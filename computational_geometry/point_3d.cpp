@@ -4,23 +4,26 @@
 
 int window_id;
 
-int& numRandomPoints()
+int& ComputationalGeometry::numRandomPoints()
 {
   static int numberOfRandomPoints = 1000;
   return numberOfRandomPoints;
 }
 
-static int gWindowWidth = 1024;
-static int gWindowHeight = 1024;
-
-void SetWindowWidthHeight(int ww, int hh)
+namespace ComputationalGeometry
 {
-  gWindowWidth = ww;
-  if (hh < 0) { hh = ww; }
-  gWindowHeight = hh;
+  static int gWindowWidth = 1024;
+  static int gWindowHeight = 1024;
 }
 
-void GetWindowWidthHeight(int& ww, int& hh)
+void ComputationalGeometry::SetWindowWidthHeight(int ww, int hh)
+{
+  ComputationalGeometry::gWindowWidth = ww;
+  if (hh < 0) { hh = ww; }
+  ComputationalGeometry::gWindowHeight = hh;
+}
+
+void ComputationalGeometry::GetWindowWidthHeight(int& ww, int& hh)
 {
   ww = gWindowWidth;
   hh = gWindowHeight;
@@ -393,19 +396,19 @@ namespace ComputationalGeometry
     //Also can use return get_orientation(P, Q) < 0;
   }
 
+  std::vector<point_2d>& point_2d::PointArray()
+  {
+   static std::vector<point_2d> pointArray;
+   return pointArray;
+  }
+
+  std::vector<point_2d>& point_2d::ConvexHull()
+  {
+    static std::vector<point_2d> convexHull;
+    return convexHull;
+  }
+
 } // end of namespace ComputationalGeometry
-
-std::vector<ComputationalGeometry::point_2d>& PointArray()
-{
-  static std::vector<ComputationalGeometry::point_2d> pointArray;
-  return pointArray;
-}
-
-std::vector<ComputationalGeometry::point_2d>& ConvexHull()
-{
-  static std::vector<ComputationalGeometry::point_2d> convexHull;
-  return convexHull;
-}
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -418,12 +421,13 @@ void keyboard(unsigned char key, int x, int y)
   glutPostRedisplay();
 }
 
-void recompute()
+void ComputationalGeometry::recompute()
 {
+  using namespace ComputationalGeometry;
   // Generate random points for display.
-  ComputationalGeometry::point_2d::generate_random_points(PointArray(), numRandomPoints());
+  point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
   // Compute convex hull.
-  ComputationalGeometry::point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
+  point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
 }
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -432,7 +436,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutInit(argc_ptr, argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
   glutInitWindowPosition(-1, -1);
-  glutInitWindowSize(gWindowWidth, gWindowHeight);
+  glutInitWindowSize(ComputationalGeometry::gWindowWidth, ComputationalGeometry::gWindowHeight);
 
   window_id = glutCreateWindow("Computational Geometry - Paul Cernea - Press 'q' to exit.");
     
@@ -443,5 +447,5 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
     
-  recompute();
+  ComputationalGeometry::recompute();
 }

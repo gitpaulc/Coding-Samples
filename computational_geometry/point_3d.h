@@ -6,17 +6,18 @@ All Rights Reserved.*/
 
 #include "includes.h"
 
-int& numRandomPoints();
-void SetWindowWidthHeight(int ww, int hh = -1);
-void GetWindowWidthHeight(int& ww, int& hh);
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void render();
-void recompute();
 void initialize_glut(int* argc_ptr, char** argv);
 
 namespace ComputationalGeometry
 {
+  int& numRandomPoints();
+  void SetWindowWidthHeight(int ww, int hh = -1);
+  void GetWindowWidthHeight(int& ww, int& hh);
+  void recompute();
+
   class point_3d
   {
     public:
@@ -38,6 +39,10 @@ namespace ComputationalGeometry
       point_2d();
       point_2d(const double& xx, const double& yy);
       int GetDimension() const override;
+      
+      static std::vector<point_2d>& PointArray();
+      static std::vector<point_2d>& ConvexHull();
+
       static double naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min);
       static double naive_min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2);
 
@@ -50,11 +55,7 @@ namespace ComputationalGeometry
       static double get_orientation(const point_2d& P, const point_2d& Q);
       static double get_orientation(const point_2d& O, const point_2d& P, const point_2d& Q);
       static bool comparator(const point_2d& P, const point_2d& Q);
-	};
-	
+	};	
 }
-
-std::vector<ComputationalGeometry::point_2d>& PointArray();
-std::vector<ComputationalGeometry::point_2d>& ConvexHull();
 
 #endif //def POINT_3D_H
