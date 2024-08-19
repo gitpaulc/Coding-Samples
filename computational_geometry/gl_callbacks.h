@@ -4,8 +4,6 @@ All Rights Reserved.*/
 #ifndef GL_CALLBACKS_H
 #define GL_CALLBACKS_H
 
-#include "includes.h"
-
 static int& GetWindowId();
 void initialize_glut(int* argc_ptr, char** argv);
 void keyboard(unsigned char key, int x, int y);

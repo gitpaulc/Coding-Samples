@@ -4,7 +4,8 @@ All Rights Reserved.*/
 #ifndef POINT_3D_H
 #define POINT_3D_H
 
-#include "includes.h"
+#include <set>
+#include <vector>
 
 namespace ComputationalGeometry
 {

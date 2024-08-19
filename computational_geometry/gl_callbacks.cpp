@@ -1,5 +1,7 @@
 
 #include "gl_callbacks.h"
+
+#include "includes.h"
 #include "point_3d.h"
 
 int& GetWindowId()
