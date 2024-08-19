@@ -26,15 +26,15 @@ void GetWindowWidthHeight(int& ww, int& hh)
   hh = gWindowHeight;
 }
 
-std::vector<ComputationalGeometry::point_2d<double> >& PointArray()
+std::vector<ComputationalGeometry::point_2d>& PointArray()
 {
-  static std::vector<ComputationalGeometry::point_2d<double> > pointArray;
+  static std::vector<ComputationalGeometry::point_2d> pointArray;
   return pointArray;
 }
 
-std::vector<ComputationalGeometry::point_2d<double> >& ConvexHull()
+std::vector<ComputationalGeometry::point_2d>& ConvexHull()
 {
-  static std::vector<ComputationalGeometry::point_2d<double> > convexHull;
+  static std::vector<ComputationalGeometry::point_2d> convexHull;
   return convexHull;
 }
 
@@ -52,9 +52,9 @@ void keyboard(unsigned char key, int x, int y)
 void recompute()
 {
   // Generate random points for display.
-  ComputationalGeometry::point_2d<double>::generate_random_points(PointArray(), numRandomPoints());
+  ComputationalGeometry::point_2d::generate_random_points(PointArray(), numRandomPoints());
   // Compute convex hull.
-  ComputationalGeometry::point_2d<double>::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
+  ComputationalGeometry::point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
 }
 
 void initialize_glut(int* argc_ptr, char** argv)

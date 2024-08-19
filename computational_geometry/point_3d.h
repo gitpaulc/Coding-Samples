@@ -1,4 +1,4 @@
-/*  Copyright Paul Cernea, May 30, 2017.
+/*  Copyright Paul Cernea, August 2024.
 All Rights Reserved.*/
 
 #ifndef POINT_3D_H
@@ -16,20 +16,20 @@ void recompute();
 void initialize_glut(int* argc_ptr, char** argv);
 
 namespace ComputationalGeometry
-{	
-	template<class T> class point_3d
+{
+	class point_3d
 	{
 	public:
-		T x;  T y;  T z;
+		double x;  double y;  double z;
 		point_3d() : x(0), y(0), z(0) {}
-		point_3d(const T& xx, const T& yy, const T& zz) : x(xx), y(yy), z(zz) {}
+		point_3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 		
 		virtual int GetDimension() const { return 3; }
 		
 		/*
 		 * Necessary for set insertion to work.
 		 */
-		bool operator <(const point_3d<T>& q) const
+		bool operator< (const point_3d& q) const
 		{
 			if (x > q.x) {return false;}
 			if (x < q.x) {return  true;}
@@ -48,10 +48,10 @@ namespace ComputationalGeometry
 			std::cout << ")";
 		}
 		
-		static T sq_distance(const point_3d<T>& P, const point_3d<T>& Q)
+		static double sq_distance(const point_3d& P, const point_3d& Q)
 		{
-			T answer = 0;
-			T dt = (P.x - Q.x);
+			double answer = 0;
+			double dt = (P.x - Q.x);
 			answer = answer + dt * dt;
 			  dt = (P.y - Q.y);
 			answer = answer + dt * dt;
@@ -63,9 +63,9 @@ namespace ComputationalGeometry
 			return answer;
 		}
 		
-		template <class Container> static T naive_min_sq_distance(Container& A, Container& B, point_3d<T>& A_min, point_3d<T>& B_min)
+		template <class Container> static double naive_min_sq_distance(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
 		{
-			T min = 0;  bool started = false;
+			double min = 0;  bool started = false;
 			for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
 			{
 				for (typename Container::iterator it2 = B.begin(); it2 != B.end(); ++it2)
@@ -74,13 +74,13 @@ namespace ComputationalGeometry
 					//std::cout << "[";  it2->print();  std::cout << "]\n";
 					if (!started)
 					{
-						min = point_3d<T>::sq_distance(*it1, *it2);
+						min = point_3d::sq_distance(*it1, *it2);
 						A_min = *it1;
 						B_min = *it2;
 						started = true;
 						continue;
 					}
-					T candidate = point_3d<T>::sq_distance(*it1, *it2);
+					double candidate = point_3d::sq_distance(*it1, *it2);
 					if (candidate >= min) {continue;}
 				
 					min = candidate;
@@ -93,9 +93,9 @@ namespace ComputationalGeometry
 			return min;
 		}
 		
-		template <class Container> static T naive_min_sq_distance(Container& arr, point_3d<T>& min_1, point_3d<T>& min_2)
+		template <class Container> static double naive_min_sq_distance(Container& arr, point_3d& min_1, point_3d& min_2)
 		{
-			T min = 0;  bool started = false;
+			double min = 0;  bool started = false;
 			if (arr.begin() != arr.end())
 			{
 				min_1 = *(arr.begin());
@@ -110,13 +110,13 @@ namespace ComputationalGeometry
 					//std::cout << "[";  it2->print();  std::cout << "]\n";
 					if (!started)
 					{
-						min = point_3d<T>::sq_distance(*it1, *it2);
+						min = point_3d::sq_distance(*it1, *it2);
 						min_1 = *it1;
 						min_2 = *it2;
 						started = true;
 						continue;
 					}
-					T candidate = point_3d<T>::sq_distance(*it1, *it2);
+					double candidate = point_3d::sq_distance(*it1, *it2);
 					if (candidate >= min) {continue;}
 				
 					min = candidate;
@@ -131,42 +131,42 @@ namespace ComputationalGeometry
 		
 	};
 	
-	template<class T> class point_2d : public point_3d<T>
+	class point_2d : public point_3d
 	{
 	public:
-		point_2d() : point_3d<T>(0, 0, 0) {}
-		point_2d(const T& xx, const T& yy) : point_3d<T>(xx, yy, 0) {}
+		point_2d() : point_3d(0, 0, 0) {}
+		point_2d(const double& xx, const double& yy) : point_3d(xx, yy, 0) {}
 		
-		/*virtual*/ int GetDimension() const { return 2; }
+		int GetDimension() const override { return 2; }
 		
-		static void generate_random_points(std::vector<point_2d<T> > & container, const unsigned & N)
+		static void generate_random_points(std::vector<point_2d>& container, const unsigned & N)
 		{
 			double randMax = RAND_MAX;
 		
 			container.resize(0);
-			std::set<point_2d<T> > initial_set; //Using a set initially ensures unique points and allows automatic sorting.
+			std::set<point_2d > initial_set; //Using a set initially ensures unique points and allows automatic sorting.
 		
 			for (int i = 0; i < N; ++i)
 			{
-				T xx = (rand() * 1.8 / randMax) - 0.9;
-				T yy = (rand() * 1.8 / randMax) - 0.9;
-				point_2d<T> P(xx, yy);
+				double xx = (rand() * 1.8 / randMax) - 0.9;
+				double yy = (rand() * 1.8 / randMax) - 0.9;
+				point_2d P(xx, yy);
 				initial_set.insert(P);
 			}
 			
-			for (typename std::set<point_2d<T> >::iterator it = initial_set.begin(); it != initial_set.end(); ++it)
+			for (std::set<point_2d >::iterator it = initial_set.begin(); it != initial_set.end(); ++it)
 			{
 				container.push_back(*it);
 			}
 		}
 		
-		static void graham_scan(std::vector<point_2d<T> > & hull, const std::vector<point_2d<T> > & points, const unsigned & N)
+		static void graham_scan(std::vector<point_2d > & hull, const std::vector<point_2d > & points, const unsigned & N)
 		{	
 			hull = points;
 			
 			if (points.size() <= 3) {return;}
 			
-			point_2d<T> temp_origin_ = hull[0];
+			point_2d temp_origin_ = hull[0];
 			{
 				int best_index = 0;
 				
@@ -237,9 +237,9 @@ namespace ComputationalGeometry
 			hull.resize(hull_count);
 		}
 		
-		template <class Container> static T min_sq_distance(Container& arr, point_2d<T>& min_1, point_2d<T>& min_2)
+		template <class Container> static double min_sq_distance(Container& arr, point_2d& min_1, point_2d& min_2)
 		{
-			T min = 0;
+			double min = 0;
 		
 			unsigned arr_count = (unsigned) arr.size();
 		
@@ -249,21 +249,21 @@ namespace ComputationalGeometry
 			{
 				typename Container::iterator it = arr.begin();
 				min_1 = *it;  ++it;  min_2 = *it;
-				return point_2d<T>::sq_distance(min_1, min_2);
+				return point_2d::sq_distance(min_1, min_2);
 			}
 			if (arr_count == 3)
 			{
 				typename Container::iterator it = arr.begin();
-				point_2d<T> a = *it;  ++it;  point_2d<T> b = *it;
-				T min_ = point_2d<T>::sq_distance(a, b);
+				point_2d a = *it;  ++it;  point_2d b = *it;
+				double min_ = point_2d::sq_distance(a, b);
 				min_1 = a;  min_2 = b;
 				++it;
-				T candidate = point_2d<T>::sq_distance(a, *it);
+				double candidate = point_2d::sq_distance(a, *it);
 				if (candidate < min_)
 				{
 					min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
 				}
-				candidate = point_2d<T>::sq_distance(*it, b);
+				candidate = point_2d::sq_distance(*it, b);
 				if (candidate < min_)
 				{
 					min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -271,7 +271,7 @@ namespace ComputationalGeometry
 				return min_;
 			}
 			
-			std::vector<point_2d<T> > arr_;
+			std::vector<point_2d > arr_;
 			for (typename Container::iterator it = arr.begin(); it != arr.end(); ++it)
 			{
 				arr_.push_back(*it);
@@ -286,17 +286,17 @@ namespace ComputationalGeometry
 		
 	private:
 		
-		static T get_orientation(const point_2d<T> & P, const point_2d<T> & Q)
+		static double get_orientation(const point_2d & P, const point_2d & Q)
 		{
 		    return P.x * Q.y - P.y * Q.x;
 		}
 		
-		static T get_orientation(const point_2d<T> & O, const point_2d<T> & P, const point_2d<T> & Q)
+		static double get_orientation(const point_2d & O, const point_2d & P, const point_2d & Q)
 		{
 		    return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
 		}
 		
-		static bool comparator(const point_2d<T> & P, const point_2d<T> & Q)
+		static bool comparator(const point_2d & P, const point_2d & Q)
 		{
 			// Equivalent to P < Q
 			
@@ -304,13 +304,12 @@ namespace ComputationalGeometry
 			double theta_Q = atan2(Q.y, Q.x);
 			
 			return theta_P < theta_Q;
-			
 			//return get_orientation(P, Q) < 0;
 		}
 		
-		template <class Container> static T min_sq_distance_(Container& arr, point_2d<T>& min_1, point_2d<T>& min_2)
+		template <class Container> static double min_sq_distance_(Container& arr, point_2d& min_1, point_2d& min_2)
 		{
-			T min = 0;
+			double min = 0;
 		
 			unsigned arr_count = (unsigned) arr.size();
 		
@@ -321,21 +320,21 @@ namespace ComputationalGeometry
 			{
 				typename Container::iterator it = arr.begin();
 				min_1 = *it;  ++it;  min_2 = *it;
-				return point_2d<T>::sq_distance(min_1, min_2);
+				return point_2d::sq_distance(min_1, min_2);
 			}
 			if (arr_count == 3)
 			{
 				typename Container::iterator it = arr.begin();
-				point_2d<T> a = *it;  ++it;  point_2d<T> b = *it;
-				T min_ = point_2d<T>::sq_distance(a, b);
+				point_2d a = *it;  ++it;  point_2d b = *it;
+				double min_ = point_2d::sq_distance(a, b);
 				min_1 = a;  min_2 = b;
 				++it;
-				T candidate = point_2d<T>::sq_distance(a, *it);
+				double candidate = point_2d::sq_distance(a, *it);
 				if (candidate < min_)
 				{
 					min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
 				}
-				candidate = point_2d<T>::sq_distance(*it, b);
+				candidate = point_2d::sq_distance(*it, b);
 				if (candidate < min_)
 				{
 					min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -347,8 +346,8 @@ namespace ComputationalGeometry
 			unsigned remaining_arr_count = arr_count - half_arr_count;
 			
 			Container arr_1, arr_2;
-			point_2d<T> left_1, left_2, right_1, right_2;
-			T min_L, min_R;
+			point_2d left_1, left_2, right_1, right_2;
+			double min_L, min_R;
 			
 			{
 				typename Container::iterator it = arr.begin();
@@ -386,7 +385,7 @@ namespace ComputationalGeometry
 	
 }
 
-std::vector<ComputationalGeometry::point_2d<double> >& PointArray();
-std::vector<ComputationalGeometry::point_2d<double> >& ConvexHull();
+std::vector<ComputationalGeometry::point_2d>& PointArray();
+std::vector<ComputationalGeometry::point_2d>& ConvexHull();
 
 #endif //def POINT_3D_H

@@ -4,41 +4,41 @@ using namespace ComputationalGeometry;
 void basic_test()
 {
   {
-    point_3d<double> P(1.0, 2.0, 3.0);
+    point_3d P(1.0, 2.0, 3.0);
     std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
     P.print("\n");
     std::cout << "\n";
 
-    point_2d<double> Q(1.0, 2.0);
+    point_2d Q(1.0, 2.0);
     std::cout << "\n//////\nThe dimension is " << Q.GetDimension() << ".";
     Q.print("\n");
     std::cout << "\n";
   }
   
   {
-    point_3d<double> P(1.0, 2.0, 3.0);
-    point_3d<double> Q(1.0, -2.0, 3.0);
+    point_3d P(1.0, 2.0, 3.0);
+    point_3d Q(1.0, -2.0, 3.0);
 
-    printf("%f\n", point_3d<double>::sq_distance(P,Q));
+    printf("%f\n", point_3d::sq_distance(P,Q));
   }
   
   {
-    point_2d<double> P(1.5, 2.0);
-    point_2d<double> Q(1.0, -2.0);
+    point_2d P(1.5, 2.0);
+    point_2d Q(1.0, -2.0);
 
-    printf("%f\n", point_2d<double>::sq_distance(P,Q));
+    printf("%f\n", point_2d::sq_distance(P,Q));
   }
   
   {
-    std::set<point_3d<double> > A;
-    point_3d<double> a(1.5, 2.0, 0);
-    point_3d<double> b(1.0, 3.0, 0);
-    point_3d<double> c(-1.5, 7.0, 0);
+    std::set<point_3d > A;
+    point_3d a(1.5, 2.0, 0);
+    point_3d b(1.0, 3.0, 0);
+    point_3d c(-1.5, 7.0, 0);
     
-    std::set<point_3d<double> > B;
-    point_3d<double> d(4.5, 2.3, 0);
-    point_3d<double> e(-1.55, 2.6, 0);
-    point_3d<double> f(88.3, 0.001, 0);
+    std::set<point_3d > B;
+    point_3d d(4.5, 2.3, 0);
+    point_3d e(-1.55, 2.6, 0);
+    point_3d f(88.3, 0.001, 0);
     
     A.insert(a);
     A.insert(b);
@@ -48,9 +48,9 @@ void basic_test()
     B.insert(e);
     B.insert(f);
     
-    point_3d<double> p, q;
+    point_3d p, q;
     
-    double min = point_3d<double>::naive_min_sq_distance(A, B, p, q);
+    double min = point_3d::naive_min_sq_distance(A, B, p, q);
     
     std::cout << "\n//////\n" << min;
     p.print("\n");
@@ -59,15 +59,15 @@ void basic_test()
   }
   
   {
-    std::set<point_2d<double> > A;
-    point_2d<double> a(1.5, 2.0);
-    point_2d<double> b(1.0, 3.0);
-    point_2d<double> c(-1.5, 7.0);
+    std::set<point_2d > A;
+    point_2d a(1.5, 2.0);
+    point_2d b(1.0, 3.0);
+    point_2d c(-1.5, 7.0);
     
-    std::set<point_2d<double> > B;
-    point_2d<double> d(4.5, 2.3);
-    point_2d<double> e(-1.35, 2.6);
-    point_2d<double> f(88.3, 0.001);
+    std::set<point_2d > B;
+    point_2d d(4.5, 2.3);
+    point_2d e(-1.35, 2.6);
+    point_2d f(88.3, 0.001);
     
     A.insert(a);
     A.insert(b);
@@ -77,9 +77,9 @@ void basic_test()
     B.insert(e);
     B.insert(f);
     
-    point_2d<double> p, q;
+    point_2d p, q;
     
-    double min = point_2d<double>::naive_min_sq_distance(A, B, p, q);
+    double min = point_2d::naive_min_sq_distance(A, B, p, q);
     
     std::cout << "\n//////\n" << min << "\n";
     p.print("\n");
@@ -88,13 +88,13 @@ void basic_test()
   }
   
   {
-    std::set<point_2d<double> > A;
-    point_2d<double> a(1.5, 2.0);
-    point_2d<double> b(1.0, 3.0);
-    point_2d<double> c(-1.5, 7.0);
-    point_2d<double> d(4.5, 2.3);
-    point_2d<double> e(-1.35, 2.6);
-    point_2d<double> f(88.3, 0.001);
+    std::set<point_2d > A;
+    point_2d a(1.5, 2.0);
+    point_2d b(1.0, 3.0);
+    point_2d c(-1.5, 7.0);
+    point_2d d(4.5, 2.3);
+    point_2d e(-1.35, 2.6);
+    point_2d f(88.3, 0.001);
     
     A.insert(a);
     A.insert(b);
@@ -103,16 +103,16 @@ void basic_test()
     A.insert(e);
     A.insert(f);
     
-    point_2d<double> p, q;
+    point_2d p, q;
     
-    double min = point_2d<double>::naive_min_sq_distance(A, p, q);
+    double min = point_2d::naive_min_sq_distance(A, p, q);
     
     std::cout << "\n//////\n";
     std::cout << min << "\n";
     p.print();  std::cout << "\n";
     q.print();  std::cout << "\n";
     
-    min = point_2d<double>::min_sq_distance(A, p, q);
+    min = point_2d::min_sq_distance(A, p, q);
     
     std::cout << "\n/!!!!/\n";
     std::cout << min << "\n";
@@ -143,7 +143,7 @@ void render()
 
     for (int i = 0; i < sizPointArray; ++i)
     {
-      const point_2d<double>& P = PointArray()[i];
+      const point_2d& P = PointArray()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
@@ -158,7 +158,7 @@ void render()
 
     for (int i = 0; i < sizPointArray; i++)
     {
-      point_2d<double> P = ConvexHull()[i];
+      point_2d P = ConvexHull()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
