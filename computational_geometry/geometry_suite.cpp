@@ -5,12 +5,12 @@ void basic_test()
 {
   {
     point_3d<double> P(1.0, 2.0, 3.0);
-    std::cout << "\n//////\nThe dimension is " << P.get_dimension() << ".";
+    std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
     P.print("\n");
     std::cout << "\n";
 
     point_2d<double> Q(1.0, 2.0);
-    std::cout << "\n//////\nThe dimension is " << Q.get_dimension() << ".";
+    std::cout << "\n//////\nThe dimension is " << Q.GetDimension() << ".";
     Q.print("\n");
     std::cout << "\n";
   }
@@ -170,6 +170,7 @@ void render()
 
 int main(int argc, char **argv)
 {
+  SetWindowWidthHeight(1024);
   if (argc == 2)
   {
     int numPoints = atoi(argv[1]);
@@ -181,11 +182,8 @@ int main(int argc, char **argv)
   }
   
   //basic_test();
-  
   srand(time(NULL));
-  
   initialize_glut(&argc, argv);
-
   glutMainLoop();
   
   return 0;

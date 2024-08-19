@@ -6,13 +6,14 @@ All Rights Reserved.*/
 
 #include "includes.h"
 
-#define WINDOW_WIDTH  (1024)
-#define WINDOW_HEIGHT (1024)
-
 int& numRandomPoints();
+void SetWindowWidthHeight(int ww, int hh = -1);
+void GetWindowWidthHeight(int& ww, int& hh);
 void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void render();
+void recompute();
+void initialize_glut(int* argc_ptr, char** argv);
 
 namespace ComputationalGeometry
 {	
@@ -23,7 +24,7 @@ namespace ComputationalGeometry
 		point_3d() : x(0), y(0), z(0) {}
 		point_3d(const T& xx, const T& yy, const T& zz) : x(xx), y(yy), z(zz) {}
 		
-		virtual int get_dimension() const {return 3;}
+		virtual int GetDimension() const { return 3; }
 		
 		/*
 		 * Necessary for set insertion to work.
@@ -34,7 +35,7 @@ namespace ComputationalGeometry
 			if (x < q.x) {return  true;}
 			if (y > q.y) {return false;}
 			if (y < q.y) {return  true;}
-			if (this->get_dimension() <= 2) {return false;}
+			if (GetDimension() <= 2) {return false;}
 			if (z > q.z) {return false;}
 			if (z < q.z) {return  true;}
 			return false;
@@ -43,7 +44,7 @@ namespace ComputationalGeometry
 		void print(const std::string& prequel="") const
 		{
 			std::cout << prequel << "(" << x << ", " << y;
-			if (this->get_dimension() > 2) {std::cout << ", " << z;}
+			if (GetDimension() > 2) {std::cout << ", " << z;}
 			std::cout << ")";
 		}
 		
@@ -54,7 +55,7 @@ namespace ComputationalGeometry
 			answer = answer + dt * dt;
 			  dt = (P.y - Q.y);
 			answer = answer + dt * dt;
-			if ((P.get_dimension() > 2) || (Q.get_dimension() > 2))
+			if ((P.GetDimension() > 2) || (Q.GetDimension() > 2))
 			{
 			  dt = (P.z - Q.z);
 			  answer = answer + dt * dt;
@@ -136,12 +137,10 @@ namespace ComputationalGeometry
 		point_2d() : point_3d<T>(0, 0, 0) {}
 		point_2d(const T& xx, const T& yy) : point_3d<T>(xx, yy, 0) {}
 		
-		/*virtual*/ int get_dimension() const {return 2;}
+		/*virtual*/ int GetDimension() const { return 2; }
 		
 		static void generate_random_points(std::vector<point_2d<T> > & container, const unsigned & N)
 		{
-			//double WW = WINDOW_WIDTH  - 1;  if(WW <= 0) {WW = 2;}
-			//double HH = WINDOW_HEIGHT - 1;  if(HH <= 0) {HH = 2;}
 			double randMax = RAND_MAX;
 		
 			container.resize(0);
@@ -366,8 +365,6 @@ namespace ComputationalGeometry
 			
 			min_L = min_sq_distance_(arr_1, left_1,  left_2);
 			min_R = min_sq_distance_(arr_2, right_1, right_2);
-		
-			// needs improvement
 			
 			if (min_L < min_R)
 			{
@@ -391,8 +388,5 @@ namespace ComputationalGeometry
 
 std::vector<ComputationalGeometry::point_2d<double> >& PointArray();
 std::vector<ComputationalGeometry::point_2d<double> >& ConvexHull();
-
-void recompute();
-void initialize_glut(int* argc_ptr, char** argv);
 
 #endif //def POINT_3D_H
