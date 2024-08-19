@@ -51,3 +51,41 @@ void mouse(int button, int state, int x, int y)
   glutPostRedisplay();
 }
 
+void render()
+{
+  using namespace ComputationalGeometry;
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glColor3f(0.0f, 0.0f, 0.0f);
+  glPointSize(3.0f);
+
+  glBegin(GL_POINTS);
+  {
+    int sizPointArray = point_2d::PointArray().size();
+
+    for (int i = 0; i < sizPointArray; ++i)
+    {
+      const point_2d& P = point_2d::PointArray()[i];
+      glVertex2f(P.x, P.y);
+      //P.print("\n");
+    }
+  }
+  glEnd();
+  
+  glColor3f(1.0f, 0.0f, 0.0f);
+
+  glBegin(GL_LINE_LOOP);
+  {
+    int sizPointArray = point_2d::ConvexHull().size();
+
+    for (int i = 0; i < sizPointArray; i++)
+    {
+      point_2d P = point_2d::ConvexHull()[i];
+      glVertex2f(P.x, P.y);
+      //P.print("\n");
+    }
+  }
+  glEnd();
+
+  glutSwapBuffers();
+}
