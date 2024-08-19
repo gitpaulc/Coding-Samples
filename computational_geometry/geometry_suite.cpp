@@ -139,11 +139,11 @@ void render()
 
   glBegin(GL_POINTS);
   {
-    int sizPointArray = point_array.size();
+    int sizPointArray = PointArray().size();
 
     for (int i = 0; i < sizPointArray; ++i)
     {
-      const point_2d<double>& P = point_array[i];
+      const point_2d<double>& P = PointArray()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
@@ -154,11 +154,11 @@ void render()
 
   glBegin(GL_LINE_LOOP);
   {
-    int sizPointArray = convex_hull.size();
+    int sizPointArray = ConvexHull().size();
 
     for (int i = 0; i < sizPointArray; i++)
     {
-      point_2d<double> P = convex_hull[i];
+      point_2d<double> P = ConvexHull()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
@@ -176,7 +176,7 @@ int main(int argc, char **argv)
     
     if (numPoints > 0)
     {
-      NUM_RANDOM_POINTS = numPoints;
+      numRandomPoints() = numPoints;
     }
   }
   

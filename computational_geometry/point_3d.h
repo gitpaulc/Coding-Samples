@@ -1,30 +1,16 @@
 /*  Copyright Paul Cernea, May 30, 2017.
 All Rights Reserved.*/
 
-#ifndef COMPUTATIONAL_GEOMETRY_H
-#define COMPUTATIONAL_GEOMETRY_H
+#ifndef POINT_3D_H
+#define POINT_3D_H
 
 #include "includes.h"
 
 #define WINDOW_WIDTH  (1024)
 #define WINDOW_HEIGHT (1024)
 
-int window_id;
-
-int NUM_RANDOM_POINTS = 1000;
-
-void keyboard(unsigned char key, int x, int y)
-{
-    if ((key == 27) //Esc
-		|| (key == 'q') || (key == 'Q'))
-    {
-		glutDestroyWindow(window_id);
-		exit (0);
-    }
-	
-    glutPostRedisplay();
-}
-
+int& numRandomPoints();
+void keyboard(unsigned char key, int x, int y);
 void mouse(int button, int state, int x, int y);
 void render();
 
@@ -403,36 +389,10 @@ namespace ComputationalGeometry
 	
 }
 
-std::vector<ComputationalGeometry::point_2d<double> > point_array;
-std::vector<ComputationalGeometry::point_2d<double> > convex_hull;
+std::vector<ComputationalGeometry::point_2d<double> >& PointArray();
+std::vector<ComputationalGeometry::point_2d<double> >& ConvexHull();
 
-void recompute()
-{
-	// Generate random points for display.
-	ComputationalGeometry::point_2d<double>::generate_random_points(point_array, NUM_RANDOM_POINTS);
-	// Compute convex hull.
-	ComputationalGeometry::point_2d<double>::graham_scan(convex_hull, point_array, NUM_RANDOM_POINTS);
-}
+void recompute();
+void initialize_glut(int* argc_ptr, char** argv);
 
-void initialize_glut(int * argc_ptr, char **argv)
-{
-	// Initialize GLUT and create a window.
-	glutInit(argc_ptr, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(-1, -1);
-	glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	window_id = glutCreateWindow("Computational Geometry - Paul Cernea - Press 'q' to exit.");
-	
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	
-	glutSetCursor(GLUT_CURSOR_INFO);
-	
-    glutKeyboardFunc(keyboard);
-    glutMouseFunc(mouse);
-	glutDisplayFunc(render);
-	
-	recompute();
-}
-
-#endif //def COMPUTATIONAL_GEOMETRY
+#endif //def POINT_3D_H
