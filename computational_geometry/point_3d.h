@@ -17,51 +17,17 @@ void initialize_glut(int* argc_ptr, char** argv);
 
 namespace ComputationalGeometry
 {
-	class point_3d
-	{
-	public:
-		double x;  double y;  double z;
-		point_3d() : x(0), y(0), z(0) {}
-		point_3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
-		
-		virtual int GetDimension() const { return 3; }
-		
-		/*
-		 * Necessary for set insertion to work.
-		 */
-		bool operator< (const point_3d& q) const
-		{
-			if (x > q.x) {return false;}
-			if (x < q.x) {return  true;}
-			if (y > q.y) {return false;}
-			if (y < q.y) {return  true;}
-			if (GetDimension() <= 2) {return false;}
-			if (z > q.z) {return false;}
-			if (z < q.z) {return  true;}
-			return false;
-		}
-		
-		void print(const std::string& prequel="") const
-		{
-			std::cout << prequel << "(" << x << ", " << y;
-			if (GetDimension() > 2) {std::cout << ", " << z;}
-			std::cout << ")";
-		}
-		
-		static double sq_distance(const point_3d& P, const point_3d& Q)
-		{
-			double answer = 0;
-			double dt = (P.x - Q.x);
-			answer = answer + dt * dt;
-			  dt = (P.y - Q.y);
-			answer = answer + dt * dt;
-			if ((P.GetDimension() > 2) || (Q.GetDimension() > 2))
-			{
-			  dt = (P.z - Q.z);
-			  answer = answer + dt * dt;
-		  	}
-			return answer;
-		}
+  class point_3d
+  {
+    public:
+    double x;  double y;  double z;
+    point_3d();
+    point_3d(const double& xx, const double& yy, const double& zz);
+    virtual int GetDimension() const;
+	/** \brief Necessary for set insertion to work. */
+    bool operator< (const point_3d& q) const;
+	void print(const std::string& prequel="") const;
+    static double sq_distance(const point_3d& P, const point_3d& Q);
 		
 		template <class Container> static double naive_min_sq_distance(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
 		{
@@ -131,113 +97,16 @@ namespace ComputationalGeometry
 		
 	};
 	
-	class point_2d : public point_3d
-	{
-	public:
-		point_2d() : point_3d(0, 0, 0) {}
-		point_2d(const double& xx, const double& yy) : point_3d(xx, yy, 0) {}
+  class point_2d : public point_3d
+  {
+    public:
+      point_2d();
+      point_2d(const double& xx, const double& yy);
+      int GetDimension() const override;
+      static void generate_random_points(std::vector<point_2d>& container, const unsigned int& N);
+      static void graham_scan(std::vector<point_2d> & hull, const std::vector<point_2d> & points, const unsigned int& N);
 		
-		int GetDimension() const override { return 2; }
-		
-		static void generate_random_points(std::vector<point_2d>& container, const unsigned & N)
-		{
-			double randMax = RAND_MAX;
-		
-			container.resize(0);
-			std::set<point_2d > initial_set; //Using a set initially ensures unique points and allows automatic sorting.
-		
-			for (int i = 0; i < N; ++i)
-			{
-				double xx = (rand() * 1.8 / randMax) - 0.9;
-				double yy = (rand() * 1.8 / randMax) - 0.9;
-				point_2d P(xx, yy);
-				initial_set.insert(P);
-			}
-			
-			for (std::set<point_2d >::iterator it = initial_set.begin(); it != initial_set.end(); ++it)
-			{
-				container.push_back(*it);
-			}
-		}
-		
-		static void graham_scan(std::vector<point_2d > & hull, const std::vector<point_2d > & points, const unsigned & N)
-		{	
-			hull = points;
-			
-			if (points.size() <= 3) {return;}
-			
-			point_2d temp_origin_ = hull[0];
-			{
-				int best_index = 0;
-				
-				for (int i = 1; i < N; i++)
-				{
-					if (hull[i].y < temp_origin_.y)
-					{
-						temp_origin_ = hull[i];
-						best_index = i;
-					}
-				}
-				
-				hull[best_index] = hull[1];
-				hull[1] = temp_origin_;
-				hull.push_back(hull[0]);
-			
-				/*std::cout << "\n/// LIST:\n";
-				for (int i = 0; i <= N; i++)
-				{
-					hull[i].print("\n");
-				}
-				std::cout << "\n";*/
-			
-				for (int i = 1; i <= N; i++)
-				{
-					hull[i].x = hull[i].x - temp_origin_.x;
-					hull[i].y = hull[i].y - temp_origin_.y;
-				}
-			
-				std::sort(hull.begin() + 1, hull.end(), comparator);
-				
-				/*std::cout << "\n/// LIST:\n";
-				for (int i = 1; i <= N; i++)
-				{
-					printf("\n%f", atan2(hull[i].y, hull[i].x));
-				}
-				std::cout << "\n";*/
-			
-				for (int i = 1; i <= N; i++)
-				{
-					hull[i].x = hull[i].x + temp_origin_.x;
-					hull[i].y = hull[i].y + temp_origin_.y;
-				}
-				
-				hull[0] = hull[N];
-			}
-			
-			int hull_count = 1; // Initialize stack.
-			
-			for (int i = 2; i <= N; i++)
-			{
-				while (get_orientation(hull[hull_count - 1], hull[hull_count], hull[i]) <= 0)
-				{
-					if (hull_count > 1)
-					{
-						hull_count--;  continue;
-					}
-					else if (i == N) {break;} // Stack is empty.
-					else {i++;} // Keep searching.
-				}
-				// Otherwise point is on the boundary of the convex hull.
-				hull_count++;
-				temp_origin_ = hull[hull_count];
-				hull[hull_count] = hull[i];
-				hull[i] = temp_origin_;
-			}
-			
-			hull.resize(hull_count);
-		}
-		
-		template <class Container> static double min_sq_distance(Container& arr, point_2d& min_1, point_2d& min_2)
+      template <class Container> static double min_sq_distance(Container& arr, point_2d& min_1, point_2d& min_2)
 		{
 			double min = 0;
 		
@@ -284,30 +153,11 @@ namespace ComputationalGeometry
 			return min;
 		}
 		
-	private:
-		
-		static double get_orientation(const point_2d & P, const point_2d & Q)
-		{
-		    return P.x * Q.y - P.y * Q.x;
-		}
-		
-		static double get_orientation(const point_2d & O, const point_2d & P, const point_2d & Q)
-		{
-		    return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
-		}
-		
-		static bool comparator(const point_2d & P, const point_2d & Q)
-		{
-			// Equivalent to P < Q
-			
-			double theta_P = atan2(P.y, P.x);
-			double theta_Q = atan2(Q.y, Q.x);
-			
-			return theta_P < theta_Q;
-			//return get_orientation(P, Q) < 0;
-		}
-		
-		template <class Container> static double min_sq_distance_(Container& arr, point_2d& min_1, point_2d& min_2)
+    private:
+      static double get_orientation(const point_2d& P, const point_2d& Q);
+      static double get_orientation(const point_2d& O, const point_2d& P, const point_2d& Q);
+      static bool comparator(const point_2d& P, const point_2d& Q);
+	  template <class Container> static double min_sq_distance_(Container& arr, point_2d& min_1, point_2d& min_2)
 		{
 			double min = 0;
 		
