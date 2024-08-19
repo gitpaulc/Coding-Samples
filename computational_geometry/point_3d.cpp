@@ -1,36 +1,32 @@
 
 #include "includes.h"
 #include "point_3d.h"
-
-int window_id;
-
-int& ComputationalGeometry::numRandomPoints()
-{
-  static int numberOfRandomPoints = 1000;
-  return numberOfRandomPoints;
-}
+#include "gl_callbacks.h"
 
 namespace ComputationalGeometry
 {
   static int gWindowWidth = 1024;
   static int gWindowHeight = 1024;
-}
 
-void ComputationalGeometry::SetWindowWidthHeight(int ww, int hh)
-{
-  ComputationalGeometry::gWindowWidth = ww;
-  if (hh < 0) { hh = ww; }
-  ComputationalGeometry::gWindowHeight = hh;
-}
+  int& numRandomPoints()
+  {
+    static int numberOfRandomPoints = 1000;
+    return numberOfRandomPoints;
+  }
 
-void ComputationalGeometry::GetWindowWidthHeight(int& ww, int& hh)
-{
-  ww = gWindowWidth;
-  hh = gWindowHeight;
-}
+  void SetWindowWidthHeight(int ww, int hh)
+  {
+    ComputationalGeometry::gWindowWidth = ww;
+    if (hh < 0) { hh = ww; }
+    ComputationalGeometry::gWindowHeight = hh;
+  }
 
-namespace ComputationalGeometry
-{
+  void GetWindowWidthHeight(int& ww, int& hh)
+  {
+    ww = gWindowWidth;
+    hh = gWindowHeight;
+  }
+
   point_3d::point_3d() : x(0), y(0), z(0) {}
   point_3d::point_3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
@@ -408,44 +404,12 @@ namespace ComputationalGeometry
     return convexHull;
   }
 
-} // end of namespace ComputationalGeometry
-
-void keyboard(unsigned char key, int x, int y)
-{
-  if ((key == 27) //Esc
-      || (key == 'q') || (key == 'Q'))
+  void recompute()
   {
-    glutDestroyWindow(window_id);
-    exit(0);
+    // Generate random points for display.
+    point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
+    // Compute convex hull.
+    point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
   }
-  glutPostRedisplay();
-}
 
-void ComputationalGeometry::recompute()
-{
-  using namespace ComputationalGeometry;
-  // Generate random points for display.
-  point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
-  // Compute convex hull.
-  point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
-}
-
-void initialize_glut(int* argc_ptr, char** argv)
-{
-  // Initialize GLUT and create a window.
-  glutInit(argc_ptr, argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-  glutInitWindowPosition(-1, -1);
-  glutInitWindowSize(ComputationalGeometry::gWindowWidth, ComputationalGeometry::gWindowHeight);
-
-  window_id = glutCreateWindow("Computational Geometry - Paul Cernea - Press 'q' to exit.");
-    
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  
-  glutSetCursor(GLUT_CURSOR_INFO);
-  glutKeyboardFunc(keyboard);
-  glutMouseFunc(mouse);
-  glutDisplayFunc(render);
-    
-  ComputationalGeometry::recompute();
-}
+} // end of namespace ComputationalGeometry

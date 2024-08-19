@@ -6,11 +6,6 @@ All Rights Reserved.*/
 
 #include "includes.h"
 
-void keyboard(unsigned char key, int x, int y);
-void mouse(int button, int state, int x, int y);
-void render();
-void initialize_glut(int* argc_ptr, char** argv);
-
 namespace ComputationalGeometry
 {
   int& numRandomPoints();

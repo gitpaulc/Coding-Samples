@@ -1,4 +1,7 @@
+
+#include "gl_callbacks.h"
 #include "point_3d.h"
+
 using namespace ComputationalGeometry;
 
 void basic_test()
@@ -119,15 +122,6 @@ void basic_test()
     p.print();  std::cout << "\n";
     q.print();  std::cout << "\n";
   }
-}
-
-void mouse(int button, int state, int x, int y)
-{
-  if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
-  {
-    recompute();
-  }
-  glutPostRedisplay();
 }
 
 void render()
