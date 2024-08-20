@@ -1,6 +1,6 @@
-** Coding Samples by Paul Cernea
+**Coding Samples by Paul Cernea**
 
-** Computational Geometry.
+**Computational Geometry.**
 
 * Navigate to the computational_geometry folder.
 * Run `bash compile_and_run_geometry.sh` to run the computational geometry suite.  By default, 1000 points are generated.
