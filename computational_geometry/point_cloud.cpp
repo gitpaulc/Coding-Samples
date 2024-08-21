@@ -303,33 +303,33 @@ namespace ComputationalGeometry
     return min;
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min)
+  double PointCloud::naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min)
   {
     return naiveMinSqDistanceImpl(A, B, A_min, B_min);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point3d>& arr, point3d& min_1, point3d& min_2)
+  double PointCloud::naiveMinSqDistance(std::set<point3d>& arr, point3d& min_1, point3d& min_2)
   {
     return naiveMinSqDistanceImpl(arr, min_1, min_2);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min)
+  double PointCloud::naiveMinSqDistance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min)
   {
     return naiveMinSqDistanceImpl(A, B, A_min, B_min);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
+  double PointCloud::naiveMinSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
     return naiveMinSqDistanceImpl(cloud, min_1, min_2);
   }
 
-  double PointCloud::naive_min_sq_distance(point2d& min_1, point2d& min_2)
+  double PointCloud::naiveMinSqDistance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
     return naiveMinSqDistanceImpl(pImpl->pointArray, min_1, min_2);
   }
 
-  template <class Container> static double min_sq_distance_helper(Container& arr, point2d& min_1, point2d& min_2)
+  template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
     unsigned arrCount = (unsigned) arr.size();
@@ -383,8 +383,8 @@ namespace ComputationalGeometry
       }
     }
     
-    min_L = min_sq_distance_helper(arr_1, left_1,  left_2);
-    min_R = min_sq_distance_helper(arr_2, right_1, right_2);
+    min_L = minSqDistanceHelper(arr_1, left_1,  left_2);
+    min_R = minSqDistanceHelper(arr_2, right_1, right_2);
     
     if (min_L < min_R)
     {
@@ -401,7 +401,7 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double min_sq_distance_impl(Container& arr, point2d& min_1, point2d& min_2)
+  template <class Container> static double minSqDistanceImplimpl(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
     unsigned arrCount = (unsigned) arr.size();
@@ -440,22 +440,22 @@ namespace ComputationalGeometry
     }
   
     std::sort(arr_.begin(), arr_.end());
-    min = min_sq_distance_helper(arr_, min_1, min_2);
+    min = minSqDistanceHelper(arr_, min_1, min_2);
     return min;
   }
 
-  double PointCloud::min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
+  double PointCloud::minSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return min_sq_distance_impl(cloud, min_1, min_2);
+    return minSqDistanceImplimpl(cloud, min_1, min_2);
   }
 
-  double PointCloud::min_sq_distance(point2d& min_1, point2d& min_2)
+  double PointCloud::minSqDistance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
-    return min_sq_distance_impl(pImpl->pointArray, min_1, min_2);
+    return minSqDistanceImplimpl(pImpl->pointArray, min_1, min_2);
   }
 
-  void PointCloud::unit_test()
+  void PointCloud::unitTest()
   {
     {
       point3d P(1.0, 2.0, 3.0);
@@ -504,7 +504,7 @@ namespace ComputationalGeometry
     
       point3d p, q;
     
-      double min = naive_min_sq_distance(A, B, p, q);
+      double min = naiveMinSqDistance(A, B, p, q);
     
       std::cout << "\n//////\n" << min;
       p.print("\n");
@@ -533,7 +533,7 @@ namespace ComputationalGeometry
     
       point2d p, q;
     
-      double min = naive_min_sq_distance(A, B, p, q);
+      double min = naiveMinSqDistance(A, B, p, q);
     
       std::cout << "\n//////\n" << min << "\n";
       p.print("\n");
@@ -559,14 +559,14 @@ namespace ComputationalGeometry
     
       point2d p, q;
 
-      double min = naive_min_sq_distance(A, p, q);
+      double min = naiveMinSqDistance(A, p, q);
     
       std::cout << "\n//////\n";
       std::cout << min << "\n";
       p.print();  std::cout << "\n";
       q.print();  std::cout << "\n";
     
-      min = min_sq_distance(A, p, q);
+      min = minSqDistance(A, p, q);
     
       std::cout << "\n/!!!!/\n";
       std::cout << min << "\n";

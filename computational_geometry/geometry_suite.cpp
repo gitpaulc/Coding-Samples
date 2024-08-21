@@ -17,7 +17,7 @@ int main(int argc, char **argv)
     }
   }
   
-  //ComputationalGeometry::PointCloud::Get().unit_test();
+  //ComputationalGeometry::PointCloud::Get().unitTest();
   srand(time(NULL));
   initialize_glut(&argc, argv);
   glutMainLoop();

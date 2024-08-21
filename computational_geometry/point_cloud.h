@@ -56,18 +56,18 @@ namespace ComputationalGeometry
       void computeConvexHull();
 
       /** \brief Naively search among pairs. */
-      static double naive_min_sq_distance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
-      static double naive_min_sq_distance(std::set<point3d>& cloud, point3d& min_1, point3d& min_2);
-      static double naive_min_sq_distance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min);
-      static double naive_min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
-      double naive_min_sq_distance(point2d& min_1, point2d& min_2);
+      static double naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
+      static double naiveMinSqDistance(std::set<point3d>& cloud, point3d& min_1, point3d& min_2);
+      static double naiveMinSqDistance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min);
+      static double naiveMinSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
+      double naiveMinSqDistance(point2d& min_1, point2d& min_2);
 
       /** \brief O(n log(n)) Divide-and-conquer implementation of min. sq. dist. in point-set. */
-      static double min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
-      double min_sq_distance(point2d& min_1, point2d& min_2);
+      static double minSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
+      double minSqDistance(point2d& min_1, point2d& min_2);
 
     public: // For testing.
-      void unit_test();
+      void unitTest();
   };
 }
 
