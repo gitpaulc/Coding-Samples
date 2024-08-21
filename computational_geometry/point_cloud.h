@@ -25,8 +25,6 @@ namespace ComputationalGeometry
     bool operator< (const point_3d& q) const;
 	void print(const std::string& prequel="") const;
     static double sq_distance(const point_3d& P, const point_3d& Q);
-    static double naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min);
-    static double naive_min_sq_distance(std::set<point_3d>& arr, point_3d& min_1, point_3d& min_2);
   };
 	
   class point_2d : public point_3d
@@ -36,13 +34,7 @@ namespace ComputationalGeometry
       point_2d(const double& xx, const double& yy);
       int GetDimension() const override;
 
-      static double naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min);
-      static double naive_min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2);
-
-      /** \brief O(n log(n)) Divide-and-conquer implementation of min. sq. dist. in point-set. */
-      static double min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2);
-
-      static double get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
+      static double getOrientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
       static bool comparator(const point_2d& P, const point_2d& Q);
   };
 
@@ -58,10 +50,23 @@ namespace ComputationalGeometry
       void refresh();
       static PointCloud& Get();
       
+    private: // These methods are declared only for the sake of exposition:
+
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
       void computeConvexHull();
 
-      // For testing.
+      /** \brief Naively search among pairs. */
+      static double naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min);
+      static double naive_min_sq_distance(std::set<point_3d>& cloud, point_3d& min_1, point_3d& min_2);
+      static double naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min);
+      static double naive_min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2);
+      double naive_min_sq_distance(point_2d& min_1, point_2d& min_2);
+
+      /** \brief O(n log(n)) Divide-and-conquer implementation of min. sq. dist. in point-set. */
+      static double min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2);
+      double min_sq_distance(point_2d& min_1, point_2d& min_2);
+
+    public: // For testing.
       void unit_test();
   };
 }

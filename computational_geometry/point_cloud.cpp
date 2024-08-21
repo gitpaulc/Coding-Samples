@@ -66,218 +66,12 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  template <class Container> static double naive_min_sq_distance_impl(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
-  {
-    double min = 0;  bool started = false;
-    for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
-    {
-        for (typename Container::iterator it2 = B.begin(); it2 != B.end(); ++it2)
-        {
-            // Note: set iteration takes place in sorted order.
-            //std::cout << "[";  it2->print();  std::cout << "]\n";
-            if (!started)
-            {
-                min = point_3d::sq_distance(*it1, *it2);
-                A_min = *it1;
-                B_min = *it2;
-                started = true;
-                continue;
-            }
-            double candidate = point_3d::sq_distance(*it1, *it2);
-            if (candidate >= min) {continue;}
-        
-            min = candidate;
-            A_min = *it1;
-            B_min = *it2;
-            if (min == 0) {break;}
-        }
-        if (min == 0) {break;}
-    }
-    return min;
-  }
-
-  template <class Container> static double naive_min_sq_distance_impl(Container& arr, point_3d& min_1, point_3d& min_2)
-  {
-    double min = 0;  bool started = false;
-    if (arr.begin() != arr.end())
-    {
-        min_1 = *(arr.begin());
-        min_2 = *(arr.begin());
-    }
-    for (typename Container::iterator it1 = arr.begin(); it1 != arr.end(); ++it1)
-    {
-        for (typename Container::iterator it2 = arr.begin(); it2 != arr.end(); ++it2)
-        {
-            if (it1 == it2) {continue;}
-            // Note: set iteration takes place in sorted order.
-            //std::cout << "[";  it2->print();  std::cout << "]\n";
-            if (!started)
-            {
-                min = point_3d::sq_distance(*it1, *it2);
-                min_1 = *it1;
-                min_2 = *it2;
-                started = true;
-                continue;
-            }
-            double candidate = point_3d::sq_distance(*it1, *it2);
-            if (candidate >= min) {continue;}
-        
-            min = candidate;
-            min_1 = *it1;
-            min_2 = *it2;
-            if (min == 0) {break;}
-        }
-        if (min == 0) {break;}
-    }
-    return min;
-  }
-
-  double point_3d::naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min)
-  {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
-  }
-
-  double point_3d::naive_min_sq_distance(std::set<point_3d>& arr, point_3d& min_1, point_3d& min_2)
-  {
-    return naive_min_sq_distance_impl(arr, min_1, min_2);
-  }
-
   point_2d::point_2d() : point_3d(0, 0, 0) {}
   point_2d::point_2d(const double& xx, const double& yy) : point_3d(xx, yy, 0) {}
 
   int point_2d::GetDimension() const { return 2; }
 
-  double point_2d::naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min)
-  {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
-  }
-
-  double point_2d::naive_min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2)
-  {
-    return naive_min_sq_distance_impl(arr, min_1, min_2);
-  }
-
-  template <class Container> static double min_sq_distance_helper(Container& arr, point_2d& min_1, point_2d& min_2)
-  {
-    double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
-  
-    // These cases (where arr_count is 0 or 1) should never happen in the private helper method.
-    //if (arr_count == 0) {return 0;}
-    //if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
-    {
-      typename Container::iterator it = arr.begin();
-      min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
-    }
-    if (arr_count == 3)
-    {
-      typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
-      min_1 = a;  min_2 = b;
-      ++it;
-      double candidate = point_2d::sq_distance(a, *it);
-      if (candidate < min_)
-      {
-        min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
-      }
-      candidate = point_2d::sq_distance(*it, b);
-      if (candidate < min_)
-      {
-        min_ = candidate;  min_1 = *it;  min_2 = b;
-      }
-      return min_;
-    }
-      
-    unsigned half_arr_count = arr_count / 2;
-    unsigned remaining_arr_count = arr_count - half_arr_count;
-      
-    Container arr_1, arr_2;
-    point_2d left_1, left_2, right_1, right_2;
-    double min_L, min_R;
-      
-    {
-      typename Container::iterator it = arr.begin();
-      for (int i = 0; i < half_arr_count; i++)
-      {
-        arr_1.push_back(*it);  ++it;
-      }
-      
-      for (int i = 0; i < remaining_arr_count; i++)
-      {
-        arr_2.push_back(*it);  ++it;
-      }
-    }
-      
-    min_L = min_sq_distance_helper(arr_1, left_1,  left_2);
-    min_R = min_sq_distance_helper(arr_2, right_1, right_2);
-      
-    if (min_L < min_R)
-    {
-      min = min_L;
-      min_1 = left_1;
-      min_2 = left_2;
-    }
-    else
-    {
-      min = min_R;
-      min_1 = right_1;
-      min_2 = right_2;
-    }
-    return min;
-  }
-
-  template <class Container> static double min_sq_distance_impl(Container& arr, point_2d& min_1, point_2d& min_2)
-  {
-    double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
-    if (arr_count == 0) {return 0;}
-    if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
-    {
-      typename Container::iterator it = arr.begin();
-      min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
-    }
-    if (arr_count == 3)
-    {
-      typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
-      min_1 = a;  min_2 = b;
-      ++it;
-      double candidate = point_2d::sq_distance(a, *it);
-      if (candidate < min_)
-      {
-        min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
-      }
-      candidate = point_2d::sq_distance(*it, b);
-      if (candidate < min_)
-      {
-        min_ = candidate;  min_1 = *it;  min_2 = b;
-      }
-      return min_;
-    }
-
-    std::vector<point_2d > arr_;
-    for (typename Container::iterator it = arr.begin(); it != arr.end(); ++it)
-    {
-      arr_.push_back(*it);
-    }
-    
-    std::sort(arr_.begin(), arr_.end());
-    min = min_sq_distance_helper(arr_, min_1, min_2);
-    return min;
-  }
-
-  double point_2d::min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2)
-  {
-    return min_sq_distance_impl(arr, min_1, min_2);
-  }
-
-  double point_2d::get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O)
+  double point_2d::getOrientation(const point_2d& P, const point_2d& Q, const point_2d& O)
   {
     return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
   }
@@ -290,7 +84,7 @@ namespace ComputationalGeometry
     double theta_Q = atan2(Q.y, Q.x);
     
     return theta_P < theta_Q;
-    //Also can use return get_orientation(P, Q) < 0;
+    //Also can use return getOrientation(P, Q) < 0;
   }
 
   class PointCloud::Impl
@@ -422,7 +216,7 @@ namespace ComputationalGeometry
     const int startIndex = 2;
     for (int i = startIndex; i <= NN; ++i)
     {
-      while (point_2d::get_orientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
+      while (point_2d::getOrientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
       {
         if (hullCount > 1)
         {
@@ -439,6 +233,226 @@ namespace ComputationalGeometry
     }
 
     hull.resize(hullCount);
+  }
+
+  template <class Container> static double naive_min_sq_distance_impl(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
+  {
+    double min = 0;  bool started = false;
+    for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
+    {
+      for (typename Container::iterator it2 = B.begin(); it2 != B.end(); ++it2)
+      {
+          // Note: set iteration takes place in sorted order.
+          //std::cout << "[";  it2->print();  std::cout << "]\n";
+          if (!started)
+          {
+              min = point_3d::sq_distance(*it1, *it2);
+              A_min = *it1;
+              B_min = *it2;
+              started = true;
+              continue;
+          }
+          double candidate = point_3d::sq_distance(*it1, *it2);
+          if (candidate >= min) {continue;}
+      
+          min = candidate;
+          A_min = *it1;
+          B_min = *it2;
+          if (min == 0) {break;}
+      }
+      if (min == 0) {break;}
+    }
+    return min;
+  }
+
+  template <class Container> static double naive_min_sq_distance_impl(Container& arr, point_3d& min_1, point_3d& min_2)
+  {
+    double min = 0;  bool started = false;
+    if (arr.begin() != arr.end())
+    {
+      min_1 = *(arr.begin());
+      min_2 = *(arr.begin());
+    }
+
+    // Iteration involving template parameters:
+    for (typename Container::iterator it1 = arr.begin(); it1 != arr.end(); ++it1)
+    {
+      for (typename Container::iterator it2 = arr.begin(); it2 != arr.end(); ++it2)
+      {
+          if (it1 == it2) {continue;}
+          // Note: set iteration takes place in sorted order.
+          //std::cout << "[";  it2->print();  std::cout << "]\n";
+          if (!started)
+          {
+              min = point_3d::sq_distance(*it1, *it2);
+              min_1 = *it1;
+              min_2 = *it2;
+              started = true;
+              continue;
+          }
+          double candidate = point_3d::sq_distance(*it1, *it2);
+          if (candidate >= min) {continue;}
+      
+          min = candidate;
+          min_1 = *it1;
+          min_2 = *it2;
+          if (min == 0) {break;}
+      }
+      if (min == 0) {break;}
+    }
+    return min;
+  }
+
+  double PointCloud::naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min)
+  {
+    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+  }
+
+  double PointCloud::naive_min_sq_distance(std::set<point_3d>& arr, point_3d& min_1, point_3d& min_2)
+  {
+    return naive_min_sq_distance_impl(arr, min_1, min_2);
+  }
+
+  double PointCloud::naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min)
+  {
+    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+  }
+
+  double PointCloud::naive_min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2)
+  {
+    return naive_min_sq_distance_impl(cloud, min_1, min_2);
+  }
+
+  double PointCloud::naive_min_sq_distance(point_2d& min_1, point_2d& min_2)
+  {
+    if (pImpl == nullptr) { return -1; }
+    return naive_min_sq_distance_impl(pImpl->pointArray, min_1, min_2);
+  }
+
+  template <class Container> static double min_sq_distance_helper(Container& arr, point_2d& min_1, point_2d& min_2)
+  {
+    double min = 0;
+    unsigned arr_count = (unsigned) arr.size();
+
+    // These cases (where arr_count is 0 or 1) should never happen in the private helper method.
+    //if (arr_count == 0) {return 0;}
+    //if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arr_count == 2)
+    {
+      typename Container::iterator it = arr.begin();
+      min_1 = *it;  ++it;  min_2 = *it;
+      return point_2d::sq_distance(min_1, min_2);
+    }
+    if (arr_count == 3)
+    {
+      typename Container::iterator it = arr.begin();
+      point_2d a = *it;  ++it;  point_2d b = *it;
+      double min_ = point_2d::sq_distance(a, b);
+      min_1 = a;  min_2 = b;
+      ++it;
+      double candidate = point_2d::sq_distance(a, *it);
+      if (candidate < min_)
+      {
+        min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
+      }
+      candidate = point_2d::sq_distance(*it, b);
+      if (candidate < min_)
+      {
+        min_ = candidate;  min_1 = *it;  min_2 = b;
+      }
+      return min_;
+    }
+    
+    unsigned half_arr_count = arr_count / 2;
+    unsigned remaining_arr_count = arr_count - half_arr_count;
+    
+    Container arr_1, arr_2;
+    point_2d left_1, left_2, right_1, right_2;
+    double min_L, min_R;
+    
+    {
+      typename Container::iterator it = arr.begin();
+      for (int i = 0; i < half_arr_count; i++)
+      {
+        arr_1.push_back(*it);  ++it;
+      }
+    
+      for (int i = 0; i < remaining_arr_count; i++)
+      {
+        arr_2.push_back(*it);  ++it;
+      }
+    }
+    
+    min_L = min_sq_distance_helper(arr_1, left_1,  left_2);
+    min_R = min_sq_distance_helper(arr_2, right_1, right_2);
+    
+    if (min_L < min_R)
+    {
+      min = min_L;
+      min_1 = left_1;
+      min_2 = left_2;
+    }
+    else
+    {
+      min = min_R;
+      min_1 = right_1;
+      min_2 = right_2;
+    }
+    return min;
+  }
+
+  template <class Container> static double min_sq_distance_impl(Container& arr, point_2d& min_1, point_2d& min_2)
+  {
+    double min = 0;
+    unsigned arr_count = (unsigned) arr.size();
+    if (arr_count == 0) {return 0;}
+    if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arr_count == 2)
+    {
+      typename Container::iterator it = arr.begin();
+      min_1 = *it;  ++it;  min_2 = *it;
+      return point_2d::sq_distance(min_1, min_2);
+    }
+    if (arr_count == 3)
+    {
+      typename Container::iterator it = arr.begin();
+      point_2d a = *it;  ++it;  point_2d b = *it;
+      double min_ = point_2d::sq_distance(a, b);
+      min_1 = a;  min_2 = b;
+      ++it;
+      double candidate = point_2d::sq_distance(a, *it);
+      if (candidate < min_)
+      {
+        min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
+      }
+      candidate = point_2d::sq_distance(*it, b);
+      if (candidate < min_)
+      {
+        min_ = candidate;  min_1 = *it;  min_2 = b;
+      }
+      return min_;
+    }
+
+    std::vector<point_2d > arr_;
+    for (typename Container::iterator it = arr.begin(); it != arr.end(); ++it)
+    {
+      arr_.push_back(*it);
+    }
+  
+    std::sort(arr_.begin(), arr_.end());
+    min = min_sq_distance_helper(arr_, min_1, min_2);
+    return min;
+  }
+
+  double PointCloud::min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2)
+  {
+    return min_sq_distance_impl(cloud, min_1, min_2);
+  }
+
+  double PointCloud::min_sq_distance(point_2d& min_1, point_2d& min_2)
+  {
+    if (pImpl == nullptr) { return -1; }
+    return min_sq_distance_impl(pImpl->pointArray, min_1, min_2);
   }
 
   void PointCloud::unit_test()
@@ -470,12 +484,12 @@ namespace ComputationalGeometry
     }
   
     {
-      std::set<point_3d > A;
+      std::set<point_3d> A;
       point_3d a(1.5, 2.0, 0);
       point_3d b(1.0, 3.0, 0);
       point_3d c(-1.5, 7.0, 0);
     
-      std::set<point_3d > B;
+      std::set<point_3d> B;
       point_3d d(4.5, 2.3, 0);
       point_3d e(-1.55, 2.6, 0);
       point_3d f(88.3, 0.001, 0);
@@ -490,7 +504,7 @@ namespace ComputationalGeometry
     
       point_3d p, q;
     
-      double min = point_3d::naive_min_sq_distance(A, B, p, q);
+      double min = naive_min_sq_distance(A, B, p, q);
     
       std::cout << "\n//////\n" << min;
       p.print("\n");
@@ -499,12 +513,12 @@ namespace ComputationalGeometry
     }
   
     {
-      std::set<point_2d > A;
+      std::set<point_2d> A;
       point_2d a(1.5, 2.0);
       point_2d b(1.0, 3.0);
       point_2d c(-1.5, 7.0);
     
-      std::set<point_2d > B;
+      std::set<point_2d> B;
       point_2d d(4.5, 2.3);
       point_2d e(-1.35, 2.6);
       point_2d f(88.3, 0.001);
@@ -519,7 +533,7 @@ namespace ComputationalGeometry
     
       point_2d p, q;
     
-      double min = point_2d::naive_min_sq_distance(A, B, p, q);
+      double min = naive_min_sq_distance(A, B, p, q);
     
       std::cout << "\n//////\n" << min << "\n";
       p.print("\n");
@@ -544,15 +558,15 @@ namespace ComputationalGeometry
       A.insert(f);
     
       point_2d p, q;
-    
-      double min = point_2d::naive_min_sq_distance(A, p, q);
+
+      double min = naive_min_sq_distance(A, p, q);
     
       std::cout << "\n//////\n";
       std::cout << min << "\n";
       p.print();  std::cout << "\n";
       q.print();  std::cout << "\n";
     
-      min = point_2d::min_sq_distance(A, p, q);
+      min = min_sq_distance(A, p, q);
     
       std::cout << "\n/!!!!/\n";
       std::cout << min << "\n";
