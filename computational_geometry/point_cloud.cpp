@@ -100,6 +100,10 @@ namespace ComputationalGeometry
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
     void computeConvexHull();
+    template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min);
+    template <class Container> static double naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2);
+    template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2);
+    template <class Container> static double minSqDistance(Container& arr, point2d& min_1, point2d& min_2);
   };
 
   PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
@@ -235,7 +239,7 @@ namespace ComputationalGeometry
     hull.resize(hullCount);
   }
 
-  template <class Container> static double naiveMinSqDistanceImpl(Container& A, Container& B, point3d& A_min, point3d& B_min)
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min)
   {
     double min = 0;  bool started = false;
     for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
@@ -265,7 +269,7 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double naiveMinSqDistanceImpl(Container& arr, point3d& min_1, point3d& min_2)
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2)
   {
     double min = 0;  bool started = false;
     if (arr.begin() != arr.end())
@@ -305,31 +309,31 @@ namespace ComputationalGeometry
 
   double PointCloud::naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min)
   {
-    return naiveMinSqDistanceImpl(A, B, A_min, B_min);
+    return Impl::naiveMinSqDistance(A, B, A_min, B_min);
   }
 
   double PointCloud::naiveMinSqDistance(std::set<point3d>& arr, point3d& min_1, point3d& min_2)
   {
-    return naiveMinSqDistanceImpl(arr, min_1, min_2);
+    return Impl::naiveMinSqDistance(arr, min_1, min_2);
   }
 
   double PointCloud::naiveMinSqDistance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min)
   {
-    return naiveMinSqDistanceImpl(A, B, A_min, B_min);
+    return Impl::naiveMinSqDistance(A, B, A_min, B_min);
   }
 
   double PointCloud::naiveMinSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return naiveMinSqDistanceImpl(cloud, min_1, min_2);
+    return Impl::naiveMinSqDistance(cloud, min_1, min_2);
   }
 
   double PointCloud::naiveMinSqDistance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
-    return naiveMinSqDistanceImpl(pImpl->pointArray, min_1, min_2);
+    return Impl::naiveMinSqDistance(pImpl->pointArray, min_1, min_2);
   }
 
-  template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2)
+  template <class Container> double PointCloud::Impl::minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
     unsigned arrCount = (unsigned) arr.size();
@@ -401,7 +405,7 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double minSqDistanceImplimpl(Container& arr, point2d& min_1, point2d& min_2)
+  template <class Container> double PointCloud::Impl::minSqDistance(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
     unsigned arrCount = (unsigned) arr.size();
@@ -446,13 +450,13 @@ namespace ComputationalGeometry
 
   double PointCloud::minSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return minSqDistanceImplimpl(cloud, min_1, min_2);
+    return Impl::minSqDistance(cloud, min_1, min_2);
   }
 
   double PointCloud::minSqDistance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
-    return minSqDistanceImplimpl(pImpl->pointArray, min_1, min_2);
+    return Impl::minSqDistance(pImpl->pointArray, min_1, min_2);
   }
 
   void PointCloud::unitTest()
