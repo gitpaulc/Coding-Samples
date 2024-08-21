@@ -1,6 +1,6 @@
 
 #include "includes.h"
-#include "point_3d.h"
+#include "point_cloud.h"
 #include "gl_callbacks.h"
 
 namespace ComputationalGeometry

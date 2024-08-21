@@ -1,8 +1,8 @@
 /*  Copyright Paul Cernea, August 2024.
 All Rights Reserved.*/
 
-#ifndef POINT_3D_H
-#define POINT_3D_H
+#ifndef POINT_CLOUD_H
+#define POINT_CLOUD_H
 
 #include <memory>
 #include <set>
@@ -62,4 +62,4 @@ namespace ComputationalGeometry
   };
 }
 
-#endif //def POINT_3D_H
+#endif //def POINT_CLOUD_H
