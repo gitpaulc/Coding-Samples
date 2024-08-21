@@ -61,6 +61,9 @@ namespace ComputationalGeometry
       std::vector<point_2d>& ConvexHull();
       void refresh();
       static PointCloud& Get();
+      
+      // For testing.
+      void unit_test();
   };
 }
 
