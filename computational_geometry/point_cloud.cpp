@@ -27,12 +27,12 @@ namespace ComputationalGeometry
     hh = gWindowHeight;
   }
 
-  point_3d::point_3d() : x(0), y(0), z(0) {}
-  point_3d::point_3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
+  point3d::point3d() : x(0), y(0), z(0) {}
+  point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
-  int point_3d::GetDimension() const { return 3; }
+  int point3d::GetDimension() const { return 3; }
 
-  bool point_3d::operator< (const point_3d& q) const
+  bool point3d::operator< (const point3d& q) const
   {
     if (x > q.x) {return false;}
     if (x < q.x) {return true;}
@@ -44,14 +44,14 @@ namespace ComputationalGeometry
     return false;
   }
 
-  void point_3d::print(const std::string& prequel) const
+  void point3d::print(const std::string& prequel) const
   {
     std::cout << prequel << "(" << x << ", " << y;
     if (GetDimension() > 2) {std::cout << ", " << z;}
     std::cout << ")";
   }
 
-  double point_3d::sq_distance(const point_3d& P, const point_3d& Q)
+  double point3d::sq_distance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
     double dt = (P.x - Q.x);
@@ -66,154 +66,330 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  template <class Container> static double naive_min_sq_distance_impl(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
+  point2d::point2d() : point3d(0, 0, 0) {}
+  point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
+
+  int point2d::GetDimension() const { return 2; }
+
+  double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
+  {
+    return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
+  }
+
+  bool point2d::comparator(const point2d& P, const point2d& Q)
+  {
+    // Equivalent to P < Q
+    
+    double theta_P = atan2(P.y, P.x);
+    double theta_Q = atan2(Q.y, Q.x);
+    
+    return theta_P < theta_Q;
+    //Also can use return getOrientation(P, Q) < 0;
+  }
+
+  class PointCloud::Impl
+  {
+  public:
+    PointCloud* pCloud = nullptr;
+
+    std::vector<point2d> hull;
+    std::vector<point2d> pointArray;
+
+    Impl(PointCloud* pParent) : pCloud(pParent) {}
+    void generateRandomPoints();
+      
+    /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
+    void computeConvexHull();
+    template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min);
+    template <class Container> static double naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2);
+    template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2);
+    template <class Container> static double minSqDistance(Container& arr, point2d& min_1, point2d& min_2);
+  };
+
+  PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
+  {
+    // unique_ptr requires C++ 11.
+    // make_unique requires C++ 14.
+  }
+
+  const std::vector<point2d>& PointCloud::PointArray()
+  {
+    if (pImpl == nullptr) // Of course this should never happen.
+    {
+      static std::vector<point2d> dummy;
+      return dummy;
+    }
+    return pImpl->pointArray;
+  }
+
+  const std::vector<point2d>& PointCloud::ConvexHull()
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<point2d> dummy;
+      return dummy;
+    }
+    return pImpl->hull;
+  }
+
+  void PointCloud::refresh()
+  {
+    if (pImpl == nullptr) { return; }
+    // Generate random points for display.
+    pImpl->generateRandomPoints();
+    pImpl->computeConvexHull();
+  }
+
+  PointCloud& PointCloud::Get()
+  {
+    static PointCloud pc;
+    return pc;
+  }
+
+  void PointCloud::Impl::generateRandomPoints()
+  {
+    double randMax = (double)RAND_MAX;
+    pointArray.resize(0);
+    std::set<point2d> initialSet; // Using a set ensures unique points and allows automatic sorting.
+
+    for (int i = 0; i < numRandomPoints(); ++i)
+    {
+      double xx = (rand() * 1.8 / randMax) - 0.9;
+      double yy = (rand() * 1.8 / randMax) - 0.9;
+      point2d P(xx, yy);
+      initialSet.insert(P);
+    }
+  
+    // Pre- C++ 11 style of iteration:
+    for (std::set<point2d>::const_iterator it = initialSet.begin(); it != initialSet.end(); ++it)
+    {
+      pointArray.push_back(*it);
+    }
+  }
+
+  void PointCloud::computeConvexHull()
+  {
+    if (pImpl != nullptr) { pImpl->computeConvexHull(); }
+  }
+
+  void PointCloud::Impl::computeConvexHull()
+  {
+    hull.resize(0);
+
+    // 2d : Graham scan.
+    hull = pointArray;
+    const int NN = (int)pointArray.size();
+    if (NN <= 3) {return;}
+
+    point2d tempOrigin = hull[0];
+    {
+      int bestIndex = 0;
+      const int startIndex = 1;
+      for (int i = startIndex; i < NN; ++i)
+      {
+        if (hull[i].y < tempOrigin.y)
+        {
+          tempOrigin = hull[i];
+          bestIndex = i;
+        }
+      }
+
+      hull[bestIndex] = hull[1];
+      hull[1] = tempOrigin;
+      hull.push_back(hull[0]);
+    
+      for (int i = startIndex; i <= NN; ++i)
+      {
+        hull[i].x = hull[i].x - tempOrigin.x;
+        hull[i].y = hull[i].y - tempOrigin.y;
+      }
+    
+      // O(n log(n)):
+      std::sort(hull.begin() + 1, hull.end(), point2d::comparator);
+    
+      for (int i = startIndex; i <= NN; ++i)
+      {
+        hull[i].x = hull[i].x + tempOrigin.x;
+        hull[i].y = hull[i].y + tempOrigin.y;
+      }
+        
+      hull[0] = hull[NN];
+    }
+    
+    int hullCount = 1; // Initialize stack.
+    const int startIndex = 2;
+    for (int i = startIndex; i <= NN; ++i)
+    {
+      while (point2d::getOrientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
+      {
+        if (hullCount > 1)
+        {
+          --hullCount;  continue;
+        }
+        if (i == NN) {break;} // Stack is empty.
+        ++i; // Else keep searching.
+      }
+      // Otherwise point is on the boundary of the convex hull.
+      ++hullCount;
+      tempOrigin = hull[hullCount];
+      hull[hullCount] = hull[i];
+      hull[i] = tempOrigin;
+    }
+
+    hull.resize(hullCount);
+  }
+
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min)
   {
     double min = 0;  bool started = false;
     for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
     {
-        for (typename Container::iterator it2 = B.begin(); it2 != B.end(); ++it2)
-        {
-            // Note: set iteration takes place in sorted order.
-            //std::cout << "[";  it2->print();  std::cout << "]\n";
-            if (!started)
-            {
-                min = point_3d::sq_distance(*it1, *it2);
-                A_min = *it1;
-                B_min = *it2;
-                started = true;
-                continue;
-            }
-            double candidate = point_3d::sq_distance(*it1, *it2);
-            if (candidate >= min) {continue;}
-        
-            min = candidate;
-            A_min = *it1;
-            B_min = *it2;
-            if (min == 0) {break;}
-        }
-        if (min == 0) {break;}
+      for (typename Container::iterator it2 = B.begin(); it2 != B.end(); ++it2)
+      {
+          // Note: set iteration takes place in sorted order.
+          //std::cout << "[";  it2->print();  std::cout << "]\n";
+          if (!started)
+          {
+              min = point3d::sq_distance(*it1, *it2);
+              A_min = *it1;
+              B_min = *it2;
+              started = true;
+              continue;
+          }
+          double candidate = point3d::sq_distance(*it1, *it2);
+          if (candidate >= min) {continue;}
+      
+          min = candidate;
+          A_min = *it1;
+          B_min = *it2;
+          if (min == 0) {break;}
+      }
+      if (min == 0) {break;}
     }
     return min;
   }
 
-  template <class Container> static double naive_min_sq_distance_impl(Container& arr, point_3d& min_1, point_3d& min_2)
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2)
   {
     double min = 0;  bool started = false;
     if (arr.begin() != arr.end())
     {
-        min_1 = *(arr.begin());
-        min_2 = *(arr.begin());
+      min_1 = *(arr.begin());
+      min_2 = *(arr.begin());
     }
+
+    // Iteration involving template parameters:
     for (typename Container::iterator it1 = arr.begin(); it1 != arr.end(); ++it1)
     {
-        for (typename Container::iterator it2 = arr.begin(); it2 != arr.end(); ++it2)
-        {
-            if (it1 == it2) {continue;}
-            // Note: set iteration takes place in sorted order.
-            //std::cout << "[";  it2->print();  std::cout << "]\n";
-            if (!started)
-            {
-                min = point_3d::sq_distance(*it1, *it2);
-                min_1 = *it1;
-                min_2 = *it2;
-                started = true;
-                continue;
-            }
-            double candidate = point_3d::sq_distance(*it1, *it2);
-            if (candidate >= min) {continue;}
-        
-            min = candidate;
-            min_1 = *it1;
-            min_2 = *it2;
-            if (min == 0) {break;}
-        }
-        if (min == 0) {break;}
+      for (typename Container::iterator it2 = arr.begin(); it2 != arr.end(); ++it2)
+      {
+          if (it1 == it2) {continue;}
+          // Note: set iteration takes place in sorted order.
+          //std::cout << "[";  it2->print();  std::cout << "]\n";
+          if (!started)
+          {
+              min = point3d::sq_distance(*it1, *it2);
+              min_1 = *it1;
+              min_2 = *it2;
+              started = true;
+              continue;
+          }
+          double candidate = point3d::sq_distance(*it1, *it2);
+          if (candidate >= min) {continue;}
+      
+          min = candidate;
+          min_1 = *it1;
+          min_2 = *it2;
+          if (min == 0) {break;}
+      }
+      if (min == 0) {break;}
     }
     return min;
   }
 
-  double point_3d::naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min)
+  double PointCloud::naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min)
   {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+    return Impl::naiveMinSqDistance(A, B, A_min, B_min);
   }
 
-  double point_3d::naive_min_sq_distance(std::set<point_3d>& arr, point_3d& min_1, point_3d& min_2)
+  double PointCloud::naiveMinSqDistance(std::set<point3d>& arr, point3d& min_1, point3d& min_2)
   {
-    return naive_min_sq_distance_impl(arr, min_1, min_2);
+    return Impl::naiveMinSqDistance(arr, min_1, min_2);
   }
 
-  point_2d::point_2d() : point_3d(0, 0, 0) {}
-  point_2d::point_2d(const double& xx, const double& yy) : point_3d(xx, yy, 0) {}
-
-  int point_2d::GetDimension() const { return 2; }
-
-  double point_2d::naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min)
+  double PointCloud::naiveMinSqDistance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min)
   {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+    return Impl::naiveMinSqDistance(A, B, A_min, B_min);
   }
 
-  double point_2d::naive_min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2)
+  double PointCloud::naiveMinSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return naive_min_sq_distance_impl(arr, min_1, min_2);
+    return Impl::naiveMinSqDistance(cloud, min_1, min_2);
   }
 
-  template <class Container> static double min_sq_distance_helper(Container& arr, point_2d& min_1, point_2d& min_2)
+  double PointCloud::naiveMinSqDistance(point2d& min_1, point2d& min_2)
+  {
+    if (pImpl == nullptr) { return -1; }
+    return Impl::naiveMinSqDistance(pImpl->pointArray, min_1, min_2);
+  }
+
+  template <class Container> double PointCloud::Impl::minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
-  
-    // These cases (where arr_count is 0 or 1) should never happen in the private helper method.
-    //if (arr_count == 0) {return 0;}
-    //if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
+    unsigned arrCount = (unsigned) arr.size();
+
+    // These cases (where arrCount is 0 or 1) should never happen in the private helper method.
+    //if (arrCount == 0) {return 0;}
+    //if (arrCount == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arrCount == 2)
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
+      return point2d::sq_distance(min_1, min_2);
     }
-    if (arr_count == 3)
+    if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
+      point2d a = *it;  ++it;  point2d b = *it;
+      double min_ = point2d::sq_distance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point_2d::sq_distance(a, *it);
+      double candidate = point2d::sq_distance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point_2d::sq_distance(*it, b);
+      candidate = point2d::sq_distance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
       }
       return min_;
     }
-      
-    unsigned half_arr_count = arr_count / 2;
-    unsigned remaining_arr_count = arr_count - half_arr_count;
-      
+    
+    unsigned halfArrCount = arrCount / 2;
+    unsigned remainingArrCount = arrCount - halfArrCount;
+    
     Container arr_1, arr_2;
-    point_2d left_1, left_2, right_1, right_2;
+    point2d left_1, left_2, right_1, right_2;
     double min_L, min_R;
-      
+    
     {
       typename Container::iterator it = arr.begin();
-      for (int i = 0; i < half_arr_count; i++)
+      for (int i = 0; i < halfArrCount; i++)
       {
         arr_1.push_back(*it);  ++it;
       }
-      
-      for (int i = 0; i < remaining_arr_count; i++)
+    
+      for (int i = 0; i < remainingArrCount; i++)
       {
         arr_2.push_back(*it);  ++it;
       }
     }
-      
-    min_L = min_sq_distance_helper(arr_1, left_1,  left_2);
-    min_R = min_sq_distance_helper(arr_2, right_1, right_2);
-      
+    
+    min_L = minSqDistanceHelper(arr_1, left_1,  left_2);
+    min_R = minSqDistanceHelper(arr_2, right_1, right_2);
+    
     if (min_L < min_R)
     {
       min = min_L;
@@ -229,31 +405,31 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double min_sq_distance_impl(Container& arr, point_2d& min_1, point_2d& min_2)
+  template <class Container> double PointCloud::Impl::minSqDistance(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
-    if (arr_count == 0) {return 0;}
-    if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
+    unsigned arrCount = (unsigned) arr.size();
+    if (arrCount == 0) {return 0;}
+    if (arrCount == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arrCount == 2)
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
+      return point2d::sq_distance(min_1, min_2);
     }
-    if (arr_count == 3)
+    if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
+      point2d a = *it;  ++it;  point2d b = *it;
+      double min_ = point2d::sq_distance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point_2d::sq_distance(a, *it);
+      double candidate = point2d::sq_distance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point_2d::sq_distance(*it, b);
+      candidate = point2d::sq_distance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -261,291 +437,146 @@ namespace ComputationalGeometry
       return min_;
     }
 
-    std::vector<point_2d > arr_;
+    std::vector<point2d > arr_;
     for (typename Container::iterator it = arr.begin(); it != arr.end(); ++it)
     {
       arr_.push_back(*it);
     }
-    
+  
     std::sort(arr_.begin(), arr_.end());
-    min = min_sq_distance_helper(arr_, min_1, min_2);
+    min = minSqDistanceHelper(arr_, min_1, min_2);
     return min;
   }
 
-  double point_2d::min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2)
+  double PointCloud::minSqDistance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return min_sq_distance_impl(arr, min_1, min_2);
+    return Impl::minSqDistance(cloud, min_1, min_2);
   }
 
-  void point_2d::generate_random_points(std::vector<point_2d>& container, const unsigned int& N)
+  double PointCloud::minSqDistance(point2d& min_1, point2d& min_2)
   {
-    double randMax = RAND_MAX;
-    container.resize(0);
-    std::set<point_2d > initial_set; // Using a set ensures unique points and allows automatic sorting.
+    if (pImpl == nullptr) { return -1; }
+    return Impl::minSqDistance(pImpl->pointArray, min_1, min_2);
+  }
 
-    for (int i = 0; i < N; ++i)
+  void PointCloud::unitTest()
+  {
     {
-      double xx = (rand() * 1.8 / randMax) - 0.9;
-      double yy = (rand() * 1.8 / randMax) - 0.9;
-      point_2d P(xx, yy);
-      initial_set.insert(P);
+      point3d P(1.0, 2.0, 3.0);
+      std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
+      P.print("\n");
+      std::cout << "\n";
+
+      point2d Q(1.0, 2.0);
+      std::cout << "\n//////\nThe dimension is " << Q.GetDimension() << ".";
+      Q.print("\n");
+      std::cout << "\n";
     }
-    
-    for (std::set<point_2d>::const_iterator it = initial_set.begin(); it != initial_set.end(); ++it)
+  
     {
-      container.push_back(*it);
+      point3d P(1.0, 2.0, 3.0);
+      point3d Q(1.0, -2.0, 3.0);
+  
+      printf("%f\n", point3d::sq_distance(P,Q));
     }
-  }
-
-  void point_2d::graham_scan(std::vector<point_2d>& hull, const std::vector<point_2d>& points, const unsigned int& N)
-  {
-    hull = points;
-    if (points.size() <= 3) {return;}
-      
-    point_2d temp_origin_ = hull[0];
+  
     {
-      int best_index = 0;
-      for (int i = 1; i < N; i++)
-      {
-        if (hull[i].y < temp_origin_.y)
-        {
-          temp_origin_ = hull[i];
-          best_index = i;
-        }
-      }
-
-      hull[best_index] = hull[1];
-      hull[1] = temp_origin_;
-      hull.push_back(hull[0]);
-      
-      /*std::cout << "\n/// LIST:\n";
-      for (int i = 0; i <= N; i++)
-      {
-        hull[i].print("\n");
-      }
-      std::cout << "\n";*/
-      
-      for (int i = 1; i <= N; i++)
-      {
-        hull[i].x = hull[i].x - temp_origin_.x;
-        hull[i].y = hull[i].y - temp_origin_.y;
-      }
-      
-      std::sort(hull.begin() + 1, hull.end(), comparator);
-          
-      /*std::cout << "\n/// LIST:\n";
-      for (int i = 1; i <= N; i++)
-      {
-        printf("\n%f", atan2(hull[i].y, hull[i].x));
-      }
-      std::cout << "\n";*/
-      
-      for (int i = 1; i <= N; i++)
-      {
-        hull[i].x = hull[i].x + temp_origin_.x;
-        hull[i].y = hull[i].y + temp_origin_.y;
-      }
-          
-      hull[0] = hull[N];
+      point2d P(1.5, 2.0);
+      point2d Q(1.0, -2.0);
+  
+      printf("%f\n", point2d::sq_distance(P,Q));
     }
-      
-    int hull_count = 1; // Initialize stack.
-    for (int i = 2; i <= N; i++)
+  
     {
-      while (get_orientation(hull[hull_count], hull[i], hull[hull_count - 1]) <= 0)
-      {
-        if (hull_count > 1)
-        {
-          hull_count--;  continue;
-        }
-        if (i == N) {break;} // Stack is empty.
-        else {i++;} // Keep searching.
-      }
-      // Otherwise point is on the boundary of the convex hull.
-      hull_count++;
-      temp_origin_ = hull[hull_count];
-      hull[hull_count] = hull[i];
-      hull[i] = temp_origin_;
+      std::set<point3d> A;
+      point3d a(1.5, 2.0, 0);
+      point3d b(1.0, 3.0, 0);
+      point3d c(-1.5, 7.0, 0);
+    
+      std::set<point3d> B;
+      point3d d(4.5, 2.3, 0);
+      point3d e(-1.55, 2.6, 0);
+      point3d f(88.3, 0.001, 0);
+    
+      A.insert(a);
+      A.insert(b);
+      A.insert(c);
+    
+      B.insert(d);
+      B.insert(e);
+      B.insert(f);
+    
+      point3d p, q;
+    
+      double min = naiveMinSqDistance(A, B, p, q);
+    
+      std::cout << "\n//////\n" << min;
+      p.print("\n");
+      q.print("\n");
+      std::cout << "\n";
     }
-
-    hull.resize(hull_count);
-  }
-
-  double point_2d::get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O)
-  {
-    return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
-  }
-
-  bool point_2d::comparator(const point_2d& P, const point_2d& Q)
-  {
-    // Equivalent to P < Q
-    
-    double theta_P = atan2(P.y, P.x);
-    double theta_Q = atan2(Q.y, Q.x);
-    
-    return theta_P < theta_Q;
-    //Also can use return get_orientation(P, Q) < 0;
-  }
-
-  class PointCloud::Impl
-  {
-  public:
-    PointCloud* pCloud = nullptr;
-
-    std::vector<point_2d> convexHull;
-    std::vector<point_2d> pointArray;
-
-    Impl(PointCloud* pParent) : pCloud(pParent) {}
-  };
-
-  PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
-  {
-    // unique_ptr requires C++ 11.
-    // make_unique requires C++ 14.
-  }
-
-  std::vector<point_2d>& PointCloud::PointArray()
-  {
-    return pImpl->pointArray;
-  }
-
-  std::vector<point_2d>& PointCloud::ConvexHull()
-  {
-    return pImpl->convexHull;
-  }
-
-  void PointCloud::refresh()
-  {
-    // Generate random points for display.
-    point_2d::generate_random_points(PointArray(), numRandomPoints());
-    // Compute convex hull.
-    point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
-  }
-
-  PointCloud& PointCloud::Get()
-  {
-    static PointCloud pc;
-    return pc;
-  }
-
-  void PointCloud::unit_test()
-  {
-  {
-    point_3d P(1.0, 2.0, 3.0);
-    std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
-    P.print("\n");
-    std::cout << "\n";
-
-    point_2d Q(1.0, 2.0);
-    std::cout << "\n//////\nThe dimension is " << Q.GetDimension() << ".";
-    Q.print("\n");
-    std::cout << "\n";
-  }
   
-  {
-    point_3d P(1.0, 2.0, 3.0);
-    point_3d Q(1.0, -2.0, 3.0);
+    {
+      std::set<point2d> A;
+      point2d a(1.5, 2.0);
+      point2d b(1.0, 3.0);
+      point2d c(-1.5, 7.0);
+    
+      std::set<point2d> B;
+      point2d d(4.5, 2.3);
+      point2d e(-1.35, 2.6);
+      point2d f(88.3, 0.001);
+    
+      A.insert(a);
+      A.insert(b);
+      A.insert(c);
+    
+      B.insert(d);
+      B.insert(e);
+      B.insert(f);
+    
+      point2d p, q;
+    
+      double min = naiveMinSqDistance(A, B, p, q);
+    
+      std::cout << "\n//////\n" << min << "\n";
+      p.print("\n");
+      q.print("\n");
+      std::cout << "\n";
+    }
+  
+    {
+      std::set<point2d > A;
+      point2d a(1.5, 2.0);
+      point2d b(1.0, 3.0);
+      point2d c(-1.5, 7.0);
+      point2d d(4.5, 2.3);
+      point2d e(-1.35, 2.6);
+      point2d f(88.3, 0.001);
+    
+      A.insert(a);
+      A.insert(b);
+      A.insert(c);
+      A.insert(d);
+      A.insert(e);
+      A.insert(f);
+    
+      point2d p, q;
 
-    printf("%f\n", point_3d::sq_distance(P,Q));
-  }
-  
-  {
-    point_2d P(1.5, 2.0);
-    point_2d Q(1.0, -2.0);
-
-    printf("%f\n", point_2d::sq_distance(P,Q));
-  }
-  
-  {
-    std::set<point_3d > A;
-    point_3d a(1.5, 2.0, 0);
-    point_3d b(1.0, 3.0, 0);
-    point_3d c(-1.5, 7.0, 0);
+      double min = naiveMinSqDistance(A, p, q);
     
-    std::set<point_3d > B;
-    point_3d d(4.5, 2.3, 0);
-    point_3d e(-1.55, 2.6, 0);
-    point_3d f(88.3, 0.001, 0);
+      std::cout << "\n//////\n";
+      std::cout << min << "\n";
+      p.print();  std::cout << "\n";
+      q.print();  std::cout << "\n";
     
-    A.insert(a);
-    A.insert(b);
-    A.insert(c);
+      min = minSqDistance(A, p, q);
     
-    B.insert(d);
-    B.insert(e);
-    B.insert(f);
-    
-    point_3d p, q;
-    
-    double min = point_3d::naive_min_sq_distance(A, B, p, q);
-    
-    std::cout << "\n//////\n" << min;
-    p.print("\n");
-    q.print("\n");
-    std::cout << "\n";
-  }
-  
-  {
-    std::set<point_2d > A;
-    point_2d a(1.5, 2.0);
-    point_2d b(1.0, 3.0);
-    point_2d c(-1.5, 7.0);
-    
-    std::set<point_2d > B;
-    point_2d d(4.5, 2.3);
-    point_2d e(-1.35, 2.6);
-    point_2d f(88.3, 0.001);
-    
-    A.insert(a);
-    A.insert(b);
-    A.insert(c);
-    
-    B.insert(d);
-    B.insert(e);
-    B.insert(f);
-    
-    point_2d p, q;
-    
-    double min = point_2d::naive_min_sq_distance(A, B, p, q);
-    
-    std::cout << "\n//////\n" << min << "\n";
-    p.print("\n");
-    q.print("\n");
-    std::cout << "\n";
-  }
-  
-  {
-    std::set<point_2d > A;
-    point_2d a(1.5, 2.0);
-    point_2d b(1.0, 3.0);
-    point_2d c(-1.5, 7.0);
-    point_2d d(4.5, 2.3);
-    point_2d e(-1.35, 2.6);
-    point_2d f(88.3, 0.001);
-    
-    A.insert(a);
-    A.insert(b);
-    A.insert(c);
-    A.insert(d);
-    A.insert(e);
-    A.insert(f);
-    
-    point_2d p, q;
-    
-    double min = point_2d::naive_min_sq_distance(A, p, q);
-    
-    std::cout << "\n//////\n";
-    std::cout << min << "\n";
-    p.print();  std::cout << "\n";
-    q.print();  std::cout << "\n";
-    
-    min = point_2d::min_sq_distance(A, p, q);
-    
-    std::cout << "\n/!!!!/\n";
-    std::cout << min << "\n";
-    p.print();  std::cout << "\n";
-    q.print();  std::cout << "\n";
-  }
-  }
+      std::cout << "\n/!!!!/\n";
+      std::cout << min << "\n";
+      p.print();  std::cout << "\n";
+      q.print();  std::cout << "\n";
+    }
+  } // end of unit_test function.
 
 } // end of namespace ComputationalGeometry
