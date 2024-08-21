@@ -352,7 +352,7 @@ namespace ComputationalGeometry
     int hull_count = 1; // Initialize stack.
     for (int i = 2; i <= N; i++)
     {
-      while (get_orientation(hull[hull_count - 1], hull[hull_count], hull[i]) <= 0)
+      while (get_orientation(hull[hull_count], hull[i], hull[hull_count - 1]) <= 0)
       {
         if (hull_count > 1)
         {
@@ -371,12 +371,7 @@ namespace ComputationalGeometry
     hull.resize(hull_count);
   }
 
-  double point_2d::get_orientation(const point_2d& P, const point_2d& Q)
-  {
-    return P.x * Q.y - P.y * Q.x;
-  }
-
-  double point_2d::get_orientation(const point_2d& O, const point_2d& P, const point_2d& Q)
+  double point_2d::get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O)
   {
     return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
   }

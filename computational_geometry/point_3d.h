@@ -48,8 +48,7 @@ namespace ComputationalGeometry
       static void graham_scan(std::vector<point_2d> & hull, const std::vector<point_2d> & points, const unsigned int& N);
 		
     private:
-      static double get_orientation(const point_2d& P, const point_2d& Q);
-      static double get_orientation(const point_2d& O, const point_2d& P, const point_2d& Q);
+      static double get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
       static bool comparator(const point_2d& P, const point_2d& Q);
 	};	
 }
