@@ -27,12 +27,12 @@ namespace ComputationalGeometry
     hh = gWindowHeight;
   }
 
-  point_3d::point_3d() : x(0), y(0), z(0) {}
-  point_3d::point_3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
+  point3d::point3d() : x(0), y(0), z(0) {}
+  point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
-  int point_3d::GetDimension() const { return 3; }
+  int point3d::GetDimension() const { return 3; }
 
-  bool point_3d::operator< (const point_3d& q) const
+  bool point3d::operator< (const point3d& q) const
   {
     if (x > q.x) {return false;}
     if (x < q.x) {return true;}
@@ -44,14 +44,14 @@ namespace ComputationalGeometry
     return false;
   }
 
-  void point_3d::print(const std::string& prequel) const
+  void point3d::print(const std::string& prequel) const
   {
     std::cout << prequel << "(" << x << ", " << y;
     if (GetDimension() > 2) {std::cout << ", " << z;}
     std::cout << ")";
   }
 
-  double point_3d::sq_distance(const point_3d& P, const point_3d& Q)
+  double point3d::sq_distance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
     double dt = (P.x - Q.x);
@@ -66,17 +66,17 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  point_2d::point_2d() : point_3d(0, 0, 0) {}
-  point_2d::point_2d(const double& xx, const double& yy) : point_3d(xx, yy, 0) {}
+  point2d::point2d() : point3d(0, 0, 0) {}
+  point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
 
-  int point_2d::GetDimension() const { return 2; }
+  int point2d::GetDimension() const { return 2; }
 
-  double point_2d::getOrientation(const point_2d& P, const point_2d& Q, const point_2d& O)
+  double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
     return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
   }
 
-  bool point_2d::comparator(const point_2d& P, const point_2d& Q)
+  bool point2d::comparator(const point2d& P, const point2d& Q)
   {
     // Equivalent to P < Q
     
@@ -92,8 +92,8 @@ namespace ComputationalGeometry
   public:
     PointCloud* pCloud = nullptr;
 
-    std::vector<point_2d> hull;
-    std::vector<point_2d> pointArray;
+    std::vector<point2d> hull;
+    std::vector<point2d> pointArray;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     void generateRandomPoints();
@@ -108,21 +108,21 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
-  const std::vector<point_2d>& PointCloud::PointArray()
+  const std::vector<point2d>& PointCloud::PointArray()
   {
     if (pImpl == nullptr) // Of course this should never happen.
     {
-      static std::vector<point_2d> dummy;
+      static std::vector<point2d> dummy;
       return dummy;
     }
     return pImpl->pointArray;
   }
 
-  const std::vector<point_2d>& PointCloud::ConvexHull()
+  const std::vector<point2d>& PointCloud::ConvexHull()
   {
     if (pImpl == nullptr)
     {
-      static std::vector<point_2d> dummy;
+      static std::vector<point2d> dummy;
       return dummy;
     }
     return pImpl->hull;
@@ -146,18 +146,18 @@ namespace ComputationalGeometry
   {
     double randMax = (double)RAND_MAX;
     pointArray.resize(0);
-    std::set<point_2d> initialSet; // Using a set ensures unique points and allows automatic sorting.
+    std::set<point2d> initialSet; // Using a set ensures unique points and allows automatic sorting.
 
     for (int i = 0; i < numRandomPoints(); ++i)
     {
       double xx = (rand() * 1.8 / randMax) - 0.9;
       double yy = (rand() * 1.8 / randMax) - 0.9;
-      point_2d P(xx, yy);
+      point2d P(xx, yy);
       initialSet.insert(P);
     }
   
     // Pre- C++ 11 style of iteration:
-    for (std::set<point_2d>::const_iterator it = initialSet.begin(); it != initialSet.end(); ++it)
+    for (std::set<point2d>::const_iterator it = initialSet.begin(); it != initialSet.end(); ++it)
     {
       pointArray.push_back(*it);
     }
@@ -177,7 +177,7 @@ namespace ComputationalGeometry
     const int NN = (int)pointArray.size();
     if (NN <= 3) {return;}
 
-    point_2d tempOrigin = hull[0];
+    point2d tempOrigin = hull[0];
     {
       int bestIndex = 0;
       const int startIndex = 1;
@@ -201,7 +201,7 @@ namespace ComputationalGeometry
       }
     
       // O(n log(n)):
-      std::sort(hull.begin() + 1, hull.end(), point_2d::comparator);
+      std::sort(hull.begin() + 1, hull.end(), point2d::comparator);
     
       for (int i = startIndex; i <= NN; ++i)
       {
@@ -216,7 +216,7 @@ namespace ComputationalGeometry
     const int startIndex = 2;
     for (int i = startIndex; i <= NN; ++i)
     {
-      while (point_2d::getOrientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
+      while (point2d::getOrientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
       {
         if (hullCount > 1)
         {
@@ -235,7 +235,7 @@ namespace ComputationalGeometry
     hull.resize(hullCount);
   }
 
-  template <class Container> static double naive_min_sq_distance_impl(Container& A, Container& B, point_3d& A_min, point_3d& B_min)
+  template <class Container> static double naiveMinSqDistanceImpl(Container& A, Container& B, point3d& A_min, point3d& B_min)
   {
     double min = 0;  bool started = false;
     for (typename Container::iterator it1 = A.begin(); it1 != A.end(); ++it1)
@@ -246,13 +246,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point_3d::sq_distance(*it1, *it2);
+              min = point3d::sq_distance(*it1, *it2);
               A_min = *it1;
               B_min = *it2;
               started = true;
               continue;
           }
-          double candidate = point_3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sq_distance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -265,7 +265,7 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double naive_min_sq_distance_impl(Container& arr, point_3d& min_1, point_3d& min_2)
+  template <class Container> static double naiveMinSqDistanceImpl(Container& arr, point3d& min_1, point3d& min_2)
   {
     double min = 0;  bool started = false;
     if (arr.begin() != arr.end())
@@ -284,13 +284,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point_3d::sq_distance(*it1, *it2);
+              min = point3d::sq_distance(*it1, *it2);
               min_1 = *it1;
               min_2 = *it2;
               started = true;
               continue;
           }
-          double candidate = point_3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sq_distance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -303,59 +303,59 @@ namespace ComputationalGeometry
     return min;
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min)
+  double PointCloud::naive_min_sq_distance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min)
   {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+    return naiveMinSqDistanceImpl(A, B, A_min, B_min);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point_3d>& arr, point_3d& min_1, point_3d& min_2)
+  double PointCloud::naive_min_sq_distance(std::set<point3d>& arr, point3d& min_1, point3d& min_2)
   {
-    return naive_min_sq_distance_impl(arr, min_1, min_2);
+    return naiveMinSqDistanceImpl(arr, min_1, min_2);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min)
+  double PointCloud::naive_min_sq_distance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min)
   {
-    return naive_min_sq_distance_impl(A, B, A_min, B_min);
+    return naiveMinSqDistanceImpl(A, B, A_min, B_min);
   }
 
-  double PointCloud::naive_min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2)
+  double PointCloud::naive_min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
-    return naive_min_sq_distance_impl(cloud, min_1, min_2);
+    return naiveMinSqDistanceImpl(cloud, min_1, min_2);
   }
 
-  double PointCloud::naive_min_sq_distance(point_2d& min_1, point_2d& min_2)
+  double PointCloud::naive_min_sq_distance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
-    return naive_min_sq_distance_impl(pImpl->pointArray, min_1, min_2);
+    return naiveMinSqDistanceImpl(pImpl->pointArray, min_1, min_2);
   }
 
-  template <class Container> static double min_sq_distance_helper(Container& arr, point_2d& min_1, point_2d& min_2)
+  template <class Container> static double min_sq_distance_helper(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
+    unsigned arrCount = (unsigned) arr.size();
 
-    // These cases (where arr_count is 0 or 1) should never happen in the private helper method.
-    //if (arr_count == 0) {return 0;}
-    //if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
+    // These cases (where arrCount is 0 or 1) should never happen in the private helper method.
+    //if (arrCount == 0) {return 0;}
+    //if (arrCount == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arrCount == 2)
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
+      return point2d::sq_distance(min_1, min_2);
     }
-    if (arr_count == 3)
+    if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
+      point2d a = *it;  ++it;  point2d b = *it;
+      double min_ = point2d::sq_distance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point_2d::sq_distance(a, *it);
+      double candidate = point2d::sq_distance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point_2d::sq_distance(*it, b);
+      candidate = point2d::sq_distance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -363,21 +363,21 @@ namespace ComputationalGeometry
       return min_;
     }
     
-    unsigned half_arr_count = arr_count / 2;
-    unsigned remaining_arr_count = arr_count - half_arr_count;
+    unsigned halfArrCount = arrCount / 2;
+    unsigned remainingArrCount = arrCount - halfArrCount;
     
     Container arr_1, arr_2;
-    point_2d left_1, left_2, right_1, right_2;
+    point2d left_1, left_2, right_1, right_2;
     double min_L, min_R;
     
     {
       typename Container::iterator it = arr.begin();
-      for (int i = 0; i < half_arr_count; i++)
+      for (int i = 0; i < halfArrCount; i++)
       {
         arr_1.push_back(*it);  ++it;
       }
     
-      for (int i = 0; i < remaining_arr_count; i++)
+      for (int i = 0; i < remainingArrCount; i++)
       {
         arr_2.push_back(*it);  ++it;
       }
@@ -401,31 +401,31 @@ namespace ComputationalGeometry
     return min;
   }
 
-  template <class Container> static double min_sq_distance_impl(Container& arr, point_2d& min_1, point_2d& min_2)
+  template <class Container> static double min_sq_distance_impl(Container& arr, point2d& min_1, point2d& min_2)
   {
     double min = 0;
-    unsigned arr_count = (unsigned) arr.size();
-    if (arr_count == 0) {return 0;}
-    if (arr_count == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
-    if (arr_count == 2)
+    unsigned arrCount = (unsigned) arr.size();
+    if (arrCount == 0) {return 0;}
+    if (arrCount == 1) {min_1 = *(arr.begin());  min_2 = *(arr.begin());  return 0;}
+    if (arrCount == 2)
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point_2d::sq_distance(min_1, min_2);
+      return point2d::sq_distance(min_1, min_2);
     }
-    if (arr_count == 3)
+    if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
-      point_2d a = *it;  ++it;  point_2d b = *it;
-      double min_ = point_2d::sq_distance(a, b);
+      point2d a = *it;  ++it;  point2d b = *it;
+      double min_ = point2d::sq_distance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point_2d::sq_distance(a, *it);
+      double candidate = point2d::sq_distance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point_2d::sq_distance(*it, b);
+      candidate = point2d::sq_distance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -433,7 +433,7 @@ namespace ComputationalGeometry
       return min_;
     }
 
-    std::vector<point_2d > arr_;
+    std::vector<point2d > arr_;
     for (typename Container::iterator it = arr.begin(); it != arr.end(); ++it)
     {
       arr_.push_back(*it);
@@ -444,12 +444,12 @@ namespace ComputationalGeometry
     return min;
   }
 
-  double PointCloud::min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2)
+  double PointCloud::min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2)
   {
     return min_sq_distance_impl(cloud, min_1, min_2);
   }
 
-  double PointCloud::min_sq_distance(point_2d& min_1, point_2d& min_2)
+  double PointCloud::min_sq_distance(point2d& min_1, point2d& min_2)
   {
     if (pImpl == nullptr) { return -1; }
     return min_sq_distance_impl(pImpl->pointArray, min_1, min_2);
@@ -458,41 +458,41 @@ namespace ComputationalGeometry
   void PointCloud::unit_test()
   {
     {
-      point_3d P(1.0, 2.0, 3.0);
+      point3d P(1.0, 2.0, 3.0);
       std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
       P.print("\n");
       std::cout << "\n";
 
-      point_2d Q(1.0, 2.0);
+      point2d Q(1.0, 2.0);
       std::cout << "\n//////\nThe dimension is " << Q.GetDimension() << ".";
       Q.print("\n");
       std::cout << "\n";
     }
   
     {
-      point_3d P(1.0, 2.0, 3.0);
-      point_3d Q(1.0, -2.0, 3.0);
+      point3d P(1.0, 2.0, 3.0);
+      point3d Q(1.0, -2.0, 3.0);
   
-      printf("%f\n", point_3d::sq_distance(P,Q));
+      printf("%f\n", point3d::sq_distance(P,Q));
     }
   
     {
-      point_2d P(1.5, 2.0);
-      point_2d Q(1.0, -2.0);
+      point2d P(1.5, 2.0);
+      point2d Q(1.0, -2.0);
   
-      printf("%f\n", point_2d::sq_distance(P,Q));
+      printf("%f\n", point2d::sq_distance(P,Q));
     }
   
     {
-      std::set<point_3d> A;
-      point_3d a(1.5, 2.0, 0);
-      point_3d b(1.0, 3.0, 0);
-      point_3d c(-1.5, 7.0, 0);
+      std::set<point3d> A;
+      point3d a(1.5, 2.0, 0);
+      point3d b(1.0, 3.0, 0);
+      point3d c(-1.5, 7.0, 0);
     
-      std::set<point_3d> B;
-      point_3d d(4.5, 2.3, 0);
-      point_3d e(-1.55, 2.6, 0);
-      point_3d f(88.3, 0.001, 0);
+      std::set<point3d> B;
+      point3d d(4.5, 2.3, 0);
+      point3d e(-1.55, 2.6, 0);
+      point3d f(88.3, 0.001, 0);
     
       A.insert(a);
       A.insert(b);
@@ -502,7 +502,7 @@ namespace ComputationalGeometry
       B.insert(e);
       B.insert(f);
     
-      point_3d p, q;
+      point3d p, q;
     
       double min = naive_min_sq_distance(A, B, p, q);
     
@@ -513,15 +513,15 @@ namespace ComputationalGeometry
     }
   
     {
-      std::set<point_2d> A;
-      point_2d a(1.5, 2.0);
-      point_2d b(1.0, 3.0);
-      point_2d c(-1.5, 7.0);
+      std::set<point2d> A;
+      point2d a(1.5, 2.0);
+      point2d b(1.0, 3.0);
+      point2d c(-1.5, 7.0);
     
-      std::set<point_2d> B;
-      point_2d d(4.5, 2.3);
-      point_2d e(-1.35, 2.6);
-      point_2d f(88.3, 0.001);
+      std::set<point2d> B;
+      point2d d(4.5, 2.3);
+      point2d e(-1.35, 2.6);
+      point2d f(88.3, 0.001);
     
       A.insert(a);
       A.insert(b);
@@ -531,7 +531,7 @@ namespace ComputationalGeometry
       B.insert(e);
       B.insert(f);
     
-      point_2d p, q;
+      point2d p, q;
     
       double min = naive_min_sq_distance(A, B, p, q);
     
@@ -542,13 +542,13 @@ namespace ComputationalGeometry
     }
   
     {
-      std::set<point_2d > A;
-      point_2d a(1.5, 2.0);
-      point_2d b(1.0, 3.0);
-      point_2d c(-1.5, 7.0);
-      point_2d d(4.5, 2.3);
-      point_2d e(-1.35, 2.6);
-      point_2d f(88.3, 0.001);
+      std::set<point2d > A;
+      point2d a(1.5, 2.0);
+      point2d b(1.0, 3.0);
+      point2d c(-1.5, 7.0);
+      point2d d(4.5, 2.3);
+      point2d e(-1.35, 2.6);
+      point2d f(88.3, 0.001);
     
       A.insert(a);
       A.insert(b);
@@ -557,7 +557,7 @@ namespace ComputationalGeometry
       A.insert(e);
       A.insert(f);
     
-      point_2d p, q;
+      point2d p, q;
 
       double min = naive_min_sq_distance(A, p, q);
     

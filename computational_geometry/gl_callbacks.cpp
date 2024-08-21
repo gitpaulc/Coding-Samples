@@ -67,7 +67,7 @@ void render()
 
     for (int i = 0; i < sizPointArray; ++i)
     {
-      const point_2d& P = PointCloud::Get().PointArray()[i];
+      const auto& P = PointCloud::Get().PointArray()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
@@ -82,7 +82,7 @@ void render()
 
     for (int i = 0; i < sizPointArray; i++)
     {
-      point_2d P = PointCloud::Get().ConvexHull()[i];
+      const auto& P = PointCloud::Get().ConvexHull()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }

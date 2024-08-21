@@ -14,28 +14,28 @@ namespace ComputationalGeometry
   void SetWindowWidthHeight(int ww, int hh = -1);
   void GetWindowWidthHeight(int& ww, int& hh);
 
-  class point_3d
+  class point3d
   {
     public:
     double x;  double y;  double z;
-    point_3d();
-    point_3d(const double& xx, const double& yy, const double& zz);
+    point3d();
+    point3d(const double& xx, const double& yy, const double& zz);
     virtual int GetDimension() const;
 	/** \brief Necessary for set insertion to work. */
-    bool operator< (const point_3d& q) const;
+    bool operator< (const point3d& q) const;
 	void print(const std::string& prequel="") const;
-    static double sq_distance(const point_3d& P, const point_3d& Q);
+    static double sq_distance(const point3d& P, const point3d& Q);
   };
 	
-  class point_2d : public point_3d
+  class point2d : public point3d
   {
     public:
-      point_2d();
-      point_2d(const double& xx, const double& yy);
+      point2d();
+      point2d(const double& xx, const double& yy);
       int GetDimension() const override;
 
-      static double getOrientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
-      static bool comparator(const point_2d& P, const point_2d& Q);
+      static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
+      static bool comparator(const point2d& P, const point2d& Q);
   };
 
   class PointCloud
@@ -45,8 +45,8 @@ namespace ComputationalGeometry
     public:
       PointCloud();
       
-      const std::vector<point_2d>& PointArray();
-      const std::vector<point_2d>& ConvexHull();
+      const std::vector<point2d>& PointArray();
+      const std::vector<point2d>& ConvexHull();
       void refresh();
       static PointCloud& Get();
       
@@ -56,15 +56,15 @@ namespace ComputationalGeometry
       void computeConvexHull();
 
       /** \brief Naively search among pairs. */
-      static double naive_min_sq_distance(std::set<point_3d>& A, std::set<point_3d>& B, point_3d& A_min, point_3d& B_min);
-      static double naive_min_sq_distance(std::set<point_3d>& cloud, point_3d& min_1, point_3d& min_2);
-      static double naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min);
-      static double naive_min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2);
-      double naive_min_sq_distance(point_2d& min_1, point_2d& min_2);
+      static double naive_min_sq_distance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
+      static double naive_min_sq_distance(std::set<point3d>& cloud, point3d& min_1, point3d& min_2);
+      static double naive_min_sq_distance(std::set<point2d>& A, std::set<point2d>& B, point2d& A_min, point2d& B_min);
+      static double naive_min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
+      double naive_min_sq_distance(point2d& min_1, point2d& min_2);
 
       /** \brief O(n log(n)) Divide-and-conquer implementation of min. sq. dist. in point-set. */
-      static double min_sq_distance(std::set<point_2d>& cloud, point_2d& min_1, point_2d& min_2);
-      double min_sq_distance(point_2d& min_1, point_2d& min_2);
+      static double min_sq_distance(std::set<point2d>& cloud, point2d& min_1, point2d& min_2);
+      double min_sq_distance(point2d& min_1, point2d& min_2);
 
     public: // For testing.
       void unit_test();
