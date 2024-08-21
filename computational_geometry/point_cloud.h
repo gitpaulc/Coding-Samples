@@ -45,8 +45,8 @@ namespace ComputationalGeometry
     public:
       PointCloud();
       
-      std::vector<point_2d>& PointArray();
-      std::vector<point_2d>& ConvexHull();
+      const std::vector<point_2d>& PointArray();
+      const std::vector<point_2d>& ConvexHull();
       void refresh();
       static PointCloud& Get();
       

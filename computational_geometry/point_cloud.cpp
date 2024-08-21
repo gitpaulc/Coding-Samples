@@ -108,9 +108,9 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
-  std::vector<point_2d>& PointCloud::PointArray()
+  const std::vector<point_2d>& PointCloud::PointArray()
   {
-    if (pImpl == nullptr)
+    if (pImpl == nullptr) // Of course this should never happen.
     {
       static std::vector<point_2d> dummy;
       return dummy;
@@ -118,7 +118,7 @@ namespace ComputationalGeometry
     return pImpl->pointArray;
   }
 
-  std::vector<point_2d>& PointCloud::ConvexHull()
+  const std::vector<point_2d>& PointCloud::ConvexHull()
   {
     if (pImpl == nullptr)
     {
