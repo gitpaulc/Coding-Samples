@@ -387,23 +387,15 @@ namespace ComputationalGeometry
     //Also can use return get_orientation(P, Q) < 0;
   }
 
-  std::vector<point_2d>& point_2d::PointArray()
-  {
-   static std::vector<point_2d> pointArray;
-   return pointArray;
-  }
-
-  std::vector<point_2d>& point_2d::ConvexHull()
-  {
-    static std::vector<point_2d> convexHull;
-    return convexHull;
-  }
-
   class PointCloud::Impl
   {
   public:
-      PointCloud* pCloud = nullptr;
-      Impl(PointCloud* pParent) : pCloud(pParent) {}
+    PointCloud* pCloud = nullptr;
+
+    std::vector<point_2d> convexHull;
+    std::vector<point_2d> pointArray;
+
+    Impl(PointCloud* pParent) : pCloud(pParent) {}
   };
 
   PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
@@ -412,12 +404,22 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
+  std::vector<point_2d>& PointCloud::PointArray()
+  {
+    return pImpl->pointArray;
+  }
+
+  std::vector<point_2d>& PointCloud::ConvexHull()
+  {
+    return pImpl->convexHull;
+  }
+
   void PointCloud::refresh()
   {
     // Generate random points for display.
-    point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
+    point_2d::generate_random_points(PointArray(), numRandomPoints());
     // Compute convex hull.
-    point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
+    point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
   }
 
   PointCloud& PointCloud::Get()

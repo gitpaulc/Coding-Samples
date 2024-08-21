@@ -35,9 +35,6 @@ namespace ComputationalGeometry
       point_2d();
       point_2d(const double& xx, const double& yy);
       int GetDimension() const override;
-      
-      static std::vector<point_2d>& PointArray();
-      static std::vector<point_2d>& ConvexHull();
 
       static double naive_min_sq_distance(std::set<point_2d>& A, std::set<point_2d>& B, point_2d& A_min, point_2d& B_min);
       static double naive_min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2);
@@ -48,6 +45,7 @@ namespace ComputationalGeometry
       static void graham_scan(std::vector<point_2d> & hull, const std::vector<point_2d> & points, const unsigned int& N);
 		
     private:
+      
       static double get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
       static bool comparator(const point_2d& P, const point_2d& Q);
   };
@@ -58,6 +56,9 @@ namespace ComputationalGeometry
     std::unique_ptr<Impl> pImpl;
     public:
       PointCloud();
+      
+      std::vector<point_2d>& PointArray();
+      std::vector<point_2d>& ConvexHull();
       void refresh();
       static PointCloud& Get();
   };

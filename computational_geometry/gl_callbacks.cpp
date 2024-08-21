@@ -63,11 +63,11 @@ void render()
 
   glBegin(GL_POINTS);
   {
-    int sizPointArray = point_2d::PointArray().size();
+    int sizPointArray = PointCloud::Get().PointArray().size();
 
     for (int i = 0; i < sizPointArray; ++i)
     {
-      const point_2d& P = point_2d::PointArray()[i];
+      const point_2d& P = PointCloud::Get().PointArray()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
@@ -78,11 +78,11 @@ void render()
 
   glBegin(GL_LINE_LOOP);
   {
-    int sizPointArray = point_2d::ConvexHull().size();
+    int sizPointArray = PointCloud::Get().ConvexHull().size();
 
     for (int i = 0; i < sizPointArray; i++)
     {
-      point_2d P = point_2d::ConvexHull()[i];
+      point_2d P = PointCloud::Get().ConvexHull()[i];
       glVertex2f(P.x, P.y);
       //P.print("\n");
     }
