@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #ifndef POINT_3D_H
 #define POINT_3D_H
 
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -50,7 +51,15 @@ namespace ComputationalGeometry
     private:
       static double get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O = point_2d());
       static bool comparator(const point_2d& P, const point_2d& Q);
-	};	
+  };
+
+  class PointCloud
+  {
+    class Impl;
+    std::unique_ptr<Impl> pImpl;
+    public:
+      PointCloud();
+  };
 }
 
 #endif //def POINT_3D_H

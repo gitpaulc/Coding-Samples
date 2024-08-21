@@ -407,4 +407,17 @@ namespace ComputationalGeometry
     point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
   }
 
+  class PointCloud::Impl
+  {
+  public:
+      PointCloud* pCloud = nullptr;
+      Impl(PointCloud* pParent) : pCloud(pParent) {}
+  };
+
+  PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
+  {
+    // unique_ptr requires C++ 11.
+    // make_unique requires C++ 14.
+  }
+
 } // end of namespace ComputationalGeometry

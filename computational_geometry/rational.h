@@ -8,6 +8,8 @@ namespace ComputationalGeometry
 {
 class Rational
 {
+  // This class is unfortunately impractical without unlimited-size
+  // int types.
   int num = 0;
   int denom = 1;
 public:
