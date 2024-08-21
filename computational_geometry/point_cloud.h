@@ -41,7 +41,6 @@ namespace ComputationalGeometry
 
       /** \brief Divide-and-conquer implementation of min. sq. dist. in point-set. */
       static double min_sq_distance(std::set<point_2d>& arr, point_2d& min_1, point_2d& min_2);
-      static void generate_random_points(std::vector<point_2d>& container, const unsigned int& N);
       static void graham_scan(std::vector<point_2d> & hull, const std::vector<point_2d> & points, const unsigned int& N);
 		
     private:

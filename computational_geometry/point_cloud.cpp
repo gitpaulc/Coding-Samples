@@ -277,26 +277,6 @@ namespace ComputationalGeometry
     return min_sq_distance_impl(arr, min_1, min_2);
   }
 
-  void point_2d::generate_random_points(std::vector<point_2d>& container, const unsigned int& N)
-  {
-    double randMax = RAND_MAX;
-    container.resize(0);
-    std::set<point_2d > initial_set; // Using a set ensures unique points and allows automatic sorting.
-
-    for (int i = 0; i < N; ++i)
-    {
-      double xx = (rand() * 1.8 / randMax) - 0.9;
-      double yy = (rand() * 1.8 / randMax) - 0.9;
-      point_2d P(xx, yy);
-      initial_set.insert(P);
-    }
-    
-    for (std::set<point_2d>::const_iterator it = initial_set.begin(); it != initial_set.end(); ++it)
-    {
-      container.push_back(*it);
-    }
-  }
-
   void point_2d::graham_scan(std::vector<point_2d>& hull, const std::vector<point_2d>& points, const unsigned int& N)
   {
     hull = points;
@@ -396,6 +376,7 @@ namespace ComputationalGeometry
     std::vector<point_2d> pointArray;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
+    void generateRandomPoints();
   };
 
   PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
@@ -406,6 +387,11 @@ namespace ComputationalGeometry
 
   std::vector<point_2d>& PointCloud::PointArray()
   {
+    if (pImpl == nullptr)
+    {
+      static std::vector<point_2d> dummy;
+      return dummy;
+    }
     return pImpl->pointArray;
   }
 
@@ -416,8 +402,9 @@ namespace ComputationalGeometry
 
   void PointCloud::refresh()
   {
+    if (pImpl == nullptr) { return; }
     // Generate random points for display.
-    point_2d::generate_random_points(PointArray(), numRandomPoints());
+    pImpl->generateRandomPoints();
     // Compute convex hull.
     point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
   }
@@ -426,6 +413,27 @@ namespace ComputationalGeometry
   {
     static PointCloud pc;
     return pc;
+  }
+
+  void PointCloud::Impl::generateRandomPoints()
+  {
+    double randMax = (double)RAND_MAX;
+    pointArray.resize(0);
+    std::set<point_2d> initialSet; // Using a set ensures unique points and allows automatic sorting.
+
+    for (int i = 0; i < numRandomPoints(); ++i)
+    {
+      double xx = (rand() * 1.8 / randMax) - 0.9;
+      double yy = (rand() * 1.8 / randMax) - 0.9;
+      point_2d P(xx, yy);
+      initialSet.insert(P);
+    }
+  
+    // Pre- C++ 11 style of iteration:
+    for (std::set<point_2d>::const_iterator it = initialSet.begin(); it != initialSet.end(); ++it)
+    {
+      pointArray.push_back(*it);
+    }
   }
 
   void PointCloud::unit_test()
