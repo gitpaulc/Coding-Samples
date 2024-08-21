@@ -277,80 +277,6 @@ namespace ComputationalGeometry
     return min_sq_distance_impl(arr, min_1, min_2);
   }
 
-  void point_2d::graham_scan(std::vector<point_2d>& hull, const std::vector<point_2d>& points, const unsigned int& N)
-  {
-    hull = points;
-    if (points.size() <= 3) {return;}
-      
-    point_2d temp_origin_ = hull[0];
-    {
-      int best_index = 0;
-      for (int i = 1; i < N; i++)
-      {
-        if (hull[i].y < temp_origin_.y)
-        {
-          temp_origin_ = hull[i];
-          best_index = i;
-        }
-      }
-
-      hull[best_index] = hull[1];
-      hull[1] = temp_origin_;
-      hull.push_back(hull[0]);
-      
-      /*std::cout << "\n/// LIST:\n";
-      for (int i = 0; i <= N; i++)
-      {
-        hull[i].print("\n");
-      }
-      std::cout << "\n";*/
-      
-      for (int i = 1; i <= N; i++)
-      {
-        hull[i].x = hull[i].x - temp_origin_.x;
-        hull[i].y = hull[i].y - temp_origin_.y;
-      }
-      
-      std::sort(hull.begin() + 1, hull.end(), comparator);
-          
-      /*std::cout << "\n/// LIST:\n";
-      for (int i = 1; i <= N; i++)
-      {
-        printf("\n%f", atan2(hull[i].y, hull[i].x));
-      }
-      std::cout << "\n";*/
-      
-      for (int i = 1; i <= N; i++)
-      {
-        hull[i].x = hull[i].x + temp_origin_.x;
-        hull[i].y = hull[i].y + temp_origin_.y;
-      }
-          
-      hull[0] = hull[N];
-    }
-      
-    int hull_count = 1; // Initialize stack.
-    for (int i = 2; i <= N; i++)
-    {
-      while (get_orientation(hull[hull_count], hull[i], hull[hull_count - 1]) <= 0)
-      {
-        if (hull_count > 1)
-        {
-          hull_count--;  continue;
-        }
-        if (i == N) {break;} // Stack is empty.
-        else {i++;} // Keep searching.
-      }
-      // Otherwise point is on the boundary of the convex hull.
-      hull_count++;
-      temp_origin_ = hull[hull_count];
-      hull[hull_count] = hull[i];
-      hull[i] = temp_origin_;
-    }
-
-    hull.resize(hull_count);
-  }
-
   double point_2d::get_orientation(const point_2d& P, const point_2d& Q, const point_2d& O)
   {
     return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
@@ -372,11 +298,14 @@ namespace ComputationalGeometry
   public:
     PointCloud* pCloud = nullptr;
 
-    std::vector<point_2d> convexHull;
+    std::vector<point_2d> hull;
     std::vector<point_2d> pointArray;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     void generateRandomPoints();
+      
+    /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
+    void computeConvexHull();
   };
 
   PointCloud::PointCloud() : pImpl(std::make_unique<PointCloud::Impl>(this))
@@ -397,7 +326,12 @@ namespace ComputationalGeometry
 
   std::vector<point_2d>& PointCloud::ConvexHull()
   {
-    return pImpl->convexHull;
+    if (pImpl == nullptr)
+    {
+      static std::vector<point_2d> dummy;
+      return dummy;
+    }
+    return pImpl->hull;
   }
 
   void PointCloud::refresh()
@@ -405,8 +339,7 @@ namespace ComputationalGeometry
     if (pImpl == nullptr) { return; }
     // Generate random points for display.
     pImpl->generateRandomPoints();
-    // Compute convex hull.
-    point_2d::graham_scan(ConvexHull(), PointArray(), numRandomPoints());
+    pImpl->computeConvexHull();
   }
 
   PointCloud& PointCloud::Get()
@@ -434,6 +367,78 @@ namespace ComputationalGeometry
     {
       pointArray.push_back(*it);
     }
+  }
+
+  void PointCloud::computeConvexHull()
+  {
+    if (pImpl != nullptr) { pImpl->computeConvexHull(); }
+  }
+
+  void PointCloud::Impl::computeConvexHull()
+  {
+    hull.resize(0);
+
+    // 2d : Graham scan.
+    hull = pointArray;
+    const int NN = (int)pointArray.size();
+    if (NN <= 3) {return;}
+
+    point_2d tempOrigin = hull[0];
+    {
+      int bestIndex = 0;
+      const int startIndex = 1;
+      for (int i = startIndex; i < NN; ++i)
+      {
+        if (hull[i].y < tempOrigin.y)
+        {
+          tempOrigin = hull[i];
+          bestIndex = i;
+        }
+      }
+
+      hull[bestIndex] = hull[1];
+      hull[1] = tempOrigin;
+      hull.push_back(hull[0]);
+    
+      for (int i = startIndex; i <= NN; ++i)
+      {
+        hull[i].x = hull[i].x - tempOrigin.x;
+        hull[i].y = hull[i].y - tempOrigin.y;
+      }
+    
+      // O(n log(n)):
+      std::sort(hull.begin() + 1, hull.end(), point_2d::comparator);
+    
+      for (int i = startIndex; i <= NN; ++i)
+      {
+        hull[i].x = hull[i].x + tempOrigin.x;
+        hull[i].y = hull[i].y + tempOrigin.y;
+      }
+        
+      hull[0] = hull[NN];
+    }
+    
+    int hullCount = 1; // Initialize stack.
+    const int startIndex = 2;
+    for (int i = startIndex; i <= NN; ++i)
+    {
+      while (point_2d::get_orientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
+      {
+        if (hullCount > 1)
+        {
+          --hullCount;  continue;
+        }
+        if (i == NN) {break;} // Stack is empty.
+        ++i; // Else keep searching.
+      }
+      // Otherwise point is on the boundary of the convex hull.
+      ++hullCount;
+      tempOrigin = hull[hullCount];
+      hull[hullCount] = hull[i];
+      hull[i] = tempOrigin;
+    }
+
+    hull.resize(hullCount);
   }
 
   void PointCloud::unit_test()
