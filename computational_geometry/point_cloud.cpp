@@ -399,14 +399,6 @@ namespace ComputationalGeometry
     return convexHull;
   }
 
-  void recompute()
-  {
-    // Generate random points for display.
-    point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
-    // Compute convex hull.
-    point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
-  }
-
   class PointCloud::Impl
   {
   public:
@@ -418,6 +410,20 @@ namespace ComputationalGeometry
   {
     // unique_ptr requires C++ 11.
     // make_unique requires C++ 14.
+  }
+
+  void PointCloud::refresh()
+  {
+    // Generate random points for display.
+    point_2d::generate_random_points(point_2d::PointArray(), numRandomPoints());
+    // Compute convex hull.
+    point_2d::graham_scan(point_2d::ConvexHull(), point_2d::PointArray(), numRandomPoints());
+  }
+
+  PointCloud& PointCloud::Get()
+  {
+    static PointCloud pc;
+    return pc;
   }
 
 } // end of namespace ComputationalGeometry

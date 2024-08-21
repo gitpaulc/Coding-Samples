@@ -13,7 +13,6 @@ namespace ComputationalGeometry
   int& numRandomPoints();
   void SetWindowWidthHeight(int ww, int hh = -1);
   void GetWindowWidthHeight(int& ww, int& hh);
-  void recompute();
 
   class point_3d
   {
@@ -59,6 +58,8 @@ namespace ComputationalGeometry
     std::unique_ptr<Impl> pImpl;
     public:
       PointCloud();
+      void refresh();
+      static PointCloud& Get();
   };
 }
 
