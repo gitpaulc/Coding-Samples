@@ -140,7 +140,7 @@ namespace ComputationalGeometry
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
   {
     if (pImpl == nullptr) { return false; }
-    if (pImpl->pointArray.size() <= 0) { return false; }
+    if (pImpl->pointArray.empty()) { return false; }
     min = pImpl->pointArray[0];
     max = pImpl->pointArray[0];
     int startIndex = 1;
