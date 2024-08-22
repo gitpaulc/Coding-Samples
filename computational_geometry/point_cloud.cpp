@@ -137,6 +137,26 @@ namespace ComputationalGeometry
     return pImpl->hull;
   }
 
+  bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
+  {
+    if (pImpl == nullptr) { return false; }
+    if (pImpl->pointArray.size() <= 0) { return false; }
+    min = pImpl->pointArray[0];
+    max = pImpl->pointArray[0];
+    int startIndex = 1;
+    for (int i = startIndex, NN = (int)(pImpl->pointArray.size()); i < NN; ++i)
+    {
+      const point3d& current = pImpl->pointArray[i];
+      if (current.x < min.x) { min.x = current.x; }
+      if (current.y < min.y) { min.y = current.y; }
+      if (current.z < min.z) { min.z = current.z; }
+      if (current.x > max.x) { max.x = current.x; }
+      if (current.y > max.y) { max.y = current.y; }
+      if (current.z > max.z) { max.z = current.z; }
+    }
+    return true;
+  }
+
   void PointCloud::refresh()
   {
     if (pImpl == nullptr) { return; }

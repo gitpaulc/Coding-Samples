@@ -48,6 +48,7 @@ namespace ComputationalGeometry
       
       const std::vector<point2d>& PointArray();
       const std::vector<point2d>& ConvexHull();
+      bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh();
       static PointCloud& Get();
       
