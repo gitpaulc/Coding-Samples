@@ -23,7 +23,8 @@ namespace ComputationalGeometry
     virtual int GetDimension() const;
 	/** \brief Necessary for set insertion to work. */
     bool operator< (const point3d& q) const;
-	void print(const std::string& prequel="") const;
+    void print() const;
+	void print(const std::string& prequel) const;
     static double sq_distance(const point3d& P, const point3d& Q);
   };
 	

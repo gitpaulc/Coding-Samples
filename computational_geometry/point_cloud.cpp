@@ -51,6 +51,11 @@ namespace ComputationalGeometry
     std::cout << ")";
   }
 
+  void point3d::print() const
+  {
+    return print("");
+  }
+
   double point3d::sq_distance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
