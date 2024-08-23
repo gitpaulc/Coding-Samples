@@ -205,6 +205,81 @@ namespace ComputationalGeometry
     }
   }
 
+  Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
+  {
+    a = aa; b = bb;
+  }
+
+  double Matrix2d::det() const
+  {
+    return a.x * b.y - a.y * b.x;
+  }
+
+  Matrix3d::Matrix3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  {
+    a = aa; b = bb; c = cc;
+  }
+
+  double Matrix3d::det() const
+  {
+    Matrix2d cof(point2d(b.y, b.z), point2d(c.y, c.z));
+    double answer = a.x * cof.det();
+    cof = Matrix2d(point2d(b.x, b.z), point2d(c.x, c.z));
+    answer -= a.y * cof.det();
+    cof = Matrix2d(point2d(b.x, b.y), point2d(c.x, c.y));
+    answer += a.z * cof.det();
+    return answer;
+  }
+
+  Circle2d::Circle2d(const point2d& cen, double sqRad)
+  {
+    center = cen;  sqRadius = sqRad;
+  }
+
+  Circle2d::Circle2d(const point2d& a, const point2d& b, const point2d& c)
+  {
+    Matrix3d AA(point3d(a.x, a.y, 1), point3d(b.x, b.y, 1), point3d(c.x, c.y, 1));
+    double den = AA.det();
+    double absDen = (den > 0) ? den : -den;
+    bool bCollinear = (absDen <= threshold());
+    if (bCollinear)
+    {
+      bool bZeroRadius = true;
+      if (point2d::sq_distance(a, b) > threshold()) { bZeroRadius = false; }
+      if (point2d::sq_distance(b, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sq_distance(a, c) > threshold()) { bZeroRadius = false; }
+      if (bZeroRadius)
+      {
+        center = a; sqRadius = 0;
+      }
+      else
+      {
+        throw std::invalid_argument("Three points on circle are collinear.");
+      }
+    }
+    else
+    {
+      double a2 = point2d::sq_distance(a, point2d(0, 0));
+      double b2 = point2d::sq_distance(b, point2d(0, 0));
+      double c2 = point2d::sq_distance(c, point2d(0, 0));
+      Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
+      Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
+      center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
+      Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
+      sqRadius = (BB.det() / den) + point2d::sq_distance(center, point2d(0, 0));
+    }
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge */
+  int Circle2d::pointIsInterior(const point2d& pt) const
+  {
+    double dd = point2d::sq_distance(center, pt);
+    double diff = dd - sqRadius;
+    double absDiff = (diff > 0) ? diff : -diff;
+    if (diff <= threshold()) { return 2; }
+    return (diff > 0) ? 0 : 1;
+  }
+
   Triangle2d::Triangle2d(const point2d& aa, const point2d& bb, const point2d& cc)
   {
     a = aa; b = bb; c = cc;

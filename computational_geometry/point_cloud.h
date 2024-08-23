@@ -48,6 +48,33 @@ namespace ComputationalGeometry
     int intersection(const Edge2d& other, point2d& intersection) const;
   };
 
+  class Matrix2d
+  {
+  public:
+    point2d a, b; /**< Rows. */
+    Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    double det() const;
+  };
+
+  class Matrix3d
+  {
+  public:
+    point3d a, b, c; /**< Rows. */
+    Matrix3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+    double det() const;
+  };
+
+  class Circle2d
+  {
+  public:
+    point2d center;
+    double sqRadius = 1.0;
+    Circle2d(const point2d& cen, double sqRad);
+    Circle2d(const point2d& a, const point2d& b, const point2d& c);
+    /** \brief 0 = exterior, 1 = interior, 2 = on edge */
+    int pointIsInterior(const point2d& pt) const;
+  };
+
   class Triangle2d
   {
   public:
