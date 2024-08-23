@@ -10,7 +10,7 @@ namespace ComputationalGeometry
 
   int& numRandomPoints()
   {
-    static int numberOfRandomPoints = 100;
+    static int numberOfRandomPoints = 50;
     return numberOfRandomPoints;
   }
 
@@ -276,7 +276,7 @@ namespace ComputationalGeometry
     double dd = point2d::sq_distance(center, pt);
     double diff = dd - sqRadius;
     double absDiff = (diff > 0) ? diff : -diff;
-    if (diff <= threshold()) { return 2; }
+    if (absDiff <= threshold()) { return 2; }
     return (diff > 0) ? 0 : 1;
   }
 
@@ -558,12 +558,14 @@ namespace ComputationalGeometry
   void PointCloud::Impl::naiveDelaunay()
   {
     std::set<Triangle2d> faces;
+    int numFaces = 0;
     {
       bool bRestore = triangulation.empty();
       if (bRestore) { naiveTriangulate(); }
       for (const auto& face : triangulation)
       {
         faces.insert(face);
+        ++numFaces;
       }
       if (bRestore) { triangulation.resize(0); }
     }
@@ -579,14 +581,14 @@ namespace ComputationalGeometry
       for (; it != faces.end(); ++it)
       {
         jt = faces.begin();
-        //if (it->sqArea() <= threshold()) { continue; }
         for (; jt != faces.end(); ++jt)
         {
           if (it == jt) { continue; }
-          //if (jt->sqArea() <= threshold()) { continue; }
+
           Edge2d match;
           bool bIsAdjacent = it->adjacentToByEdge(*jt, match);
           if (!bIsAdjacent) { continue; }
+
           point2d iVertex = it->a;
           point2d jVertex = jt->a;
           if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->b; }
@@ -595,6 +597,7 @@ namespace ComputationalGeometry
           if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->c; }
           if (match.sq_distance(iVertex) <= threshold()) { continue; }
           if (match.sq_distance(jVertex) <= threshold()) { continue; }
+
           Circle2d testCircle(it->a, it->b, it->c);
           if (testCircle.pointIsInterior(jVertex) == 1)
           {
@@ -630,7 +633,10 @@ namespace ComputationalGeometry
     {
       delaunay.push_back(face);
     }
-    //std::cout << "\nNumber of Delaunay flips: " << flips;
+    //std::cout << "\nNumber of points: " << pointArray.size() << ".";
+    //std::cout << "\nNumber of faces in initial triangulation: " << numFaces << ".";
+    //std::cout << "\nNumber of Delaunay flips: " << flips << ".";
+    //std::cout << "\nNumber of faces in Delaunay triangulation: " << delaunay.size() << ".";
   }
 
   void PointCloud::Impl::naiveTriangulate()

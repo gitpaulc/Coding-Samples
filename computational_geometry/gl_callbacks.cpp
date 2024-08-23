@@ -21,7 +21,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   ComputationalGeometry::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'T' to triangulate, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'D' for Delaunay Triangulation, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
