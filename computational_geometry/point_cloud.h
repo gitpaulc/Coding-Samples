@@ -54,6 +54,8 @@ namespace ComputationalGeometry
     point2d a, b, c;
     Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
     double sqArea() const;
+    /** \brief For set and map insertion. */
+    bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     int pointIsInterior(const point2d& pt) const;
   };

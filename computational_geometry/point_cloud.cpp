@@ -228,6 +228,17 @@ namespace ComputationalGeometry
     return sqrt(xx);
   }
 
+  bool Triangle2d::operator< (const Triangle2d& rhs) const
+  {
+    if (rhs.a < a) {return false;}
+    if (a < rhs.a) {return true;}
+    if (rhs.b < b) {return false;}
+    if (b < rhs.b) {return true;}
+    if (rhs.c < c) {return false;}
+    if (c < rhs.c) {return true;}
+    return false;
+  }
+
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
@@ -381,9 +392,31 @@ namespace ComputationalGeometry
     int NN = (int) hull.size();
     if (NN <= 2) { return; }
     int startIndex = 2;
+    std::set<Triangle2d> faces;
     for (int i = startIndex; i < NN; ++i)
     {
       Triangle2d face(hull[0], hull[i - 1], hull[i]);
+      faces.insert(face);
+    }
+    for (int i = 0, NN = pointArray.size(); i < NN; ++i)
+    {
+      // Pre- C++ 11 style of iteration:
+      std::set<Triangle2d>::iterator it = faces.begin();
+      for (; it != faces.end(); ++it)
+      {
+        if ((it->pointIsInterior(pointArray[i])) == 1) { break; }
+      }
+      if (it == faces.end()) { continue; }
+      Triangle2d u(pointArray[i], it->a, it->b);
+      Triangle2d v(pointArray[i], it->b, it->c);
+      Triangle2d w(pointArray[i], it->c, it->a);
+      faces.erase(it);
+      faces.insert(u);
+      faces.insert(v);
+      faces.insert(w);
+    }
+    for (const auto& face : faces)
+    {
       triangulation.push_back(face);
     }
   }
