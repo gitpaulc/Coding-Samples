@@ -12,6 +12,7 @@ namespace ComputationalGeometry
   int& numRandomPoints();
   void SetWindowWidthHeight(int ww, int hh = -1);
   void GetWindowWidthHeight(int& ww, int& hh);
+  double threshold();
 
   class point3d
   {
@@ -32,9 +33,19 @@ namespace ComputationalGeometry
       point2d();
       point2d(const double& xx, const double& yy);
       int GetDimension() const override;
-
       static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
       static bool comparator(const point2d& P, const point2d& Q);
+  };
+
+  class Edge2d
+  {
+  public:
+    point2d a, b;
+    Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    double sqLength() const;
+    double sq_distance(const point2d& P) const;
+    /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
+    int intersection(const Edge2d& other, point2d& intersection) const;
   };
 
   class Triangle2d
@@ -42,6 +53,9 @@ namespace ComputationalGeometry
   public:
     point2d a, b, c;
     Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
+    double sqArea() const;
+    /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+    int pointIsInterior(const point2d& pt) const;
   };
 
   class PointCloud

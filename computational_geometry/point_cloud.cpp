@@ -27,6 +27,8 @@ namespace ComputationalGeometry
     hh = gWindowHeight;
   }
 
+  double threshold() { return 1.0e-9; }
+
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
@@ -87,9 +89,170 @@ namespace ComputationalGeometry
     //Also can use return getOrientation(P, Q) < 0;
   }
 
+  Edge2d::Edge2d(const point2d& aa, const point2d& bb)
+  {
+    a = aa; b = bb;
+  }
+
+  double Edge2d::sqLength() const
+  {
+    return point2d::sq_distance(a, b);
+  }
+
+  double Edge2d::sq_distance(const point2d& P) const
+  {
+    double aSqDistP = point2d::sq_distance(a, P);
+    if (sqLength() <= threshold())
+    {
+      return aSqDistP;
+    }
+    const double& x0 = P.x;
+    const double& y0 = P.y;
+    const double& x1 = a.x;
+    const double& y1 = a.y;
+    const double& x2 = b.x;
+    const double& y2 = b.y;
+    double numSqrt = (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1;
+    double answer = numSqrt * numSqrt / sqLength();
+    if (answer > threshold()) { return answer; }
+    double bSqDistP = point2d::sq_distance(b, P);
+    if ((aSqDistP < sqLength()) && (bSqDistP < sqLength())) { return 0.0; }
+    if (aSqDistP >= sqLength()) { return bSqDistP; }
+    return aSqDistP;
+  }
+
+  /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
+  int Edge2d::intersection(const Edge2d& other, point2d& intersection) const
+  {
+    if (point2d::sq_distance(a, b) <= threshold())
+    {
+      if (point2d::sq_distance(a, other.a) <= threshold())
+      {
+        intersection = a; return 2;
+      }
+      if (point2d::sq_distance(a, other.b) <= threshold())
+      {
+        intersection = a; return 2;
+      }
+      return 0;
+    }
+    const double& x1 = a.x;
+    const double& y1 = a.y;
+    const double& x2 = b.x;
+    const double& y2 = b.y;
+    const double& x3 = other.a.x;
+    const double& y3 = other.a.y;
+    const double& x4 = other.b.x;
+    const double& y4 = other.b.y;
+    const double det = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    const double absDet = (det > 0) ? det : -det;
+
+    // t = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)
+    //     ---------------------------------------------
+    //     (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    //
+    // u = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)
+    //     ---------------------------------------------
+    //     (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+      
+    // For intersection as point, t and u must be between 0 and 1.
+    bool bDetNonzero = (absDet > threshold());
+    if ((point2d::sq_distance(a, other.a) <= threshold()) || (point2d::sq_distance(a, other.b) <= threshold()))
+    {
+      intersection = a;
+      return bDetNonzero ? 1 : 2;
+    }
+    if ((point2d::sq_distance(b, other.a) <= threshold()) || (point2d::sq_distance(b, other.b) <= threshold()))
+    {
+      intersection = b;
+      return bDetNonzero ? 1 : 2;
+    }
+    double tNum = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+    double uNum = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
+    if (bDetNonzero)
+    {
+      if ((tNum < 0) && (det > 0)) { return 0; }
+      if ((tNum > 0) && (det < 0)) { return 0; }
+      if ((uNum < 0) && (det > 0)) { return 0; }
+      if ((uNum > 0) && (det < 0)) { return 0; }
+      if ((tNum > det) && (det > 0)) { return 0; }
+      if ((tNum < det) && (det < 0)) { return 0; }
+      if ((uNum > det) && (det > 0)) { return 0; }
+      if ((uNum < det) && (det < 0)) { return 0; }
+      intersection = point2d(a.x + tNum * b.x / det, a.y + tNum * b.y / det);
+      return 1;
+    }
+    // Parallel and non-collinear or else edges intersect.
+    if (sq_distance(other.a) < threshold())
+    {
+      intersection = other.a;
+      return 2;
+    }
+    if (sq_distance(other.b) < threshold())
+    {
+      intersection = other.b;
+      return 2;
+    }
+    if (other.sq_distance(a) < threshold())
+    {
+      intersection = a;
+      return 2;
+    }
+    // else if (other.sq_distance(b) < threshold())
+    {
+      intersection = b;
+      return 2;
+    }
+  }
+
   Triangle2d::Triangle2d(const point2d& aa, const point2d& bb, const point2d& cc)
   {
     a = aa; b = bb; c = cc;
+  }
+
+  double Triangle2d::sqArea() const
+  {
+    Edge2d u(a, b);
+    Edge2d v(b, c);
+    Edge2d w(c, a);
+    double u2 = u.sqLength();
+    double v2 = v.sqLength();
+    double w2 = w.sqLength();
+    double sum = u2 + v2 + w2;
+    return (4.0 * (u2 * v2 + u2 * w2 + v2 * w2) - sum * sum) / 16.0;
+  }
+
+  static double safeSqrt(const double& xx)
+  {
+    if (xx <= threshold()) { return 0; }
+    return sqrt(xx);
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  int Triangle2d::pointIsInterior(const point2d& pt) const
+  {
+    if (point2d::sq_distance(a, pt) <= threshold()) { return 3; }
+    if (point2d::sq_distance(b, pt) <= threshold()) { return 3; }
+    if (point2d::sq_distance(c, pt) <= threshold()) { return 3; }
+    Edge2d u(a, b);
+    Edge2d v(b, c);
+    Edge2d w(c, a);
+    if (u.sq_distance(pt) <= threshold()) { return 2; }
+    if (v.sq_distance(pt) <= threshold()) { return 2; }
+    if (w.sq_distance(pt) <= threshold()) { return 2; }
+    if (sqArea() <= threshold()) { return 0; }
+    Triangle2d U(a, b, pt);
+    Triangle2d V(b, c, pt);
+    Triangle2d W(c, a, pt);
+    // Can we find a way to do this without taking square roots?
+    const double uArea = safeSqrt(U.sqArea());
+    const double vArea = safeSqrt(V.sqArea());
+    const double wArea = safeSqrt(W.sqArea());
+    const double AA = safeSqrt(sqArea());
+    if (uArea + vArea > AA) { return 0; }
+    if (vArea + wArea > AA) { return 0; }
+    if (wArea + uArea > AA) { return 0; }
+    return 1;
   }
 
   class PointCloud::Impl
