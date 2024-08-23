@@ -10,7 +10,7 @@ namespace ComputationalGeometry
 
   int& numRandomPoints()
   {
-    static int numberOfRandomPoints = 1000;
+    static int numberOfRandomPoints = 100;
     return numberOfRandomPoints;
   }
 
@@ -26,6 +26,8 @@ namespace ComputationalGeometry
     ww = gWindowWidth;
     hh = gWindowHeight;
   }
+
+  double threshold() { return 1.0e-9; }
 
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
@@ -87,15 +89,240 @@ namespace ComputationalGeometry
     //Also can use return getOrientation(P, Q) < 0;
   }
 
+  Edge2d::Edge2d(const point2d& aa, const point2d& bb)
+  {
+    a = aa; b = bb;
+  }
+
+  double Edge2d::sqLength() const
+  {
+    return point2d::sq_distance(a, b);
+  }
+
+  double Edge2d::sq_distance(const point2d& P) const
+  {
+    double aSqDistP = point2d::sq_distance(a, P);
+    if (sqLength() <= threshold())
+    {
+      return aSqDistP;
+    }
+    const double& x0 = P.x;
+    const double& y0 = P.y;
+    const double& x1 = a.x;
+    const double& y1 = a.y;
+    const double& x2 = b.x;
+    const double& y2 = b.y;
+    double numSqrt = (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1;
+    double answer = numSqrt * numSqrt / sqLength();
+    if (answer > threshold()) { return answer; }
+    double bSqDistP = point2d::sq_distance(b, P);
+    if ((aSqDistP < sqLength()) && (bSqDistP < sqLength())) { return 0.0; }
+    if (aSqDistP >= sqLength()) { return bSqDistP; }
+    return aSqDistP;
+  }
+
+  /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
+  int Edge2d::intersection(const Edge2d& other, point2d& intersection) const
+  {
+    if (point2d::sq_distance(a, b) <= threshold())
+    {
+      if (point2d::sq_distance(a, other.a) <= threshold())
+      {
+        intersection = a; return 2;
+      }
+      if (point2d::sq_distance(a, other.b) <= threshold())
+      {
+        intersection = a; return 2;
+      }
+      return 0;
+    }
+    const double& x1 = a.x;
+    const double& y1 = a.y;
+    const double& x2 = b.x;
+    const double& y2 = b.y;
+    const double& x3 = other.a.x;
+    const double& y3 = other.a.y;
+    const double& x4 = other.b.x;
+    const double& y4 = other.b.y;
+    const double det = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+    const double absDet = (det > 0) ? det : -det;
+
+    // t = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)
+    //     ---------------------------------------------
+    //     (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    //
+    // u = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)
+    //     ---------------------------------------------
+    //     (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+      
+    // For intersection as point, t and u must be between 0 and 1.
+    bool bDetNonzero = (absDet > threshold());
+    if ((point2d::sq_distance(a, other.a) <= threshold()) || (point2d::sq_distance(a, other.b) <= threshold()))
+    {
+      intersection = a;
+      return bDetNonzero ? 1 : 2;
+    }
+    if ((point2d::sq_distance(b, other.a) <= threshold()) || (point2d::sq_distance(b, other.b) <= threshold()))
+    {
+      intersection = b;
+      return bDetNonzero ? 1 : 2;
+    }
+    double tNum = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+    double uNum = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
+    if (bDetNonzero)
+    {
+      if ((tNum < 0) && (det > 0)) { return 0; }
+      if ((tNum > 0) && (det < 0)) { return 0; }
+      if ((uNum < 0) && (det > 0)) { return 0; }
+      if ((uNum > 0) && (det < 0)) { return 0; }
+      if ((tNum > det) && (det > 0)) { return 0; }
+      if ((tNum < det) && (det < 0)) { return 0; }
+      if ((uNum > det) && (det > 0)) { return 0; }
+      if ((uNum < det) && (det < 0)) { return 0; }
+      intersection = point2d(a.x + tNum * b.x / det, a.y + tNum * b.y / det);
+      return 1;
+    }
+    // Parallel and non-collinear or else edges intersect.
+    if (sq_distance(other.a) < threshold())
+    {
+      intersection = other.a;
+      return 2;
+    }
+    if (sq_distance(other.b) < threshold())
+    {
+      intersection = other.b;
+      return 2;
+    }
+    if (other.sq_distance(a) < threshold())
+    {
+      intersection = a;
+      return 2;
+    }
+    // else if (other.sq_distance(b) < threshold())
+    {
+      intersection = b;
+      return 2;
+    }
+  }
+
+  Triangle2d::Triangle2d(const point2d& aa, const point2d& bb, const point2d& cc)
+  {
+    a = aa; b = bb; c = cc;
+  }
+
+  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs)
+  {
+    if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      return false;
+    }
+    if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      return false;
+    }
+    if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      return false;
+    }
+  }
+
+  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs) const
+  {
+    if (adjacentToByEdgeHelper(*this, rhs)) { return true; }
+    Triangle2d tr(b, c, a);
+    if (adjacentToByEdgeHelper(tr, rhs)) { return true; }
+    Triangle2d tr2(c, a, b);
+    if (adjacentToByEdgeHelper(tr2, rhs)) { return true; }
+    return false;
+  }
+
+  double Triangle2d::sqArea() const
+  {
+    Edge2d u(a, b);
+    Edge2d v(b, c);
+    Edge2d w(c, a);
+    double u2 = u.sqLength();
+    double v2 = v.sqLength();
+    double w2 = w.sqLength();
+    double sum = u2 + v2 + w2;
+    return (4.0 * (u2 * v2 + u2 * w2 + v2 * w2) - sum * sum) / 16.0;
+  }
+
+  static double safeSqrt(const double& xx)
+  {
+    if (xx <= threshold()) { return 0; }
+    return sqrt(xx);
+  }
+
+  bool Triangle2d::operator< (const Triangle2d& rhs) const
+  {
+    if (rhs.a < a) {return false;}
+    if (a < rhs.a) {return true;}
+    if (rhs.b < b) {return false;}
+    if (b < rhs.b) {return true;}
+    if (rhs.c < c) {return false;}
+    if (c < rhs.c) {return true;}
+    return false;
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  int Triangle2d::pointIsInterior(const point2d& pt) const
+  {
+    if (point2d::sq_distance(a, pt) <= threshold()) { return 3; }
+    if (point2d::sq_distance(b, pt) <= threshold()) { return 3; }
+    if (point2d::sq_distance(c, pt) <= threshold()) { return 3; }
+    Edge2d u(a, b);
+    Edge2d v(b, c);
+    Edge2d w(c, a);
+    if (u.sq_distance(pt) <= threshold()) { return 2; }
+    if (v.sq_distance(pt) <= threshold()) { return 2; }
+    if (w.sq_distance(pt) <= threshold()) { return 2; }
+    if (sqArea() <= threshold()) { return 0; }
+    Triangle2d U(a, b, pt);
+    Triangle2d V(b, c, pt);
+    Triangle2d W(c, a, pt);
+    // Can we find a way to do this without taking square roots?
+    const double uArea = safeSqrt(U.sqArea());
+    const double vArea = safeSqrt(V.sqArea());
+    const double wArea = safeSqrt(W.sqArea());
+    const double AA = safeSqrt(sqArea());
+    if (uArea + vArea > AA) { return 0; }
+    if (vArea + wArea > AA) { return 0; }
+    if (wArea + uArea > AA) { return 0; }
+    return 1;
+  }
+
   class PointCloud::Impl
   {
   public:
     PointCloud* pCloud = nullptr;
 
+    bool bTrianglesModeOn = false;
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
+    std::vector<Triangle2d> triangulation;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
+    /**
+     * This is O(n^2 log(n)) where n is the number of vertices.
+     * For every vertex, iterate over the number of faces a constant number of times.
+     * The number of faces in any triangulation is 2n - size(hull) - 2 which is O(n).
+     * So iterating over the faces is O(n log(n))
+     * This gives a total of O(n^2 log(n)).
+     */
+    void naiveTriangulate();
     void generateRandomPoints();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
@@ -112,7 +339,7 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
-  const std::vector<point2d>& PointCloud::PointArray()
+  const std::vector<point2d>& PointCloud::PointArray() const
   {
     if (pImpl == nullptr) // Of course this should never happen.
     {
@@ -122,7 +349,7 @@ namespace ComputationalGeometry
     return pImpl->pointArray;
   }
 
-  const std::vector<point2d>& PointCloud::ConvexHull()
+  const std::vector<point2d>& PointCloud::ConvexHull() const
   {
     if (pImpl == nullptr)
     {
@@ -132,18 +359,111 @@ namespace ComputationalGeometry
     return pImpl->hull;
   }
 
-  void PointCloud::refresh()
+  const std::vector<Triangle2d>& PointCloud::Triangulation() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Triangle2d> dummy;
+      return dummy;
+    }
+    return pImpl->triangulation;
+  }
+
+  bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
+  {
+    if (pImpl == nullptr) { return false; }
+    if (pImpl->pointArray.empty()) { return false; }
+    min = pImpl->pointArray[0];
+    max = pImpl->pointArray[0];
+    int startIndex = 1;
+    for (int i = startIndex, NN = (int)(pImpl->pointArray.size()); i < NN; ++i)
+    {
+      const point3d& current = pImpl->pointArray[i];
+      if (current.x < min.x) { min.x = current.x; }
+      if (current.y < min.y) { min.y = current.y; }
+      if (current.z < min.z) { min.z = current.z; }
+      if (current.x > max.x) { max.x = current.x; }
+      if (current.y > max.y) { max.y = current.y; }
+      if (current.z > max.z) { max.z = current.z; }
+    }
+    return true;
+  }
+
+  void PointCloud::refresh(bool bRecompute)
   {
     if (pImpl == nullptr) { return; }
     // Generate random points for display.
-    pImpl->generateRandomPoints();
-    pImpl->computeConvexHull();
+    if (bRecompute)
+    {
+      pImpl->generateRandomPoints();
+      pImpl->computeConvexHull();
+    }
+    static bool bTrianglesModeWasOn = false;
+    if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
+    {
+      if (pImpl->bTrianglesModeOn)
+      {
+        pImpl->naiveTriangulate();
+      }
+      else { pImpl->triangulation.resize(0); }
+    }
+    bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
   }
 
   PointCloud& PointCloud::Get()
   {
     static PointCloud pc;
     return pc;
+  }
+
+  void PointCloud::toggleTriangulation()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+  }
+
+  void PointCloud::naiveTriangulate()
+  {
+    if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+  }
+
+  void PointCloud::Impl::naiveTriangulate()
+  {
+    triangulation.resize(0);
+    if (hull.empty())
+    {
+      computeConvexHull();
+    }
+    int NN = (int) hull.size();
+    if (NN <= 2) { return; }
+    int startIndex = 2;
+    std::set<Triangle2d> faces;
+    for (int i = startIndex; i < NN; ++i)
+    {
+      Triangle2d face(hull[0], hull[i - 1], hull[i]);
+      faces.insert(face);
+    }
+    for (int i = 0, NN = pointArray.size(); i < NN; ++i)
+    {
+      // Pre- C++ 11 style of iteration:
+      std::set<Triangle2d>::iterator it = faces.begin();
+      for (; it != faces.end(); ++it)
+      {
+        if ((it->pointIsInterior(pointArray[i])) == 1) { break; }
+      }
+      if (it == faces.end()) { continue; }
+      Triangle2d u(pointArray[i], it->a, it->b);
+      Triangle2d v(pointArray[i], it->b, it->c);
+      Triangle2d w(pointArray[i], it->c, it->a);
+      faces.erase(it);
+      faces.insert(u);
+      faces.insert(v);
+      faces.insert(w);
+    }
+    for (const auto& face : faces)
+    {
+      triangulation.push_back(face);
+    }
   }
 
   void PointCloud::Impl::generateRandomPoints()
