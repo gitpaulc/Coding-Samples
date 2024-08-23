@@ -285,41 +285,50 @@ namespace ComputationalGeometry
     a = aa; b = bb; c = cc;
   }
 
-  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs)
+  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs, Edge2d& edge)
   {
+    edge = Edge2d(lhs.a, lhs.b);
+    edge.a = lhs.a;
     if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
     if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
     if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
       return false;
     }
   }
 
-  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs) const
+  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const
   {
-    if (adjacentToByEdgeHelper(*this, rhs)) { return true; }
+    Edge2d edge0;
+    if (adjacentToByEdgeHelper(*this, rhs, edge0)) { edge = edge0; return true; }
     Triangle2d tr(b, c, a);
-    if (adjacentToByEdgeHelper(tr, rhs)) { return true; }
+    if (adjacentToByEdgeHelper(tr, rhs, edge0)) { edge = edge0; return true; }
     Triangle2d tr2(c, a, b);
-    if (adjacentToByEdgeHelper(tr2, rhs)) { return true; }
+    if (adjacentToByEdgeHelper(tr2, rhs, edge0)) { edge = edge0; return true; }
     return false;
   }
 
@@ -558,26 +567,70 @@ namespace ComputationalGeometry
       }
       if (bRestore) { triangulation.resize(0); }
     }
-    bool bChanged = false;
-    for (bool bStarting = true; bStarting || bChanged; bStarting = false)
+    bool bDelaunayNotMet = false;
+    int flips = 0;
+    for (bool bStarting = true; bStarting || bDelaunayNotMet; bStarting = false)
     {
-      bChanged = false;
+      bDelaunayNotMet = false;
+      Triangle2d flip0, flip1;
       // Pre- C++ 11 style of iteration:
       std::set<Triangle2d>::iterator it = faces.begin();
       std::set<Triangle2d>::iterator jt = faces.begin();
       for (; it != faces.end(); ++it)
       {
+        jt = faces.begin();
+        //if (it->sqArea() <= threshold()) { continue; }
         for (; jt != faces.end(); ++jt)
         {
-          bool bIsAdjacent = it->adjacentToByEdge(*jt);
+          if (it == jt) { continue; }
+          //if (jt->sqArea() <= threshold()) { continue; }
+          Edge2d match;
+          bool bIsAdjacent = it->adjacentToByEdge(*jt, match);
           if (!bIsAdjacent) { continue; }
+          point2d iVertex = it->a;
+          point2d jVertex = jt->a;
+          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->b; }
+          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->b; }
+          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->c; }
+          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->c; }
+          if (match.sq_distance(iVertex) <= threshold()) { continue; }
+          if (match.sq_distance(jVertex) <= threshold()) { continue; }
+          Circle2d testCircle(it->a, it->b, it->c);
+          if (testCircle.pointIsInterior(jVertex) == 1)
+          {
+            bDelaunayNotMet = true;
+            flip0 = Triangle2d(iVertex, jVertex, match.a);
+            flip1 = Triangle2d(iVertex, jVertex, match.b);
+            ++flips;
+          }
+          if (!bDelaunayNotMet)
+          {
+            testCircle = Circle2d(jt->a, jt->b, jt->c);
+            if (testCircle.pointIsInterior(iVertex) == 1)
+            {
+              bDelaunayNotMet = true;
+              flip0 = Triangle2d(iVertex, jVertex, match.a);
+              flip1 = Triangle2d(iVertex, jVertex, match.b);
+              ++flips;
+            }
+          }
+          if (bDelaunayNotMet) { break; }
         }
+        if (bDelaunayNotMet) { break; }
+      }
+      if (bDelaunayNotMet)
+      {
+        faces.erase(it);
+        faces.erase(jt);
+        faces.insert(flip0);
+        faces.insert(flip1);
       }
     }
     for (const auto& face : faces)
     {
       delaunay.push_back(face);
     }
+    //std::cout << "\nNumber of Delaunay flips: " << flips;
   }
 
   void PointCloud::Impl::naiveTriangulate()

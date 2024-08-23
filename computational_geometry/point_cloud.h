@@ -80,7 +80,7 @@ namespace ComputationalGeometry
   public:
     point2d a, b, c;
     Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
-    bool adjacentToByEdge(const Triangle2d& rhs) const;
+    bool adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const;
     double sqArea() const;
     /** \brief For set and map insertion. */
     bool operator< (const Triangle2d& rhs) const;
