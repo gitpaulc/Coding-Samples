@@ -83,11 +83,10 @@ void render()
     }
   }
   glEnd();
-  
-  glColor3f(0.0f, 0.0f, 1.0f);
 
-  //Triangulation.
+  if (PointCloud::Get().triangulationIsOn())
   {
+    glColor3f(0.0f, 0.0f, 1.0f);
     int numTriangles = (int)PointCloud::Get().Triangulation().size();
 
     for (int i = 0; i < numTriangles; ++i)
@@ -101,11 +100,10 @@ void render()
       glEnd();
     }
   }
-    
-  glColor3f(0.0f, 1.0f, 0.0f);
 
-  //Delaunay.
+  if (PointCloud::Get().delaunayIsOn())
   {
+    glColor3f(0.0f, 1.0f, 0.0f);
     int numTriangles = (int)PointCloud::Get().Delaunay().size();
 
     for (int i = 0; i < numTriangles; ++i)

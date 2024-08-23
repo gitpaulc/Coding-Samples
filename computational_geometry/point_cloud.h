@@ -106,6 +106,9 @@ namespace ComputationalGeometry
       void toggleDelaunay();
       void toggleTriangulation();
       
+      bool delaunayIsOn() const;
+      bool triangulationIsOn() const;
+      
     private: // These methods are declared only for the sake of exposition:
 
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */

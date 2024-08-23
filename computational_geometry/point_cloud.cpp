@@ -494,37 +494,23 @@ namespace ComputationalGeometry
     {
       pImpl->generateRandomPoints();
       pImpl->computeConvexHull();
-    }
-    static bool bTrianglesModeWasOn = false;
-    static bool bDelaunayWasOn = false;
-    if (pImpl->bTrianglesModeOn || bRecompute)
-    {
+      pImpl->triangulation.resize(0);
       pImpl->delaunay.resize(0);
     }
-    if (pImpl->bDelaunayOn || bRecompute)
+    if (pImpl->bTrianglesModeOn)
     {
-      pImpl->triangulation.resize(0);
-    }
-    if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
-    {
-      if (pImpl->bTrianglesModeOn)
+      if (pImpl->triangulation.empty())
       {
         pImpl->naiveTriangulate();
       }
-      else { pImpl->triangulation.resize(0); }
     }
-    if ((pImpl->bDelaunayOn != bDelaunayWasOn) || bRecompute)
+    if (pImpl->bDelaunayOn)
     {
-      if (pImpl->bDelaunayOn)
+      if (pImpl->delaunay.empty())
       {
         pImpl->naiveDelaunay();
       }
-      else { pImpl->delaunay.resize(0); }
     }
-    if (pImpl->bTrianglesModeOn) { pImpl->bDelaunayOn = false; }
-    if (pImpl->bDelaunayOn) { pImpl->bTrianglesModeOn = false; }
-    bDelaunayWasOn = pImpl->bDelaunayOn;
-    bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
   }
 
   PointCloud& PointCloud::Get()
@@ -543,6 +529,18 @@ namespace ComputationalGeometry
   {
     if (pImpl == nullptr) { return; }
     pImpl->bDelaunayOn = !(pImpl->bDelaunayOn);
+  }
+
+  bool PointCloud::delaunayIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bDelaunayOn;
+  }
+
+  bool PointCloud::triangulationIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bTrianglesModeOn;
   }
 
   void PointCloud::computeDelaunay()
