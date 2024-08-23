@@ -210,6 +210,44 @@ namespace ComputationalGeometry
     a = aa; b = bb; c = cc;
   }
 
+  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs)
+  {
+    if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      return false;
+    }
+    if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      return false;
+    }
+    if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
+    {
+      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      return false;
+    }
+  }
+
+  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs) const
+  {
+    if (adjacentToByEdgeHelper(*this, rhs)) { return true; }
+    Triangle2d tr(b, c, a);
+    if (adjacentToByEdgeHelper(tr, rhs)) { return true; }
+    Triangle2d tr2(c, a, b);
+    if (adjacentToByEdgeHelper(tr2, rhs)) { return true; }
+    return false;
+  }
+
   double Triangle2d::sqArea() const
   {
     Edge2d u(a, b);
