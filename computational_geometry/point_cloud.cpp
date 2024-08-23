@@ -10,7 +10,7 @@ namespace ComputationalGeometry
 
   int& numRandomPoints()
   {
-    static int numberOfRandomPoints = 1000;
+    static int numberOfRandomPoints = 100;
     return numberOfRandomPoints;
   }
 
@@ -277,6 +277,13 @@ namespace ComputationalGeometry
     std::vector<Triangle2d> triangulation;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
+    /**
+     * This is O(n^2 log(n)) where n is the number of vertices.
+     * For every vertex, iterate over the number of faces a constant number of times.
+     * The number of faces in any triangulation is 2n - size(hull) - 2 which is O(n).
+     * So iterating over the faces is O(n log(n))
+     * This gives a total of O(n^2 log(n)).
+     */
     void naiveTriangulate();
     void generateRandomPoints();
       
