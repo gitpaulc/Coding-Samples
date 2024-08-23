@@ -51,11 +51,6 @@ namespace ComputationalGeometry
     std::cout << ")";
   }
 
-  void point3d::print() const
-  {
-    return print("");
-  }
-
   double point3d::sq_distance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
@@ -92,15 +87,23 @@ namespace ComputationalGeometry
     //Also can use return getOrientation(P, Q) < 0;
   }
 
+  Triangle2d::Triangle2d(const point2d& aa, const point2d& bb, const point2d& cc)
+  {
+    a = aa; b = bb; c = cc;
+  }
+
   class PointCloud::Impl
   {
   public:
     PointCloud* pCloud = nullptr;
 
+    bool bTrianglesModeOn = false;
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
+    std::vector<Triangle2d> triangulation;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
+    void naiveTriangulate();
     void generateRandomPoints();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
@@ -117,7 +120,7 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
-  const std::vector<point2d>& PointCloud::PointArray()
+  const std::vector<point2d>& PointCloud::PointArray() const
   {
     if (pImpl == nullptr) // Of course this should never happen.
     {
@@ -127,7 +130,7 @@ namespace ComputationalGeometry
     return pImpl->pointArray;
   }
 
-  const std::vector<point2d>& PointCloud::ConvexHull()
+  const std::vector<point2d>& PointCloud::ConvexHull() const
   {
     if (pImpl == nullptr)
     {
@@ -135,6 +138,16 @@ namespace ComputationalGeometry
       return dummy;
     }
     return pImpl->hull;
+  }
+
+  const std::vector<Triangle2d>& PointCloud::Triangulation() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Triangle2d> dummy;
+      return dummy;
+    }
+    return pImpl->triangulation;
   }
 
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
@@ -157,18 +170,59 @@ namespace ComputationalGeometry
     return true;
   }
 
-  void PointCloud::refresh()
+  void PointCloud::refresh(bool bRecompute)
   {
     if (pImpl == nullptr) { return; }
     // Generate random points for display.
-    pImpl->generateRandomPoints();
-    pImpl->computeConvexHull();
+    if (bRecompute)
+    {
+      pImpl->generateRandomPoints();
+      pImpl->computeConvexHull();
+    }
+    static bool bTrianglesModeWasOn = false;
+    if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
+    {
+      if (pImpl->bTrianglesModeOn)
+      {
+        pImpl->naiveTriangulate();
+      }
+      else { pImpl->triangulation.resize(0); }
+    }
+    bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
   }
 
   PointCloud& PointCloud::Get()
   {
     static PointCloud pc;
     return pc;
+  }
+
+  void PointCloud::toggleTriangulation()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+  }
+
+  void PointCloud::naiveTriangulate()
+  {
+    if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+  }
+
+  void PointCloud::Impl::naiveTriangulate()
+  {
+    triangulation.resize(0);
+    if (hull.empty())
+    {
+      computeConvexHull();
+    }
+    int NN = (int) hull.size();
+    if (NN <= 2) { return; }
+    int startIndex = 2;
+    for (int i = startIndex; i < NN; ++i)
+    {
+      Triangle2d face(hull[0], hull[i - 1], hull[i]);
+      triangulation.push_back(face);
+    }
   }
 
   void PointCloud::Impl::generateRandomPoints()

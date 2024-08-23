@@ -5,8 +5,7 @@ All Rights Reserved.*/
 #define POINT_CLOUD_H
 
 #include <memory>
-#include <set>
-#include <vector>
+#include <string>
 
 namespace ComputationalGeometry
 {
@@ -23,8 +22,7 @@ namespace ComputationalGeometry
     virtual int GetDimension() const;
 	/** \brief Necessary for set insertion to work. */
     bool operator< (const point3d& q) const;
-    void print() const;
-	void print(const std::string& prequel) const;
+	void print(const std::string& prequel = "") const;
     static double sq_distance(const point3d& P, const point3d& Q);
   };
 	
@@ -39,6 +37,13 @@ namespace ComputationalGeometry
       static bool comparator(const point2d& P, const point2d& Q);
   };
 
+  class Triangle2d
+  {
+  public:
+    point2d a, b, c;
+    Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
+  };
+
   class PointCloud
   {
     class Impl;
@@ -46,11 +51,16 @@ namespace ComputationalGeometry
     public:
       PointCloud();
       
-      const std::vector<point2d>& PointArray();
-      const std::vector<point2d>& ConvexHull();
+      const std::vector<point2d>& PointArray() const;
+      const std::vector<point2d>& ConvexHull() const;
+      const std::vector<Triangle2d>& Triangulation() const;
       bool getBoundingBox(point3d& min, point3d& max) const;
-      void refresh();
+      void refresh(bool bRecompute = true);
       static PointCloud& Get();
+      
+      void toggleTriangulation();
+      /** \brief An arbitrary triangulation. */
+      void naiveTriangulate();
       
     private: // These methods are declared only for the sake of exposition:
 

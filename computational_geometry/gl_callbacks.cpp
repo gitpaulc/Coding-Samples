@@ -41,6 +41,11 @@ void keyboard(unsigned char key, int x, int y)
     glutDestroyWindow(GetWindowId());
     exit(0);
   }
+  if ((key == 't') || (key == 'T'))
+  {
+    ComputationalGeometry::PointCloud::Get().toggleTriangulation();
+    ComputationalGeometry::PointCloud::Get().refresh(false);
+  }
   glutPostRedisplay();
 }
 
@@ -74,13 +79,32 @@ void render()
   }
   glEnd();
   
+  glColor3f(0.0f, 0.0f, 1.0f);
+
+  //Triangulation.
+  {
+    int numTriangles = PointCloud::Get().Triangulation().size();
+
+    for (int i = 0; i < numTriangles; ++i)
+    {
+      glBegin(GL_LINE_LOOP);
+      const auto& tri = PointCloud::Get().Triangulation()[i];
+      glVertex2f(tri.a.x, tri.a.y);
+      glVertex2f(tri.b.x, tri.b.y);
+      glVertex2f(tri.c.x, tri.c.y);
+      //P.print("\n");
+      glEnd();
+    }
+  }
+    
   glColor3f(1.0f, 0.0f, 0.0f);
 
   glBegin(GL_LINE_LOOP);
+  // Convex hull.
   {
     int sizPointArray = PointCloud::Get().ConvexHull().size();
 
-    for (int i = 0; i < sizPointArray; i++)
+    for (int i = 0; i < sizPointArray; ++i)
     {
       const auto& P = PointCloud::Get().ConvexHull()[i];
       glVertex2f(P.x, P.y);
