@@ -86,7 +86,7 @@ namespace ComputationalGeometry
 
       /** \brief A naive O(n^2 log(n)) triangulation. */
       void naiveTriangulate();
-      /** \brief Delaunay triangulation maximizes minimum angles. */
+      /** \brief Delaunay triangulation maximizes the minimum angle of the triangulation. */
       void computeDelaunay();
       
       /** \brief Naively search among pairs. */

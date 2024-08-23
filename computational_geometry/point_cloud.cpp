@@ -473,6 +473,36 @@ namespace ComputationalGeometry
 
   void PointCloud::Impl::naiveDelaunay()
   {
+    std::set<Triangle2d> faces;
+    {
+      bool bRestore = triangulation.empty();
+      if (bRestore) { naiveTriangulate(); }
+      for (const auto& face : triangulation)
+      {
+        faces.insert(face);
+      }
+      if (bRestore) { triangulation.resize(0); }
+    }
+    bool bChanged = false;
+    for (bool bStarting = true; bStarting || bChanged; bStarting = false)
+    {
+      bChanged = false;
+      // Pre- C++ 11 style of iteration:
+      std::set<Triangle2d>::iterator it = faces.begin();
+      std::set<Triangle2d>::iterator jt = faces.begin();
+      for (; it != faces.end(); ++it)
+      {
+        for (; jt != faces.end(); ++jt)
+        {
+          bool bIsAdjacent = it->adjacentToByEdge(*jt);
+          if (!bIsAdjacent) { continue; }
+        }
+      }
+    }
+    for (const auto& face : faces)
+    {
+      delaunay.push_back(face);
+    }
   }
 
   void PointCloud::Impl::naiveTriangulate()
