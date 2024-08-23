@@ -94,6 +94,15 @@ namespace ComputationalGeometry
     a = aa; b = bb;
   }
 
+  bool Edge2d::operator< (const Edge2d& rhs) const
+  {
+    if (rhs.a < a) {return false;}
+    if (a < rhs.a) {return true;}
+    if (rhs.b < b) {return false;}
+    if (b < rhs.b) {return true;}
+    return false;
+  }
+
   double Edge2d::sqLength() const
   {
     return point2d::sq_distance(a, b);
@@ -416,8 +425,8 @@ namespace ComputationalGeometry
      * This gives a total of O(n^2 log(n)).
      */
     void naiveTriangulate();
-    void naiveDelaunay();
     void generateRandomPoints();
+    void computeDelaunay();
     void computeNearestNeighbor();
     void computeVoronoi();
       
@@ -539,7 +548,7 @@ namespace ComputationalGeometry
     {
       if (pImpl->delaunay.empty())
       {
-        pImpl->naiveDelaunay();
+        pImpl->computeDelaunay();
       }
     }
     if (pImpl->bNearestNeighborOn)
@@ -638,7 +647,7 @@ namespace ComputationalGeometry
 
   void PointCloud::computeDelaunay()
   {
-    if (pImpl != nullptr) { pImpl->naiveDelaunay(); }
+    if (pImpl != nullptr) { pImpl->computeDelaunay(); }
   }
 
   void PointCloud::naiveTriangulate()
@@ -646,19 +655,17 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
   }
 
-  void PointCloud::Impl::naiveDelaunay()
+  void PointCloud::Impl::computeDelaunay() // Naive Delaunay
   {
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
-      bool bRestore = triangulation.empty();
-      if (bRestore) { naiveTriangulate(); }
+      if (triangulation.empty()) { naiveTriangulate(); }
       for (const auto& face : triangulation)
       {
         faces.insert(face);
         ++numFaces;
       }
-      if (bRestore) { triangulation.resize(0); }
     }
     bool bDelaunayNotMet = false;
     int flips = 0;
@@ -737,11 +744,11 @@ namespace ComputationalGeometry
     {
       computeConvexHull();
     }
-    int NN = (int) hull.size();
-    if (NN <= 2) { return; }
+    int hullSize = (int) hull.size();
+    if (hullSize <= 2) { return; }
     int startIndex = 2;
     std::set<Triangle2d> faces;
-    for (int i = startIndex; i < NN; ++i)
+    for (int i = startIndex; i < hullSize; ++i)
     {
       Triangle2d face(hull[0], hull[i - 1], hull[i]);
       faces.insert(face);
@@ -797,6 +804,53 @@ namespace ComputationalGeometry
 
   void PointCloud::Impl::computeNearestNeighbor()
   {
+    nearestNeighbor.resize(0);
+    if (delaunay.empty())
+    {
+      computeDelaunay();
+    }
+      
+    std::set<Triangle2d> faces;
+    for (const auto& face : delaunay)
+    {
+      faces.insert(face);
+    }
+
+    for (const auto& current : pointArray)
+    {
+      std::set<Edge2d> edgesForThisOne;
+      for (const auto& face : faces)
+      {
+        if (point2d::sq_distance(face.a, current) <= threshold())
+        {
+          Edge2d edge(face.a, face.b);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.a, face.c);
+          edgesForThisOne.insert(edge);
+        }
+        if (point2d::sq_distance(face.b, current) <= threshold())
+        {
+          Edge2d edge(face.a, face.b);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.b, face.c);
+          edgesForThisOne.insert(edge);
+        }
+        if (point2d::sq_distance(face.c, current) <= threshold())
+        {
+          Edge2d edge(face.b, face.c);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.c, face.a);
+          edgesForThisOne.insert(edge);
+        }
+      }
+      if (edgesForThisOne.empty()) { continue; }
+      Edge2d nearest = *(edgesForThisOne.begin());
+      for (const auto& edge : edgesForThisOne)
+      {
+        if (edge.sqLength() < nearest.sqLength()) { nearest = edge; }
+      }
+      nearestNeighbor.push_back(nearest);
+    }
   }
 
   void PointCloud::computeVoronoi()

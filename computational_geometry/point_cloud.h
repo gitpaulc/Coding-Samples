@@ -42,6 +42,8 @@ namespace ComputationalGeometry
   public:
     point2d a, b;
     Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    /** \brief For set and map insertion. */
+    bool operator< (const Edge2d& rhs) const;
     double sqLength() const;
     double sq_distance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
