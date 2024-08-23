@@ -310,9 +310,11 @@ namespace ComputationalGeometry
     PointCloud* pCloud = nullptr;
 
     bool bTrianglesModeOn = false;
+    bool bDelaunayOn = false;
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
     std::vector<Triangle2d> triangulation;
+    std::vector<Triangle2d> delaunay;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     /**
@@ -323,6 +325,7 @@ namespace ComputationalGeometry
      * This gives a total of O(n^2 log(n)).
      */
     void naiveTriangulate();
+    void naiveDelaunay();
     void generateRandomPoints();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
@@ -369,6 +372,16 @@ namespace ComputationalGeometry
     return pImpl->triangulation;
   }
 
+  const std::vector<Triangle2d>& PointCloud::Delaunay() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Triangle2d> dummy;
+      return dummy;
+    }
+    return pImpl->delaunay;
+  }
+
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
   {
     if (pImpl == nullptr) { return false; }
@@ -399,6 +412,15 @@ namespace ComputationalGeometry
       pImpl->computeConvexHull();
     }
     static bool bTrianglesModeWasOn = false;
+    static bool bDelaunayWasOn = false;
+    if (pImpl->bTrianglesModeOn || bRecompute)
+    {
+      pImpl->delaunay.resize(0);
+    }
+    if (pImpl->bDelaunayOn || bRecompute)
+    {
+      pImpl->triangulation.resize(0);
+    }
     if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
     {
       if (pImpl->bTrianglesModeOn)
@@ -407,6 +429,17 @@ namespace ComputationalGeometry
       }
       else { pImpl->triangulation.resize(0); }
     }
+    if ((pImpl->bDelaunayOn != bDelaunayWasOn) || bRecompute)
+    {
+      if (pImpl->bDelaunayOn)
+      {
+        pImpl->naiveDelaunay();
+      }
+      else { pImpl->delaunay.resize(0); }
+    }
+    if (pImpl->bTrianglesModeOn) { pImpl->bDelaunayOn = false; }
+    if (pImpl->bDelaunayOn) { pImpl->bTrianglesModeOn = false; }
+    bDelaunayWasOn = pImpl->bDelaunayOn;
     bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
   }
 
@@ -422,9 +455,24 @@ namespace ComputationalGeometry
     pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
   }
 
+  void PointCloud::toggleDelaunay()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bDelaunayOn = !(pImpl->bDelaunayOn);
+  }
+
+  void PointCloud::computeDelaunay()
+  {
+    if (pImpl != nullptr) { pImpl->naiveDelaunay(); }
+  }
+
   void PointCloud::naiveTriangulate()
   {
     if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+  }
+
+  void PointCloud::Impl::naiveDelaunay()
+  {
   }
 
   void PointCloud::Impl::naiveTriangulate()

@@ -46,6 +46,11 @@ void keyboard(unsigned char key, int x, int y)
     ComputationalGeometry::PointCloud::Get().toggleTriangulation();
     ComputationalGeometry::PointCloud::Get().refresh(false);
   }
+  if ((key == 'd') || (key == 'D'))
+  {
+    ComputationalGeometry::PointCloud::Get().toggleDelaunay();
+    ComputationalGeometry::PointCloud::Get().refresh(false);
+  }
   glutPostRedisplay();
 }
 

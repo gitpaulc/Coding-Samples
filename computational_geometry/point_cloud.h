@@ -70,20 +70,25 @@ namespace ComputationalGeometry
       
       const std::vector<point2d>& PointArray() const;
       const std::vector<point2d>& ConvexHull() const;
+      const std::vector<Triangle2d>& Delaunay() const;
       const std::vector<Triangle2d>& Triangulation() const;
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
       
+      void toggleDelaunay();
       void toggleTriangulation();
-      /** \brief An arbitrary triangulation. */
-      void naiveTriangulate();
       
     private: // These methods are declared only for the sake of exposition:
 
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
       void computeConvexHull();
 
+      /** \brief A naive O(n^2 log(n)) triangulation. */
+      void naiveTriangulate();
+      /** \brief Delaunay triangulation maximizes minimum angles. */
+      void computeDelaunay();
+      
       /** \brief Naively search among pairs. */
       static double naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
       static double naiveMinSqDistance(std::set<point3d>& cloud, point3d& min_1, point3d& min_2);
