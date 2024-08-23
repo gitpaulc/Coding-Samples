@@ -48,12 +48,39 @@ namespace ComputationalGeometry
     int intersection(const Edge2d& other, point2d& intersection) const;
   };
 
+  class Matrix2d
+  {
+  public:
+    point2d a, b; /**< Rows. */
+    Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    double det() const;
+  };
+
+  class Matrix3d
+  {
+  public:
+    point3d a, b, c; /**< Rows. */
+    Matrix3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+    double det() const;
+  };
+
+  class Circle2d
+  {
+  public:
+    point2d center;
+    double sqRadius = 1.0;
+    Circle2d(const point2d& cen, double sqRad);
+    Circle2d(const point2d& a, const point2d& b, const point2d& c);
+    /** \brief 0 = exterior, 1 = interior, 2 = on edge */
+    int pointIsInterior(const point2d& pt) const;
+  };
+
   class Triangle2d
   {
   public:
     point2d a, b, c;
     Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
-    bool adjacentToByEdge(const Triangle2d& rhs) const;
+    bool adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const;
     double sqArea() const;
     /** \brief For set and map insertion. */
     bool operator< (const Triangle2d& rhs) const;
@@ -70,20 +97,25 @@ namespace ComputationalGeometry
       
       const std::vector<point2d>& PointArray() const;
       const std::vector<point2d>& ConvexHull() const;
+      const std::vector<Triangle2d>& Delaunay() const;
       const std::vector<Triangle2d>& Triangulation() const;
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
       
+      void toggleDelaunay();
       void toggleTriangulation();
-      /** \brief An arbitrary triangulation. */
-      void naiveTriangulate();
       
     private: // These methods are declared only for the sake of exposition:
 
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
       void computeConvexHull();
 
+      /** \brief A naive O(n^2 log(n)) triangulation. */
+      void naiveTriangulate();
+      /** \brief Delaunay triangulation maximizes the minimum angle of the triangulation. */
+      void computeDelaunay();
+      
       /** \brief Naively search among pairs. */
       static double naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
       static double naiveMinSqDistance(std::set<point3d>& cloud, point3d& min_1, point3d& min_2);

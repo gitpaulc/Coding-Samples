@@ -10,7 +10,7 @@ namespace ComputationalGeometry
 
   int& numRandomPoints()
   {
-    static int numberOfRandomPoints = 100;
+    static int numberOfRandomPoints = 50;
     return numberOfRandomPoints;
   }
 
@@ -205,46 +205,130 @@ namespace ComputationalGeometry
     }
   }
 
+  Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
+  {
+    a = aa; b = bb;
+  }
+
+  double Matrix2d::det() const
+  {
+    return a.x * b.y - a.y * b.x;
+  }
+
+  Matrix3d::Matrix3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  {
+    a = aa; b = bb; c = cc;
+  }
+
+  double Matrix3d::det() const
+  {
+    Matrix2d cof(point2d(b.y, b.z), point2d(c.y, c.z));
+    double answer = a.x * cof.det();
+    cof = Matrix2d(point2d(b.x, b.z), point2d(c.x, c.z));
+    answer -= a.y * cof.det();
+    cof = Matrix2d(point2d(b.x, b.y), point2d(c.x, c.y));
+    answer += a.z * cof.det();
+    return answer;
+  }
+
+  Circle2d::Circle2d(const point2d& cen, double sqRad)
+  {
+    center = cen;  sqRadius = sqRad;
+  }
+
+  Circle2d::Circle2d(const point2d& a, const point2d& b, const point2d& c)
+  {
+    Matrix3d AA(point3d(a.x, a.y, 1), point3d(b.x, b.y, 1), point3d(c.x, c.y, 1));
+    double den = AA.det();
+    double absDen = (den > 0) ? den : -den;
+    bool bCollinear = (absDen <= threshold());
+    if (bCollinear)
+    {
+      bool bZeroRadius = true;
+      if (point2d::sq_distance(a, b) > threshold()) { bZeroRadius = false; }
+      if (point2d::sq_distance(b, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sq_distance(a, c) > threshold()) { bZeroRadius = false; }
+      if (bZeroRadius)
+      {
+        center = a; sqRadius = 0;
+      }
+      else
+      {
+        throw std::invalid_argument("Three points on circle are collinear.");
+      }
+    }
+    else
+    {
+      double a2 = point2d::sq_distance(a, point2d(0, 0));
+      double b2 = point2d::sq_distance(b, point2d(0, 0));
+      double c2 = point2d::sq_distance(c, point2d(0, 0));
+      Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
+      Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
+      center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
+      Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
+      sqRadius = (BB.det() / den) + point2d::sq_distance(center, point2d(0, 0));
+    }
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge */
+  int Circle2d::pointIsInterior(const point2d& pt) const
+  {
+    double dd = point2d::sq_distance(center, pt);
+    double diff = dd - sqRadius;
+    double absDiff = (diff > 0) ? diff : -diff;
+    if (absDiff <= threshold()) { return 2; }
+    return (diff > 0) ? 0 : 1;
+  }
+
   Triangle2d::Triangle2d(const point2d& aa, const point2d& bb, const point2d& cc)
   {
     a = aa; b = bb; c = cc;
   }
 
-  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs)
+  static bool adjacentToByEdgeHelper(const Triangle2d& lhs, const Triangle2d& rhs, Edge2d& edge)
   {
+    edge = Edge2d(lhs.a, lhs.b);
+    edge.a = lhs.a;
     if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
     if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
     if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
     {
+      edge.b = lhs.b;
       if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      edge.b = lhs.c;
       if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
       if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
       return false;
     }
   }
 
-  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs) const
+  bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const
   {
-    if (adjacentToByEdgeHelper(*this, rhs)) { return true; }
+    Edge2d edge0;
+    if (adjacentToByEdgeHelper(*this, rhs, edge0)) { edge = edge0; return true; }
     Triangle2d tr(b, c, a);
-    if (adjacentToByEdgeHelper(tr, rhs)) { return true; }
+    if (adjacentToByEdgeHelper(tr, rhs, edge0)) { edge = edge0; return true; }
     Triangle2d tr2(c, a, b);
-    if (adjacentToByEdgeHelper(tr2, rhs)) { return true; }
+    if (adjacentToByEdgeHelper(tr2, rhs, edge0)) { edge = edge0; return true; }
     return false;
   }
 
@@ -310,9 +394,11 @@ namespace ComputationalGeometry
     PointCloud* pCloud = nullptr;
 
     bool bTrianglesModeOn = false;
+    bool bDelaunayOn = false;
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
     std::vector<Triangle2d> triangulation;
+    std::vector<Triangle2d> delaunay;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     /**
@@ -323,6 +409,7 @@ namespace ComputationalGeometry
      * This gives a total of O(n^2 log(n)).
      */
     void naiveTriangulate();
+    void naiveDelaunay();
     void generateRandomPoints();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
@@ -369,6 +456,16 @@ namespace ComputationalGeometry
     return pImpl->triangulation;
   }
 
+  const std::vector<Triangle2d>& PointCloud::Delaunay() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Triangle2d> dummy;
+      return dummy;
+    }
+    return pImpl->delaunay;
+  }
+
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
   {
     if (pImpl == nullptr) { return false; }
@@ -399,6 +496,15 @@ namespace ComputationalGeometry
       pImpl->computeConvexHull();
     }
     static bool bTrianglesModeWasOn = false;
+    static bool bDelaunayWasOn = false;
+    if (pImpl->bTrianglesModeOn || bRecompute)
+    {
+      pImpl->delaunay.resize(0);
+    }
+    if (pImpl->bDelaunayOn || bRecompute)
+    {
+      pImpl->triangulation.resize(0);
+    }
     if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
     {
       if (pImpl->bTrianglesModeOn)
@@ -407,6 +513,17 @@ namespace ComputationalGeometry
       }
       else { pImpl->triangulation.resize(0); }
     }
+    if ((pImpl->bDelaunayOn != bDelaunayWasOn) || bRecompute)
+    {
+      if (pImpl->bDelaunayOn)
+      {
+        pImpl->naiveDelaunay();
+      }
+      else { pImpl->delaunay.resize(0); }
+    }
+    if (pImpl->bTrianglesModeOn) { pImpl->bDelaunayOn = false; }
+    if (pImpl->bDelaunayOn) { pImpl->bTrianglesModeOn = false; }
+    bDelaunayWasOn = pImpl->bDelaunayOn;
     bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
   }
 
@@ -422,9 +539,104 @@ namespace ComputationalGeometry
     pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
   }
 
+  void PointCloud::toggleDelaunay()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bDelaunayOn = !(pImpl->bDelaunayOn);
+  }
+
+  void PointCloud::computeDelaunay()
+  {
+    if (pImpl != nullptr) { pImpl->naiveDelaunay(); }
+  }
+
   void PointCloud::naiveTriangulate()
   {
     if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+  }
+
+  void PointCloud::Impl::naiveDelaunay()
+  {
+    std::set<Triangle2d> faces;
+    int numFaces = 0;
+    {
+      bool bRestore = triangulation.empty();
+      if (bRestore) { naiveTriangulate(); }
+      for (const auto& face : triangulation)
+      {
+        faces.insert(face);
+        ++numFaces;
+      }
+      if (bRestore) { triangulation.resize(0); }
+    }
+    bool bDelaunayNotMet = false;
+    int flips = 0;
+    for (bool bStarting = true; bStarting || bDelaunayNotMet; bStarting = false)
+    {
+      bDelaunayNotMet = false;
+      Triangle2d flip0, flip1;
+      // Pre- C++ 11 style of iteration:
+      std::set<Triangle2d>::iterator it = faces.begin();
+      std::set<Triangle2d>::iterator jt = faces.begin();
+      for (; it != faces.end(); ++it)
+      {
+        jt = faces.begin();
+        for (; jt != faces.end(); ++jt)
+        {
+          if (it == jt) { continue; }
+
+          Edge2d match;
+          bool bIsAdjacent = it->adjacentToByEdge(*jt, match);
+          if (!bIsAdjacent) { continue; }
+
+          point2d iVertex = it->a;
+          point2d jVertex = jt->a;
+          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->b; }
+          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->b; }
+          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->c; }
+          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->c; }
+          if (match.sq_distance(iVertex) <= threshold()) { continue; }
+          if (match.sq_distance(jVertex) <= threshold()) { continue; }
+
+          Circle2d testCircle(it->a, it->b, it->c);
+          if (testCircle.pointIsInterior(jVertex) == 1)
+          {
+            bDelaunayNotMet = true;
+            flip0 = Triangle2d(iVertex, jVertex, match.a);
+            flip1 = Triangle2d(iVertex, jVertex, match.b);
+            ++flips;
+          }
+          if (!bDelaunayNotMet)
+          {
+            testCircle = Circle2d(jt->a, jt->b, jt->c);
+            if (testCircle.pointIsInterior(iVertex) == 1)
+            {
+              bDelaunayNotMet = true;
+              flip0 = Triangle2d(iVertex, jVertex, match.a);
+              flip1 = Triangle2d(iVertex, jVertex, match.b);
+              ++flips;
+            }
+          }
+          if (bDelaunayNotMet) { break; }
+        }
+        if (bDelaunayNotMet) { break; }
+      }
+      if (bDelaunayNotMet)
+      {
+        faces.erase(it);
+        faces.erase(jt);
+        faces.insert(flip0);
+        faces.insert(flip1);
+      }
+    }
+    for (const auto& face : faces)
+    {
+      delaunay.push_back(face);
+    }
+    //std::cout << "\nNumber of points: " << pointArray.size() << ".";
+    //std::cout << "\nNumber of faces in initial triangulation: " << numFaces << ".";
+    //std::cout << "\nNumber of Delaunay flips: " << flips << ".";
+    //std::cout << "\nNumber of faces in Delaunay triangulation: " << delaunay.size() << ".";
   }
 
   void PointCloud::Impl::naiveTriangulate()

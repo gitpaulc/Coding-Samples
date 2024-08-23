@@ -21,7 +21,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   ComputationalGeometry::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'T' to triangulate, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'D' for Delaunay Triangulation, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -46,6 +46,11 @@ void keyboard(unsigned char key, int x, int y)
     ComputationalGeometry::PointCloud::Get().toggleTriangulation();
     ComputationalGeometry::PointCloud::Get().refresh(false);
   }
+  if ((key == 'd') || (key == 'D'))
+  {
+    ComputationalGeometry::PointCloud::Get().toggleDelaunay();
+    ComputationalGeometry::PointCloud::Get().refresh(false);
+  }
   glutPostRedisplay();
 }
 
@@ -68,7 +73,7 @@ void render()
 
   glBegin(GL_POINTS);
   {
-    int sizPointArray = PointCloud::Get().PointArray().size();
+    int sizPointArray = (int)PointCloud::Get().PointArray().size();
 
     for (int i = 0; i < sizPointArray; ++i)
     {
@@ -83,7 +88,7 @@ void render()
 
   //Triangulation.
   {
-    int numTriangles = PointCloud::Get().Triangulation().size();
+    int numTriangles = (int)PointCloud::Get().Triangulation().size();
 
     for (int i = 0; i < numTriangles; ++i)
     {
@@ -97,6 +102,24 @@ void render()
     }
   }
     
+  glColor3f(0.0f, 1.0f, 0.0f);
+
+  //Delaunay.
+  {
+    int numTriangles = (int)PointCloud::Get().Delaunay().size();
+
+    for (int i = 0; i < numTriangles; ++i)
+    {
+      glBegin(GL_LINE_LOOP);
+      const auto& tri = PointCloud::Get().Delaunay()[i];
+      glVertex2f(tri.a.x, tri.a.y);
+      glVertex2f(tri.b.x, tri.b.y);
+      glVertex2f(tri.c.x, tri.c.y);
+      //P.print("\n");
+      glEnd();
+    }
+  }
+
   glColor3f(1.0f, 0.0f, 0.0f);
 
   glBegin(GL_LINE_LOOP);
