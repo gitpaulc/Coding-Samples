@@ -393,12 +393,19 @@ namespace ComputationalGeometry
   public:
     PointCloud* pCloud = nullptr;
 
-    bool bTrianglesModeOn = false;
+    bool bConvexHullOn = true;
     bool bDelaunayOn = false;
+    bool bNearestNeighborOn = false;
+    bool bPointsVisible = true;
+    bool bTrianglesModeOn = false;
+    bool bVoronoiOn = false;
+
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
     std::vector<Triangle2d> triangulation;
     std::vector<Triangle2d> delaunay;
+    std::vector<Edge2d> nearestNeighbor;
+    std::vector<Edge2d> voronoi;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     /**
@@ -411,6 +418,8 @@ namespace ComputationalGeometry
     void naiveTriangulate();
     void naiveDelaunay();
     void generateRandomPoints();
+    void computeNearestNeighbor();
+    void computeVoronoi();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
     void computeConvexHull();
@@ -446,6 +455,16 @@ namespace ComputationalGeometry
     return pImpl->hull;
   }
 
+  const std::vector<Edge2d>& PointCloud::NearestNeighbor() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Edge2d> dummy;
+      return dummy;
+    }
+    return pImpl->nearestNeighbor;
+  }
+
   const std::vector<Triangle2d>& PointCloud::Triangulation() const
   {
     if (pImpl == nullptr)
@@ -464,6 +483,16 @@ namespace ComputationalGeometry
       return dummy;
     }
     return pImpl->delaunay;
+  }
+
+  const std::vector<Edge2d>& PointCloud::Voronoi() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Edge2d> dummy;
+      return dummy;
+    }
+    return pImpl->voronoi;
   }
 
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
@@ -496,6 +525,8 @@ namespace ComputationalGeometry
       pImpl->computeConvexHull();
       pImpl->triangulation.resize(0);
       pImpl->delaunay.resize(0);
+      pImpl->nearestNeighbor.resize(0);
+      pImpl->voronoi.resize(0);
     }
     if (pImpl->bTrianglesModeOn)
     {
@@ -511,6 +542,20 @@ namespace ComputationalGeometry
         pImpl->naiveDelaunay();
       }
     }
+    if (pImpl->bNearestNeighborOn)
+    {
+      if (pImpl->nearestNeighbor.empty())
+      {
+        pImpl->computeNearestNeighbor();
+      }
+    }
+    if (pImpl->bVoronoiOn)
+    {
+      if (pImpl->voronoi.empty())
+      {
+        pImpl->computeVoronoi();
+      }
+    }
   }
 
   PointCloud& PointCloud::Get()
@@ -519,10 +564,10 @@ namespace ComputationalGeometry
     return pc;
   }
 
-  void PointCloud::toggleTriangulation()
+  void PointCloud::toggleConvexHull()
   {
     if (pImpl == nullptr) { return; }
-    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+    pImpl->bConvexHullOn = !(pImpl->bConvexHullOn);
   }
 
   void PointCloud::toggleDelaunay()
@@ -531,16 +576,64 @@ namespace ComputationalGeometry
     pImpl->bDelaunayOn = !(pImpl->bDelaunayOn);
   }
 
+  void PointCloud::toggleNearestNeighbor()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bNearestNeighborOn = !(pImpl->bNearestNeighborOn);
+  }
+
+  void PointCloud::togglePointsVisibility()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bPointsVisible = !(pImpl->bPointsVisible);
+  }
+
+  void PointCloud::toggleTriangulation()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+  }
+
+  void PointCloud::toggleVoronoi()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bVoronoiOn = !(pImpl->bVoronoiOn);
+  }
+
+  bool PointCloud::convexHullIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bConvexHullOn;
+  }
+
   bool PointCloud::delaunayIsOn() const
   {
     if (pImpl == nullptr) { return false; }
     return pImpl->bDelaunayOn;
   }
 
+  bool PointCloud::nearestNeighborIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bNearestNeighborOn;
+  }
+
+  bool PointCloud::pointsAreOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bPointsVisible;
+  }
+
   bool PointCloud::triangulationIsOn() const
   {
     if (pImpl == nullptr) { return false; }
     return pImpl->bTrianglesModeOn;
+  }
+
+  bool PointCloud::voronoiIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bVoronoiOn;
   }
 
   void PointCloud::computeDelaunay()
@@ -695,6 +788,24 @@ namespace ComputationalGeometry
     {
       pointArray.push_back(*it);
     }
+  }
+
+  void PointCloud::computeNearestNeighbor()
+  {
+    if (pImpl != nullptr) { pImpl->computeNearestNeighbor(); }
+  }
+
+  void PointCloud::Impl::computeNearestNeighbor()
+  {
+  }
+
+  void PointCloud::computeVoronoi()
+  {
+    if (pImpl != nullptr) { pImpl->computeVoronoi(); }
+  }
+
+  void PointCloud::Impl::computeVoronoi()
+  {
   }
 
   void PointCloud::computeConvexHull()

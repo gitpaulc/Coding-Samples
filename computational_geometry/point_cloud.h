@@ -98,16 +98,26 @@ namespace ComputationalGeometry
       const std::vector<point2d>& PointArray() const;
       const std::vector<point2d>& ConvexHull() const;
       const std::vector<Triangle2d>& Delaunay() const;
+      const std::vector<Edge2d>& NearestNeighbor() const;
       const std::vector<Triangle2d>& Triangulation() const;
+      const std::vector<Edge2d>& Voronoi() const;
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
       
+      void toggleConvexHull();
       void toggleDelaunay();
+      void toggleNearestNeighbor();
+      void togglePointsVisibility();
       void toggleTriangulation();
+      void toggleVoronoi();
       
+      bool convexHullIsOn() const;
       bool delaunayIsOn() const;
+      bool nearestNeighborIsOn() const;
+      bool pointsAreOn() const;
       bool triangulationIsOn() const;
+      bool voronoiIsOn() const;
       
     private: // These methods are declared only for the sake of exposition:
 
@@ -118,6 +128,9 @@ namespace ComputationalGeometry
       void naiveTriangulate();
       /** \brief Delaunay triangulation maximizes the minimum angle of the triangulation. */
       void computeDelaunay();
+      
+      void computeNearestNeighbor();
+      void computeVoronoi();
       
       /** \brief Naively search among pairs. */
       static double naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
