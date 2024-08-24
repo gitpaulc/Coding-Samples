@@ -50,6 +50,8 @@ namespace ComputationalGeometry
     double sq_distance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
     int intersection(const Edge2d& other, point2d& intersection) const;
+    /** \brief Point that attains square distance from point P to line spanned by edge. */
+    point2d projection(const point2d& P) const;
   };
 
   class Matrix2d

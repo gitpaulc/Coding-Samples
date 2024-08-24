@@ -216,6 +216,18 @@ namespace ComputationalGeometry
     }
   }
 
+  point2d Edge2d::projection(const point2d& P) const
+  {
+    if (sqLength() <= threshold()) { return a; }
+    point2d pp(P.x - a.x, P.y - a.y);
+    point2d qq(b.x - a.x, b.y - a.y);
+    double squareNorm = point2d::sq_distance(qq, point2d(0.0, 0.0));
+    double tt = (qq.y * pp.x - qq.x * pp.y) / squareNorm;
+    point2d rr(pp.x - tt * qq.y, pp.y + tt * qq.x);
+    point2d answer(rr.x + a.x, rr.y + a.y);
+    return answer;
+  }
+
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
   {
     a = aa; b = bb;
@@ -882,6 +894,13 @@ namespace ComputationalGeometry
       computeDelaunay();
     }
 
+    double raySqLength = -1.0;
+    {
+      int ww = 0; int hh = 0;
+      GetWindowWidthHeight(ww, hh);
+      raySqLength = (double)(ww * ww + hh * hh);
+    }
+
     std::map<int, point2d> sites;
     std::map<int, Triangle2d> faces;
     {
@@ -926,12 +945,21 @@ namespace ComputationalGeometry
           nonMatching.erase(edge);
         }
         if (sitesForThisOne.size() >= 3) { break; }
-        
       }
+
       for (const auto& endpoint : sitesForThisOne)
       {
         Edge2d edge(siteIt.second, endpoint);
         voronoi.push_back(edge);
+      }
+      if (raySqLength < 0.0) { continue; }
+      for (const auto& nonMatch : nonMatching)
+      {
+        point2d proj = nonMatch.projection(siteIt.second);
+        //Edge2d ray(siteIt.second,
+        //  point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
+        //  raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
+        //voronoi.push_back(ray);
       }
     }
   }
