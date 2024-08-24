@@ -3,6 +3,8 @@
 #include "point_cloud.h"
 #include "gl_callbacks.h"
 
+#include <map>
+
 namespace ComputationalGeometry
 {
   static int gWindowWidth = 1024;
@@ -92,6 +94,15 @@ namespace ComputationalGeometry
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
   {
     a = aa; b = bb;
+  }
+
+  bool Edge2d::operator< (const Edge2d& rhs) const
+  {
+    if (rhs.a < a) {return false;}
+    if (a < rhs.a) {return true;}
+    if (rhs.b < b) {return false;}
+    if (b < rhs.b) {return true;}
+    return false;
   }
 
   double Edge2d::sqLength() const
@@ -205,6 +216,18 @@ namespace ComputationalGeometry
     }
   }
 
+  point2d Edge2d::projection(const point2d& P) const
+  {
+    if (sqLength() <= threshold()) { return a; }
+    point2d pp(P.x - a.x, P.y - a.y);
+    point2d qq(b.x - a.x, b.y - a.y);
+    double squareNorm = point2d::sq_distance(qq, point2d(0.0, 0.0));
+    double tt = (qq.y * pp.x - qq.x * pp.y) / squareNorm;
+    point2d rr(pp.x - tt * qq.y, pp.y + tt * qq.x);
+    point2d answer(rr.x + a.x, rr.y + a.y);
+    return answer;
+  }
+
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
   {
     a = aa; b = bb;
@@ -233,6 +256,11 @@ namespace ComputationalGeometry
 
   Circle2d::Circle2d(const point2d& cen, double sqRad)
   {
+    if (sqRad < -threshold())
+    {
+      throw std::invalid_argument("Three points on circle are collinear.");
+    }
+    if (sqRad <= threshold()) { sqRad = 0.0; }
     center = cen;  sqRadius = sqRad;
   }
 
@@ -388,17 +416,33 @@ namespace ComputationalGeometry
     return 1;
   }
 
+  std::set<Edge2d> Triangle2d::getEdges() const
+  {
+    std::set<Edge2d> edges;
+    edges.insert(Edge2d(a, b));
+    edges.insert(Edge2d(b, c));
+    edges.insert(Edge2d(c, a));
+    return edges;
+  }
+
   class PointCloud::Impl
   {
   public:
     PointCloud* pCloud = nullptr;
 
-    bool bTrianglesModeOn = false;
+    bool bConvexHullOn = true;
     bool bDelaunayOn = false;
+    bool bNearestNeighborOn = false;
+    bool bPointsVisible = true;
+    bool bTrianglesModeOn = false;
+    bool bVoronoiOn = false;
+
     std::vector<point2d> hull;
     std::vector<point2d> pointArray;
     std::vector<Triangle2d> triangulation;
     std::vector<Triangle2d> delaunay;
+    std::vector<Edge2d> nearestNeighbor;
+    std::vector<Edge2d> voronoi;
 
     Impl(PointCloud* pParent) : pCloud(pParent) {}
     /**
@@ -409,8 +453,10 @@ namespace ComputationalGeometry
      * This gives a total of O(n^2 log(n)).
      */
     void naiveTriangulate();
-    void naiveDelaunay();
     void generateRandomPoints();
+    void computeDelaunay();
+    void computeNearestNeighbor();
+    void computeVoronoi();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
     void computeConvexHull();
@@ -446,6 +492,16 @@ namespace ComputationalGeometry
     return pImpl->hull;
   }
 
+  const std::vector<Edge2d>& PointCloud::NearestNeighbor() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Edge2d> dummy;
+      return dummy;
+    }
+    return pImpl->nearestNeighbor;
+  }
+
   const std::vector<Triangle2d>& PointCloud::Triangulation() const
   {
     if (pImpl == nullptr)
@@ -464,6 +520,16 @@ namespace ComputationalGeometry
       return dummy;
     }
     return pImpl->delaunay;
+  }
+
+  const std::vector<Edge2d>& PointCloud::Voronoi() const
+  {
+    if (pImpl == nullptr)
+    {
+      static std::vector<Edge2d> dummy;
+      return dummy;
+    }
+    return pImpl->voronoi;
   }
 
   bool PointCloud::getBoundingBox(point3d& min, point3d& max) const
@@ -494,37 +560,39 @@ namespace ComputationalGeometry
     {
       pImpl->generateRandomPoints();
       pImpl->computeConvexHull();
-    }
-    static bool bTrianglesModeWasOn = false;
-    static bool bDelaunayWasOn = false;
-    if (pImpl->bTrianglesModeOn || bRecompute)
-    {
-      pImpl->delaunay.resize(0);
-    }
-    if (pImpl->bDelaunayOn || bRecompute)
-    {
       pImpl->triangulation.resize(0);
+      pImpl->delaunay.resize(0);
+      pImpl->nearestNeighbor.resize(0);
+      pImpl->voronoi.resize(0);
     }
-    if ((pImpl->bTrianglesModeOn != bTrianglesModeWasOn) || bRecompute)
+    if (pImpl->bTrianglesModeOn)
     {
-      if (pImpl->bTrianglesModeOn)
+      if (pImpl->triangulation.empty())
       {
         pImpl->naiveTriangulate();
       }
-      else { pImpl->triangulation.resize(0); }
     }
-    if ((pImpl->bDelaunayOn != bDelaunayWasOn) || bRecompute)
+    if (pImpl->bDelaunayOn)
     {
-      if (pImpl->bDelaunayOn)
+      if (pImpl->delaunay.empty())
       {
-        pImpl->naiveDelaunay();
+        pImpl->computeDelaunay();
       }
-      else { pImpl->delaunay.resize(0); }
     }
-    if (pImpl->bTrianglesModeOn) { pImpl->bDelaunayOn = false; }
-    if (pImpl->bDelaunayOn) { pImpl->bTrianglesModeOn = false; }
-    bDelaunayWasOn = pImpl->bDelaunayOn;
-    bTrianglesModeWasOn = pImpl->bTrianglesModeOn;
+    if (pImpl->bNearestNeighborOn)
+    {
+      if (pImpl->nearestNeighbor.empty())
+      {
+        pImpl->computeNearestNeighbor();
+      }
+    }
+    if (pImpl->bVoronoiOn)
+    {
+      if (pImpl->voronoi.empty())
+      {
+        pImpl->computeVoronoi();
+      }
+    }
   }
 
   PointCloud& PointCloud::Get()
@@ -533,10 +601,10 @@ namespace ComputationalGeometry
     return pc;
   }
 
-  void PointCloud::toggleTriangulation()
+  void PointCloud::toggleConvexHull()
   {
     if (pImpl == nullptr) { return; }
-    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+    pImpl->bConvexHullOn = !(pImpl->bConvexHullOn);
   }
 
   void PointCloud::toggleDelaunay()
@@ -545,9 +613,69 @@ namespace ComputationalGeometry
     pImpl->bDelaunayOn = !(pImpl->bDelaunayOn);
   }
 
+  void PointCloud::toggleNearestNeighbor()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bNearestNeighborOn = !(pImpl->bNearestNeighborOn);
+  }
+
+  void PointCloud::togglePointsVisibility()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bPointsVisible = !(pImpl->bPointsVisible);
+  }
+
+  void PointCloud::toggleTriangulation()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bTrianglesModeOn = !(pImpl->bTrianglesModeOn);
+  }
+
+  void PointCloud::toggleVoronoi()
+  {
+    if (pImpl == nullptr) { return; }
+    pImpl->bVoronoiOn = !(pImpl->bVoronoiOn);
+  }
+
+  bool PointCloud::convexHullIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bConvexHullOn;
+  }
+
+  bool PointCloud::delaunayIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bDelaunayOn;
+  }
+
+  bool PointCloud::nearestNeighborIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bNearestNeighborOn;
+  }
+
+  bool PointCloud::pointsAreOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bPointsVisible;
+  }
+
+  bool PointCloud::triangulationIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bTrianglesModeOn;
+  }
+
+  bool PointCloud::voronoiIsOn() const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->bVoronoiOn;
+  }
+
   void PointCloud::computeDelaunay()
   {
-    if (pImpl != nullptr) { pImpl->naiveDelaunay(); }
+    if (pImpl != nullptr) { pImpl->computeDelaunay(); }
   }
 
   void PointCloud::naiveTriangulate()
@@ -555,19 +683,17 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
   }
 
-  void PointCloud::Impl::naiveDelaunay()
+  void PointCloud::Impl::computeDelaunay() // Naive Delaunay
   {
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
-      bool bRestore = triangulation.empty();
-      if (bRestore) { naiveTriangulate(); }
+      if (triangulation.empty()) { naiveTriangulate(); }
       for (const auto& face : triangulation)
       {
         faces.insert(face);
         ++numFaces;
       }
-      if (bRestore) { triangulation.resize(0); }
     }
     bool bDelaunayNotMet = false;
     int flips = 0;
@@ -646,11 +772,11 @@ namespace ComputationalGeometry
     {
       computeConvexHull();
     }
-    int NN = (int) hull.size();
-    if (NN <= 2) { return; }
+    int hullSize = (int) hull.size();
+    if (hullSize <= 2) { return; }
     int startIndex = 2;
     std::set<Triangle2d> faces;
-    for (int i = startIndex; i < NN; ++i)
+    for (int i = startIndex; i < hullSize; ++i)
     {
       Triangle2d face(hull[0], hull[i - 1], hull[i]);
       faces.insert(face);
@@ -699,6 +825,145 @@ namespace ComputationalGeometry
     }
   }
 
+  void PointCloud::computeNearestNeighbor()
+  {
+    if (pImpl != nullptr) { pImpl->computeNearestNeighbor(); }
+  }
+
+  void PointCloud::Impl::computeNearestNeighbor()
+  {
+    nearestNeighbor.resize(0);
+    if (delaunay.empty())
+    {
+      computeDelaunay();
+    }
+      
+    std::set<Triangle2d> faces;
+    for (const auto& face : delaunay)
+    {
+      faces.insert(face);
+    }
+
+    for (const auto& current : pointArray)
+    {
+      std::set<Edge2d> edgesForThisOne;
+      for (const auto& face : faces)
+      {
+        if (point2d::sq_distance(face.a, current) <= threshold())
+        {
+          Edge2d edge(face.a, face.b);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.a, face.c);
+          edgesForThisOne.insert(edge);
+        }
+        if (point2d::sq_distance(face.b, current) <= threshold())
+        {
+          Edge2d edge(face.a, face.b);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.b, face.c);
+          edgesForThisOne.insert(edge);
+        }
+        if (point2d::sq_distance(face.c, current) <= threshold())
+        {
+          Edge2d edge(face.b, face.c);
+          edgesForThisOne.insert(edge);
+          edge = Edge2d(face.c, face.a);
+          edgesForThisOne.insert(edge);
+        }
+      }
+      if (edgesForThisOne.empty()) { continue; }
+      Edge2d nearest = *(edgesForThisOne.begin());
+      for (const auto& edge : edgesForThisOne)
+      {
+        if (edge.sqLength() < nearest.sqLength()) { nearest = edge; }
+      }
+      nearestNeighbor.push_back(nearest);
+    }
+  }
+
+  void PointCloud::computeVoronoi()
+  {
+    if (pImpl != nullptr) { pImpl->computeVoronoi(); }
+  }
+
+  void PointCloud::Impl::computeVoronoi()
+  {
+    voronoi.resize(0);
+    if (delaunay.empty())
+    {
+      computeDelaunay();
+    }
+
+    double raySqLength = -1.0;
+    {
+      int ww = 0; int hh = 0;
+      GetWindowWidthHeight(ww, hh);
+      raySqLength = (double)(ww * ww + hh * hh);
+    }
+
+    std::map<int, point2d> sites;
+    std::map<int, Triangle2d> faces;
+    {
+      int i = 0;
+      for (const auto& face : delaunay)
+      {
+        point2d site;
+        bool bCollinear = false;
+        try
+        {
+          Circle2d circ(face.a, face.b, face.c);
+          site = circ.center;
+        }
+        catch (...)
+        {
+          bCollinear = true;
+        }
+        if (bCollinear) { continue; }
+        faces[i] = face;
+        sites[i] = site;
+        ++i;
+      }
+    }
+
+    for (const auto& siteIt : sites)
+    {
+      std::set<point2d> sitesForThisOne;
+      const auto& itsFace = faces[siteIt.first];
+      const std::set<Edge2d> edges = itsFace.getEdges();
+      std::set<Edge2d> nonMatching = edges;
+      for (const auto& faceIt : faces)
+      {
+        if (faceIt.first == siteIt.first) { continue; }
+        Edge2d match;
+        bool bIsAdjacent = itsFace.adjacentToByEdge(faceIt.second, match);
+        if (!bIsAdjacent) { continue; }
+        sitesForThisOne.insert(sites.at(faceIt.first));
+        for (const auto& edge : edges)
+        {
+          if (match.sq_distance(edge.a) > threshold()) { continue; }
+          if (match.sq_distance(edge.b) > threshold()) { continue; }
+          nonMatching.erase(edge);
+        }
+        if (sitesForThisOne.size() >= 3) { break; }
+      }
+
+      for (const auto& endpoint : sitesForThisOne)
+      {
+        Edge2d edge(siteIt.second, endpoint);
+        voronoi.push_back(edge);
+      }
+      if (raySqLength < 0.0) { continue; }
+      for (const auto& nonMatch : nonMatching)
+      {
+        point2d proj = nonMatch.projection(siteIt.second);
+        //Edge2d ray(siteIt.second,
+        //  point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
+        //  raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
+        //voronoi.push_back(ray);
+      }
+    }
+  }
+
   void PointCloud::computeConvexHull()
   {
     if (pImpl != nullptr) { pImpl->computeConvexHull(); }
@@ -708,7 +973,7 @@ namespace ComputationalGeometry
   {
     hull.resize(0);
 
-    // 2d : Graham scan.
+    // 2d: Graham scan.
     hull = pointArray;
     const int NN = (int)pointArray.size();
     if (NN <= 3) {return;}

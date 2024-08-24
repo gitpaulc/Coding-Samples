@@ -5,7 +5,9 @@ All Rights Reserved.*/
 #define POINT_CLOUD_H
 
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace ComputationalGeometry
 {
@@ -42,10 +44,14 @@ namespace ComputationalGeometry
   public:
     point2d a, b;
     Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    /** \brief For set and map insertion. */
+    bool operator< (const Edge2d& rhs) const;
     double sqLength() const;
     double sq_distance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
     int intersection(const Edge2d& other, point2d& intersection) const;
+    /** \brief Point that attains square distance from point P to line spanned by edge. */
+    point2d projection(const point2d& P) const;
   };
 
   class Matrix2d
@@ -69,7 +75,9 @@ namespace ComputationalGeometry
   public:
     point2d center;
     double sqRadius = 1.0;
+    /** \brief Throws invalid argument if square radius is negative. */
     Circle2d(const point2d& cen, double sqRad);
+    /** \brief Throws invalid argument if points are collinear. */
     Circle2d(const point2d& a, const point2d& b, const point2d& c);
     /** \brief 0 = exterior, 1 = interior, 2 = on edge */
     int pointIsInterior(const point2d& pt) const;
@@ -86,6 +94,7 @@ namespace ComputationalGeometry
     bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     int pointIsInterior(const point2d& pt) const;
+    std::set<Edge2d> getEdges() const;
   };
 
   class PointCloud
@@ -98,13 +107,26 @@ namespace ComputationalGeometry
       const std::vector<point2d>& PointArray() const;
       const std::vector<point2d>& ConvexHull() const;
       const std::vector<Triangle2d>& Delaunay() const;
+      const std::vector<Edge2d>& NearestNeighbor() const;
       const std::vector<Triangle2d>& Triangulation() const;
+      const std::vector<Edge2d>& Voronoi() const;
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
       
+      void toggleConvexHull();
       void toggleDelaunay();
+      void toggleNearestNeighbor();
+      void togglePointsVisibility();
       void toggleTriangulation();
+      void toggleVoronoi();
+      
+      bool convexHullIsOn() const;
+      bool delaunayIsOn() const;
+      bool nearestNeighborIsOn() const;
+      bool pointsAreOn() const;
+      bool triangulationIsOn() const;
+      bool voronoiIsOn() const;
       
     private: // These methods are declared only for the sake of exposition:
 
@@ -115,6 +137,9 @@ namespace ComputationalGeometry
       void naiveTriangulate();
       /** \brief Delaunay triangulation maximizes the minimum angle of the triangulation. */
       void computeDelaunay();
+      
+      void computeNearestNeighbor();
+      void computeVoronoi();
       
       /** \brief Naively search among pairs. */
       static double naiveMinSqDistance(std::set<point3d>& A, std::set<point3d>& B, point3d& A_min, point3d& B_min);
