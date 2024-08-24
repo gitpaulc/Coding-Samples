@@ -5,7 +5,9 @@ All Rights Reserved.*/
 #define POINT_CLOUD_H
 
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace ComputationalGeometry
 {
@@ -90,6 +92,7 @@ namespace ComputationalGeometry
     bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     int pointIsInterior(const point2d& pt) const;
+    std::set<Edge2d> getEdges() const;
   };
 
   class PointCloud

@@ -404,6 +404,15 @@ namespace ComputationalGeometry
     return 1;
   }
 
+  std::set<Edge2d> Triangle2d::getEdges() const
+  {
+    std::set<Edge2d> edges;
+    edges.insert(Edge2d(a, b));
+    edges.insert(Edge2d(b, c));
+    edges.insert(Edge2d(c, a));
+    return edges;
+  }
+
   class PointCloud::Impl
   {
   public:
@@ -901,6 +910,8 @@ namespace ComputationalGeometry
     {
       std::set<point2d> sitesForThisOne;
       const auto& itsFace = faces[siteIt.first];
+      const std::set<Edge2d> edges = itsFace.getEdges();
+      std::set<Edge2d> nonMatching = edges;
       for (const auto& faceIt : faces)
       {
         if (faceIt.first == siteIt.first) { continue; }
@@ -908,7 +919,14 @@ namespace ComputationalGeometry
         bool bIsAdjacent = itsFace.adjacentToByEdge(faceIt.second, match);
         if (!bIsAdjacent) { continue; }
         sitesForThisOne.insert(sites.at(faceIt.first));
+        for (const auto& edge : edges)
+        {
+          if (match.sq_distance(edge.a) > threshold()) { continue; }
+          if (match.sq_distance(edge.b) > threshold()) { continue; }
+          nonMatching.erase(edge);
+        }
         if (sitesForThisOne.size() >= 3) { break; }
+        
       }
       for (const auto& endpoint : sitesForThisOne)
       {
@@ -927,7 +945,7 @@ namespace ComputationalGeometry
   {
     hull.resize(0);
 
-    // 2d : Graham scan.
+    // 2d: Graham scan.
     hull = pointArray;
     const int NN = (int)pointArray.size();
     if (NN <= 3) {return;}

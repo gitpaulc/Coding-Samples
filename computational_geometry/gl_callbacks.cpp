@@ -65,6 +65,10 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'v') || (key == 'V'))
   {
+    if (ComputationalGeometry::PointCloud::Get().convexHullIsOn())
+    {
+      ComputationalGeometry::PointCloud::Get().toggleConvexHull();
+    }
     ComputationalGeometry::PointCloud::Get().toggleVoronoi();
   }
   ComputationalGeometry::PointCloud::Get().refresh(false);
