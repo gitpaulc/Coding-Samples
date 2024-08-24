@@ -6,10 +6,12 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
+/** \class Rational
+ * This class is unfortunately impractical without unlimited-size int types.
+ * Operations including construction throw invalid argument exception upon division by zero.
+ */
 class Rational
 {
-  // This class is unfortunately impractical without unlimited-size
-  // int types.
   int num = 0;
   int denom = 1;
 public:

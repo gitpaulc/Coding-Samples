@@ -880,8 +880,6 @@ namespace ComputationalGeometry
       for (const auto& face : delaunay)
       {
         point2d site;
-        //site.x = (face.a.x + face.b.x + face.c.x) / 3.0;
-        //site.y = (face.a.y + face.b.y + face.c.y) / 3.0;
         bool bCollinear = false;
         try
         {
