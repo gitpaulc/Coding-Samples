@@ -3,6 +3,8 @@
 #include "point_cloud.h"
 #include "gl_callbacks.h"
 
+#include <map>
+
 namespace ComputationalGeometry
 {
   static int gWindowWidth = 1024;
@@ -242,6 +244,11 @@ namespace ComputationalGeometry
 
   Circle2d::Circle2d(const point2d& cen, double sqRad)
   {
+    if (sqRad < -threshold())
+    {
+      throw std::invalid_argument("Three points on circle are collinear.");
+    }
+    if (sqRad <= threshold()) { sqRad = 0.0; }
     center = cen;  sqRadius = sqRad;
   }
 
@@ -860,6 +867,57 @@ namespace ComputationalGeometry
 
   void PointCloud::Impl::computeVoronoi()
   {
+    voronoi.resize(0);
+    if (delaunay.empty())
+    {
+      computeDelaunay();
+    }
+
+    std::map<int, point2d> sites;
+    std::map<int, Triangle2d> faces;
+    {
+      int i = 0;
+      for (const auto& face : delaunay)
+      {
+        point2d site;
+        //site.x = (face.a.x + face.b.x + face.c.x) / 3.0;
+        //site.y = (face.a.y + face.b.y + face.c.y) / 3.0;
+        bool bCollinear = false;
+        try
+        {
+          Circle2d circ(face.a, face.b, face.c);
+          site = circ.center;
+        }
+        catch (...)
+        {
+          bCollinear = true;
+        }
+        if (bCollinear) { continue; }
+        faces[i] = face;
+        sites[i] = site;
+        ++i;
+      }
+    }
+
+    for (const auto& siteIt : sites)
+    {
+      std::set<point2d> sitesForThisOne;
+      const auto& itsFace = faces[siteIt.first];
+      for (const auto& faceIt : faces)
+      {
+        if (faceIt.first == siteIt.first) { continue; }
+        Edge2d match;
+        bool bIsAdjacent = itsFace.adjacentToByEdge(faceIt.second, match);
+        if (!bIsAdjacent) { continue; }
+        sitesForThisOne.insert(sites.at(faceIt.first));
+        if (sitesForThisOne.size() >= 3) { break; }
+      }
+      for (const auto& endpoint : sitesForThisOne)
+      {
+        Edge2d edge(siteIt.second, endpoint);
+        voronoi.push_back(edge);
+      }
+    }
   }
 
   void PointCloud::computeConvexHull()

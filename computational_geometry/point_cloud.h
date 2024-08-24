@@ -71,7 +71,9 @@ namespace ComputationalGeometry
   public:
     point2d center;
     double sqRadius = 1.0;
+    /** \brief Throws invalid argument if square radius is negative. */
     Circle2d(const point2d& cen, double sqRad);
+    /** \brief Throws invalid argument if points are collinear. */
     Circle2d(const point2d& a, const point2d& b, const point2d& c);
     /** \brief 0 = exterior, 1 = interior, 2 = on edge */
     int pointIsInterior(const point2d& pt) const;
