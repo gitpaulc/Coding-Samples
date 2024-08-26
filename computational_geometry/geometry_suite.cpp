@@ -6,7 +6,11 @@
 
 int main(int argc, char **argv)
 {
+#ifdef __APPLE__
   ComputationalGeometry::SetWindowWidthHeight(1024);
+#else
+  ComputationalGeometry::SetWindowWidthHeight(750);
+#endif
   if (argc == 2)
   {
     int numPoints = atoi(argv[1]);
