@@ -3,6 +3,9 @@
 #include "point_cloud.h"
 #include "gl_callbacks.h"
 
+#ifdef _WIN32
+#include <algorithm>
+#endif
 #include <map>
 
 namespace ComputationalGeometry
@@ -347,6 +350,7 @@ namespace ComputationalGeometry
       if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
       return false;
     }
+    return false;
   }
 
   bool Triangle2d::adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const

@@ -1,2 +1,10 @@
 .DS_Store
 *.o
+computational_geometry/ComputationalGeometry/.vs
+computational_geometry/ComputationalGeometry/Computat.*
+computational_geometry/ComputationalGeometry/Debug
+computational_geometry/ComputationalGeometry/glut/glut.h
+computational_geometry/ComputationalGeometry/glut/*.lib
+computational_geometry/ComputationalGeometry/glut/*.dll
+computational_geometry/ComputationalGeometry/Release
+computational_geometry/ComputationalGeometry/x64
