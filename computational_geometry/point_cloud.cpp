@@ -960,8 +960,10 @@ namespace ComputationalGeometry
       }
 
       double minSqLenFromSite = -1;
+      std::vector<point2d> testEndpoints;
       for (const auto& endpoint : sitesForThisOne)
       {
+        testEndpoints.push_back(endpoint);
         Edge2d edge(siteIt.second, endpoint);
         voronoi.push_back(edge);
         if ((minSqLenFromSite < 0) || (edge.sqLength() < minSqLenFromSite))
@@ -981,21 +983,23 @@ namespace ComputationalGeometry
         bool bShouldReverseRay = false;
         // Test to see: should we reverse ray?
         point2d testPoint(testRayLen * (proj.x - siteIt.second.x) + siteIt.second.x, testRayLen * (proj.y - siteIt.second.y) + siteIt.second.y);
-        for (int siteInd = 0; siteInd < (int)sitesForThisOne.size(); ++siteInd)
+        for (int siteInd = 0; siteInd < (int)testEndpoints.size(); ++siteInd)
         {
           int i0 = siteInd;
           int i1 = siteInd + 1;
           if (i1 >= (int)sitesForThisOne.size()) { i1 = 0; }
-          Triangle2d testTri(siteIt.second, sitesForThisOne[i0], sitesForThisOne[i1]);
+          Triangle2d testTri(siteIt.second, testEndpoints[i0], testEndpoints[i1]);
           if (testTri.pointIsInterior(testPoint) != 0)
           {
             bShouldReverseRay = true; break;
           }
         }
         // Done testing.
-        if (bShouldReverseRay) { coeff = -coeff; }
-        Edge2d ray(siteIt.second, point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y));
+          if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+        point2d rayPoint = point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y);
+        Edge2d ray(siteIt.second, rayPoint);
         voronoi.push_back(ray);
+        testEndpoints.push_back(point2d(testRayLen * (proj.x - siteIt.second.x) + siteIt.second.x, testRayLen * (proj.y - siteIt.second.y) + siteIt.second.y));
       }
     }
   }
