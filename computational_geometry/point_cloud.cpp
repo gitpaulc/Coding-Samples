@@ -939,7 +939,7 @@ namespace ComputationalGeometry
 
     for (const auto& siteIt : sites)
     {
-      std::set<point2d> sitesForThisOne;
+      std::vector<point2d> sitesForThisOne;
       const auto& itsFace = faces[siteIt.first];
       const std::set<Edge2d> edges = itsFace.getEdges();
       std::set<Edge2d> nonMatching = edges;
@@ -949,7 +949,7 @@ namespace ComputationalGeometry
         Edge2d match;
         bool bIsAdjacent = itsFace.adjacentToByEdge(faceIt.second, match);
         if (!bIsAdjacent) { continue; }
-        sitesForThisOne.insert(sites.at(faceIt.first));
+        sitesForThisOne.push_back(sites.at(faceIt.first));
         for (const auto& edge : edges)
         {
           if (match.sq_distance(edge.a) > threshold()) { continue; }
@@ -959,18 +959,42 @@ namespace ComputationalGeometry
         if (sitesForThisOne.size() >= 3) { break; }
       }
 
+      double minSqLenFromSite = -1;
       for (const auto& endpoint : sitesForThisOne)
       {
         Edge2d edge(siteIt.second, endpoint);
         voronoi.push_back(edge);
+        if ((minSqLenFromSite < 0) || (edge.sqLength() < minSqLenFromSite))
+        {
+          minSqLenFromSite = edge.sqLength();
+        }
       }
-      if (raySqLength < 0.0) { continue; }
+      if (minSqLenFromSite < 0) { continue; }
+      double testRaySqLen = minSqLenFromSite / 4;
+      double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
+
       for (const auto& nonMatch : nonMatching)
       {
         point2d proj = nonMatch.projection(siteIt.second);
-        Edge2d ray(siteIt.second,
-          point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
-          raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
+        double coeff = raySqLength;
+          
+        bool bShouldReverseRay = false;
+        // Test to see: should we reverse ray?
+        point2d testPoint(testRayLen * (proj.x - siteIt.second.x) + siteIt.second.x, testRayLen * (proj.y - siteIt.second.y) + siteIt.second.y);
+        for (int siteInd = 0; siteInd < (int)sitesForThisOne.size(); ++siteInd)
+        {
+          int i0 = siteInd;
+          int i1 = siteInd + 1;
+          if (i1 >= (int)sitesForThisOne.size()) { i1 = 0; }
+          Triangle2d testTri(siteIt.second, sitesForThisOne[i0], sitesForThisOne[i1]);
+          if (testTri.pointIsInterior(testPoint) != 0)
+          {
+            bShouldReverseRay = true; break;
+          }
+        }
+        // Done testing.
+        if (bShouldReverseRay) { coeff = -coeff; }
+        Edge2d ray(siteIt.second, point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y));
         voronoi.push_back(ray);
       }
     }
