@@ -967,23 +967,25 @@ namespace ComputationalGeometry
       point2d testPoint(testRayLen * (proj.x - site.x) + site.x, testRayLen * (proj.y - site.y) + site.y);
       {
         Triangle2d testTri(site, delaunayEdge.a, delaunayEdge.b);
-        if (testTri.pointIsInterior(testPoint)  == 1)
+        if (testTri.pointIsInterior(testPoint)  != 0)
         {
           bShouldReverseRay = true;
         }
         testTri = Triangle2d(site, testPoint, delaunayEdge.b);
-        if (testTri.pointIsInterior(delaunayEdge.a)  == 1)
+        if (testTri.pointIsInterior(delaunayEdge.a)  != 0)
         {
           bShouldReverseRay = true;
         }
         testTri = Triangle2d(site, testPoint, delaunayEdge.a);
-        if (testTri.pointIsInterior(delaunayEdge.b)  == 1)
+        if (testTri.pointIsInterior(delaunayEdge.b)  != 0)
         {
           bShouldReverseRay = true;
         }
       }
       // Done testing.
       if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+      double projSqLen = Edge2d(proj, site).sqLength();
+      if (projSqLen > threshold()) { coeff = coeff / safeSqrt(projSqLen); }
       point2d rayPoint = point2d(coeff * (proj.x - site.x) + site.x, coeff * (proj.y - site.y) + site.y);
       Edge2d ray(site, rayPoint);
       voronoi.push_back(ray);
@@ -1108,6 +1110,8 @@ namespace ComputationalGeometry
         }
         // Done testing.
         if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+        double projSqLen = Edge2d(proj, siteIt.second).sqLength();
+        if (projSqLen > threshold()) { coeff = coeff / safeSqrt(projSqLen); }
         point2d rayPoint = point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y);
         Edge2d ray(siteIt.second, rayPoint);
         voronoi.push_back(ray);
