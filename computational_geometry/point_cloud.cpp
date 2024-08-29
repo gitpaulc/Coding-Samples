@@ -705,6 +705,14 @@ namespace ComputationalGeometry
     int numFaces = 0;
     {
       if (triangulation.empty()) { naiveTriangulate(); }
+      if (pointArray.size() == 2)
+      {
+        if (triangulation.size() >= 1)
+        {
+          delaunay.push_back(triangulation[0]);
+          return;
+        }
+      }
       for (const auto& face : triangulation)
       {
         faces.insert(face);
@@ -789,7 +797,18 @@ namespace ComputationalGeometry
       computeConvexHull();
     }
     int hullSize = (int) hull.size();
-    if (hullSize <= 2) { return; }
+    if (hullSize <= 2)
+    {
+      if (pointArray.size() == 2)
+      {
+        if (point2d::sq_distance(pointArray[0], pointArray[1]) > threshold())
+        {
+          Triangle2d face(pointArray[0], pointArray[1], pointArray[0]);
+          triangulation.push_back(face);
+        }
+      }
+      return;
+    }
     int startIndex = 2;
     std::set<Triangle2d> faces;
     for (int i = startIndex; i < hullSize; ++i)
