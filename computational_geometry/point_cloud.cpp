@@ -987,7 +987,7 @@ namespace ComputationalGeometry
         {
           int i0 = siteInd;
           int i1 = siteInd + 1;
-          if (i1 >= (int)sitesForThisOne.size()) { i1 = 0; }
+          if (i1 >= (int)testEndpoints.size()) { i1 = 0; }
           Triangle2d testTri(siteIt.second, testEndpoints[i0], testEndpoints[i1]);
           if (testTri.pointIsInterior(testPoint) != 0)
           {
