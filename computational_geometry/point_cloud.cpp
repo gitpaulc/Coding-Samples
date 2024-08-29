@@ -852,7 +852,13 @@ namespace ComputationalGeometry
     {
       computeDelaunay();
     }
-      
+
+    if (pointArray.size() == 2)
+    {
+      nearestNeighbor.push_back(Edge2d(pointArray[0], pointArray[1]));
+      return;
+    }
+
     std::set<Triangle2d> faces;
     for (const auto& face : delaunay)
     {
