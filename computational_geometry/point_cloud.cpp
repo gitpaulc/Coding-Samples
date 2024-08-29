@@ -13,6 +13,9 @@ namespace ComputationalGeometry
   static int gWindowWidth = 1024;
   static int gWindowHeight = 1024;
 
+  static point2d gScreenMin(-1, -1);
+  static point2d gScreenMax(1, 1);
+
   int& numRandomPoints()
   {
     static int numberOfRandomPoints = 50;
@@ -974,6 +977,11 @@ namespace ComputationalGeometry
       if (minSqLenFromSite < 0) { continue; }
       double testRaySqLen = minSqLenFromSite / 4;
       double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
+
+      if (siteIt.second.x <= gScreenMin.x) { continue; }
+      if (siteIt.second.y <= gScreenMin.y) { continue; }
+      if (siteIt.second.x >= gScreenMax.x) { continue; }
+      if (siteIt.second.y >= gScreenMax.y) { continue; }
 
       for (const auto& nonMatch : nonMatching)
       {
