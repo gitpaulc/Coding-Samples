@@ -28,8 +28,13 @@ All Rights Reserved.*/
 #include <GL/gl.h>
 #include <GL/glut.h>
 #else
+#ifdef __linux__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include <GL/glut.h>
+#endif // def __linux__
 #endif // def _WIN32
 #endif // def _WIN64
 #endif // def __APPLE__
