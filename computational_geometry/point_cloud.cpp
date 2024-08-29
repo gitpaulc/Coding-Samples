@@ -973,9 +973,9 @@ namespace ComputationalGeometry
     double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
 
     std::vector<Edge2d> delaunayEdges;
-    delaunayEdges.push_back(delaunay[0].a);
-    delaunayEdges.push_back(delaunay[0].b);
-    delaunayEdges.push_back(delaunay[0].c);
+    delaunayEdges.push_back(Edge2d(pointArray[0], pointArray[1]));
+    delaunayEdges.push_back(Edge2d(pointArray[1], pointArray[2]));
+    delaunayEdges.push_back(Edge2d(pointArray[2], pointArray[0]));
     for (const auto& delaunayEdge : delaunayEdges)
     {
       point2d proj = delaunayEdge.projection(site);
