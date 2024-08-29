@@ -13,6 +13,9 @@ namespace ComputationalGeometry
   static int gWindowWidth = 1024;
   static int gWindowHeight = 1024;
 
+  static point2d gScreenMin(-1, -1);
+  static point2d gScreenMax(1, 1);
+
   int& numRandomPoints()
   {
     static int numberOfRandomPoints = 50;
@@ -56,6 +59,16 @@ namespace ComputationalGeometry
     std::cout << prequel << "(" << x << ", " << y;
     if (GetDimension() > 2) {std::cout << ", " << z;}
     std::cout << ")";
+  }
+
+  double point3d::dot(const point3d& P) const
+  {
+    double answer = x * P.x + y * P.y;
+    if ((GetDimension() > 2) || (P.GetDimension() > 2))
+    {
+      answer = answer + z * P.z;
+    }
+    return answer;
   }
 
   double point3d::sq_distance(const point3d& P, const point3d& Q)
@@ -224,11 +237,9 @@ namespace ComputationalGeometry
     if (sqLength() <= threshold()) { return a; }
     point2d pp(P.x - a.x, P.y - a.y);
     point2d qq(b.x - a.x, b.y - a.y);
-    double squareNorm = point2d::sq_distance(qq, point2d(0.0, 0.0));
-    double tt = (qq.y * pp.x - qq.x * pp.y) / squareNorm;
-    point2d rr(pp.x - tt * qq.y, pp.y + tt * qq.x);
-    point2d answer(rr.x + a.x, rr.y + a.y);
-    return answer;
+    double coeff = pp.dot(qq) / sqLength();
+    point2d rr(qq.x * coeff, qq.y * coeff);
+    return point2d(rr.x + a.x, rr.y + a.y);
   }
 
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
@@ -461,6 +472,7 @@ namespace ComputationalGeometry
     void computeDelaunay();
     void computeNearestNeighbor();
     void computeVoronoi();
+    void computeVoronoi2or3points();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
     void computeConvexHull();
@@ -841,7 +853,13 @@ namespace ComputationalGeometry
     {
       computeDelaunay();
     }
-      
+
+    if (pointArray.size() == 2)
+    {
+      nearestNeighbor.push_back(Edge2d(pointArray[0], pointArray[1]));
+      return;
+    }
+
     std::set<Triangle2d> faces;
     for (const auto& face : delaunay)
     {
@@ -890,6 +908,90 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->computeVoronoi(); }
   }
 
+  void PointCloud::Impl::computeVoronoi2or3points()
+  {
+    if ((pointArray.size() < 2) || (pointArray.size() > 3))
+    {
+      return;
+    }
+    double raySqLength = -1.0;
+    {
+      Edge2d diag(gScreenMin, gScreenMax);
+      raySqLength = diag.sqLength() * 4;
+    }
+    if (pointArray.size() == 2)
+    {
+      Edge2d seg(pointArray[0], pointArray[1]);
+      point2d normal(seg.b.y - seg.a.y, seg.a.x - seg.b.x);
+      point2d site((seg.a.x + seg.b.x) / 2, (seg.a.y + seg.b.y) / 2);
+      voronoi.push_back(Edge2d(site, point2d(site.x + raySqLength * normal.x, site.y + raySqLength * normal.y)));
+      voronoi.push_back(Edge2d(site, point2d(site.x - raySqLength * normal.x, site.y - raySqLength * normal.y)));
+      return;
+    }
+      
+    point2d site;
+    bool bCollinear = false;
+    try
+    {
+      Circle2d circ(pointArray[0], pointArray[1], pointArray[2]);
+      site = circ.center;
+    }
+    catch (...) { bCollinear = true; }
+    if (bCollinear) { return; } // TODO: There should be two lines in this case. Or treat it as a segment if two points coincide. Use recursion.
+    if (delaunay.size() < 1) { return; } // In fact it should == 1.
+
+    double minSqLenFromSite = -1;
+    for (const auto& vertex : pointArray)
+    {
+      Edge2d edge(site, vertex);
+      if ((minSqLenFromSite < 0) || (edge.sqLength() < minSqLenFromSite))
+      {
+        minSqLenFromSite = edge.sqLength();
+      }
+    }
+    if (minSqLenFromSite < 0) { return; }
+    double testRaySqLen = minSqLenFromSite / 4;
+    double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
+
+    std::vector<Edge2d> delaunayEdges;
+    delaunayEdges.push_back(delaunay[0].a);
+    delaunayEdges.push_back(delaunay[0].b);
+    delaunayEdges.push_back(delaunay[0].c);
+    for (const auto& delaunayEdge : delaunayEdges)
+    {
+      point2d proj = delaunayEdge.projection(site);
+      double coeff = raySqLength;
+        
+      bool bShouldReverseRay = false;
+      // Test to see: should we reverse ray?
+      point2d testPoint(testRayLen * (proj.x - site.x) + site.x, testRayLen * (proj.y - site.y) + site.y);
+      {
+        Triangle2d testTri(site, delaunayEdge.a, delaunayEdge.b);
+        if (testTri.pointIsInterior(testPoint)  != 0)
+        {
+          bShouldReverseRay = true;
+        }
+        testTri = Triangle2d(site, testPoint, delaunayEdge.b);
+        if (testTri.pointIsInterior(delaunayEdge.a)  != 0)
+        {
+          bShouldReverseRay = true;
+        }
+        testTri = Triangle2d(site, testPoint, delaunayEdge.a);
+        if (testTri.pointIsInterior(delaunayEdge.b)  != 0)
+        {
+          bShouldReverseRay = true;
+        }
+      }
+      // Done testing.
+      if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+      double projSqLen = Edge2d(proj, site).sqLength();
+      if (projSqLen > threshold()) { coeff = coeff / safeSqrt(projSqLen); }
+      point2d rayPoint = point2d(coeff * (proj.x - site.x) + site.x, coeff * (proj.y - site.y) + site.y);
+      Edge2d ray(site, rayPoint);
+      voronoi.push_back(ray);
+    }
+  }
+
   void PointCloud::Impl::computeVoronoi()
   {
     voronoi.resize(0);
@@ -898,11 +1000,16 @@ namespace ComputationalGeometry
       computeDelaunay();
     }
 
+    if (pointArray.size() <= 3)
+    {
+      computeVoronoi2or3points();
+      return;
+    }
+      
     double raySqLength = -1.0;
     {
-      int ww = 0; int hh = 0;
-      GetWindowWidthHeight(ww, hh);
-      raySqLength = (double)(ww * ww + hh * hh);
+      Edge2d diag(gScreenMin, gScreenMax);
+      raySqLength = diag.sqLength() * 4;
     }
 
     std::map<int, point2d> sites;
@@ -931,7 +1038,7 @@ namespace ComputationalGeometry
 
     for (const auto& siteIt : sites)
     {
-      std::set<point2d> sitesForThisOne;
+      std::vector<point2d> sitesForThisOne;
       const auto& itsFace = faces[siteIt.first];
       const std::set<Edge2d> edges = itsFace.getEdges();
       std::set<Edge2d> nonMatching = edges;
@@ -941,7 +1048,7 @@ namespace ComputationalGeometry
         Edge2d match;
         bool bIsAdjacent = itsFace.adjacentToByEdge(faceIt.second, match);
         if (!bIsAdjacent) { continue; }
-        sitesForThisOne.insert(sites.at(faceIt.first));
+        sitesForThisOne.push_back(sites.at(faceIt.first));
         for (const auto& edge : edges)
         {
           if (match.sq_distance(edge.a) > threshold()) { continue; }
@@ -951,19 +1058,64 @@ namespace ComputationalGeometry
         if (sitesForThisOne.size() >= 3) { break; }
       }
 
+      double minSqLenFromSite = -1;
+      std::vector<point2d> testEndpoints;
       for (const auto& endpoint : sitesForThisOne)
       {
+        testEndpoints.push_back(endpoint);
         Edge2d edge(siteIt.second, endpoint);
         voronoi.push_back(edge);
+        if ((minSqLenFromSite < 0) || (edge.sqLength() < minSqLenFromSite))
+        {
+          minSqLenFromSite = edge.sqLength();
+        }
       }
-      if (raySqLength < 0.0) { continue; }
+      if (minSqLenFromSite < 0) { continue; }
+      double testRaySqLen = minSqLenFromSite / 4;
+      double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
+
+      if (siteIt.second.x <= gScreenMin.x) { continue; }
+      if (siteIt.second.y <= gScreenMin.y) { continue; }
+      if (siteIt.second.x >= gScreenMax.x) { continue; }
+      if (siteIt.second.y >= gScreenMax.y) { continue; }
+
       for (const auto& nonMatch : nonMatching)
       {
         point2d proj = nonMatch.projection(siteIt.second);
-        //Edge2d ray(siteIt.second,
-        //  point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
-        //  raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
-        //voronoi.push_back(ray);
+        double coeff = raySqLength;
+          
+        bool bShouldReverseRay = false;
+        // Test to see: should we reverse ray?
+        point2d testPoint(testRayLen * (proj.x - siteIt.second.x) + siteIt.second.x, testRayLen * (proj.y - siteIt.second.y) + siteIt.second.y);
+        for (int siteInd = 0; siteInd < (int)testEndpoints.size(); ++siteInd)
+        {
+          int i0 = siteInd;
+          int i1 = siteInd + 1;
+          if (i1 >= (int)testEndpoints.size()) { i1 = 0; }
+          Triangle2d testTri(siteIt.second, testEndpoints[i0], testEndpoints[i1]);
+          if (testTri.pointIsInterior(testPoint)  == 1)
+          {
+            bShouldReverseRay = true; break;
+          }
+          testTri = Triangle2d(siteIt.second, testPoint, testEndpoints[i1]);
+          if (testTri.pointIsInterior(testEndpoints[i0])  == 1)
+          {
+            bShouldReverseRay = true; break;
+          }
+          testTri = Triangle2d(siteIt.second, testPoint, testEndpoints[i0]);
+          if (testTri.pointIsInterior(testEndpoints[i1])  == 1)
+          {
+            bShouldReverseRay = true; break;
+          }
+        }
+        // Done testing.
+        if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+        double projSqLen = Edge2d(proj, siteIt.second).sqLength();
+        if (projSqLen > threshold()) { coeff = coeff / safeSqrt(projSqLen); }
+        point2d rayPoint = point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y);
+        Edge2d ray(siteIt.second, rayPoint);
+        voronoi.push_back(ray);
+        testEndpoints.push_back(point2d(testRayLen * (proj.x - siteIt.second.x) + siteIt.second.x, testRayLen * (proj.y - siteIt.second.y) + siteIt.second.y));
       }
     }
   }
