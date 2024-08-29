@@ -19,14 +19,15 @@ namespace ComputationalGeometry
   class point3d
   {
     public:
-    double x;  double y;  double z;
-    point3d();
-    point3d(const double& xx, const double& yy, const double& zz);
-    virtual int GetDimension() const;
-    /** \brief Necessary for set insertion to work. */
-    bool operator< (const point3d& q) const;
-    void print(const std::string& prequel = "") const;
-    static double sq_distance(const point3d& P, const point3d& Q);
+      double x;  double y;  double z;
+      point3d();
+      point3d(const double& xx, const double& yy, const double& zz);
+      virtual int GetDimension() const;
+      /** \brief Necessary for set insertion to work. */
+      bool operator< (const point3d& q) const;
+      void print(const std::string& prequel = "") const;
+      double dot(const point3d& P) const;
+      static double sq_distance(const point3d& P, const point3d& Q);
   };
     
   class point2d : public point3d

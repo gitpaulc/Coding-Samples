@@ -58,6 +58,16 @@ namespace ComputationalGeometry
     std::cout << ")";
   }
 
+  double point3d::dot(const point3d& P) const
+  {
+    double answer = x * P.x + y * P.y;
+    if ((GetDimension() > 2) || (P.GetDimension() > 2))
+    {
+      answer = answer + z * P.z;
+    }
+    return answer;
+  }
+
   double point3d::sq_distance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
@@ -224,11 +234,9 @@ namespace ComputationalGeometry
     if (sqLength() <= threshold()) { return a; }
     point2d pp(P.x - a.x, P.y - a.y);
     point2d qq(b.x - a.x, b.y - a.y);
-    double squareNorm = point2d::sq_distance(qq, point2d(0.0, 0.0));
-    double tt = (qq.y * pp.x - qq.x * pp.y) / squareNorm;
-    point2d rr(pp.x - tt * qq.y, pp.y + tt * qq.x);
-    point2d answer(rr.x + a.x, rr.y + a.y);
-    return answer;
+    double coeff = pp.dot(qq) / sqLength();
+    point2d rr(qq.x * coeff, qq.y * coeff);
+    return point2d(rr.x + a.x, rr.y + a.y);
   }
 
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
@@ -960,10 +968,10 @@ namespace ComputationalGeometry
       for (const auto& nonMatch : nonMatching)
       {
         point2d proj = nonMatch.projection(siteIt.second);
-        //Edge2d ray(siteIt.second,
-        //  point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
-        //  raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
-        //voronoi.push_back(ray);
+        Edge2d ray(siteIt.second,
+          point2d(raySqLength * (proj.x - siteIt.second.x) + siteIt.second.x,
+          raySqLength * (proj.y - siteIt.second.y) + siteIt.second.y));
+        voronoi.push_back(ray);
       }
     }
   }
