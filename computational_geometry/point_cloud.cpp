@@ -989,13 +989,23 @@ namespace ComputationalGeometry
           int i1 = siteInd + 1;
           if (i1 >= (int)testEndpoints.size()) { i1 = 0; }
           Triangle2d testTri(siteIt.second, testEndpoints[i0], testEndpoints[i1]);
-          if (testTri.pointIsInterior(testPoint) != 0)
+          if (testTri.pointIsInterior(testPoint)  == 1)
+          {
+            bShouldReverseRay = true; break;
+          }
+          testTri = Triangle2d(siteIt.second, testPoint, testEndpoints[i1]);
+          if (testTri.pointIsInterior(testEndpoints[i0])  == 1)
+          {
+            bShouldReverseRay = true; break;
+          }
+          testTri = Triangle2d(siteIt.second, testPoint, testEndpoints[i0]);
+          if (testTri.pointIsInterior(testEndpoints[i1])  == 1)
           {
             bShouldReverseRay = true; break;
           }
         }
         // Done testing.
-          if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
+        if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
         point2d rayPoint = point2d(coeff * (proj.x - siteIt.second.x) + siteIt.second.x, coeff * (proj.y - siteIt.second.y) + siteIt.second.y);
         Edge2d ray(siteIt.second, rayPoint);
         voronoi.push_back(ray);
