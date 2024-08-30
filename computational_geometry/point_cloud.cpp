@@ -8,6 +8,12 @@
 #endif
 #include <map>
 
+#define USE_MULTI_THREADING
+#ifdef USE_MULTI_THREADING
+#include <mutex>
+#include <thread>
+#endif // USE_MULTI_THREADING
+
 namespace ComputationalGeometry
 {
   static int gWindowWidth = 1024;
@@ -15,6 +21,10 @@ namespace ComputationalGeometry
 
   static point2d gScreenMin(-1, -1);
   static point2d gScreenMax(1, 1);
+
+#ifdef USE_MULTI_THREADING
+  static std::mutex gMutex;
+#endif // USE_MULTI_THREADING
 
   int& numRandomPoints()
   {
@@ -71,7 +81,7 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point3d::sq_distance(const point3d& P, const point3d& Q)
+  double point3d::sqDistance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
     double dt = (P.x - Q.x);
@@ -123,12 +133,12 @@ namespace ComputationalGeometry
 
   double Edge2d::sqLength() const
   {
-    return point2d::sq_distance(a, b);
+    return point2d::sqDistance(a, b);
   }
 
-  double Edge2d::sq_distance(const point2d& P) const
+  double Edge2d::sqDistance(const point2d& P) const
   {
-    double aSqDistP = point2d::sq_distance(a, P);
+    double aSqDistP = point2d::sqDistance(a, P);
     if (sqLength() <= threshold())
     {
       return aSqDistP;
@@ -142,7 +152,7 @@ namespace ComputationalGeometry
     double numSqrt = (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1;
     double answer = numSqrt * numSqrt / sqLength();
     if (answer > threshold()) { return answer; }
-    double bSqDistP = point2d::sq_distance(b, P);
+    double bSqDistP = point2d::sqDistance(b, P);
     if ((aSqDistP < sqLength()) && (bSqDistP < sqLength())) { return 0.0; }
     if (aSqDistP >= sqLength()) { return bSqDistP; }
     return aSqDistP;
@@ -151,13 +161,13 @@ namespace ComputationalGeometry
   /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
   int Edge2d::intersection(const Edge2d& other, point2d& intersection) const
   {
-    if (point2d::sq_distance(a, b) <= threshold())
+    if (point2d::sqDistance(a, b) <= threshold())
     {
-      if (point2d::sq_distance(a, other.a) <= threshold())
+      if (point2d::sqDistance(a, other.a) <= threshold())
       {
         intersection = a; return 2;
       }
-      if (point2d::sq_distance(a, other.b) <= threshold())
+      if (point2d::sqDistance(a, other.b) <= threshold())
       {
         intersection = a; return 2;
       }
@@ -184,12 +194,12 @@ namespace ComputationalGeometry
       
     // For intersection as point, t and u must be between 0 and 1.
     bool bDetNonzero = (absDet > threshold());
-    if ((point2d::sq_distance(a, other.a) <= threshold()) || (point2d::sq_distance(a, other.b) <= threshold()))
+    if ((point2d::sqDistance(a, other.a) <= threshold()) || (point2d::sqDistance(a, other.b) <= threshold()))
     {
       intersection = a;
       return bDetNonzero ? 1 : 2;
     }
-    if ((point2d::sq_distance(b, other.a) <= threshold()) || (point2d::sq_distance(b, other.b) <= threshold()))
+    if ((point2d::sqDistance(b, other.a) <= threshold()) || (point2d::sqDistance(b, other.b) <= threshold()))
     {
       intersection = b;
       return bDetNonzero ? 1 : 2;
@@ -210,22 +220,22 @@ namespace ComputationalGeometry
       return 1;
     }
     // Parallel and non-collinear or else edges intersect.
-    if (sq_distance(other.a) < threshold())
+    if (sqDistance(other.a) < threshold())
     {
       intersection = other.a;
       return 2;
     }
-    if (sq_distance(other.b) < threshold())
+    if (sqDistance(other.b) < threshold())
     {
       intersection = other.b;
       return 2;
     }
-    if (other.sq_distance(a) < threshold())
+    if (other.sqDistance(a) < threshold())
     {
       intersection = a;
       return 2;
     }
-    // else if (other.sq_distance(b) < threshold())
+    // else if (other.sqDistance(b) < threshold())
     {
       intersection = b;
       return 2;
@@ -287,9 +297,9 @@ namespace ComputationalGeometry
     if (bCollinear)
     {
       bool bZeroRadius = true;
-      if (point2d::sq_distance(a, b) > threshold()) { bZeroRadius = false; }
-      if (point2d::sq_distance(b, c) > threshold()) { bZeroRadius = false; }
-      if (point2d::sq_distance(a, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(a, b) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(b, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(a, c) > threshold()) { bZeroRadius = false; }
       if (bZeroRadius)
       {
         center = a; sqRadius = 0;
@@ -301,21 +311,21 @@ namespace ComputationalGeometry
     }
     else
     {
-      double a2 = point2d::sq_distance(a, point2d(0, 0));
-      double b2 = point2d::sq_distance(b, point2d(0, 0));
-      double c2 = point2d::sq_distance(c, point2d(0, 0));
+      double a2 = point2d::sqDistance(a, point2d(0, 0));
+      double b2 = point2d::sqDistance(b, point2d(0, 0));
+      double c2 = point2d::sqDistance(c, point2d(0, 0));
       Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
       Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
       center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
       Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
-      sqRadius = (BB.det() / den) + point2d::sq_distance(center, point2d(0, 0));
+      sqRadius = (BB.det() / den) + point2d::sqDistance(center, point2d(0, 0));
     }
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge */
   int Circle2d::pointIsInterior(const point2d& pt) const
   {
-    double dd = point2d::sq_distance(center, pt);
+    double dd = point2d::sqDistance(center, pt);
     double diff = dd - sqRadius;
     double absDiff = (diff > 0) ? diff : -diff;
     if (absDiff <= threshold()) { return 2; }
@@ -331,34 +341,34 @@ namespace ComputationalGeometry
   {
     edge = Edge2d(lhs.a, lhs.b);
     edge.a = lhs.a;
-    if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.a) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.c) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
-    if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.b) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.a) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
-    if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.c) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.b) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.a) < threshold()) { return true; }
       return false;
     }
     return false;
@@ -407,15 +417,15 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
-    if (point2d::sq_distance(a, pt) <= threshold()) { return 3; }
-    if (point2d::sq_distance(b, pt) <= threshold()) { return 3; }
-    if (point2d::sq_distance(c, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(a, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(b, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(c, pt) <= threshold()) { return 3; }
     Edge2d u(a, b);
     Edge2d v(b, c);
     Edge2d w(c, a);
-    if (u.sq_distance(pt) <= threshold()) { return 2; }
-    if (v.sq_distance(pt) <= threshold()) { return 2; }
-    if (w.sq_distance(pt) <= threshold()) { return 2; }
+    if (u.sqDistance(pt) <= threshold()) { return 2; }
+    if (v.sqDistance(pt) <= threshold()) { return 2; }
+    if (w.sqDistance(pt) <= threshold()) { return 2; }
     if (sqArea() <= threshold()) { return 0; }
     Triangle2d U(a, b, pt);
     Triangle2d V(b, c, pt);
@@ -467,16 +477,37 @@ namespace ComputationalGeometry
      * So iterating over the faces is O(n log(n))
      * This gives a total of O(n^2 log(n)).
      */
-    void naiveTriangulate();
+    void naiveTriangulate(std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull);
     void generateRandomPoints();
-    void computeDelaunay();
+    /**
+     * Divide by picking a best center point and drawing three best segments to a vertex
+     * in the convex hull. Each subregion is the intersection of a triangle with the hull, and so
+     * it must be convex.
+     */
+    void dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3);
+    static const int DelaunayMaxForNaive = 100;
+    enum class DelaunayMode
+    {
+      Naive = 0,
+      DivideAndConquer = 1
+    };
+    void computeDelaunay(DelaunayMode delaunayMode,
+                         std::vector<point2d>& ioPointArray,
+                         std::vector<Triangle2d>& ioTriangulation,
+                         std::vector<point2d>& ioHull,
+                         std::vector<Triangle2d>& ioDelaunay);
+#ifdef USE_MULTI_THREADING
+    std::vector<std::vector<Triangle2d> > mPartialTriangulations;
+    std::vector<std::vector<point2d> > mSmallClouds;
+    void computeDelaunayThreadFunc(int threadIndex);
+#endif // USE_MULTI_THREADING
     void computeNearestNeighbor();
     std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
     void computeVoronoi2or3points();
     void computeVoronoi();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
-    void computeConvexHull();
+    void computeConvexHull(const std::vector<point2d>& iPointArray, std::vector<point2d>& ioHull);
     template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min);
     template <class Container> static double naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2);
     template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2);
@@ -576,7 +607,7 @@ namespace ComputationalGeometry
     if (bRecompute)
     {
       pImpl->generateRandomPoints();
-      pImpl->computeConvexHull();
+      computeConvexHull();
       pImpl->triangulation.resize(0);
       pImpl->delaunay.resize(0);
       pImpl->nearestNeighbor.resize(0);
@@ -586,14 +617,14 @@ namespace ComputationalGeometry
     {
       if (pImpl->triangulation.empty())
       {
-        pImpl->naiveTriangulate();
+        pImpl->naiveTriangulate(pImpl->triangulation, pImpl->pointArray, pImpl->hull);
       }
     }
     if (pImpl->bDelaunayOn)
     {
       if (pImpl->delaunay.empty())
       {
-        pImpl->computeDelaunay();
+        computeDelaunay();
       }
     }
     if (pImpl->bNearestNeighborOn)
@@ -616,6 +647,22 @@ namespace ComputationalGeometry
   {
     static PointCloud pc;
     return pc;
+  }
+
+  bool PointCloud::pointIsInConvexSorted(const std::vector<point2d>& iHull, const point2d& iPoint)
+  {
+    const int hullSize = (int)iHull.size();
+    if (hullSize == 0) { return false; }
+    if (hullSize == 1) { return (point2d::sqDistance(iHull[0], iPoint) <= threshold()); }
+    if (hullSize == 2) { Edge2d edge(iHull[0], iHull[1]); return (edge.sqDistance(iPoint) <= threshold()); }
+    int startIndex = 2;
+    for (int ii = startIndex; ii < hullSize; ++ii)
+    {
+      Triangle2d face(iHull[0], iHull[ii - 1], iHull[ii]);
+      if (face.pointIsInterior(iPoint) == 0) { continue; }
+      return true;
+    }
+    return false;
   }
 
   void PointCloud::toggleConvexHull()
@@ -692,29 +739,298 @@ namespace ComputationalGeometry
 
   void PointCloud::computeDelaunay()
   {
-    if (pImpl != nullptr) { pImpl->computeDelaunay(); }
+    if (pImpl != nullptr) { pImpl->computeDelaunay(Impl::DelaunayMode::DivideAndConquer, pImpl->pointArray, pImpl->triangulation, pImpl->hull, pImpl->delaunay); }
   }
 
   void PointCloud::naiveTriangulate()
   {
-    if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+    if (pImpl != nullptr) { pImpl->naiveTriangulate(pImpl->triangulation, pImpl->pointArray, pImpl->hull); }
   }
 
-  void PointCloud::Impl::computeDelaunay() // Naive Delaunay
+  void PointCloud::Impl::dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3)
   {
+    std::vector<point2d> testHull;
+    computeConvexHull(iPointArray, testHull);
+    oPointArray1.resize(0);
+    oPointArray2.resize(0);
+    oPointArray3.resize(0);
+    if (iPointArray.size() <= 3)
+    {
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        if (ii == 0) { oPointArray1.push_back(iPointArray[0]); }
+        else if (ii == 1) { oPointArray2.push_back(iPointArray[1]); }
+        else if (ii == 2) { oPointArray3.push_back(iPointArray[2]); }
+      }
+      return;
+    }
+    std::sort(testHull.begin(), testHull.end(), point2d::comparator);
+    if (testHull.size() == iPointArray.size()) // All points in hull.
+    {
+      int NN = (int)testHull.size() / 3;
+      oPointArray2.push_back(testHull[0]);
+      oPointArray3.push_back(testHull[0]);
+      for (int ii = 0; ii < (int)(testHull.size()); ++ii)
+      {
+        if (ii <= NN) { oPointArray1.push_back(testHull[ii]); continue; }
+        if (ii <= 2 * NN) { oPointArray2.push_back(testHull[ii]); continue; }
+        oPointArray3.push_back(testHull[ii]);
+      }
+      return;
+    }
+    point2d centerOfMass(0, 0);
+    {
+      double inv = 1.0 / (double)(iPointArray.size());
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        centerOfMass.x = centerOfMass.x + iPointArray[ii].x * inv;
+        centerOfMass.y = centerOfMass.y + iPointArray[ii].y * inv;
+      }
+      double bestSqDist = -1;
+      point2d bestPoint;
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        if (ii == 0)
+        {
+          bestSqDist = point2d::sqDistance(iPointArray[ii], centerOfMass);
+          bestPoint = iPointArray[ii];
+        }
+        else if (point2d::sqDistance(iPointArray[ii], centerOfMass) < bestSqDist)
+        {
+          bestSqDist = point2d::sqDistance(iPointArray[ii], centerOfMass);
+          bestPoint = iPointArray[ii];
+        }
+      }
+      centerOfMass = bestPoint;
+    }
+    int bestScore = -1;
+    // Trying each point is too slow. Use center of mass.
+    // for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+    {
+      //auto baseVertex = iPointArray[ii];
+      auto& baseVertex = centerOfMass;
+      for (int j1 = 0; j1 < (int)(testHull.size()); ++j1)
+      for (int j2 = j1 + 1; j2 < (int)(testHull.size()); ++j2)
+      for (int j3 = j2 + 1; j3 < (int)(testHull.size()); ++j3)
+      {
+        std::vector<point2d> testHull1, testHull2, testHull3;
+        testHull1.push_back(baseVertex);
+        testHull2.push_back(baseVertex);
+        testHull3.push_back(baseVertex);
+        for (int jj = 0; jj < (int)(testHull.size()); ++jj)
+        {
+          if (jj <= j1) { testHull1.push_back(testHull[jj]); continue; }
+          if (jj <= j2) { testHull2.push_back(testHull[jj]); continue; }
+          testHull3.push_back(testHull[jj]);
+        }
+        std::vector<point2d> tempArray1, tempArray2, tempArray3;
+        for (int kk = 0; kk < (int)(iPointArray.size()); ++kk)
+        {
+          if (PointCloud::pointIsInConvexSorted(testHull1, iPointArray[kk]))
+          {
+            tempArray1.push_back(iPointArray[kk]); continue;
+          }
+          if (PointCloud::pointIsInConvexSorted(testHull2, iPointArray[kk]))
+          {
+            tempArray2.push_back(iPointArray[kk]); continue;
+          }
+          // if (PointCloud::pointIsInConvexSorted(testHull3, iPointArray[kk]))
+          {
+            tempArray3.push_back(iPointArray[kk]);
+          }
+        }
+        int score1 = (int)tempArray1.size();
+        int score2 = (int)tempArray2.size();
+        int score3 = (int)tempArray3.size();
+        int score = abs(score1 - score2) + abs(score2 - score3) + abs(score3 - score1);
+        if ((bestScore < 0) || (score < bestScore))
+        {
+          bestScore = score;
+          oPointArray1 = tempArray1;
+          oPointArray2 = tempArray2;
+          oPointArray3 = tempArray3;
+        }
+      }
+    }
+  }
+
+#ifdef USE_MULTI_THREADING
+  void PointCloud::Impl::computeDelaunayThreadFunc(int threadIndex)
+  {
+    //gMutex.lock();
+    std::vector<Triangle2d> smallDelaunay;
+    std::vector<Triangle2d> smallTriangulation;
+    std::vector<point2d> smallHull;
+    computeDelaunay(DelaunayMode::Naive, mSmallClouds[threadIndex], smallTriangulation, smallHull, smallDelaunay);
+    for (auto& face : smallDelaunay)
+    {
+      mPartialTriangulations[threadIndex].push_back(face);
+    }
+    //gMutex.unlock();
+  }
+#endif // USE_MULTI_THREADING
+
+  void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioHull, std::vector<Triangle2d>& ioDelaunay)
+  {
+    if (delaunayMode == DelaunayMode::DivideAndConquer)
+    {
+      if ((int)(ioPointArray.size()) <= DelaunayMaxForNaive)
+      {
+        computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
+            return;
+      }
+        
+#ifdef USE_MULTI_THREADING
+      auto& smallClouds = mSmallClouds;
+      smallClouds.resize(0);
+#else
+      std::vector<std::vector<point2d> > smallClouds;
+#endif // USE_MULTI_THREADING
+      {
+        const int maxStackSize = 8;
+        std::vector<std::vector<point2d> > remaining;
+        {
+          std::vector<point2d> oPointArray1, oPointArray2, oPointArray3;
+          {
+            dividePointsInto3ConvexClouds(ioPointArray, oPointArray1, oPointArray2, oPointArray3);
+            if ((int)(oPointArray1.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray1);
+            }
+            else { remaining.push_back(oPointArray1); }
+            if ((int)(oPointArray2.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray2);
+            }
+            else { remaining.push_back(oPointArray2); }
+            if ((int)(oPointArray3.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray3);
+            }
+            else { remaining.push_back(oPointArray3); }
+          }
+          for (;remaining.size() > 0;)
+          {
+            if (remaining.size() >= maxStackSize)
+            {
+              for (const auto& trialCloud : remaining)
+              {
+                smallClouds.push_back(trialCloud);
+              }
+              break;
+            }
+            auto trialCloud = remaining[(int)remaining.size() - 1];
+            remaining.resize((int)remaining.size() - 1);
+            bool bFoundOne = false;
+            {
+              std::vector<point2d> thisRemainingCloud;
+              dividePointsInto3ConvexClouds(trialCloud, oPointArray1, oPointArray2, oPointArray3);
+              if ((int)(oPointArray1.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray1);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray1)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if ((int)(oPointArray2.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray2);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray2)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if ((int)(oPointArray3.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray3);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray3)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if (!bFoundOne)
+              {
+                remaining.push_back(oPointArray1);
+                remaining.push_back(oPointArray2);
+                remaining.push_back(oPointArray3);
+              }
+              else if (thisRemainingCloud.size() > 0)
+              {
+                remaining.push_back(thisRemainingCloud);
+              }
+            }
+          }
+        }
+      }
+
+      //std::cout << "\nNumber of small clouds: " << smallClouds.size() << std::endl;
+
+      std::vector<Triangle2d> partialTriangulation;
+#ifdef USE_MULTI_THREADING
+      std::vector<std::thread> cloudThreads;
+      mPartialTriangulations.resize(smallClouds.size());
+      int threadIndex = 0;
+#endif // USE_MULTI_THREADING
+      for (auto& smallCloud : smallClouds)
+      {
+#ifdef USE_MULTI_THREADING
+        std::thread cloudThread(&PointCloud::Impl::computeDelaunayThreadFunc, this, threadIndex);
+        ++threadIndex;
+        cloudThreads.push_back(std::move(cloudThread));
+#else
+        std::vector<Triangle2d> smallDelaunay;
+        std::vector<Triangle2d> smallTriangulation;
+        std::vector<point2d> smallHull;
+        computeDelaunay(DelaunayMode::Naive, smallCloud, smallTriangulation, smallHull, smallDelaunay);
+        for (auto& face : smallDelaunay)
+        {
+          partialTriangulation.push_back(face);
+        }
+#endif // USE_MULTI_THREADING
+      }
+#ifdef USE_MULTI_THREADING
+      for (auto& cloudThread : cloudThreads) // Synchronize.
+      {
+        cloudThread.join();
+      }
+      for (auto& smallDelaunay : mPartialTriangulations)
+      {
+        for (const auto& face : smallDelaunay)
+        {
+          partialTriangulation.push_back(face);
+        }
+      }
+#endif // USE_MULTI_THREADING
+      computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
+      return;
+    }
+    // if (delaunayMode == DelaunayMode::Naive):
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
-      if (triangulation.empty()) { naiveTriangulate(); }
-      if (pointArray.size() == 2)
+      if (ioTriangulation.empty()) { naiveTriangulate(ioTriangulation, ioPointArray, ioHull); }
+      if (ioPointArray.size() == 2)
       {
-        if (triangulation.size() >= 1)
+        if (ioTriangulation.size() >= 1)
         {
-          delaunay.push_back(triangulation[0]);
+          ioDelaunay.push_back(ioTriangulation[0]);
           return;
         }
       }
-      for (const auto& face : triangulation)
+      for (const auto& face : ioTriangulation)
       {
         faces.insert(face);
         ++numFaces;
@@ -742,12 +1058,12 @@ namespace ComputationalGeometry
 
           point2d iVertex = it->a;
           point2d jVertex = jt->a;
-          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->b; }
-          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->b; }
-          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->c; }
-          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->c; }
-          if (match.sq_distance(iVertex) <= threshold()) { continue; }
-          if (match.sq_distance(jVertex) <= threshold()) { continue; }
+          if (match.sqDistance(iVertex) <= threshold()) { iVertex = it->b; }
+          if (match.sqDistance(jVertex) <= threshold()) { jVertex = jt->b; }
+          if (match.sqDistance(iVertex) <= threshold()) { iVertex = it->c; }
+          if (match.sqDistance(jVertex) <= threshold()) { jVertex = jt->c; }
+          if (match.sqDistance(iVertex) <= threshold()) { continue; }
+          if (match.sqDistance(jVertex) <= threshold()) { continue; }
 
           Circle2d testCircle(it->a, it->b, it->c);
           if (testCircle.pointIsInterior(jVertex) == 1)
@@ -782,30 +1098,30 @@ namespace ComputationalGeometry
     }
     for (const auto& face : faces)
     {
-      delaunay.push_back(face);
+      ioDelaunay.push_back(face);
     }
-    //std::cout << "\nNumber of points: " << pointArray.size() << ".";
+    //std::cout << "\nNumber of points: " << ioPointArray.size() << ".";
     //std::cout << "\nNumber of faces in initial triangulation: " << numFaces << ".";
     //std::cout << "\nNumber of Delaunay flips: " << flips << ".";
-    //std::cout << "\nNumber of faces in Delaunay triangulation: " << delaunay.size() << ".";
+    //std::cout << "\nNumber of faces in Delaunay triangulation: " << ioDelaunay.size() << ".";
   }
 
-  void PointCloud::Impl::naiveTriangulate()
+  void PointCloud::Impl::naiveTriangulate(std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull)
   {
-    triangulation.resize(0);
-    if (hull.empty())
+    ioTriangulation.resize(0);
+    if (ioHull.empty())
     {
-      computeConvexHull();
+      computeConvexHull(ioPointArray, ioHull);
     }
-    int hullSize = (int) hull.size();
+    int hullSize = (int) ioHull.size();
     if (hullSize <= 2)
     {
-      if (pointArray.size() == 2)
+      if (ioPointArray.size() == 2)
       {
-        if (point2d::sq_distance(pointArray[0], pointArray[1]) > threshold())
+        if (point2d::sqDistance(ioPointArray[0], ioPointArray[1]) > threshold())
         {
-          Triangle2d face(pointArray[0], pointArray[1], pointArray[0]);
-          triangulation.push_back(face);
+          Triangle2d face(ioPointArray[0], ioPointArray[1], ioPointArray[0]);
+          ioTriangulation.push_back(face);
         }
       }
       return;
@@ -814,21 +1130,22 @@ namespace ComputationalGeometry
     std::set<Triangle2d> faces;
     for (int i = startIndex; i < hullSize; ++i)
     {
-      Triangle2d face(hull[0], hull[i - 1], hull[i]);
+      Triangle2d face(ioHull[0], ioHull[i - 1], ioHull[i]);
       faces.insert(face);
     }
-    for (int i = 0, NN = pointArray.size(); i < NN; ++i)
+    for (int i = 0, NN = (int)(ioPointArray.size()); i < NN; ++i)
     {
       // Pre- C++ 11 style of iteration:
       std::set<Triangle2d>::iterator it = faces.begin();
       for (; it != faces.end(); ++it)
       {
-        if ((it->pointIsInterior(pointArray[i])) == 1) { break; }
+        if ((it->pointIsInterior(ioPointArray[i])) == 1) { break; }
       }
       if (it == faces.end()) { continue; }
-      Triangle2d u(pointArray[i], it->a, it->b);
-      Triangle2d v(pointArray[i], it->b, it->c);
-      Triangle2d w(pointArray[i], it->c, it->a);
+      point2d basePoint = ioPointArray[i];
+      Triangle2d u(basePoint, it->a, it->b);
+      Triangle2d v(basePoint, it->b, it->c);
+      Triangle2d w(basePoint, it->c, it->a);
       faces.erase(it);
       faces.insert(u);
       faces.insert(v);
@@ -836,7 +1153,7 @@ namespace ComputationalGeometry
     }
     for (const auto& face : faces)
     {
-      triangulation.push_back(face);
+      ioTriangulation.push_back(face);
     }
   }
 
@@ -869,9 +1186,9 @@ namespace ComputationalGeometry
   void PointCloud::Impl::computeNearestNeighbor()
   {
     nearestNeighbor.resize(0);
-    if (delaunay.empty())
+    if (delaunay.empty() && (pCloud != nullptr))
     {
-      computeDelaunay();
+      pCloud->computeDelaunay();
     }
 
     if (pointArray.size() == 2)
@@ -891,21 +1208,21 @@ namespace ComputationalGeometry
       std::set<Edge2d> edgesForThisOne;
       for (const auto& face : faces)
       {
-        if (point2d::sq_distance(face.a, current) <= threshold())
+        if (point2d::sqDistance(face.a, current) <= threshold())
         {
           Edge2d edge(face.a, face.b);
           edgesForThisOne.insert(edge);
           edge = Edge2d(face.a, face.c);
           edgesForThisOne.insert(edge);
         }
-        if (point2d::sq_distance(face.b, current) <= threshold())
+        if (point2d::sqDistance(face.b, current) <= threshold())
         {
           Edge2d edge(face.a, face.b);
           edgesForThisOne.insert(edge);
           edge = Edge2d(face.b, face.c);
           edgesForThisOne.insert(edge);
         }
-        if (point2d::sq_distance(face.c, current) <= threshold())
+        if (point2d::sqDistance(face.c, current) <= threshold())
         {
           Edge2d edge(face.b, face.c);
           edgesForThisOne.insert(edge);
@@ -1016,9 +1333,9 @@ namespace ComputationalGeometry
   void PointCloud::Impl::computeVoronoi()
   {
     voronoi.resize(0);
-    if (delaunay.empty())
+    if (delaunay.empty() && (pCloud != nullptr))
     {
-      computeDelaunay();
+      pCloud->computeDelaunay();
     }
 
     if (pointArray.size() <= 3)
@@ -1072,8 +1389,8 @@ namespace ComputationalGeometry
         sitesForThisOne.push_back(sites.at(faceIt.first));
         for (const auto& edge : edges)
         {
-          if (match.sq_distance(edge.a) > threshold()) { continue; }
-          if (match.sq_distance(edge.b) > threshold()) { continue; }
+          if (match.sqDistance(edge.a) > threshold()) { continue; }
+          if (match.sqDistance(edge.b) > threshold()) { continue; }
           nonMatching.erase(edge);
         }
         if (sitesForThisOne.size() >= 3) { break; }
@@ -1143,58 +1460,58 @@ namespace ComputationalGeometry
 
   void PointCloud::computeConvexHull()
   {
-    if (pImpl != nullptr) { pImpl->computeConvexHull(); }
+    if (pImpl != nullptr) { pImpl->computeConvexHull(pImpl->pointArray, pImpl->hull); }
   }
 
-  void PointCloud::Impl::computeConvexHull()
+  void PointCloud::Impl::computeConvexHull(const std::vector<point2d>& iPointArray, std::vector<point2d>& ioHull)
   {
-    hull.resize(0);
+    ioHull.resize(0);
 
     // 2d: Graham scan.
-    hull = pointArray;
-    const int NN = (int)pointArray.size();
+    ioHull = iPointArray;
+    const int NN = (int)iPointArray.size();
     if (NN <= 3) {return;}
 
-    point2d tempOrigin = hull[0];
+    point2d tempOrigin = ioHull[0];
     {
       int bestIndex = 0;
       const int startIndex = 1;
       for (int i = startIndex; i < NN; ++i)
       {
-        if (hull[i].y < tempOrigin.y)
+        if (ioHull[i].y < tempOrigin.y)
         {
-          tempOrigin = hull[i];
+          tempOrigin = ioHull[i];
           bestIndex = i;
         }
       }
 
-      hull[bestIndex] = hull[1];
-      hull[1] = tempOrigin;
-      hull.push_back(hull[0]);
+      ioHull[bestIndex] = ioHull[1];
+      ioHull[1] = tempOrigin;
+      ioHull.push_back(ioHull[0]);
     
       for (int i = startIndex; i <= NN; ++i)
       {
-        hull[i].x = hull[i].x - tempOrigin.x;
-        hull[i].y = hull[i].y - tempOrigin.y;
+        ioHull[i].x = ioHull[i].x - tempOrigin.x;
+        ioHull[i].y = ioHull[i].y - tempOrigin.y;
       }
     
       // O(n log(n)):
-      std::sort(hull.begin() + 1, hull.end(), point2d::comparator);
+      std::sort(ioHull.begin() + 1, ioHull.end(), point2d::comparator);
     
       for (int i = startIndex; i <= NN; ++i)
       {
-        hull[i].x = hull[i].x + tempOrigin.x;
-        hull[i].y = hull[i].y + tempOrigin.y;
+        ioHull[i].x = ioHull[i].x + tempOrigin.x;
+        ioHull[i].y = ioHull[i].y + tempOrigin.y;
       }
         
-      hull[0] = hull[NN];
+      ioHull[0] = ioHull[NN];
     }
     
     int hullCount = 1; // Initialize stack.
     const int startIndex = 2;
     for (int i = startIndex; i <= NN; ++i)
     {
-      while (point2d::getOrientation(hull[hullCount], hull[i], hull[hullCount - 1]) <= 0)
+      while (point2d::getOrientation(ioHull[hullCount], ioHull[i], ioHull[hullCount - 1]) <= 0)
       {
         if (hullCount > 1)
         {
@@ -1205,12 +1522,12 @@ namespace ComputationalGeometry
       }
       // Otherwise point is on the boundary of the convex hull.
       ++hullCount;
-      tempOrigin = hull[hullCount];
-      hull[hullCount] = hull[i];
-      hull[i] = tempOrigin;
+      tempOrigin = ioHull[hullCount];
+      ioHull[hullCount] = ioHull[i];
+      ioHull[i] = tempOrigin;
     }
 
-    hull.resize(hullCount);
+    ioHull.resize(hullCount);
   }
 
   template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min)
@@ -1224,13 +1541,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point3d::sq_distance(*it1, *it2);
+              min = point3d::sqDistance(*it1, *it2);
               A_min = *it1;
               B_min = *it2;
               started = true;
               continue;
           }
-          double candidate = point3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sqDistance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -1262,13 +1579,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point3d::sq_distance(*it1, *it2);
+              min = point3d::sqDistance(*it1, *it2);
               min_1 = *it1;
               min_2 = *it2;
               started = true;
               continue;
           }
-          double candidate = point3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sqDistance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -1319,21 +1636,21 @@ namespace ComputationalGeometry
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point2d::sq_distance(min_1, min_2);
+      return point2d::sqDistance(min_1, min_2);
     }
     if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
       point2d a = *it;  ++it;  point2d b = *it;
-      double min_ = point2d::sq_distance(a, b);
+      double min_ = point2d::sqDistance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point2d::sq_distance(a, *it);
+      double candidate = point2d::sqDistance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point2d::sq_distance(*it, b);
+      candidate = point2d::sqDistance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -1389,21 +1706,21 @@ namespace ComputationalGeometry
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point2d::sq_distance(min_1, min_2);
+      return point2d::sqDistance(min_1, min_2);
     }
     if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
       point2d a = *it;  ++it;  point2d b = *it;
-      double min_ = point2d::sq_distance(a, b);
+      double min_ = point2d::sqDistance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point2d::sq_distance(a, *it);
+      double candidate = point2d::sqDistance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point2d::sq_distance(*it, b);
+      candidate = point2d::sqDistance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -1451,14 +1768,14 @@ namespace ComputationalGeometry
       point3d P(1.0, 2.0, 3.0);
       point3d Q(1.0, -2.0, 3.0);
   
-      printf("%f\n", point3d::sq_distance(P,Q));
+      printf("%f\n", point3d::sqDistance(P,Q));
     }
   
     {
       point2d P(1.5, 2.0);
       point2d Q(1.0, -2.0);
   
-      printf("%f\n", point2d::sq_distance(P,Q));
+      printf("%f\n", point2d::sqDistance(P,Q));
     }
   
     {

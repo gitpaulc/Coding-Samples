@@ -27,7 +27,7 @@ namespace ComputationalGeometry
       bool operator< (const point3d& q) const;
       void print(const std::string& prequel = "") const;
       double dot(const point3d& P) const;
-      static double sq_distance(const point3d& P, const point3d& Q);
+      static double sqDistance(const point3d& P, const point3d& Q);
   };
     
   class point2d : public point3d
@@ -48,7 +48,7 @@ namespace ComputationalGeometry
     /** \brief For set and map insertion. */
     bool operator< (const Edge2d& rhs) const;
     double sqLength() const;
-    double sq_distance(const point2d& P) const;
+    double sqDistance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
     int intersection(const Edge2d& other, point2d& intersection) const;
     /** \brief Point that attains square distance from point P to line spanned by edge. */
@@ -114,6 +114,7 @@ namespace ComputationalGeometry
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
+      static bool pointIsInConvexSorted(const std::vector<point2d>& iHull, const point2d& iPoint);
       
       void toggleConvexHull();
       void toggleDelaunay();
