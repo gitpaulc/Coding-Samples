@@ -469,6 +469,11 @@ namespace ComputationalGeometry
      */
     void naiveTriangulate(std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull);
     void generateRandomPoints();
+    /**
+     * Divide by picking a best center point and drawing three best segments to a vertex
+     * in the convex hull. Each subregion is the intersection of a triangle with the hull, and so
+     * it must be convex.
+     */
     void dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3);
     static const int DelaunayMaxForNaive = 50;
     enum class DelaunayMode
@@ -758,6 +763,7 @@ namespace ComputationalGeometry
       }
       return;
     }
+    // TODO: Replace with a simple center of mass calculation.
     int bestScore = -1;
     for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
     {
@@ -815,6 +821,96 @@ namespace ComputationalGeometry
       {
         computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
             return;
+      }
+      std::vector<std::vector<point2d> > smallClouds;
+      {
+        const int maxStackSize = 8;
+        std::vector<std::vector<point2d> > remaining;
+        {
+          std::vector<point2d> oPointArray1, oPointArray2, oPointArray3;
+          {
+            dividePointsInto3ConvexClouds(ioPointArray, oPointArray1, oPointArray2, oPointArray3);
+            if ((int)(oPointArray1.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray1);
+            }
+            else { remaining.push_back(oPointArray1); }
+            if ((int)(oPointArray2.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray2);
+            }
+            else { remaining.push_back(oPointArray2); }
+            if ((int)(oPointArray3.size()) <= DelaunayMaxForNaive)
+            {
+              smallClouds.push_back(oPointArray3);
+            }
+            else { remaining.push_back(oPointArray3); }
+          }
+          for (;remaining.size() > 0;)
+          {
+            if (remaining.size() >= maxStackSize)
+            {
+              for (const auto& trialCloud : remaining)
+              {
+                smallClouds.push_back(trialCloud);
+              }
+              break;
+            }
+            auto trialCloud = remaining[(int)remaining.size() - 1];
+            remaining.resize((int)remaining.size() - 1);
+            bool bFoundOne = false;
+            {
+              std::vector<point2d> thisRemainingCloud;
+              dividePointsInto3ConvexClouds(trialCloud, oPointArray1, oPointArray2, oPointArray3);
+              if ((int)(oPointArray1.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray1);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray1)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if ((int)(oPointArray2.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray2);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray2)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if ((int)(oPointArray3.size()) <= DelaunayMaxForNaive)
+              {
+                smallClouds.push_back(oPointArray3);
+                bFoundOne = true;
+              }
+              else
+              {
+                for (const auto thisPoint : oPointArray3)
+                {
+                  thisRemainingCloud.push_back(thisPoint);
+                }
+              }
+              if (!bFoundOne)
+              {
+                remaining.push_back(oPointArray1);
+                remaining.push_back(oPointArray2);
+                remaining.push_back(oPointArray3);
+              }
+              else if (thisRemainingCloud.size() > 0)
+              {
+                remaining.push_back(thisRemainingCloud);
+              }
+            }
+          }
+        }
       }
     }
     // if (delaunayMode == DelaunayMode::Naive):
