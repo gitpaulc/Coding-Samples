@@ -1001,19 +1001,6 @@ namespace ComputationalGeometry
     if (bCollinear) { return; } // TODO: There should be two lines in this case. Or treat it as a segment if two points coincide. Use recursion.
     if (delaunay.size() < 1) { return; } // In fact it should == 1.
 
-    double minSqLenFromSite = -1;
-    for (const auto& vertex : pointArray)
-    {
-      Edge2d edge(site, vertex);
-      if ((minSqLenFromSite < 0) || (edge.sqLength() < minSqLenFromSite))
-      {
-        minSqLenFromSite = edge.sqLength();
-      }
-    }
-    if (minSqLenFromSite < 0) { return; }
-    double testRaySqLen = minSqLenFromSite / 4;
-    double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
-
     std::vector<Edge2d> voronoiRays = constructVoronoiRays(site, pointArray);
     for (const auto& voronoiRay : voronoiRays)
     {
