@@ -499,7 +499,7 @@ namespace ComputationalGeometry
 #ifdef USE_MULTI_THREADING
     std::vector<std::vector<Triangle2d> > mPartialTriangulations;
     std::vector<std::vector<point2d> > mSmallClouds;
-      void computeDelaunayThreadFunc(); //int threadIndex);
+    void computeDelaunayThreadFunc(int threadIndex);
 #endif // USE_MULTI_THREADING
     void computeNearestNeighbor();
     std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
@@ -855,10 +855,10 @@ namespace ComputationalGeometry
   }
 
 #ifdef USE_MULTI_THREADING
-  void PointCloud::Impl::computeDelaunayThreadFunc() //(int threadIndex)
+  void PointCloud::Impl::computeDelaunayThreadFunc(int threadIndex)
   {
-      static int threadIndex = -1;
-      ++threadIndex;
+      //static int threadIndex = -1;
+      //++threadIndex;
     gMutex.lock();
     std::vector<Triangle2d> smallDelaunay;
     std::vector<Triangle2d> smallTriangulation;
@@ -984,13 +984,13 @@ namespace ComputationalGeometry
 #ifdef USE_MULTI_THREADING
       std::vector<std::thread> cloudThreads;
       mPartialTriangulations.resize(smallClouds.size());
-      //int threadIndex = 0;
+      int threadIndex = 0;
 #endif // USE_MULTI_THREADING
       for (auto& smallCloud : smallClouds)
       {
 #ifdef USE_MULTI_THREADING
-        std::thread cloudThread(&PointCloud::Impl::computeDelaunayThreadFunc, this); //, threadIndex);
-        //++threadIndex;
+        std::thread cloudThread(&PointCloud::Impl::computeDelaunayThreadFunc, this, threadIndex);
+        ++threadIndex;
         cloudThreads.push_back(std::move(cloudThread));
 #else
         std::vector<Triangle2d> smallDelaunay;
