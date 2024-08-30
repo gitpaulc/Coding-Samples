@@ -763,11 +763,37 @@ namespace ComputationalGeometry
       }
       return;
     }
-    // TODO: Replace with a simple center of mass calculation.
-    int bestScore = -1;
-    for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+    point2d centerOfMass(0, 0);
     {
-      auto baseVertex = iPointArray[ii];
+      double inv = 1.0 / (double)(iPointArray.size());
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        centerOfMass.x = centerOfMass.x + iPointArray[ii].x * inv;
+        centerOfMass.y = centerOfMass.y + iPointArray[ii].y * inv;
+      }
+      double bestSqDist = -1;
+      point2d bestPoint;
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        if (ii == 0)
+        {
+          bestSqDist = point2d::sq_distance(iPointArray[ii], centerOfMass);
+          bestPoint = iPointArray[ii];
+        }
+        else if (point2d::sq_distance(iPointArray[ii], centerOfMass) < bestSqDist)
+        {
+          bestSqDist = point2d::sq_distance(iPointArray[ii], centerOfMass);
+          bestPoint = iPointArray[ii];
+        }
+      }
+      centerOfMass = bestPoint;
+    }
+    int bestScore = -1;
+    // Trying each point is too slow. Use center of mass.
+    // for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+    {
+      //auto baseVertex = iPointArray[ii];
+      auto& baseVertex = centerOfMass;
       for (int j1 = 0; j1 < (int)(testHull.size()); ++j1)
       for (int j2 = j1 + 1; j2 < (int)(testHull.size()); ++j2)
       for (int j3 = j2 + 1; j3 < (int)(testHull.size()); ++j3)
@@ -914,6 +940,7 @@ namespace ComputationalGeometry
       }
 
       std::vector<Triangle2d> partialTriangulation;
+      //std::cout << "\nNumber of small clouds: " << smallClouds.size() << std::endl;
       for (auto& smallCloud : smallClouds)
       {
         std::vector<Triangle2d> smallDelaunay;
