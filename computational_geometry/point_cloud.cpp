@@ -467,7 +467,7 @@ namespace ComputationalGeometry
      * So iterating over the faces is O(n log(n))
      * This gives a total of O(n^2 log(n)).
      */
-    void naiveTriangulate();
+    void naiveTriangulate(std::vector<Triangle2d>& ioTriangulation);
     void generateRandomPoints();
     static const int DelaunayMaxForNaive = 50;
     enum class DelaunayMode
@@ -475,7 +475,10 @@ namespace ComputationalGeometry
       Naive = 0,
       DivideAndConquer = 1
     };
-    void computeDelaunay(DelaunayMode delaunayMode);
+    void computeDelaunay(DelaunayMode delaunayMode,
+                         std::vector<point2d>& ioPointArray,
+                         std::vector<Triangle2d>& ioTriangulation,
+                         std::vector<Triangle2d>& ioDelaunay);
     void computeNearestNeighbor();
     std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
     void computeVoronoi2or3points();
@@ -592,7 +595,7 @@ namespace ComputationalGeometry
     {
       if (pImpl->triangulation.empty())
       {
-        pImpl->naiveTriangulate();
+        pImpl->naiveTriangulate(pImpl->triangulation);
       }
     }
     if (pImpl->bDelaunayOn)
@@ -698,19 +701,19 @@ namespace ComputationalGeometry
 
   void PointCloud::computeDelaunay()
   {
-    if (pImpl != nullptr) { pImpl->computeDelaunay(Impl::DelaunayMode::DivideAndConquer); }
+    if (pImpl != nullptr) { pImpl->computeDelaunay(Impl::DelaunayMode::DivideAndConquer, pImpl->pointArray, pImpl->triangulation, pImpl->delaunay); }
   }
 
   void PointCloud::naiveTriangulate()
   {
-    if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
+    if (pImpl != nullptr) { pImpl->naiveTriangulate(pImpl->triangulation); }
   }
 
-  void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode)
+  void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<Triangle2d>& ioDelaunay)
   {
     if (delaunayMode == DelaunayMode::DivideAndConquer)
     {
-      if ((int)(pointArray.size()) <= DelaunayMaxForNaive)
+      if ((int)(ioPointArray.size()) <= DelaunayMaxForNaive)
       {
         delaunayMode = DelaunayMode::Naive;
       }
@@ -718,16 +721,16 @@ namespace ComputationalGeometry
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
-      if (triangulation.empty()) { naiveTriangulate(); }
-      if (pointArray.size() == 2)
+      if (ioTriangulation.empty()) { naiveTriangulate(ioTriangulation); }
+      if (ioPointArray.size() == 2)
       {
-        if (triangulation.size() >= 1)
+        if (ioTriangulation.size() >= 1)
         {
-          delaunay.push_back(triangulation[0]);
+          ioDelaunay.push_back(ioTriangulation[0]);
           return;
         }
       }
-      for (const auto& face : triangulation)
+      for (const auto& face : ioTriangulation)
       {
         faces.insert(face);
         ++numFaces;
@@ -795,17 +798,17 @@ namespace ComputationalGeometry
     }
     for (const auto& face : faces)
     {
-      delaunay.push_back(face);
+      ioDelaunay.push_back(face);
     }
-    //std::cout << "\nNumber of points: " << pointArray.size() << ".";
+    //std::cout << "\nNumber of points: " << ioPointArray.size() << ".";
     //std::cout << "\nNumber of faces in initial triangulation: " << numFaces << ".";
     //std::cout << "\nNumber of Delaunay flips: " << flips << ".";
-    //std::cout << "\nNumber of faces in Delaunay triangulation: " << delaunay.size() << ".";
+    //std::cout << "\nNumber of faces in Delaunay triangulation: " << ioDelaunay.size() << ".";
   }
 
-  void PointCloud::Impl::naiveTriangulate()
+  void PointCloud::Impl::naiveTriangulate(std::vector<Triangle2d>& ioTriangulation)
   {
-    triangulation.resize(0);
+    ioTriangulation.resize(0);
     if (hull.empty())
     {
       computeConvexHull();
@@ -818,7 +821,7 @@ namespace ComputationalGeometry
         if (point2d::sq_distance(pointArray[0], pointArray[1]) > threshold())
         {
           Triangle2d face(pointArray[0], pointArray[1], pointArray[0]);
-          triangulation.push_back(face);
+          ioTriangulation.push_back(face);
         }
       }
       return;
@@ -849,7 +852,7 @@ namespace ComputationalGeometry
     }
     for (const auto& face : faces)
     {
-      triangulation.push_back(face);
+      ioTriangulation.push_back(face);
     }
   }
 
