@@ -857,9 +857,7 @@ namespace ComputationalGeometry
 #ifdef USE_MULTI_THREADING
   void PointCloud::Impl::computeDelaunayThreadFunc(int threadIndex)
   {
-      //static int threadIndex = -1;
-      //++threadIndex;
-    gMutex.lock();
+    //gMutex.lock();
     std::vector<Triangle2d> smallDelaunay;
     std::vector<Triangle2d> smallTriangulation;
     std::vector<point2d> smallHull;
@@ -868,7 +866,7 @@ namespace ComputationalGeometry
     {
       mPartialTriangulations[threadIndex].push_back(face);
     }
-    gMutex.unlock();
+    //gMutex.unlock();
   }
 #endif // USE_MULTI_THREADING
 
