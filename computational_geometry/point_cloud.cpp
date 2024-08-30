@@ -471,8 +471,9 @@ namespace ComputationalGeometry
     void generateRandomPoints();
     void computeDelaunay();
     void computeNearestNeighbor();
-    void computeVoronoi();
+    std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
     void computeVoronoi2or3points();
+    void computeVoronoi();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
     void computeConvexHull();
@@ -927,6 +928,25 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->computeVoronoi(); }
   }
 
+  std::vector<Edge2d> PointCloud::Impl::constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices)
+  {
+    std::vector<Edge2d> voronoiRays;
+    if (localDelaunayVertices.empty()) { return voronoiRays; }
+    std::vector<Edge2d> delaunayEdges;
+    for (int ii = 0; ii < (int)localDelaunayVertices.size(); ++ii)
+    {
+      int jj = ii + 1;
+      if (jj >= (int)localDelaunayVertices.size()) { jj = 0; }
+      delaunayEdges.push_back(Edge2d(pointArray[ii], pointArray[jj]));
+    }
+    for (const auto& delaunayEdge : delaunayEdges)
+    {
+      point2d proj = delaunayEdge.projection(site);
+      voronoiRays.push_back(Edge2d(site, proj));
+    }
+    return voronoiRays;
+  }
+
   void PointCloud::Impl::computeVoronoi2or3points()
   {
     if ((pointArray.size() < 2) || (pointArray.size() > 3))
@@ -972,40 +992,13 @@ namespace ComputationalGeometry
     double testRaySqLen = minSqLenFromSite / 4;
     double testRayLen = safeSqrt(testRaySqLen); // Can we avoid sqrt?
 
-    std::vector<Edge2d> delaunayEdges;
-    delaunayEdges.push_back(Edge2d(pointArray[0], pointArray[1]));
-    delaunayEdges.push_back(Edge2d(pointArray[1], pointArray[2]));
-    delaunayEdges.push_back(Edge2d(pointArray[2], pointArray[0]));
-    for (const auto& delaunayEdge : delaunayEdges)
+    std::vector<Edge2d> voronoiRays = constructVoronoiRays(site, pointArray);
+    for (const auto& voronoiRay : voronoiRays)
     {
-      point2d proj = delaunayEdge.projection(site);
       double coeff = raySqLength;
-        
-      bool bShouldReverseRay = false;
-      // Test to see: should we reverse ray?
-      point2d testPoint(testRayLen * (proj.x - site.x) + site.x, testRayLen * (proj.y - site.y) + site.y);
-      {
-        Triangle2d testTri(site, delaunayEdge.a, delaunayEdge.b);
-        if (testTri.pointIsInterior(testPoint)  != 0)
-        {
-          bShouldReverseRay = true;
-        }
-        testTri = Triangle2d(site, testPoint, delaunayEdge.b);
-        if (testTri.pointIsInterior(delaunayEdge.a)  != 0)
-        {
-          bShouldReverseRay = true;
-        }
-        testTri = Triangle2d(site, testPoint, delaunayEdge.a);
-        if (testTri.pointIsInterior(delaunayEdge.b)  != 0)
-        {
-          bShouldReverseRay = true;
-        }
-      }
-      // Done testing.
-      if (bShouldReverseRay) { coeff = -coeff; testRayLen = -testRayLen; }
-      double projSqLen = Edge2d(proj, site).sqLength();
+      double projSqLen = voronoiRay.sqLength();
       if (projSqLen > threshold()) { coeff = coeff / safeSqrt(projSqLen); }
-      point2d rayPoint = point2d(coeff * (proj.x - site.x) + site.x, coeff * (proj.y - site.y) + site.y);
+      point2d rayPoint = point2d(coeff * (voronoiRay.b.x - voronoiRay.a.x) + voronoiRay.a.x, coeff * (voronoiRay.b.y - voronoiRay.a.y) + voronoiRay.a.y);
       Edge2d ray(site, rayPoint);
       voronoi.push_back(ray);
     }
