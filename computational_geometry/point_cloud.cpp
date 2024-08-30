@@ -944,6 +944,28 @@ namespace ComputationalGeometry
       point2d proj = delaunayEdge.projection(site);
       voronoiRays.push_back(Edge2d(site, proj));
     }
+    if (voronoiRays.size() < 3) { return voronoiRays; }
+    for (int ii = 0; ii < 3; ++ii)
+    {
+      int jj = ii + 1;
+      if (jj >= 3) { jj = 0; }
+      int kk = 2;
+      if (ii != 0) { kk = (ii == 1) ? 0 : 1; }
+      auto testRay = voronoiRays[kk];
+      auto minSqLen = voronoiRays[ii].sqLength();
+      if (voronoiRays[jj].sqLength() < minSqLen) { minSqLen = voronoiRays[jj].sqLength(); }
+      if (testRay.sqLength() > threshold())
+      {
+        double coeff = safeSqrt(minSqLen / testRay.sqLength()) / 2;
+        testRay.b.x = coeff * (testRay.b.x - testRay.a.x) + testRay.a.x;
+        testRay.b.y = coeff * (testRay.b.y - testRay.a.y) + testRay.a.y;
+        Triangle2d testTri(site, voronoiRays[ii].b, voronoiRays[jj].b);
+        if (testTri.pointIsInterior(testRay.b) == 0) { continue; }
+        voronoiRays[kk].b.x = -(voronoiRays[kk].b.x - voronoiRays[kk].a.x) + voronoiRays[kk].a.x;
+        voronoiRays[kk].b.y = -(voronoiRays[kk].b.y - voronoiRays[kk].a.y) + voronoiRays[kk].a.y;
+        break;
+      }
+    }
     return voronoiRays;
   }
 
