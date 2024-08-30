@@ -469,7 +469,13 @@ namespace ComputationalGeometry
      */
     void naiveTriangulate();
     void generateRandomPoints();
-    void computeDelaunay();
+    static const int DelaunayMaxForNaive = 50;
+    enum class DelaunayMode
+    {
+      Naive = 0,
+      DivideAndConquer = 1
+    };
+    void computeDelaunay(DelaunayMode delaunayMode);
     void computeNearestNeighbor();
     std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
     void computeVoronoi2or3points();
@@ -593,7 +599,7 @@ namespace ComputationalGeometry
     {
       if (pImpl->delaunay.empty())
       {
-        pImpl->computeDelaunay();
+        computeDelaunay();
       }
     }
     if (pImpl->bNearestNeighborOn)
@@ -692,7 +698,7 @@ namespace ComputationalGeometry
 
   void PointCloud::computeDelaunay()
   {
-    if (pImpl != nullptr) { pImpl->computeDelaunay(); }
+    if (pImpl != nullptr) { pImpl->computeDelaunay(Impl::DelaunayMode::DivideAndConquer); }
   }
 
   void PointCloud::naiveTriangulate()
@@ -700,8 +706,15 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->naiveTriangulate(); }
   }
 
-  void PointCloud::Impl::computeDelaunay() // Naive Delaunay
+  void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode)
   {
+    if (delaunayMode == DelaunayMode::DivideAndConquer)
+    {
+      if ((int)(pointArray.size()) <= DelaunayMaxForNaive)
+      {
+        delaunayMode = DelaunayMode::Naive;
+      }
+    }
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
@@ -869,9 +882,9 @@ namespace ComputationalGeometry
   void PointCloud::Impl::computeNearestNeighbor()
   {
     nearestNeighbor.resize(0);
-    if (delaunay.empty())
+    if (delaunay.empty() && (pCloud != nullptr))
     {
-      computeDelaunay();
+      pCloud->computeDelaunay();
     }
 
     if (pointArray.size() == 2)
@@ -1016,9 +1029,9 @@ namespace ComputationalGeometry
   void PointCloud::Impl::computeVoronoi()
   {
     voronoi.resize(0);
-    if (delaunay.empty())
+    if (delaunay.empty() && (pCloud != nullptr))
     {
-      computeDelaunay();
+      pCloud->computeDelaunay();
     }
 
     if (pointArray.size() <= 3)
