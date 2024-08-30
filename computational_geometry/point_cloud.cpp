@@ -912,6 +912,21 @@ namespace ComputationalGeometry
           }
         }
       }
+
+      std::vector<Triangle2d> partialTriangulation;
+      for (auto& smallCloud : smallClouds)
+      {
+        std::vector<Triangle2d> smallDelaunay;
+        std::vector<Triangle2d> smallTriangulation;
+        std::vector<point2d> smallHull;
+        computeDelaunay(DelaunayMode::Naive, smallCloud, smallTriangulation, smallHull, smallDelaunay);
+        for (auto& face : smallDelaunay)
+        {
+          partialTriangulation.push_back(face);
+        }
+      }
+      computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
+      return;
     }
     // if (delaunayMode == DelaunayMode::Naive):
     std::set<Triangle2d> faces;
