@@ -8,6 +8,12 @@
 #endif
 #include <map>
 
+#define USE_MULTI_THREADING
+#ifdef USE_MULTI_THREADING
+#include <mutex>
+#include <thread>
+#endif // USE_MULTI_THREADING
+
 namespace ComputationalGeometry
 {
   static int gWindowWidth = 1024;
@@ -15,6 +21,10 @@ namespace ComputationalGeometry
 
   static point2d gScreenMin(-1, -1);
   static point2d gScreenMax(1, 1);
+
+#ifdef USE_MULTI_THREADING
+  static std::mutex gMutex;
+#endif // USE_MULTI_THREADING
 
   int& numRandomPoints()
   {
@@ -486,6 +496,11 @@ namespace ComputationalGeometry
                          std::vector<Triangle2d>& ioTriangulation,
                          std::vector<point2d>& ioHull,
                          std::vector<Triangle2d>& ioDelaunay);
+#ifdef USE_MULTI_THREADING
+    std::vector<std::vector<Triangle2d> > mPartialTriangulations;
+    std::vector<std::vector<point2d> > mSmallClouds;
+      void computeDelaunayThreadFunc(); //int threadIndex);
+#endif // USE_MULTI_THREADING
     void computeNearestNeighbor();
     std::vector<Edge2d> constructVoronoiRays(const point2d& site, const std::vector<point2d>& localDelaunayVertices);
     void computeVoronoi2or3points();
@@ -839,6 +854,24 @@ namespace ComputationalGeometry
     }
   }
 
+#ifdef USE_MULTI_THREADING
+  void PointCloud::Impl::computeDelaunayThreadFunc() //(int threadIndex)
+  {
+      static int threadIndex = -1;
+      ++threadIndex;
+    gMutex.lock();
+    std::vector<Triangle2d> smallDelaunay;
+    std::vector<Triangle2d> smallTriangulation;
+    std::vector<point2d> smallHull;
+    computeDelaunay(DelaunayMode::Naive, mSmallClouds[threadIndex], smallTriangulation, smallHull, smallDelaunay);
+    for (auto& face : smallDelaunay)
+    {
+      mPartialTriangulations[threadIndex].push_back(face);
+    }
+    gMutex.unlock();
+  }
+#endif // USE_MULTI_THREADING
+
   void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioHull, std::vector<Triangle2d>& ioDelaunay)
   {
     if (delaunayMode == DelaunayMode::DivideAndConquer)
@@ -848,7 +881,13 @@ namespace ComputationalGeometry
         computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
             return;
       }
+        
+#ifdef USE_MULTI_THREADING
+      auto& smallClouds = mSmallClouds;
+      smallClouds.resize(0);
+#else
       std::vector<std::vector<point2d> > smallClouds;
+#endif // USE_MULTI_THREADING
       {
         const int maxStackSize = 8;
         std::vector<std::vector<point2d> > remaining;
@@ -939,10 +978,21 @@ namespace ComputationalGeometry
         }
       }
 
-      std::vector<Triangle2d> partialTriangulation;
       //std::cout << "\nNumber of small clouds: " << smallClouds.size() << std::endl;
+
+      std::vector<Triangle2d> partialTriangulation;
+#ifdef USE_MULTI_THREADING
+      std::vector<std::thread> cloudThreads;
+      mPartialTriangulations.resize(smallClouds.size());
+      //int threadIndex = 0;
+#endif // USE_MULTI_THREADING
       for (auto& smallCloud : smallClouds)
       {
+#ifdef USE_MULTI_THREADING
+        std::thread cloudThread(&PointCloud::Impl::computeDelaunayThreadFunc, this); //, threadIndex);
+        //++threadIndex;
+        cloudThreads.push_back(std::move(cloudThread));
+#else
         std::vector<Triangle2d> smallDelaunay;
         std::vector<Triangle2d> smallTriangulation;
         std::vector<point2d> smallHull;
@@ -951,7 +1001,21 @@ namespace ComputationalGeometry
         {
           partialTriangulation.push_back(face);
         }
+#endif // USE_MULTI_THREADING
       }
+#ifdef USE_MULTI_THREADING
+      for (auto& cloudThread : cloudThreads) // Synchronize.
+      {
+        cloudThread.join();
+      }
+      for (auto& smallDelaunay : mPartialTriangulations)
+      {
+        for (const auto& face : smallDelaunay)
+        {
+          partialTriangulation.push_back(face);
+        }
+      }
+#endif // USE_MULTI_THREADING
       computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
       return;
     }
