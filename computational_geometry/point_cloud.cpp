@@ -71,7 +71,7 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point3d::sq_distance(const point3d& P, const point3d& Q)
+  double point3d::sqDistance(const point3d& P, const point3d& Q)
   {
     double answer = 0;
     double dt = (P.x - Q.x);
@@ -123,12 +123,12 @@ namespace ComputationalGeometry
 
   double Edge2d::sqLength() const
   {
-    return point2d::sq_distance(a, b);
+    return point2d::sqDistance(a, b);
   }
 
-  double Edge2d::sq_distance(const point2d& P) const
+  double Edge2d::sqDistance(const point2d& P) const
   {
-    double aSqDistP = point2d::sq_distance(a, P);
+    double aSqDistP = point2d::sqDistance(a, P);
     if (sqLength() <= threshold())
     {
       return aSqDistP;
@@ -142,7 +142,7 @@ namespace ComputationalGeometry
     double numSqrt = (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1;
     double answer = numSqrt * numSqrt / sqLength();
     if (answer > threshold()) { return answer; }
-    double bSqDistP = point2d::sq_distance(b, P);
+    double bSqDistP = point2d::sqDistance(b, P);
     if ((aSqDistP < sqLength()) && (bSqDistP < sqLength())) { return 0.0; }
     if (aSqDistP >= sqLength()) { return bSqDistP; }
     return aSqDistP;
@@ -151,13 +151,13 @@ namespace ComputationalGeometry
   /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
   int Edge2d::intersection(const Edge2d& other, point2d& intersection) const
   {
-    if (point2d::sq_distance(a, b) <= threshold())
+    if (point2d::sqDistance(a, b) <= threshold())
     {
-      if (point2d::sq_distance(a, other.a) <= threshold())
+      if (point2d::sqDistance(a, other.a) <= threshold())
       {
         intersection = a; return 2;
       }
-      if (point2d::sq_distance(a, other.b) <= threshold())
+      if (point2d::sqDistance(a, other.b) <= threshold())
       {
         intersection = a; return 2;
       }
@@ -184,12 +184,12 @@ namespace ComputationalGeometry
       
     // For intersection as point, t and u must be between 0 and 1.
     bool bDetNonzero = (absDet > threshold());
-    if ((point2d::sq_distance(a, other.a) <= threshold()) || (point2d::sq_distance(a, other.b) <= threshold()))
+    if ((point2d::sqDistance(a, other.a) <= threshold()) || (point2d::sqDistance(a, other.b) <= threshold()))
     {
       intersection = a;
       return bDetNonzero ? 1 : 2;
     }
-    if ((point2d::sq_distance(b, other.a) <= threshold()) || (point2d::sq_distance(b, other.b) <= threshold()))
+    if ((point2d::sqDistance(b, other.a) <= threshold()) || (point2d::sqDistance(b, other.b) <= threshold()))
     {
       intersection = b;
       return bDetNonzero ? 1 : 2;
@@ -210,22 +210,22 @@ namespace ComputationalGeometry
       return 1;
     }
     // Parallel and non-collinear or else edges intersect.
-    if (sq_distance(other.a) < threshold())
+    if (sqDistance(other.a) < threshold())
     {
       intersection = other.a;
       return 2;
     }
-    if (sq_distance(other.b) < threshold())
+    if (sqDistance(other.b) < threshold())
     {
       intersection = other.b;
       return 2;
     }
-    if (other.sq_distance(a) < threshold())
+    if (other.sqDistance(a) < threshold())
     {
       intersection = a;
       return 2;
     }
-    // else if (other.sq_distance(b) < threshold())
+    // else if (other.sqDistance(b) < threshold())
     {
       intersection = b;
       return 2;
@@ -287,9 +287,9 @@ namespace ComputationalGeometry
     if (bCollinear)
     {
       bool bZeroRadius = true;
-      if (point2d::sq_distance(a, b) > threshold()) { bZeroRadius = false; }
-      if (point2d::sq_distance(b, c) > threshold()) { bZeroRadius = false; }
-      if (point2d::sq_distance(a, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(a, b) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(b, c) > threshold()) { bZeroRadius = false; }
+      if (point2d::sqDistance(a, c) > threshold()) { bZeroRadius = false; }
       if (bZeroRadius)
       {
         center = a; sqRadius = 0;
@@ -301,21 +301,21 @@ namespace ComputationalGeometry
     }
     else
     {
-      double a2 = point2d::sq_distance(a, point2d(0, 0));
-      double b2 = point2d::sq_distance(b, point2d(0, 0));
-      double c2 = point2d::sq_distance(c, point2d(0, 0));
+      double a2 = point2d::sqDistance(a, point2d(0, 0));
+      double b2 = point2d::sqDistance(b, point2d(0, 0));
+      double c2 = point2d::sqDistance(c, point2d(0, 0));
       Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
       Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
       center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
       Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
-      sqRadius = (BB.det() / den) + point2d::sq_distance(center, point2d(0, 0));
+      sqRadius = (BB.det() / den) + point2d::sqDistance(center, point2d(0, 0));
     }
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge */
   int Circle2d::pointIsInterior(const point2d& pt) const
   {
-    double dd = point2d::sq_distance(center, pt);
+    double dd = point2d::sqDistance(center, pt);
     double diff = dd - sqRadius;
     double absDiff = (diff > 0) ? diff : -diff;
     if (absDiff <= threshold()) { return 2; }
@@ -331,34 +331,34 @@ namespace ComputationalGeometry
   {
     edge = Edge2d(lhs.a, lhs.b);
     edge.a = lhs.a;
-    if (point2d::sq_distance(lhs.a, rhs.a) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.a) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.c) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
-    if (point2d::sq_distance(lhs.a, rhs.b) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.b) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.c) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.a) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.c) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.c) < threshold()) { return true; }
       return false;
     }
-    if (point2d::sq_distance(lhs.a, rhs.c) < threshold())
+    if (point2d::sqDistance(lhs.a, rhs.c) < threshold())
     {
       edge.b = lhs.b;
-      if (point2d::sq_distance(lhs.b, rhs.a) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.b, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.b, rhs.b) < threshold()) { return true; }
       edge.b = lhs.c;
-      if (point2d::sq_distance(lhs.c, rhs.b) < threshold()) { return true; }
-      if (point2d::sq_distance(lhs.c, rhs.a) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.b) < threshold()) { return true; }
+      if (point2d::sqDistance(lhs.c, rhs.a) < threshold()) { return true; }
       return false;
     }
     return false;
@@ -407,15 +407,15 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
-    if (point2d::sq_distance(a, pt) <= threshold()) { return 3; }
-    if (point2d::sq_distance(b, pt) <= threshold()) { return 3; }
-    if (point2d::sq_distance(c, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(a, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(b, pt) <= threshold()) { return 3; }
+    if (point2d::sqDistance(c, pt) <= threshold()) { return 3; }
     Edge2d u(a, b);
     Edge2d v(b, c);
     Edge2d w(c, a);
-    if (u.sq_distance(pt) <= threshold()) { return 2; }
-    if (v.sq_distance(pt) <= threshold()) { return 2; }
-    if (w.sq_distance(pt) <= threshold()) { return 2; }
+    if (u.sqDistance(pt) <= threshold()) { return 2; }
+    if (v.sqDistance(pt) <= threshold()) { return 2; }
+    if (w.sqDistance(pt) <= threshold()) { return 2; }
     if (sqArea() <= threshold()) { return 0; }
     Triangle2d U(a, b, pt);
     Triangle2d V(b, c, pt);
@@ -475,7 +475,7 @@ namespace ComputationalGeometry
      * it must be convex.
      */
     void dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3);
-    static const int DelaunayMaxForNaive = 50;
+    static const int DelaunayMaxForNaive = 100;
     enum class DelaunayMode
     {
       Naive = 0,
@@ -638,8 +638,8 @@ namespace ComputationalGeometry
   {
     const int hullSize = (int)iHull.size();
     if (hullSize == 0) { return false; }
-    if (hullSize == 1) { return (point2d::sq_distance(iHull[0], iPoint) <= threshold()); }
-    if (hullSize == 2) { Edge2d edge(iHull[0], iHull[1]); return (edge.sq_distance(iPoint) <= threshold()); }
+    if (hullSize == 1) { return (point2d::sqDistance(iHull[0], iPoint) <= threshold()); }
+    if (hullSize == 2) { Edge2d edge(iHull[0], iHull[1]); return (edge.sqDistance(iPoint) <= threshold()); }
     int startIndex = 2;
     for (int ii = startIndex; ii < hullSize; ++ii)
     {
@@ -777,12 +777,12 @@ namespace ComputationalGeometry
       {
         if (ii == 0)
         {
-          bestSqDist = point2d::sq_distance(iPointArray[ii], centerOfMass);
+          bestSqDist = point2d::sqDistance(iPointArray[ii], centerOfMass);
           bestPoint = iPointArray[ii];
         }
-        else if (point2d::sq_distance(iPointArray[ii], centerOfMass) < bestSqDist)
+        else if (point2d::sqDistance(iPointArray[ii], centerOfMass) < bestSqDist)
         {
-          bestSqDist = point2d::sq_distance(iPointArray[ii], centerOfMass);
+          bestSqDist = point2d::sqDistance(iPointArray[ii], centerOfMass);
           bestPoint = iPointArray[ii];
         }
       }
@@ -996,12 +996,12 @@ namespace ComputationalGeometry
 
           point2d iVertex = it->a;
           point2d jVertex = jt->a;
-          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->b; }
-          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->b; }
-          if (match.sq_distance(iVertex) <= threshold()) { iVertex = it->c; }
-          if (match.sq_distance(jVertex) <= threshold()) { jVertex = jt->c; }
-          if (match.sq_distance(iVertex) <= threshold()) { continue; }
-          if (match.sq_distance(jVertex) <= threshold()) { continue; }
+          if (match.sqDistance(iVertex) <= threshold()) { iVertex = it->b; }
+          if (match.sqDistance(jVertex) <= threshold()) { jVertex = jt->b; }
+          if (match.sqDistance(iVertex) <= threshold()) { iVertex = it->c; }
+          if (match.sqDistance(jVertex) <= threshold()) { jVertex = jt->c; }
+          if (match.sqDistance(iVertex) <= threshold()) { continue; }
+          if (match.sqDistance(jVertex) <= threshold()) { continue; }
 
           Circle2d testCircle(it->a, it->b, it->c);
           if (testCircle.pointIsInterior(jVertex) == 1)
@@ -1056,7 +1056,7 @@ namespace ComputationalGeometry
     {
       if (ioPointArray.size() == 2)
       {
-        if (point2d::sq_distance(ioPointArray[0], ioPointArray[1]) > threshold())
+        if (point2d::sqDistance(ioPointArray[0], ioPointArray[1]) > threshold())
         {
           Triangle2d face(ioPointArray[0], ioPointArray[1], ioPointArray[0]);
           ioTriangulation.push_back(face);
@@ -1146,21 +1146,21 @@ namespace ComputationalGeometry
       std::set<Edge2d> edgesForThisOne;
       for (const auto& face : faces)
       {
-        if (point2d::sq_distance(face.a, current) <= threshold())
+        if (point2d::sqDistance(face.a, current) <= threshold())
         {
           Edge2d edge(face.a, face.b);
           edgesForThisOne.insert(edge);
           edge = Edge2d(face.a, face.c);
           edgesForThisOne.insert(edge);
         }
-        if (point2d::sq_distance(face.b, current) <= threshold())
+        if (point2d::sqDistance(face.b, current) <= threshold())
         {
           Edge2d edge(face.a, face.b);
           edgesForThisOne.insert(edge);
           edge = Edge2d(face.b, face.c);
           edgesForThisOne.insert(edge);
         }
-        if (point2d::sq_distance(face.c, current) <= threshold())
+        if (point2d::sqDistance(face.c, current) <= threshold())
         {
           Edge2d edge(face.b, face.c);
           edgesForThisOne.insert(edge);
@@ -1327,8 +1327,8 @@ namespace ComputationalGeometry
         sitesForThisOne.push_back(sites.at(faceIt.first));
         for (const auto& edge : edges)
         {
-          if (match.sq_distance(edge.a) > threshold()) { continue; }
-          if (match.sq_distance(edge.b) > threshold()) { continue; }
+          if (match.sqDistance(edge.a) > threshold()) { continue; }
+          if (match.sqDistance(edge.b) > threshold()) { continue; }
           nonMatching.erase(edge);
         }
         if (sitesForThisOne.size() >= 3) { break; }
@@ -1479,13 +1479,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point3d::sq_distance(*it1, *it2);
+              min = point3d::sqDistance(*it1, *it2);
               A_min = *it1;
               B_min = *it2;
               started = true;
               continue;
           }
-          double candidate = point3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sqDistance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -1517,13 +1517,13 @@ namespace ComputationalGeometry
           //std::cout << "[";  it2->print();  std::cout << "]\n";
           if (!started)
           {
-              min = point3d::sq_distance(*it1, *it2);
+              min = point3d::sqDistance(*it1, *it2);
               min_1 = *it1;
               min_2 = *it2;
               started = true;
               continue;
           }
-          double candidate = point3d::sq_distance(*it1, *it2);
+          double candidate = point3d::sqDistance(*it1, *it2);
           if (candidate >= min) {continue;}
       
           min = candidate;
@@ -1574,21 +1574,21 @@ namespace ComputationalGeometry
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point2d::sq_distance(min_1, min_2);
+      return point2d::sqDistance(min_1, min_2);
     }
     if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
       point2d a = *it;  ++it;  point2d b = *it;
-      double min_ = point2d::sq_distance(a, b);
+      double min_ = point2d::sqDistance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point2d::sq_distance(a, *it);
+      double candidate = point2d::sqDistance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point2d::sq_distance(*it, b);
+      candidate = point2d::sqDistance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -1644,21 +1644,21 @@ namespace ComputationalGeometry
     {
       typename Container::iterator it = arr.begin();
       min_1 = *it;  ++it;  min_2 = *it;
-      return point2d::sq_distance(min_1, min_2);
+      return point2d::sqDistance(min_1, min_2);
     }
     if (arrCount == 3)
     {
       typename Container::iterator it = arr.begin();
       point2d a = *it;  ++it;  point2d b = *it;
-      double min_ = point2d::sq_distance(a, b);
+      double min_ = point2d::sqDistance(a, b);
       min_1 = a;  min_2 = b;
       ++it;
-      double candidate = point2d::sq_distance(a, *it);
+      double candidate = point2d::sqDistance(a, *it);
       if (candidate < min_)
       {
         min_ = candidate;  /*min_1 = a;*/  min_2 = *it;
       }
-      candidate = point2d::sq_distance(*it, b);
+      candidate = point2d::sqDistance(*it, b);
       if (candidate < min_)
       {
         min_ = candidate;  min_1 = *it;  min_2 = b;
@@ -1706,14 +1706,14 @@ namespace ComputationalGeometry
       point3d P(1.0, 2.0, 3.0);
       point3d Q(1.0, -2.0, 3.0);
   
-      printf("%f\n", point3d::sq_distance(P,Q));
+      printf("%f\n", point3d::sqDistance(P,Q));
     }
   
     {
       point2d P(1.5, 2.0);
       point2d Q(1.0, -2.0);
   
-      printf("%f\n", point2d::sq_distance(P,Q));
+      printf("%f\n", point2d::sqDistance(P,Q));
     }
   
     {
