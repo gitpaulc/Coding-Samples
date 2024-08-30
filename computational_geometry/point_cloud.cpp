@@ -469,6 +469,7 @@ namespace ComputationalGeometry
      */
     void naiveTriangulate(std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull);
     void generateRandomPoints();
+    void dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3);
     static const int DelaunayMaxForNaive = 50;
     enum class DelaunayMode
     {
@@ -486,7 +487,7 @@ namespace ComputationalGeometry
     void computeVoronoi();
       
     /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
-    void computeConvexHull(std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull);
+    void computeConvexHull(const std::vector<point2d>& iPointArray, std::vector<point2d>& ioHull);
     template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min);
     template <class Container> static double naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2);
     template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2);
@@ -628,6 +629,22 @@ namespace ComputationalGeometry
     return pc;
   }
 
+  bool PointCloud::pointIsInConvexSorted(const std::vector<point2d>& iHull, const point2d& iPoint)
+  {
+    const int hullSize = (int)iHull.size();
+    if (hullSize == 0) { return false; }
+    if (hullSize == 1) { return (point2d::sq_distance(iHull[0], iPoint) <= threshold()); }
+    if (hullSize == 2) { Edge2d edge(iHull[0], iHull[1]); return (edge.sq_distance(iPoint) <= threshold()); }
+    int startIndex = 2;
+    for (int ii = startIndex; ii < hullSize; ++ii)
+    {
+      Triangle2d face(iHull[0], iHull[ii - 1], iHull[ii]);
+      if (face.pointIsInterior(iPoint) == 0) { continue; }
+      return true;
+    }
+    return false;
+  }
+
   void PointCloud::toggleConvexHull()
   {
     if (pImpl == nullptr) { return; }
@@ -710,15 +727,97 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->naiveTriangulate(pImpl->triangulation, pImpl->pointArray, pImpl->hull); }
   }
 
+  void PointCloud::Impl::dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3)
+  {
+    std::vector<point2d> testHull;
+    computeConvexHull(iPointArray, testHull);
+    oPointArray1.resize(0);
+    oPointArray2.resize(0);
+    oPointArray3.resize(0);
+    if (iPointArray.size() <= 3)
+    {
+      for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+      {
+        if (ii == 0) { oPointArray1.push_back(iPointArray[0]); }
+        else if (ii == 1) { oPointArray2.push_back(iPointArray[1]); }
+        else if (ii == 2) { oPointArray3.push_back(iPointArray[2]); }
+      }
+      return;
+    }
+    std::sort(testHull.begin(), testHull.end(), point2d::comparator);
+    if (testHull.size() == iPointArray.size()) // All points in hull.
+    {
+      int NN = (int)testHull.size() / 3;
+      oPointArray2.push_back(testHull[0]);
+      oPointArray3.push_back(testHull[0]);
+      for (int ii = 0; ii < (int)(testHull.size()); ++ii)
+      {
+        if (ii <= NN) { oPointArray1.push_back(testHull[ii]); continue; }
+        if (ii <= 2 * NN) { oPointArray2.push_back(testHull[ii]); continue; }
+        oPointArray3.push_back(testHull[ii]);
+      }
+      return;
+    }
+    int bestScore = -1;
+    for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
+    {
+      auto baseVertex = iPointArray[ii];
+      for (int j1 = 0; j1 < (int)(testHull.size()); ++j1)
+      for (int j2 = j1 + 1; j2 < (int)(testHull.size()); ++j2)
+      for (int j3 = j2 + 1; j3 < (int)(testHull.size()); ++j3)
+      {
+        std::vector<point2d> testHull1, testHull2, testHull3;
+        testHull1.push_back(baseVertex);
+        testHull2.push_back(baseVertex);
+        testHull3.push_back(baseVertex);
+        for (int jj = 0; jj < (int)(testHull.size()); ++jj)
+        {
+          if (jj <= j1) { testHull1.push_back(testHull[jj]); continue; }
+          if (jj <= j2) { testHull2.push_back(testHull[jj]); continue; }
+          testHull3.push_back(testHull[jj]);
+        }
+        std::vector<point2d> tempArray1, tempArray2, tempArray3;
+        for (int kk = 0; kk < (int)(iPointArray.size()); ++kk)
+        {
+          if (PointCloud::pointIsInConvexSorted(testHull1, iPointArray[kk]))
+          {
+            tempArray1.push_back(iPointArray[kk]); continue;
+          }
+          if (PointCloud::pointIsInConvexSorted(testHull2, iPointArray[kk]))
+          {
+            tempArray2.push_back(iPointArray[kk]); continue;
+          }
+          // if (PointCloud::pointIsInConvexSorted(testHull3, iPointArray[kk]))
+          {
+            tempArray3.push_back(iPointArray[kk]);
+          }
+        }
+        int score1 = (int)tempArray1.size();
+        int score2 = (int)tempArray2.size();
+        int score3 = (int)tempArray3.size();
+        int score = abs(score1 - score2) + abs(score2 - score3) + abs(score3 - score1);
+        if ((bestScore < 0) || (score < bestScore))
+        {
+          bestScore = score;
+          oPointArray1 = tempArray1;
+          oPointArray2 = tempArray2;
+          oPointArray3 = tempArray3;
+        }
+      }
+    }
+  }
+
   void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioHull, std::vector<Triangle2d>& ioDelaunay)
   {
     if (delaunayMode == DelaunayMode::DivideAndConquer)
     {
       if ((int)(ioPointArray.size()) <= DelaunayMaxForNaive)
       {
-        delaunayMode = DelaunayMode::Naive;
+        computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
+            return;
       }
     }
+    // if (delaunayMode == DelaunayMode::Naive):
     std::set<Triangle2d> faces;
     int numFaces = 0;
     {
@@ -1164,13 +1263,13 @@ namespace ComputationalGeometry
     if (pImpl != nullptr) { pImpl->computeConvexHull(pImpl->pointArray, pImpl->hull); }
   }
 
-  void PointCloud::Impl::computeConvexHull(std::vector<point2d>& ioPointArray, std::vector<point2d>& ioHull)
+  void PointCloud::Impl::computeConvexHull(const std::vector<point2d>& iPointArray, std::vector<point2d>& ioHull)
   {
     ioHull.resize(0);
 
     // 2d: Graham scan.
-    ioHull = ioPointArray;
-    const int NN = (int)ioPointArray.size();
+    ioHull = iPointArray;
+    const int NN = (int)iPointArray.size();
     if (NN <= 3) {return;}
 
     point2d tempOrigin = ioHull[0];

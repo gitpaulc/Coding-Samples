@@ -114,6 +114,7 @@ namespace ComputationalGeometry
       bool getBoundingBox(point3d& min, point3d& max) const;
       void refresh(bool bRecompute = true);
       static PointCloud& Get();
+      static bool pointIsInConvexSorted(const std::vector<point2d>& iHull, const point2d& iPoint);
       
       void toggleConvexHull();
       void toggleDelaunay();
