@@ -9,6 +9,18 @@ All Rights Reserved.*/
 #include <string>
 #include <vector>
 
+//#define USE_CUDA
+
+#ifdef USE_CUDA
+#include <cuda_runtime.h>
+// __CUDA_RUNTIME_H__ is now a defined macro.
+#else
+#define __host__
+#define __device__
+#define __global__
+#define __constant__
+#endif // def USE_CUDA
+
 namespace ComputationalGeometry
 {
   int& numRandomPoints();
@@ -29,7 +41,7 @@ namespace ComputationalGeometry
       double dot(const point3d& P) const;
       static double sqDistance(const point3d& P, const point3d& Q);
   };
-    
+
   class point2d : public point3d
   {
     public:
@@ -39,6 +51,8 @@ namespace ComputationalGeometry
       static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
       static bool comparator(const point2d& P, const point2d& Q);
   };
+
+  __global__ void CenterOfMass(point2d* aa, int N, point2d* bb);
 
   class Edge2d
   {
@@ -129,7 +143,7 @@ namespace ComputationalGeometry
       bool pointsAreOn() const;
       bool triangulationIsOn() const;
       bool voronoiIsOn() const;
-      
+
     private: // These methods are declared only for the sake of exposition:
 
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */

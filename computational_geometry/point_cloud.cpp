@@ -9,6 +9,7 @@
 #include <map>
 
 #define USE_MULTI_THREADING
+
 #ifdef USE_MULTI_THREADING
 #include <mutex>
 #include <thread>
@@ -115,6 +116,19 @@ namespace ComputationalGeometry
     
     return theta_P < theta_Q;
     //Also can use return getOrientation(P, Q) < 0;
+  }
+
+  __global__ void ComputationalGeometry::CenterOfMass(point2d* aa, int arrSize, point2d* bb)
+  {
+#ifdef __CUDA_RUNTIME_H__
+      int i = blockIdx.x * blockDim.x + threadIdx.x;
+      double inv = 1.0 / (double)arrSize;
+      if (i < arrSize)
+      {
+        bb[i].x = aa[i].x * inv;
+        bb[i].y = aa[i].y * inv;
+      }
+#endif // def __CUDA_RUNTIME_H__
   }
 
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
@@ -778,14 +792,35 @@ namespace ComputationalGeometry
       }
       return;
     }
+
     point2d centerOfMass(0, 0);
     {
+#ifdef __CUDA_RUNTIME_H__
+      int arrSize = (int)(iPointArray.size());
+      std::vector<point2d> summands(iPointArray.size());
+      point2d *d_PointArray, *d_PartialSums;
+      int sizeToAlloc = sizeof(point2d) * arrSize;
+      {
+        // Allocate memory on the GPU.
+        cudaMalloc((void**)&(d_PointArray), sizeToAlloc);
+        cudaMalloc((void**)&(d_PartialSums), sizeToAlloc);
+        cudaMemcpy(d_PointArray, iPointArray.data(), sizeToAlloc, cudaMemcpyHostToDevice);
+      }
+
+      int threadsPerBlock = 128;
+      dim3 numBlocks = arrSize / threadsPerBlock;
+      CenterOfMass <<<numBlocks, threadsPerBlock >>> (d_PointArray, arrSize, d_PartialSums);
+      cudaMemcpy(summands.data(), d_PartialSums, sizeToAlloc, cudaMemcpyDeviceToHost);
+      cudaFree(&d_PartialSums); // Free GPU memory.
+      cudaFree(&d_PointArray); // Free GPU memory.
+#else
       double inv = 1.0 / (double)(iPointArray.size());
       for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
       {
         centerOfMass.x = centerOfMass.x + iPointArray[ii].x * inv;
         centerOfMass.y = centerOfMass.y + iPointArray[ii].y * inv;
       }
+#endif // def __CUDA_RUNTIME_H__
       double bestSqDist = -1;
       point2d bestPoint;
       for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
@@ -803,6 +838,7 @@ namespace ComputationalGeometry
       }
       centerOfMass = bestPoint;
     }
+
     int bestScore = -1;
     // Trying each point is too slow. Use center of mass.
     // for (int ii = 0; ii < (int)(iPointArray.size()); ++ii)
@@ -868,7 +904,7 @@ namespace ComputationalGeometry
     }
     //gMutex.unlock();
   }
-#endif // USE_MULTI_THREADING
+#endif // def USE_MULTI_THREADING
 
   void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioHull, std::vector<Triangle2d>& ioDelaunay)
   {
@@ -879,13 +915,13 @@ namespace ComputationalGeometry
         computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
             return;
       }
-        
+
 #ifdef USE_MULTI_THREADING
       auto& smallClouds = mSmallClouds;
       smallClouds.resize(0);
 #else
       std::vector<std::vector<point2d> > smallClouds;
-#endif // USE_MULTI_THREADING
+#endif // def USE_MULTI_THREADING
       {
         const int maxStackSize = 8;
         std::vector<std::vector<point2d> > remaining;
@@ -932,7 +968,7 @@ namespace ComputationalGeometry
               }
               else
               {
-                for (const auto thisPoint : oPointArray1)
+                for (const auto& thisPoint : oPointArray1)
                 {
                   thisRemainingCloud.push_back(thisPoint);
                 }
@@ -944,7 +980,7 @@ namespace ComputationalGeometry
               }
               else
               {
-                for (const auto thisPoint : oPointArray2)
+                for (const auto& thisPoint : oPointArray2)
                 {
                   thisRemainingCloud.push_back(thisPoint);
                 }
@@ -956,7 +992,7 @@ namespace ComputationalGeometry
               }
               else
               {
-                for (const auto thisPoint : oPointArray3)
+                for (const auto& thisPoint : oPointArray3)
                 {
                   thisRemainingCloud.push_back(thisPoint);
                 }
@@ -1667,12 +1703,12 @@ namespace ComputationalGeometry
     
     {
       typename Container::iterator it = arr.begin();
-      for (int i = 0; i < halfArrCount; i++)
+      for (int i = 0; i < (int)halfArrCount; i++)
       {
         arr_1.push_back(*it);  ++it;
       }
     
-      for (int i = 0; i < remainingArrCount; i++)
+      for (int i = 0; i < (int)remainingArrCount; i++)
       {
         arr_2.push_back(*it);  ++it;
       }

@@ -22,7 +22,7 @@ int main(int argc, char **argv)
   }
   
   //ComputationalGeometry::PointCloud::Get().unitTest();
-  srand(time(NULL));
+  srand((unsigned)time(NULL));
   initialize_glut(&argc, argv);
   glutMainLoop();
   

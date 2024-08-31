@@ -1,1 +1,0 @@
-TODO: If using Windows solution, add glut.dll and glut32.dll to this folder.
