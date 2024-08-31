@@ -8,26 +8,28 @@
 * Run `bash compile_and_run_geometry.sh` to run the computational geometry suite.  By default, 50 points are generated.
 * Run `bash compile_and_run_geometry.sh <number-of-points>` to run the computational geometry suite with your desired number of points.  For instance `bash compile_and_run_geometry.sh 100` would run the program with 100 points.
 
-* If you are using Windows...
-* If you do not have Glut installed, install Glut as follows:
-* Download the Glut zip file, for instance from https://www.opengl.org/resources/libraries/glut/glutdlls37beta.zip.
-* For simplicity, after unzipping the folder, rename it to `glut`. The folder contains `glut.h`,`glut.lib`, `glut32.lib`, `glut.dll`, and `glut32.dll`.
-* Navigate to `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include`. If a folder called `GL` does not exist there, create it, and copy `glut.h` there.
-* Copy `glut32.lib` to `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\lib\x86`.
-* Copy `glut.lib` to `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\lib\x64`.
-* Copy `glut32.dll` to `C:\Windows\System32`.
-* Copy `glut.dll` to `C:\Windows\SysWOW64`.
-* Now that Glut is installed, copy the downloaded glut folder to `Coding-Samples\computational_geometry\ComputationalGeometry\glut`.
-* This folder should contain `glut32.dll` and `glut.dll`.
-* Having this folder in place will allow the post-build script to copy the DLLs in the build folder.
-* For now, make sure to build in 32-bit mode.
+* If you want to build the CUDA version on Windows...
+* Uncomment the line `//#define USE_CUDA` in point_cloud.h.
+* Install CUDA if you haven't already. Follow the steps below to install FreeGlut.
+* Run the batch file compile_and_run_geometry_cuda.bat
+* If it gives an error about not finding cl.exe, add this (or a similar) folder path as an environment variable: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64\
+* After adding the new PATH variable, close and open the command prompt to make sure it updates.
+* You can pass in the number of points as a parameter to compile_and_run_geometry_cuda.bat.
+
+* Otherwise, if you are using Windows...
+* If you do not have FreeGlut installed, install FreeGlut as follows:
+* Download FreeGlut and build it if necessary. Copy the `freeglut` folder to `Coding-Samples\computational_geometry\ComputationalGeometry`.
+* This `freeglut` folder should contain `include`, `lib`, and `bin` folders. The dependencies should now be in place.
+* Make sure to be in Release or Debug mode x64 (64-bit).
 * Build and run the executable from `Coding-Samples\computational_geometry\ComputationalGeometry\ComputationalGeometry.sln`
 * By default 50 points are generated.
 * If you pass arguments to the executable, the first argument is the custom number of points. For instance 100 for 100 points.
 
 * Click the window to generate a new point set.
 * The convex hull is automatically generated.
+* Press V to turn the Voronoi diagram on and off.
 * Press D to turn Delaunay triangulation on and off.
+* Press N to turn the Nearest-Neighbor graph on and off.
 * Press T to turn naive triangulation on and off.
 * See the screenshots seven_points.png, hundred_points_1.png, hundred_points_2.png for examples.
 * Press **Q** or **ESC** to exit.
