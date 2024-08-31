@@ -104,7 +104,7 @@ void render()
     for (int i = 0; i < sizPointArray; ++i)
     {
       const auto& P = PointCloud::Get().PointArray()[i];
-      glVertex2f(P.x, P.y);
+      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
       //P.print("\n");
     }
     glEnd();
@@ -119,9 +119,9 @@ void render()
     {
       glBegin(GL_LINE_LOOP);
       const auto& tri = PointCloud::Get().Triangulation()[i];
-      glVertex2f(tri.a.x, tri.a.y);
-      glVertex2f(tri.b.x, tri.b.y);
-      glVertex2f(tri.c.x, tri.c.y);
+      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
+      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
+      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
       //P.print("\n");
       glEnd();
     }
@@ -136,9 +136,9 @@ void render()
     {
       glBegin(GL_LINE_LOOP);
       const auto& tri = PointCloud::Get().Delaunay()[i];
-      glVertex2f(tri.a.x, tri.a.y);
-      glVertex2f(tri.b.x, tri.b.y);
-      glVertex2f(tri.c.x, tri.c.y);
+      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
+      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
+      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
       //P.print("\n");
       glEnd();
     }
@@ -153,8 +153,8 @@ void render()
     {
       glBegin(GL_LINE_LOOP);
       const auto& edge = PointCloud::Get().NearestNeighbor()[i];
-      glVertex2f(edge.a.x, edge.a.y);
-      glVertex2f(edge.b.x, edge.b.y);
+      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
+      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
       //P.print("\n");
       glEnd();
     }
@@ -169,8 +169,8 @@ void render()
     {
       glBegin(GL_LINE_LOOP);
       const auto& edge = PointCloud::Get().Voronoi()[i];
-      glVertex2f(edge.a.x, edge.a.y);
-      glVertex2f(edge.b.x, edge.b.y);
+      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
+      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
       //P.print("\n");
       glEnd();
     }
@@ -180,12 +180,12 @@ void render()
   {
     glColor3f(1.0f, 0.0f, 0.0f);
     glBegin(GL_LINE_LOOP);
-    int sizPointArray = PointCloud::Get().ConvexHull().size();
+    int sizPointArray = (int)PointCloud::Get().ConvexHull().size();
 
     for (int i = 0; i < sizPointArray; ++i)
     {
       const auto& P = PointCloud::Get().ConvexHull()[i];
-      glVertex2f(P.x, P.y);
+      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
       //P.print("\n");
     }
     glEnd();
