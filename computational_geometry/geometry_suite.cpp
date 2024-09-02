@@ -4,8 +4,20 @@
 #include "includes.h"
 #include "point_cloud.h"
 
+#ifdef USE_OPEN_CV
+#include "create_video.h"
+#endif // def USE_OPEN_CV
+
 int main(int argc, char **argv)
 {
+#ifdef USE_OPEN_CV
+  {
+    std::string errorMessage = "";
+    ComputationalGeometry::VideoMode vm = ComputationalGeometry::VideoMode::Usual;
+    ComputationalGeometry::createVideo(errorMessage, vm);
+    return 0;
+  }
+#endif // def USE_OPEN_CV
 #ifdef __APPLE__
   ComputationalGeometry::SetWindowWidthHeight(1024);
 #else
