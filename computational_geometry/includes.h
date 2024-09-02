@@ -13,6 +13,8 @@ All Rights Reserved.*/
 #include <time.h>       // time function
 #include <math.h>       // atan2 function
 
+//#define USE_OPEN_CV
+
 /*  OpenGL */
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
