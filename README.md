@@ -20,7 +20,9 @@
 * If you do not have FreeGlut installed, install FreeGlut as follows:
 * Download FreeGlut and build it if necessary. Copy the `freeglut` folder to `Coding-Samples\computational_geometry\ComputationalGeometry`.
 * This `freeglut` folder should contain `include`, `lib`, and `bin` folders. The dependencies should now be in place.
-* Make sure to be in Release or Debug mode x64 (64-bit).
+* Use Release or Debug mode x64 (64-bit) if possible.
+* For OpenCV support uncomment the line `//#define USE_OPEN_CV` in includes.h. In that case download OpenCV 4.9.0. Create a folder called `opencv` in `Coding-Samples\computational_geometry\ComputationalGeometry` and copy the `build` folder in there. 
+* Otherwise if you do not wish to use OpenCV, remove OpenCV dependencies from the .vcxproj file.
 * Build and run the executable from `Coding-Samples\computational_geometry\ComputationalGeometry\ComputationalGeometry.sln`
 * By default 50 points are generated.
 * If you pass arguments to the executable, the first argument is the custom number of points. For instance 100 for 100 points.
