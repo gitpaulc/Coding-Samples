@@ -19,7 +19,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Include various libraries?
+# CMake variables. Options to include various libraries.
 
 set(OPEN_CV_VERSION_STR "")
 set(USE_OPEN_GL ON CACHE BOOL "Use OpenGL? Required to be true." FORCE)
@@ -42,24 +42,32 @@ if (${USE_OPEN_CV})
   set(OPEN_CV_BIN_DIR "opencv/build${PATH_64}/vc16/bin" CACHE PATH "Location of OpenCV DLLs.")
 endif()
 
+set(IMG_OUTPUT_FOLDER "../../image_output" CACHE PATH "Where should image outputs be written?")
+set(VIDEO_OUTPUT_FOLDER "../../video_output" CACHE PATH "Where should video outputs be written?")
+
+file(MAKE_DIRECTORY "${IMG_OUTPUT_FOLDER}")
+file(MAKE_DIRECTORY "${VIDEO_OUTPUT_FOLDER}")
+
 # Header files.
 
 set(HEADER_FILES
- ../create_video.h
- ../gl_callbacks.h
- ../includes.h
- ../point_cloud.h
- ../rational.h
+  ../create_video.h
+  ../edge_list.h
+  ../gl_callbacks.h
+  ../includes.h
+  ../point_cloud.h
+  ../rational.h
 )
 
 # Source files.
 
 set(SOURCE_FILES
- ../create_video.cpp
- ../geometry_suite.cpp
- ../gl_callbacks.cpp
- ../point_cloud.cpp
- ../rational.cpp
+  ../create_video.cpp
+  ../edge_list.cpp
+  ../geometry_suite.cpp
+  ../gl_callbacks.cpp
+  ../point_cloud.cpp
+  ../rational.cpp
 )
 
 # Binary output.
@@ -119,3 +127,5 @@ if (${USE_CUDA})
   add_definitions(-DUSE_CUDA)
 endif()
 
+add_definitions(-DIMG_OUTPUT_FOLDER="${IMG_OUTPUT_FOLDER}")
+add_definitions(-DVIDEO_OUTPUT_FOLDER="${VIDEO_OUTPUT_FOLDER}")

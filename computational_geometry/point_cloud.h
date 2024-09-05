@@ -21,6 +21,8 @@ All Rights Reserved.*/
 #define __constant__
 #endif // def USE_CUDA
 
+//#define USE_VIRTUAL_FUNC_POINT2D
+
 namespace ComputationalGeometry
 {
   int& numRandomPoints();
@@ -34,7 +36,9 @@ namespace ComputationalGeometry
       double x;  double y;  double z;
       point3d();
       point3d(const double& xx, const double& yy, const double& zz);
-      virtual int GetDimension() const;
+#ifdef USE_VIRTUAL_FUNC_POINT2D
+      virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
+#endif // def USE_VIRTUAL_FUNC_POINT2D
       /** \brief Necessary for set insertion to work. */
       bool operator< (const point3d& q) const;
       void print(const std::string& prequel = "") const;
@@ -47,10 +51,25 @@ namespace ComputationalGeometry
     public:
       point2d();
       point2d(const double& xx, const double& yy);
-      int GetDimension() const override;
+#ifdef USE_VIRTUAL_FUNC_POINT2D
+      virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
+#endif // def USE_VIRTUAL_FUNC_POINT2D
       static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
       static bool comparator(const point2d& P, const point2d& Q);
   };
+
+  /**
+   *  `input` two convex polygons, A and B of respective sizes iConvexASize and iConvexBSize.
+   *  They are ASSUMED to be separated by a line of the form { x = const. } with max{iConvexA.x} < min{iConvexB.x}.
+   *  The output convex polygon oMerged is ASSUMED to have max. size (iConvexASize + iConvexBSize) preallocated.
+   *  `output` oMerged as the polygon, oMergedSize as the actual size. oMergedSize pointer is ASSUMED not null.
+   *  Running time is linear: O(iConvexASize + iConvexBSize).
+   */
+  void MergeConvex(point2d* iConvexA, int iConvexASize,
+                   point2d* iConvexB, int iConvexBSize,
+                   point2d* oMerged, int* oMergedSize);
+
+  std::vector<point2d> ConvexHullDivideAndConquer(std::vector<point2d>& iCloud);
 
   __global__ void CenterOfMass(point2d* aa, int N, point2d* bb);
 
@@ -61,6 +80,7 @@ namespace ComputationalGeometry
     Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
     /** \brief For set and map insertion. */
     bool operator< (const Edge2d& rhs) const;
+    /** \brief (sqLength.a < sqLength.b) if and only if (length.a < length.b). a^2 - b^2 = (a - b)(a + b) */
     double sqLength() const;
     double sqDistance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
@@ -118,6 +138,7 @@ namespace ComputationalGeometry
     std::unique_ptr<Impl> pImpl;
     public:
       PointCloud();
+      PointCloud(point2d* iPoints, int iNumPoints);
       
       const std::vector<point2d>& PointArray() const;
       const std::vector<point2d>& ConvexHull() const;
@@ -144,10 +165,10 @@ namespace ComputationalGeometry
       bool triangulationIsOn() const;
       bool voronoiIsOn() const;
 
-    private: // These methods are declared only for the sake of exposition:
-
       /** \brief O(n log(n)) Convex hull implementation. Graham scan for 2d points. */
       void computeConvexHull();
+
+    private: // These methods are declared only for the sake of exposition:
 
       /** \brief A naive O(n^2 log(n)) triangulation. */
       void naiveTriangulate();
