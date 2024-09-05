@@ -51,7 +51,9 @@ namespace ComputationalGeometry
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
+#ifdef USE_VIRTUAL_FUNC_POINT2D
   int point3d::GetDimension() const { return 3; }
+#endif // def USE_VIRTUAL_FUNC_POINT2D
 
   bool point3d::operator< (const point3d& q) const
   {
@@ -59,7 +61,10 @@ namespace ComputationalGeometry
     if (x < q.x) {return true;}
     if (y > q.y) {return false;}
     if (y < q.y) {return true;}
-    if (GetDimension() <= 2) {return false;}
+#ifdef USE_VIRTUAL_FUNC_POINT2D
+    if (GetDimension() <= 2) { return false; }
+#else
+#endif // def USE_VIRTUAL_FUNC_POINT2D
     if (z > q.z) {return false;}
     if (z < q.z) {return true;}
     return false;
@@ -68,14 +73,21 @@ namespace ComputationalGeometry
   void point3d::print(const std::string& prequel) const
   {
     std::cout << prequel << "(" << x << ", " << y;
-    if (GetDimension() > 2) {std::cout << ", " << z;}
+#ifdef USE_VIRTUAL_FUNC_POINT2D
+    if (GetDimension() > 2) { std::cout << ", " << z; }
+#else
+    std::cout << ", " << z;
+#endif // def USE_VIRTUAL_FUNC_POINT2D
     std::cout << ")";
   }
 
   double point3d::dot(const point3d& P) const
   {
     double answer = x * P.x + y * P.y;
+#ifdef USE_VIRTUAL_FUNC_POINT2D
     if ((GetDimension() > 2) || (P.GetDimension() > 2))
+#else
+#endif // def USE_VIRTUAL_FUNC_POINT2D
     {
       answer = answer + z * P.z;
     }
@@ -89,7 +101,10 @@ namespace ComputationalGeometry
     answer = answer + dt * dt;
     dt = (P.y - Q.y);
     answer = answer + dt * dt;
+#ifdef USE_VIRTUAL_FUNC_POINT2D
     if ((P.GetDimension() > 2) || (Q.GetDimension() > 2))
+#else
+#endif // def USE_VIRTUAL_FUNC_POINT2D
     {
       dt = (P.z - Q.z);
       answer = answer + dt * dt;
@@ -100,7 +115,9 @@ namespace ComputationalGeometry
   point2d::point2d() : point3d(0, 0, 0) {}
   point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
 
+#ifdef USE_VIRTUAL_FUNC_POINT2D
   int point2d::GetDimension() const { return 2; }
+#endif // def USE_VIRTUAL_FUNC_POINT2D
 
   double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
@@ -116,6 +133,183 @@ namespace ComputationalGeometry
     
     return theta_P < theta_Q;
     //Also can use return getOrientation(P, Q) < 0;
+  }
+
+  void ComputationalGeometry::MergeConvex(point2d* iConvexA, int iConvexASize,
+                                          point2d* iConvexB, int iConvexBSize,
+                                          point2d* oMerged, int* oMergedSize)
+  {
+    if (iConvexASize == 0)
+    {
+      for (int ii = 0; ii < iConvexBSize; ++ii) { oMerged[ii] = iConvexB[ii]; }
+      *oMergedSize = iConvexBSize;
+      return;
+    }
+    if (iConvexBSize == 0)
+    {
+      for (int ii = 0; ii < iConvexASize; ++ii) { oMerged[ii] = iConvexA[ii]; }
+      *oMergedSize = iConvexASize;
+      return;
+    }
+    int minIndexA = 0;
+    int minIndexA_Y = 0;
+    int maxIndexA_Y = 0;
+    int minIndexB = 0;
+    int minIndexB_Y = 0;
+    int maxIndexB_Y = 0;
+    for (int ii = 0; ii < iConvexASize; ++ii)
+    {
+      if (iConvexA[ii] < iConvexA[minIndexA]) { minIndexA = ii; }
+      if (iConvexA[ii].y < iConvexA[minIndexA_Y].y) { minIndexA_Y = ii; }
+      if (iConvexA[ii].y > iConvexA[maxIndexA_Y].y) { maxIndexA_Y = ii; }
+    }
+    for (int ii = 0; ii < iConvexBSize; ++ii)
+    {
+      if (iConvexB[ii] < iConvexB[minIndexB]) { minIndexB = ii; }
+      if (iConvexB[ii].y < iConvexB[minIndexB_Y].y) { minIndexB_Y = ii; }
+      if (iConvexB[ii].y > iConvexB[maxIndexB_Y].y) { maxIndexB_Y = ii; }
+    }
+
+    // TODO: Make this run in linear time.
+    // For now the hull is so small that in practice the time O(h * log(h)) is linear O(h).
+
+    point2d* helperArr = (point2d*)malloc(sizeof(point2d) * (iConvexASize + iConvexBSize));
+    if (helperArr == nullptr) { return; }
+    for (int ii = 0; ii < iConvexASize; ++ii) { helperArr[ii] = iConvexA[ii]; }
+    for (int ii = 0; ii < iConvexBSize; ++ii) { helperArr[ii + iConvexASize] = iConvexB[ii]; }
+    {
+      PointCloud pc(helperArr, iConvexASize + iConvexBSize);
+      pc.computeConvexHull();
+      *oMergedSize = (int)(pc.ConvexHull().size());
+      for (int ii = 0; ii < *oMergedSize; ++ii)
+      {
+        oMerged[ii] = pc.ConvexHull()[ii];
+      }
+    }
+    free(helperArr);
+    helperArr = nullptr;
+  }
+
+  std::vector<point2d> ComputationalGeometry::ConvexHullDivideAndConquer(std::vector<point2d>& iCloud)
+  {
+    const int convexHullSmall = 50;
+    if (iCloud.size() == 0) { return iCloud; }
+    std::sort(iCloud.begin(), iCloud.end()); // Sort by x-coordinate first and foremost;
+    if (iCloud.size() <= 3) { return iCloud; }
+    int cloudSize = (int)iCloud.size();
+
+    int* partitionsCloud = nullptr;
+    int* partitionsHull = nullptr;
+    int partitionsLength = 1;
+    int stackDepth = 0;
+    {
+      int smallSize = cloudSize;
+      while (smallSize > convexHullSmall)
+      {
+        smallSize = smallSize / 2;
+        partitionsLength *= 2;
+        ++stackDepth;
+      }
+
+      partitionsCloud = (int*)malloc(sizeof(int) * partitionsLength);
+      partitionsHull = (int*)malloc(sizeof(int) * partitionsLength);
+      for (int ii = 0; ii < partitionsLength; ++ii)
+      {
+        partitionsCloud[ii] = smallSize;
+      }
+    }
+
+    point2d* cloudArr = (point2d*)malloc(sizeof(point2d) * cloudSize);
+    point2d* hull = (point2d*)malloc(sizeof(point2d) * cloudSize);
+
+    for (int ii = 0; ii < cloudSize; ++ii)
+    {
+      cloudArr[ii] = iCloud[ii];
+    }
+    // Try to ensure partition line does not occur along a common x-coordinate.
+    {
+      int startIndex = 1;
+      for (int pp = startIndex; pp < partitionsLength; ++pp)
+      {
+        int ii = partitionsCloud[pp - 1];
+        int diff = 0;
+        for (int jj = 0; jj < partitionsCloud[pp] - startIndex; ++jj)
+        {
+          double deltaX = (cloudArr[ii].x - cloudArr[jj].x);
+          if (deltaX * deltaX <= threshold()) { ++diff; continue; }
+          break;
+        }
+        partitionsCloud[pp - 1] = partitionsCloud[pp - 1] + diff;
+        partitionsCloud[pp] = partitionsCloud[pp] - diff;
+      }
+    }
+    int hullSize = 0;
+    {
+      int startIndex = 0;
+      for (int ii = 0; ii < partitionsLength; ++ii)
+      {
+        int tempSize = partitionsCloud[ii];
+        PointCloud pc(cloudArr + startIndex, tempSize);
+        startIndex += tempSize;
+        pc.computeConvexHull();
+        const int currentHullSize = (int)(pc.ConvexHull().size());
+        partitionsHull[ii] = currentHullSize;
+        for (int jj = 0; jj < currentHullSize; ++jj)
+        {
+          if (jj + hullSize >= cloudSize) { break; }
+          hull[jj + hullSize] = pc.ConvexHull()[jj];
+        }
+        hullSize += currentHullSize;
+      }
+    }
+    cloudSize = hullSize;
+    for (int ii = 0; ii < cloudSize; ++ii)
+    {
+      cloudArr[ii] = hull[ii];
+    }
+    for (int ii = 0; ii < partitionsLength; ++ii)
+    {
+      partitionsCloud[ii] = partitionsHull[ii];
+    }
+
+    for (;stackDepth > 0; --stackDepth)
+    {
+      int hullPartitionsLength = 0;
+      int increaseBy = 2;
+      hullSize = 0;
+      int indA = 0;
+      for (int ii = 0; ii < partitionsLength; ii = ii + increaseBy)
+      {
+        const int arrSizeA = partitionsCloud[ii];
+        int indB = indA + arrSizeA;
+        const int arrSizeB = partitionsCloud[ii + 1];
+        int hullSizeOut = 0;
+        MergeConvex(cloudArr + indA, arrSizeA, cloudArr + indB, arrSizeB,
+                    hull + hullSize, &hullSizeOut);
+        indA = indB + arrSizeB;
+        partitionsHull[hullPartitionsLength] = hullSizeOut;
+        hullSize += hullSizeOut;
+        ++hullPartitionsLength;
+      }
+      cloudSize = hullSize;
+      for (int ii = 0; ii < cloudSize; ++ii)
+      {
+        cloudArr[ii] = hull[ii];
+      }
+      partitionsLength = hullPartitionsLength;
+      for (int ii = 0; ii < partitionsLength; ++ii)
+      {
+        partitionsCloud[ii] = partitionsHull[ii];
+      }
+    }
+
+    std::vector<point2d> hull0; hull0.resize(hullSize);
+    for (int ii = 0; ii < hullSize; ++ii) { hull0[ii] = hull[ii]; }
+    free(cloudArr);
+    free(hull);
+    free(partitionsCloud);
+    free(partitionsHull);
+    return hull0;
   }
 
   __global__ void ComputationalGeometry::CenterOfMass(point2d* aa, int arrSize, point2d* bb)
@@ -499,6 +693,7 @@ namespace ComputationalGeometry
      * it must be convex.
      */
     void dividePointsInto3ConvexClouds(const std::vector<point2d>& iPointArray, std::vector<point2d>& oPointArray1, std::vector<point2d>& oPointArray2, std::vector<point2d>& oPointArray3);
+    void computeHullDivideConquer();
     static const int DelaunayMaxForNaive = 100;
     enum class DelaunayMode
     {
@@ -532,6 +727,18 @@ namespace ComputationalGeometry
   {
     // unique_ptr requires C++ 11.
     // make_unique requires C++ 14.
+  }
+
+  PointCloud::PointCloud(point2d* iPoints, int iNumPoints) : pImpl(std::make_unique<PointCloud::Impl>(this))
+  {
+    if (pImpl != nullptr) // Of course this should never happen.
+    {
+      pImpl->pointArray.resize(iNumPoints);
+      for (int ii = 0; ii < iNumPoints; ++ii)
+      {
+        pImpl->pointArray[ii] = iPoints[ii];
+      }
+    }
   }
 
   const std::vector<point2d>& PointCloud::PointArray() const
@@ -622,6 +829,7 @@ namespace ComputationalGeometry
     {
       pImpl->generateRandomPoints();
       computeConvexHull();
+      //pImpl->computeHullDivideConquer();
       pImpl->triangulation.resize(0);
       pImpl->delaunay.resize(0);
       pImpl->nearestNeighbor.resize(0);
@@ -905,6 +1113,12 @@ namespace ComputationalGeometry
     //gMutex.unlock();
   }
 #endif // def USE_MULTI_THREADING
+
+  void PointCloud::Impl::computeHullDivideConquer()
+  {
+    std::vector<point2d> tempArray = pointArray;
+    hull = ConvexHullDivideAndConquer(tempArray);
+  }
 
   void PointCloud::Impl::computeDelaunay(DelaunayMode delaunayMode, std::vector<point2d>& ioPointArray, std::vector<Triangle2d>& ioTriangulation, std::vector<point2d>& ioHull, std::vector<Triangle2d>& ioDelaunay)
   {
@@ -1506,61 +1720,66 @@ namespace ComputationalGeometry
     // 2d: Graham scan.
     ioHull = iPointArray;
     const int NN = (int)iPointArray.size();
-    if (NN <= 3) {return;}
+    if (NN <= 3) { return; }
 
-    point2d tempOrigin = ioHull[0];
     {
       int bestIndex = 0;
-      const int startIndex = 1;
-      for (int i = startIndex; i < NN; ++i)
+      point2d tempOrigin = ioHull[0];
+      for (int i = 0; i < NN; ++i)
       {
-        if (ioHull[i].y < tempOrigin.y)
-        {
-          tempOrigin = ioHull[i];
-          bestIndex = i;
-        }
+        if (ioHull[i].y >= tempOrigin.y) { continue; }
+        bestIndex = i;
+        tempOrigin = ioHull[bestIndex];
       }
 
       ioHull[bestIndex] = ioHull[1];
       ioHull[1] = tempOrigin;
-      ioHull.push_back(ioHull[0]);
-    
-      for (int i = startIndex; i <= NN; ++i)
+
+      for (int i = 0; i < NN; ++i)
       {
         ioHull[i].x = ioHull[i].x - tempOrigin.x;
         ioHull[i].y = ioHull[i].y - tempOrigin.y;
       }
     
       // O(n log(n)):
-      std::sort(ioHull.begin() + 1, ioHull.end(), point2d::comparator);
+      std::sort(ioHull.begin(), ioHull.end(), point2d::comparator);
     
-      for (int i = startIndex; i <= NN; ++i)
+      for (int i = 0; i < NN; ++i)
       {
         ioHull[i].x = ioHull[i].x + tempOrigin.x;
         ioHull[i].y = ioHull[i].y + tempOrigin.y;
       }
-        
-      ioHull[0] = ioHull[NN];
     }
+    point2d endOfList = ioHull[0];
     
     int hullCount = 1; // Initialize stack.
     const int startIndex = 2;
     for (int i = startIndex; i <= NN; ++i)
     {
-      while (point2d::getOrientation(ioHull[hullCount], ioHull[i], ioHull[hullCount - 1]) <= 0)
+      point2d pointP = (hullCount == NN) ? endOfList : ioHull[hullCount];
+      point2d pointQ = (i == NN) ? endOfList : ioHull[i];
+      point2d pointO = (hullCount - 1 == NN) ? endOfList : ioHull[hullCount - 1];
+      while (point2d::getOrientation(pointP, pointQ, pointO) <= 0)
       {
         if (hullCount > 1)
         {
-          --hullCount;  continue;
+          --hullCount;
+          pointP = (hullCount == NN) ? endOfList : ioHull[hullCount];
+          pointO = (hullCount - 1 == NN) ? endOfList : ioHull[hullCount - 1];
+          continue;
         }
-        if (i == NN) {break;} // Stack is empty.
+        if (i == NN) { break; } // Stack is empty.
         ++i; // Else keep searching.
+        pointQ = (i == NN) ? endOfList : ioHull[i];
       }
       // Otherwise point is on the boundary of the convex hull.
       ++hullCount;
-      tempOrigin = ioHull[hullCount];
-      ioHull[hullCount] = ioHull[i];
-      ioHull[i] = tempOrigin;
+      pointP = (hullCount == NN) ? endOfList : ioHull[hullCount];
+      pointO = (hullCount - 1 == NN) ? endOfList : ioHull[hullCount - 1];
+      if (hullCount == NN) { endOfList = pointQ; }
+      else { ioHull[hullCount] = pointQ; }
+      if (i == NN) { endOfList = pointP; }
+      else { ioHull[i] = pointP; }
     }
 
     ioHull.resize(hullCount);
@@ -1788,6 +2007,7 @@ namespace ComputationalGeometry
 
   void PointCloud::unitTest()
   {
+#ifdef USE_VIRTUAL_FUNC_POINT2D
     {
       point3d P(1.0, 2.0, 3.0);
       std::cout << "\n//////\nThe dimension is " << P.GetDimension() << ".";
@@ -1799,6 +2019,7 @@ namespace ComputationalGeometry
       Q.print("\n");
       std::cout << "\n";
     }
+#endif // def USE_VIRTUAL_FUNC_POINT2D
   
     {
       point3d P(1.0, 2.0, 3.0);
