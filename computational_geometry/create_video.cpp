@@ -7,6 +7,14 @@ All Rights Reserved.*/
 
 #ifdef USE_OPEN_CV
 
+#ifndef IMG_OUTPUT_FOLDER
+#define IMG_OUTPUT_FOLDER ".."
+#endif // not IMG VIDEO_OUTPUT_FOLDER
+
+#ifndef VIDEO_OUTPUT_FOLDER
+#define VIDEO_OUTPUT_FOLDER ".."
+#endif // not def VIDEO_OUTPUT_FOLDER
+
 #include <opencv2/opencv.hpp>
 
 namespace ComputationalGeometry
@@ -20,14 +28,15 @@ namespace ComputationalGeometry
     const auto frameWidth = (int)capture.get(cv::CAP_PROP_FRAME_WIDTH);
     const auto frameHeight = (int)capture.get(cv::CAP_PROP_FRAME_HEIGHT);
 
-    cv::VideoWriter videoOut("../video_output/compGeo.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+    std::string videoOutFolder = VIDEO_OUTPUT_FOLDER;
+    cv::VideoWriter videoOut(videoOutFolder + "/compGeo.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
 
     uint8_t fewerColorsInterval = 30;
 
+    cv::Mat currentFrame;
     const char escapeKey = (char)27;
     while (true)
     {
-      cv::Mat currentFrame;
       capture >> currentFrame;
       if (currentFrame.empty()) { break; }
       if ((vm == VideoMode::Grayscale) || (vm == VideoMode::FewerColors))
@@ -57,6 +66,9 @@ namespace ComputationalGeometry
       char keyboardKey = (char)cv::waitKey(1);
       if (keyboardKey == escapeKey) { break; }
     }
+
+    std::string imgOutFolder = IMG_OUTPUT_FOLDER;
+    cv::imwrite(imgOutFolder + "/compGeoScreenshot.png", currentFrame);
 
     return true;
   }
