@@ -101,12 +101,12 @@
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;USE_OPEN_GL;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;USE_OPEN_GL;IMG_OUTPUT_FOLDER="../../image_output";VIDEO_OUTPUT_FOLDER="../../video_output";CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;USE_OPEN_GL;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;USE_OPEN_GL;IMG_OUTPUT_FOLDER=\"../../image_output\";VIDEO_OUTPUT_FOLDER=\"../../video_output\";CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\pcern\Coding-Samples\computational_geometry\ComputationalGeometry\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -159,14 +159,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER="../../image_output";VIDEO_OUTPUT_FOLDER="../../video_output";CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER=\"../../image_output\";VIDEO_OUTPUT_FOLDER=\"../../video_output\";CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\pcern\Coding-Samples\computational_geometry\ComputationalGeometry\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -219,14 +219,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER="../../image_output";VIDEO_OUTPUT_FOLDER="../../video_output";CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER=\"../../image_output\";VIDEO_OUTPUT_FOLDER=\"../../video_output\";CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\pcern\Coding-Samples\computational_geometry\ComputationalGeometry\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -280,12 +280,12 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER="../../image_output";VIDEO_OUTPUT_FOLDER="../../video_output";CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;USE_OPEN_GL;IMG_OUTPUT_FOLDER=\"../../image_output\";VIDEO_OUTPUT_FOLDER=\"../../video_output\";CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\pcern\Coding-Samples\computational_geometry\ComputationalGeometry\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -324,11 +324,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\create_video.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\edge_list.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\gl_callbacks.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\includes.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\point_cloud.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\rational.h" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\create_video.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\edge_list.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\geometry_suite.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\gl_callbacks.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\point_cloud.cpp" />

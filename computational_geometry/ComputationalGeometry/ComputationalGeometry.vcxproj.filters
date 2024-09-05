@@ -4,6 +4,9 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\create_video.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\edge_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\computational_geometry\geometry_suite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -19,6 +22,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\create_video.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\edge_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\computational_geometry\gl_callbacks.h">
