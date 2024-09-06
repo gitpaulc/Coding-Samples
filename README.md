@@ -8,13 +8,11 @@
 * Run `bash compile_and_run_geometry.sh` to run the computational geometry suite.  By default, 50 points are generated.
 * Run `bash compile_and_run_geometry.sh <number-of-points>` to run the computational geometry suite with your desired number of points.  For instance `bash compile_and_run_geometry.sh 100` would run the program with 100 points.
 
-* If you want to build the CUDA version on Windows...
-* Uncomment the line `//#define USE_CUDA` in point_cloud.h.
-* Install CUDA if you haven't already. Follow the steps below to install FreeGlut.
-* Run the batch file compile_and_run_geometry_cuda.bat
-* If it gives an error about not finding cl.exe, add this (or a similar) folder path as an environment variable: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64\
+* If you want to build the CUDA version on Windows, set the USE_CUDA CMake variable. Reconfigure and regenerate the project.
+* Install CUDA if you haven't already.
+* When you build, if it gives an error about not finding cl.exe, add this (or a similar) folder path as an environment variable: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64\
 * After adding the new PATH variable, close and open the command prompt to make sure it updates.
-* You can pass in the number of points as a parameter to compile_and_run_geometry_cuda.bat.
+* Generally for Windows, follow the steps below.
 
 * Otherwise, if you are using Windows...
 * Use CMake to generate the ComputationalGeometry project/solution. If you do not have CMake installed, a project/solution is already generated in `Coding-Samples\computational_geometry\ComputationalGeometry`
