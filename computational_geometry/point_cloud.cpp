@@ -121,18 +121,21 @@ namespace ComputationalGeometry
 
   double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
+    return P.orientation(Q, O);
+  }
+  double point2d::orientation(const point2d& Q, const point2d& O) const
+  {
+    point2d P = *this;
     return (P.x - O.x) * (Q.y - O.y) - (P.y - O.y) * (Q.x - O.x);
   }
+  bool point2d::comparator(const point2d& P, const point2d& Q) { return P.compare(Q); }
 
-  bool point2d::comparator(const point2d& P, const point2d& Q)
+  bool point2d::compare(const point2d& Q) const
   {
-    // Equivalent to P < Q
-    
-    double theta_P = atan2(P.y, P.x);
+    // Equivalent to *this < Q
+    double theta_P = atan2(y, x);
     double theta_Q = atan2(Q.y, Q.x);
-    
-    return theta_P < theta_Q;
-    //Also can use return getOrientation(P, Q) < 0;
+    return theta_P < theta_Q; // Also can use return getOrientation(*this, Q) < 0;
   }
 
   void ComputationalGeometry::MergeConvex(point2d* iConvexA, int iConvexASize,
@@ -244,6 +247,65 @@ namespace ComputationalGeometry
       }
     }
     int hullSize = 0;
+#ifdef __CUDA_RUNTIME_H__
+    {
+        int maxPartitionSize = 0;
+        // Initialize host arrays.
+        for (int pp = 0; pp < partitionsLength; ++pp)
+        {
+          if (partitionsCloud[pp] > maxPartitionSize) { maxPartitionSize = partitionsCloud[pp]; }
+        }
+        point2d** hostArrays = new point2d* [partitionsLength]; // Row count.
+        for (int pp = 0; pp < partitionsLength; ++pp)
+        {
+          hostArrays[pp] = new point2d[maxPartitionSize]; // Column count.
+          int cloudArrInd = 0;
+          for (int ii = 0; ii < partitionsCloud[pp]; ++ii)
+          {
+            hostArrays[pp][ii] = cloudArr[cloudArrInd + ii];
+          }
+          cloudArrInd += partitionsCloud[pp];
+        }
+        // Initialize device arrays.
+        point2d* d_PointArrays;
+        int* d_ArraySizes;
+        point2d* d_oHulls;
+        int* d_oHullSizes;
+        // Allocate memory on the GPU.
+        cudaMalloc((void**)&(d_PointArrays), sizeof(point2d) * partitionsLength * maxPartitionSize);
+        cudaMalloc((void**)&(d_ArraySizes), sizeof(int) * partitionsLength);
+        cudaMalloc((void**)&(d_oHulls), sizeof(point2d) * partitionsLength * maxPartitionSize);
+        cudaMalloc((void**)&(d_oHullSizes), sizeof(int) * partitionsLength);
+        cudaMemcpy(d_PointArrays, hostArrays, sizeof(point2d) * partitionsLength * maxPartitionSize, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_ArraySizes, partitionsCloud, sizeof(int) * partitionsLength, cudaMemcpyHostToDevice);
+
+        int threadsPerBlock = 1;
+        dim3 numBlocks(maxPartitionSize, partitionsLength); // grid(numCols, numRows)
+        ComputeConvexHulls << <numBlocks, threadsPerBlock >> > (d_PointArrays, d_ArraySizes, partitionsLength, d_oHulls, d_oHullSizes);
+
+        cudaMemcpy(partitionsHull, d_oHullSizes, sizeof(int) * partitionsLength, cudaMemcpyDeviceToHost);
+        cudaMemcpy(hostArrays, d_PointArrays, sizeof(point2d) * partitionsLength * maxPartitionSize, cudaMemcpyDeviceToHost);
+
+        for (int pp = 0; pp < partitionsLength; ++pp)
+        {
+          const int currentHullSize = partitionsHull[pp];
+          for (int ii = 0; ii < currentHullSize; ++ii)
+          {
+            if (ii + hullSize >= cloudSize) { break; }
+            hull[ii + hullSize] = hostArrays[pp][ii];
+          }
+          hullSize += currentHullSize;
+        }
+
+        cudaFree(&d_PointArrays); // Free GPU memory.
+        cudaFree(&d_ArraySizes); // Free GPU memory.
+        cudaFree(&d_oHulls); // Free GPU memory.
+        cudaFree(&d_oHullSizes); // Free GPU memory.
+
+        for (int pp = 0; pp < partitionsLength; ++pp) { delete[] (hostArrays[pp]); }
+        delete[] hostArrays;
+    }
+#else
     {
       int startIndex = 0;
       for (int ii = 0; ii < partitionsLength; ++ii)
@@ -262,6 +324,7 @@ namespace ComputationalGeometry
         hullSize += currentHullSize;
       }
     }
+#endif // def __CUDA_RUNTIME_H__
     cloudSize = hullSize;
     for (int ii = 0; ii < cloudSize; ++ii)
     {
@@ -315,13 +378,113 @@ namespace ComputationalGeometry
   __global__ void ComputationalGeometry::CenterOfMass(point2d* aa, int arrSize, point2d* bb)
   {
 #ifdef __CUDA_RUNTIME_H__
-      int i = blockIdx.x * blockDim.x + threadIdx.x;
-      double inv = 1.0 / (double)arrSize;
-      if (i < arrSize)
+    int ii = blockIdx.x * blockDim.x + threadIdx.x;
+    double inv = 1.0 / (double)arrSize;
+    if (ii < arrSize)
+    {
+      bb[ii].x = aa[ii].x * inv;
+      bb[ii].y = aa[ii].y * inv;
+    }
+#endif // def __CUDA_RUNTIME_H__
+  }
+
+  __device__ void computeConvexHullCuda(point2d* iPointArray, int iNumPoints, point2d* oHull, int* oHullSize)
+  {
+#ifdef __CUDA_RUNTIME_H__
+    // 2d: Graham scan.
+    for (int ii = 0; ii < iNumPoints; ++ii)
+    {
+      oHull[ii] = iPointArray[ii];
+    }
+    int NN = iNumPoints;
+    if (NN <= 3) { *oHullSize = 3; return; }
+
+    {
+      int bestIndex = 0;
+      point2d tempOrigin = oHull[0];
+      for (int i = 0; i < NN; ++i)
       {
-        bb[i].x = aa[i].x * inv;
-        bb[i].y = aa[i].y * inv;
+        if (oHull[i].y >= tempOrigin.y) { continue; }
+        bestIndex = i;
+        tempOrigin = oHull[bestIndex];
       }
+
+      oHull[bestIndex] = oHull[1];
+      oHull[1] = tempOrigin;
+
+      for (int i = 0; i < NN; ++i)
+      {
+        oHull[i].x = oHull[i].x - tempOrigin.x;
+        oHull[i].y = oHull[i].y - tempOrigin.y;
+      }
+
+      // O(n log(n)):
+      // std::sort(oHull.begin(), oHull.end(), point2d::comparator);
+      // Instead do bubble sort:
+      for (int i = 0; i < NN; ++i)
+      {
+        int minIndex = i;
+        for (int j = i; j < NN; ++j)
+        {
+          if (oHull[j].compare(oHull[minIndex])) { minIndex = j; }
+        }
+        point2d tempSort = oHull[i];
+        oHull[i] = oHull[minIndex];
+        oHull[minIndex] = tempSort;
+      }
+
+      for (int i = 0; i < NN; ++i)
+      {
+        oHull[i].x = oHull[i].x + tempOrigin.x;
+        oHull[i].y = oHull[i].y + tempOrigin.y;
+      }
+    }
+    point2d endOfList = oHull[0];
+
+    int hullCount = 1; // Initialize stack.
+    const int startIndex = 2;
+    for (int i = startIndex; i <= NN; ++i)
+    {
+      point2d pointP = (hullCount == NN) ? endOfList : oHull[hullCount];
+      point2d pointQ = (i == NN) ? endOfList : oHull[i];
+      point2d pointO = (hullCount - 1 == NN) ? endOfList : oHull[hullCount - 1];
+      while (pointP.orientation(pointQ, pointO) <= 0)
+      {
+        if (hullCount > 1)
+        {
+          --hullCount;
+          pointP = (hullCount == NN) ? endOfList : oHull[hullCount];
+          pointO = (hullCount - 1 == NN) ? endOfList : oHull[hullCount - 1];
+          continue;
+        }
+        if (i == NN) { break; } // Stack is empty.
+        ++i; // Else keep searching.
+        pointQ = (i == NN) ? endOfList : oHull[i];
+      }
+      // Otherwise point is on the boundary of the convex hull.
+      ++hullCount;
+      pointP = (hullCount == NN) ? endOfList : oHull[hullCount];
+      pointO = (hullCount - 1 == NN) ? endOfList : oHull[hullCount - 1];
+      if (hullCount == NN) { endOfList = pointQ; }
+      else { oHull[hullCount] = pointQ; }
+      if (i == NN) { endOfList = pointP; }
+      else { oHull[i] = pointP; }
+    }
+
+    *oHullSize = hullCount;
+#endif // def __CUDA_RUNTIME_H__
+  }
+
+  __global__ void ComputeConvexHulls(point2d* pointArrays, int* arraySizes, int numArrays, point2d* oHulls, int* hullSizes)
+  {
+#ifdef __CUDA_RUNTIME_H__
+    int ii = blockIdx.x; // Which column?
+    int jj = blockIdx.y; // Which row?
+    int id = gridDim.x * jj + ii;
+    if (jj < numArrays)
+    {
+      computeConvexHullCuda(pointArrays + jj, arraySizes[jj], oHulls + jj, hullSizes + jj);
+    }
 #endif // def __CUDA_RUNTIME_H__
   }
 
@@ -828,8 +991,12 @@ namespace ComputationalGeometry
     if (bRecompute)
     {
       pImpl->generateRandomPoints();
+#ifdef __CUDA_RUNTIME_H__
       computeConvexHull();
-      //pImpl->computeHullDivideConquer();
+      // pImpl->computeHullDivideConquer(); // TODO: Fix this.
+#else
+      computeConvexHull();
+#endif
       pImpl->triangulation.resize(0);
       pImpl->delaunay.resize(0);
       pImpl->nearestNeighbor.resize(0);
