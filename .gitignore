@@ -1,7 +1,6 @@
 .DS_Store
 *.o
 computational_geometry/*.exe
-computational_geometry/comp_geo_cuda/*
 computational_geometry/ComputationalGeometry/.vs
 
 computational_geometry/ComputationalGeometry/CMakeCache.txt

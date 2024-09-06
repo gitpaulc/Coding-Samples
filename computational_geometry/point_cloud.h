@@ -55,7 +55,9 @@ namespace ComputationalGeometry
       virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
 #endif // def USE_VIRTUAL_FUNC_POINT2D
       static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
+      __host__ __device__ double orientation(const point2d& Q, const point2d& O = point2d()) const;
       static bool comparator(const point2d& P, const point2d& Q);
+      __host__ __device__ bool compare(const point2d& Q) const;
   };
 
   /**
@@ -72,6 +74,7 @@ namespace ComputationalGeometry
   std::vector<point2d> ConvexHullDivideAndConquer(std::vector<point2d>& iCloud);
 
   __global__ void CenterOfMass(point2d* aa, int N, point2d* bb);
+  __global__ void ComputeConvexHulls(point2d* pointArrays, int* arraySizes, int numArrays, point2d* oHulls, int* hullSizes);
 
   class Edge2d
   {

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 project(ComputationalGeometry)
 
 # Do not generate ZERO_BUILD project.
@@ -25,6 +25,11 @@ set(OPEN_CV_VERSION_STR "")
 set(USE_OPEN_GL ON CACHE BOOL "Use OpenGL? Required to be true." FORCE)
 set(USE_OPEN_CV OFF CACHE BOOL "Use OpenCV? Optional.")
 set(USE_CUDA OFF CACHE BOOL "Use CUDA? Optional.")
+if (${USE_CUDA})
+  enable_language(CUDA)
+  set(CUDA_VERBOSE_BUILD ON)
+  #set(NVCC_PATH "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6/bin/nvcc.exe" CACHE PATH "Location of nvcc binary.")
+endif()
 if (${USE_OPEN_GL})
   set(FREE_GLUT_INCLUDE "freeglut/include" CACHE PATH "Location of FreeGlut headers.")
   set(FREE_GLUT_LIB_DIR "freeglut/lib${PATH_64}" CACHE PATH "Location of FreeGlut static libraries.")
@@ -83,6 +88,12 @@ endif()
 
 if (${USE_OPEN_CV})
   target_include_directories(ComputationalGeometry PUBLIC "${OPEN_CV_INCLUDE}")
+endif()
+
+# Compiler flags.
+
+if (${USE_CUDA})
+  set_source_files_properties(../point_cloud.cpp PROPERTIES LANGUAGE CUDA)
 endif()
 
 # Linking.
