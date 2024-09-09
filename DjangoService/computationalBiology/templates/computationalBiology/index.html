@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+  {% load static %}
+</head>
+
+<link rel="stylesheet" href="{% static 'computationalBiology/style.css' %}">
+
+<h1>Welcome to Computational Biology by Paul Cernea.</h1>
+{% if latest_algorithm_list %}
+    <ul>
+    {% for algorithm in latest_algorithm_list %}
+        <li><a href="{% url 'computationalBiology:algorithm' algorithm.id %}">{{ algorithm }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No computational biology algorithms available.</p>
+{% endif %}

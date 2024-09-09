@@ -35,3 +35,7 @@
 * Press T to turn naive triangulation on and off.
 * See the screenshots seven_points.png, hundred_points_1.png, hundred_points_2.png for examples.
 * Press **Q** or **ESC** to exit.
+
+**Computational Biology.**
+
+* This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings.
