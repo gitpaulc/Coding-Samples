@@ -38,4 +38,4 @@
 
 **Computational Biology.**
 
-* This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings.
+* This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings. The source code along with a screenshot is contained in the `DjangoService` folder.
