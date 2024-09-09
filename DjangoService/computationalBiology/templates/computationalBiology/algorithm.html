@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<head>
+  {% load static %}
+</head>
+
+<link rel="stylesheet" href="{% static 'computationalBiology/style.css' %}">
+
+<form action="{% url 'computationalBiology:run' algorithm.id %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1 id="mainHeading">{{ algorithm }}.</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    {% for inputmodel in algorithm.inputmodel_set.all %}
+        <label for="inputmodel{{ forloop.counter }}">{{ inputmodel }}</label><br><br>
+        <input type="text" id="input1" value="{{ inputmodel.input1 }}"><br><br>
+        <input type="text" id="input2" value="{{ inputmodel.input2 }}"><br><br>
+    {% endfor %}
+</fieldset>
+<fieldset>
+    <legend><h1>Result.</h1></legend>
+    <input type="text" name="res" id="algoResult" value="" disabled></input>
+</fieldset>
+<br><br>
+<input type="button" onclick="runAlgo()" value="Run Algorithm">
+<script>
+    function validString(str)
+    {
+        // alert(str); // For debugging.
+        for (let i = 0; i < str.length; i++) {
+            if (str[i] == 'G') { continue; }
+            if (str[i] == 'g') { continue; }
+            if (str[i] == 'A') { continue; }
+            if (str[i] == 'a') { continue; }
+            if (str[i] == 'T') { continue; }
+            if (str[i] == 't') { continue; }
+            if (str[i] == 'C') { continue; }
+            if (str[i] == 'c') { continue; }
+            return false;
+        }
+        return true;
+    }
+
+    function reverse(str) { return str.split('').reverse().join(''); }
+
+    function lcSequence(strA, strB) {
+        var lenA = strA.length;
+        var lenB = strB.length;
+        var lcs = new Array(lenA + 1);
+        for (var i = 0; i <= strA.length; i++) {
+            lcs[i] = new Array(lenB + 1);
+        }
+        for (var i = 0; i <= lenA; i++) {
+            for (var j = 0; j <= lenB; j++) {
+                if ((i == 0) || (j == 0)) {
+                    lcs[i][j] = 0; // Base case.
+                    continue;
+                }
+                if (strA[i - 1] == strB[j - 1]) {
+                    lcs[i][j] = 1 + lcs[i - 1][j - 1];
+                    continue;
+                }
+                if (lcs[i][j - 1] > lcs[i - 1][j]) {
+                    lcs[i][j] = lcs[i][j - 1];
+                    continue;
+                }
+                lcs[i][j] = lcs[i - 1][j];
+            }
+        }
+        var answer = "";
+        var len = lcs[lenA][lenB];
+        var i = lenA; var j = lenB;
+        while ((i > 0) && (j > 0)) {
+            if (strA[i - 1] == strB[j - 1]) {
+                answer += strA[i - 1];
+                i--;
+                j--;
+                continue;
+            }
+            if (lcs[i][j - 1] > lcs[i - 1][j]) {
+                j--;
+                continue;
+            }
+            i--;
+        }
+        if (answer == "") { return "Empty."; }
+        return reverse(answer);
+    }
+
+    function runAlgo() {
+        var mainHeading = document.getElementById("mainHeading");
+        var output = document.getElementById("algoResult");
+        var input1 = document.getElementById("input1");
+        var input2 = document.getElementById("input2");
+        if (!validString(input1.value)) {
+            output.value = "G A T or C only.";
+            return;
+        }
+        if (!validString(input2.value)) {
+            output.value = "G A T or C only.";
+            return;
+        }
+        var doingSubsequence = (mainHeading.innerHTML == "Largest Common Subsequence.");
+        if (doingSubsequence) {
+            output.value = lcSequence(input1.value, input2.value);
+            return;
+        }
+        // else doingSubstring
+        output.value = input2.value; // TODO: Implement this.
+}
+</script>
+<input type="button" onclick="location.href='..'" value="Back to Main">
+</form>
