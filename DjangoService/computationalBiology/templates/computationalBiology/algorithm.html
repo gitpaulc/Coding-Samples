@@ -7,15 +7,14 @@
 
 <form action="{% url 'computationalBiology:run' algorithm.id %}" method="post">
 {% csrf_token %}
-<fieldset>
-    <legend><h1 id="mainHeading">{{ algorithm }}.</h1></legend>
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-    {% for inputmodel in algorithm.inputmodel_set.all %}
-        <label for="inputmodel{{ forloop.counter }}">{{ inputmodel }}</label><br><br>
-        <input type="text" id="input1" value="{{ inputmodel.input1 }}"><br><br>
-        <input type="text" id="input2" value="{{ inputmodel.input2 }}"><br><br>
-    {% endfor %}
-</fieldset>
+    <fieldset>
+        <legend><h1 id="mainHeading">{{ algorithm }}.</h1></legend>
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        <label>Strings can only contain G, A, T, and C.</label><br><br>
+        {% for inputstring in algorithm.inputstring_set.all %}
+        <input type="text" id="input{{ inputstring.id }}" value="{{ inputstring.inputField }}"><br><br>
+        {% endfor %}
+    </fieldset>
 <fieldset>
     <legend><h1>Result.</h1></legend>
     <input type="text" name="res" id="algoResult" value="" disabled></input>
@@ -43,6 +42,8 @@
     function reverse(str) { return str.split('').reverse().join(''); }
 
     function lcSequence(strA, strB) {
+        var strAU = strA.toUpperCase(); // Ignore case.
+        var strBU = strB.toUpperCase(); // Ignore case.
         var lenA = strA.length;
         var lenB = strB.length;
         var lcs = new Array(lenA + 1);
@@ -55,7 +56,7 @@
                     lcs[i][j] = 0; // Base case.
                     continue;
                 }
-                if (strA[i - 1] == strB[j - 1]) {
+                if (strAU[i - 1] == strBU[j - 1]) {
                     lcs[i][j] = 1 + lcs[i - 1][j - 1];
                     continue;
                 }
@@ -70,7 +71,7 @@
         var len = lcs[lenA][lenB];
         var i = lenA; var j = lenB;
         while ((i > 0) && (j > 0)) {
-            if (strA[i - 1] == strB[j - 1]) {
+            if (strAU[i - 1] == strBU[j - 1]) {
                 answer += strA[i - 1];
                 i--;
                 j--;
@@ -99,7 +100,7 @@
             output.value = "G A T or C only.";
             return;
         }
-        var doingSubsequence = (mainHeading.innerHTML == "Largest Common Subsequence.");
+        var doingSubsequence = (mainHeading.innerHTML == "Longest Common Subsequence.");
         if (doingSubsequence) {
             output.value = lcSequence(input1.value, input2.value);
             return;
