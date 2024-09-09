@@ -56,5 +56,3 @@
 * Now navigate to the locally hosted URL `http://localhost:8000/computationalBiology/`.
 * Clicking a link for the algorithm should take you to a page where you can compute the LCS.
 * Running the algorithm for those two example strings should give the output `GCACATCATAC`.
-
-
