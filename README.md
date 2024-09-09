@@ -38,4 +38,21 @@
 
 **Computational Biology.**
 
-* This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings. The source code along with a screenshot is contained in the `DjangoService` folder.
+* This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings. The source code along with a screenshot is contained in the `DjangoService` folder. To run this...
+* Install Python and Django if you haven't already.
+* Open a command prompt window and navigate to the DjangoService folder.
+* Run the command `python manage.py makemigrations computationalBiology` to create a database.
+* Run the command `python manage.py migrate computationalBiology`
+* Run the command `python manage.py migrate`
+* Run the command `python manage.py runserver` to run the service.
+* Navigate to the locally hosted URL `http://localhost:8000/computationalBiology/`.
+* The page should say "No computational biology algorithms available".
+* Run the command `python manage.py createsuperuser`
+* This will allow you to create an admin account. Do so, preferably with a simple password.
+* Run the service again. Navigate to the locally hosted URL `http://localhost:8000/admin/` to log in.
+* Now you can configure server-side content.
+* Add an Algorithm. Choose 0 for Longest Common Subsequence.
+* Add two Input Strings to this Algorithm containing default sequences like `GCATCATCATTAC` and `GACTACCATGCATACT` for the input fields. The captions can be arbitrary.
+* Now navigate to the locally hosted URL `http://localhost:8000/computationalBiology/`.
+* Clicking a link for the algorithm should take you to a page where you can compute the LCS.
+* Running the algorithm for those two example strings should give the output `GCACATCATAC`.
