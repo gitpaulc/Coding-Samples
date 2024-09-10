@@ -8,7 +8,7 @@ class Algorithm(models.Model):
         if self.whichAlgorithm == 0:
             return 'Longest Common Subsequence'
         #else:
-            return 'Longest Common Substring'
+        return 'Longest Common Substring'
 
 
 class InputString(models.Model):
