@@ -56,3 +56,6 @@
 * Now navigate to the locally hosted URL `http://localhost:8000/computationalBiology/`.
 * Clicking a link for the algorithm should take you to a page where you can compute the LCS.
 * Running the algorithm for those two example strings should give the output `GCACATCATAC`.
+
+* Besides the Django service, the `computational_biology` folder contains a CUDA computational biology implementation. See the CUDA and CMake instructions as listed above.
+* Although the typical longest common substring algorithm does not leave a lot of room for parallelization, nevertheless parallel preprocessing can be performed. The longest common substring of N strings is at most as long as the LCS of any two of the strings. So by computing the smallest LCS of all pairs in parallel, we can obtain a bound to speed up the algorithm.

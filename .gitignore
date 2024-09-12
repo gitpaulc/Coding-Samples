@@ -22,3 +22,17 @@ computational_geometry/ComputationalGeometry/x64
 *__pycache__
 DjangoService/computationalBiology/migrations*
 DjangoService/db.sqlite3
+
+computational_biology/.vs
+computational_biology/ALL_BUILD.vcxproj
+computational_biology/ALL_BUILD.vcxproj.filters
+computational_biology/CMakeCache.txt
+computational_biology/CMakeFiles
+computational_biology/ComputationalBiology.dir
+computational_biology/ComputationalBiology.sln
+computational_biology/ComputationalBiology.vcxproj
+computational_biology/ComputationalBiology.vcxproj.filters
+computational_biology/ComputationalBiology.vcxproj.user
+computational_biology/cmake_install.cmake
+computational_biology/Debug
+computational_biology/Release
