@@ -440,7 +440,7 @@ namespace ComputationalGeometry
           Triangle2d face(iPointArray[ii], iPointArray[jj], iPointArray[kk]);
           for (int ll = 0; ll < iNumPoints; ++ll)
           {
-            auto pointInterior = face.pointIsInterior2(iPointArray[ll]);
+            auto pointInterior = face.pointIsInterior(iPointArray[ll]);
             if ((pointInterior != 0) && (pointInterior != 3))
             {
               isInHull[ll] = 0;
@@ -761,7 +761,7 @@ namespace ComputationalGeometry
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
-  int Triangle2d::pointIsInterior(const point2d& pt) const
+  int Triangle2d::pointIsInterior2(const point2d& pt) const
   {
     if (point2d::sqDistance(a, pt) <= threshold()) { return 3; }
     if (point2d::sqDistance(b, pt) <= threshold()) { return 3; }
@@ -788,7 +788,7 @@ namespace ComputationalGeometry
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
-  int Triangle2d::pointIsInterior2(const point2d& pt) const
+  int Triangle2d::pointIsInterior(const point2d& pt) const
   {
       if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
       if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
@@ -1582,7 +1582,7 @@ namespace ComputationalGeometry
       std::set<Triangle2d>::iterator it = faces.begin();
       for (; it != faces.end(); ++it)
       {
-        if ((it->pointIsInterior(ioPointArray[i])) == 1) { break; }
+        if ((it->pointIsInterior2(ioPointArray[i])) == 1) { break; }
       }
       if (it == faces.end()) { continue; }
       point2d basePoint = ioPointArray[i];

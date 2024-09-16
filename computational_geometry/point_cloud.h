@@ -133,9 +133,9 @@ namespace ComputationalGeometry
     /** \brief For set and map insertion. */
     bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
-    int pointIsInterior(const point2d& pt) const;
+    __host__ __device__ int pointIsInterior(const point2d& pt) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge */
-    __host__ __device__ int pointIsInterior2(const point2d& pt) const;
+    int pointIsInterior2(const point2d& pt) const;
     std::set<Edge2d> getEdges() const;
   };
 
