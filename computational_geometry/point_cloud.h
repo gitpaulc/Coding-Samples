@@ -28,14 +28,14 @@ namespace ComputationalGeometry
   int& numRandomPoints();
   void SetWindowWidthHeight(int ww, int hh = -1);
   void GetWindowWidthHeight(int& ww, int& hh);
-  double threshold();
+  __host__ __device__ double threshold();
 
   class point3d
   {
     public:
       double x;  double y;  double z;
-      point3d();
-      point3d(const double& xx, const double& yy, const double& zz);
+      __host__ __device__ point3d();
+      __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
 #ifdef USE_VIRTUAL_FUNC_POINT2D
       virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
 #endif // def USE_VIRTUAL_FUNC_POINT2D
@@ -44,13 +44,14 @@ namespace ComputationalGeometry
       void print(const std::string& prequel = "") const;
       double dot(const point3d& P) const;
       static double sqDistance(const point3d& P, const point3d& Q);
+      __host__ __device__ double sqDistance(const point3d& Q) const;
   };
 
   class point2d : public point3d
   {
     public:
-      point2d();
-      point2d(const double& xx, const double& yy);
+      __host__ __device__ point2d();
+      __host__ __device__ point2d(const double& xx, const double& yy);
 #ifdef USE_VIRTUAL_FUNC_POINT2D
       virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
 #endif // def USE_VIRTUAL_FUNC_POINT2D
@@ -74,18 +75,19 @@ namespace ComputationalGeometry
   std::vector<point2d> ConvexHullDivideAndConquer(std::vector<point2d>& iCloud);
 
   __global__ void CenterOfMass(point2d* aa, int N, point2d* bb);
-  __global__ void ComputeConvexHulls(point2d* pointArrays, int* arraySizes, int numArrays, point2d* oHulls, int* hullSizes);
+  __host__ __device__ void computeConvexHullCuda(point2d* iPointArray, int iNumPoints, int* isInHull);
+  __global__ void ComputeConvexHulls(point2d* pointArrays, int* arraySizes, int maxArrSize, int numArrays, int* oIndicatorArrays);
 
   class Edge2d
   {
   public:
     point2d a, b;
-    Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    __host__ __device__ Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
     /** \brief For set and map insertion. */
     bool operator< (const Edge2d& rhs) const;
     /** \brief (sqLength.a < sqLength.b) if and only if (length.a < length.b). a^2 - b^2 = (a - b)(a + b) */
-    double sqLength() const;
-    double sqDistance(const point2d& P) const;
+    __host__ __device__ double sqLength() const;
+    __host__ __device__ double sqDistance(const point2d& P) const;
     /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
     int intersection(const Edge2d& other, point2d& intersection) const;
     /** \brief Point that attains square distance from point P to line spanned by edge. */
@@ -125,13 +127,15 @@ namespace ComputationalGeometry
   {
   public:
     point2d a, b, c;
-    Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
+    __host__ __device__ Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
     bool adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const;
     double sqArea() const;
     /** \brief For set and map insertion. */
     bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     int pointIsInterior(const point2d& pt) const;
+    /** \brief 0 = exterior, 1 = interior, 2 = on edge */
+    __host__ __device__ int pointIsInterior2(const point2d& pt) const;
     std::set<Edge2d> getEdges() const;
   };
 
