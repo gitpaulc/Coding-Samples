@@ -761,39 +761,53 @@ namespace ComputationalGeometry
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  __host__ __device__ int pointIsInteriorHelper(const Triangle2d& tri, const point2d& pt)
+  {
+    auto pp = point2d(tri.a.x - tri.b.x, tri.a.y - tri.b.y);
+    auto qq = point2d(tri.c.x - tri.b.x, tri.c.y - tri.b.y);
+    auto rr = point2d(pt.x - tri.b.x, pt.y - tri.b.y);
+    double x0 = pp.x;
+    double y0 = pp.y;
+    double x1 = qq.x;
+    double y1 = qq.y;
+    double determinant = x0 * y1 - x1 * y0;
+    point2d testPoint;
+    if (determinant > threshold())
+    {
+      testPoint.x = (y1 * rr.x - x1 * rr.y) / determinant;
+      testPoint.y = (x0 * rr.y - y0 * rr.x) / determinant;
+      if ((testPoint.x < -threshold()) || (testPoint.y < -threshold())) { return 0; }
+      if ((testPoint.x + testPoint.y) > 1 + threshold()) { return 0; }
+      if ((testPoint.x >= threshold()) && (testPoint.y >= threshold())
+              && ((testPoint.x + testPoint.y) <= 1 - threshold()))
+      {
+        return 1;
+      }
+      return 2;
+    }
+    Edge2d u(tri.a, tri.b);
+    Edge2d v(tri.b, tri.c);
+    Edge2d w(tri.c, tri.a);
+    if (u.sqDistance(pt) <= threshold()) { return 2; }
+    if (v.sqDistance(pt) <= threshold()) { return 2; }
+    if (w.sqDistance(pt) <= threshold()) { return 2; }
+    return 0;
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
-      if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
-      if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
-      if (pt.point2d::sqDistance(c) <= threshold()) { return 3; }
-      auto pp = point2d(a.x - b.x, a.y - b.y);
-      auto qq = point2d(c.x - b.x, c.y - b.y);
-      auto rr = point2d(pt.x - b.x, pt.y - b.y);
-      double x0 = pp.x;
-      double y0 = pp.y;
-      double x1 = qq.x;
-      double y1 = qq.y;
-      double determinant = x0 * y1 - x1 * y0;
-      point2d testPoint;
-      if (determinant > threshold())
-      {
-          testPoint.x = (y1 * rr.x - x1 * rr.y) / determinant;
-          testPoint.y = (x0 * rr.y - y0 * rr.x) / determinant;
-          if ((testPoint.x < -threshold()) || (testPoint.y < -threshold())) { return 0; }
-          if ((testPoint.x + testPoint.y) > 1 + threshold()) { return 0; }
-          if ((testPoint.x >= threshold()) && (testPoint.y >= threshold())
-              && ((testPoint.x + testPoint.y) <= 1 - threshold())) {
-              return 1;
-          }
-          return 2;
-      }
-      Edge2d u(a, b);
-      Edge2d v(b, c);
-      Edge2d w(c, a);
-      if (u.sqDistance(pt) <= threshold()) { return 2; }
-      if (v.sqDistance(pt) <= threshold()) { return 2; }
-      if (w.sqDistance(pt) <= threshold()) { return 2; }
-      return 0;
+    if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
+    if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
+    if (pt.point2d::sqDistance(c) <= threshold()) { return 3; }
+    double oneThird = 1.0 / 3.0;
+    point2d barycenter = point2d(oneThird * (a.x + b.x + c.x), oneThird * (a.y + b.y + c.y));
+    if (pointIsInteriorHelper(*this, barycenter) == 0)
+    {
+      Triangle2d face0(b, a, c); // Orient properly.
+      return pointIsInteriorHelper(face0, pt);
+    }
+    return pointIsInteriorHelper(*this, pt);
   }
 
   std::set<Edge2d> Triangle2d::getEdges() const
@@ -1556,8 +1570,7 @@ namespace ComputationalGeometry
       point2d basePoint = ioPointArray[i];
       for (; it != faces.end(); ++it)
       {
-        Triangle2d face0(it->b, it->a, it->c); // Orient properly.
-        if ((face0.pointIsInterior(basePoint)) == 1) { break; }
+        if ((it->pointIsInterior(basePoint)) == 1) { break; }
       }
       if (it == faces.end()) { continue; }
       Triangle2d u(basePoint, it->a, it->b);
