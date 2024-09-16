@@ -48,6 +48,12 @@ namespace ComputationalGeometry
 
   double threshold() { return 1.0e-9; }
 
+  static double safeSqrt(const double& xx)
+  {
+    if (xx <= threshold()) { return 0; }
+    return sqrt(xx);
+  }
+
   void ComputationalGeometry::MergeConvex(point2d* iConvexA, int iConvexASize, point2d* iConvexB, int iConvexBSize, point2d* oMerged, int* oMergedSize)
   {
     if (iConvexASize == 0)

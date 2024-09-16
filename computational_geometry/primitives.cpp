@@ -2,6 +2,8 @@
 #include "includes.h"
 #include "primitives.h"
 
+#include "point_cloud.h"
+
 #ifdef _WIN32
 #include <algorithm>
 #endif
