@@ -118,6 +118,9 @@ namespace ComputationalGeometry
     return answer;
   }
 
+  double point3d::sqNorm() const { return (*this).dot(*this); }
+  point3d& point3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
+
   point2d::point2d() : point3d(0, 0, 0) {}
   point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
 
@@ -198,6 +201,45 @@ namespace ComputationalGeometry
         oMerged[ii] = pc.ConvexHull()[ii];
       }
     }
+  }
+
+  void ComputationalGeometry::MergeConvex3d(point3d* iConvexA, int iConvexASize,
+                                            point3d* iConvexB, int iConvexBSize,
+                                            point3d* oMerged, int* oMergedSize)
+  {
+    if (iConvexASize == 0)
+    {
+      for (int ii = 0; ii < iConvexBSize; ++ii) { oMerged[ii] = iConvexB[ii]; }
+      *oMergedSize = iConvexBSize;
+      return;
+    }
+    if (iConvexBSize == 0)
+    {
+      for (int ii = 0; ii < iConvexASize; ++ii) { oMerged[ii] = iConvexA[ii]; }
+      *oMergedSize = iConvexASize;
+      return;
+    }
+    // TODO: Make this run in linear time.
+    // For now the |hull| is typically much less than |cloud|
+    std::vector<point3d> mergedArray(iConvexASize + iConvexBSize);
+    for (int ii = 0; ii < iConvexASize; ++ii)
+    {
+      mergedArray[ii] = iConvexA[ii];
+    }
+    for (int ii = 0; ii < iConvexBSize; ++ii)
+    {
+      mergedArray[iConvexASize + ii] = iConvexB[ii];
+    }
+    std::vector<int> isInHull(iConvexASize + iConvexBSize);
+    computeConvexHull3d(mergedArray.data(), (int)mergedArray.size(), isInHull.data());
+    int hullSize = 0;
+    for (int ii = 0; ii < (int)(mergedArray.size()); ++ii)
+    {
+      if (isInHull[ii] == 0) { continue; }
+      oMerged[hullSize] = mergedArray[ii];
+      ++hullSize;
+    }
+    *oMergedSize = hullSize;
   }
 
   std::vector<point2d> ComputationalGeometry::ConvexHullDivideAndConquer(std::vector<point2d>& iCloud)
@@ -412,6 +454,128 @@ namespace ComputationalGeometry
     return hull;
   }
 
+  std::vector<point3d> ComputationalGeometry::ConvexHull3d(std::vector<point3d>& iCloud)
+  {
+    const int convexHullSmall = 25;
+    if (iCloud.size() == 0) { return iCloud; }
+    std::sort(iCloud.begin(), iCloud.end()); // Sort by x-coordinate first and foremost, then y.
+    if (iCloud.size() <= 3) { return iCloud; }
+    int cloudSize = (int)iCloud.size();
+
+    std::vector<int> partitionsCloud;
+    std::vector<int> partitionsHull;
+    int partitionsLength = 1;
+    int stackDepth = 0;
+    {
+      int initialSize = 1;
+      for (int ii = 0; ii < 1000; ++ii)
+      {
+        initialSize *= 2;
+        if (initialSize >= cloudSize) { break; }
+      }
+      int smallSize = initialSize;
+      while ((smallSize > convexHullSmall) || (stackDepth == 0))
+      {
+        smallSize = smallSize / 2;
+        partitionsLength *= 2;
+        ++stackDepth;
+      }
+      partitionsCloud = std::vector<int>(partitionsLength, smallSize);
+      partitionsHull.resize(partitionsLength);
+    }
+
+    auto cloudArr = iCloud;
+    std::vector<point3d> hull(cloudSize);
+
+    // Try to ensure partition line does not occur along a common x or y-coordinate.
+    {
+      int startIndex = 1;
+      for (int pp = startIndex; pp < partitionsLength; ++pp)
+      {
+        int ii = partitionsCloud[pp - 1];
+        int diff = 0;
+        for (int jj = 0; jj < partitionsCloud[pp] - startIndex; ++jj)
+        {
+          double deltaX = (cloudArr[ii].x - cloudArr[jj].x);
+          if (deltaX * deltaX <= threshold()) { ++diff; continue; }
+          double deltaY = (cloudArr[ii].y - cloudArr[jj].y);
+          if (deltaY * deltaY <= threshold()) { ++diff; continue; }
+          break;
+        }
+        partitionsCloud[pp - 1] = partitionsCloud[pp - 1] + diff;
+        partitionsCloud[pp] = partitionsCloud[pp] - diff;
+      }
+    }
+    int hullSize = 0;
+    {
+      int startIndex = 0;
+      for (int pp = 0; pp < partitionsLength; ++pp)
+      {
+        int tempSize = partitionsCloud[pp];
+        std::vector<point3d> cloudArrCuda(tempSize);
+        for (int ii = 0; ii < tempSize; ++ii)
+        {
+          cloudArrCuda[ii] = cloudArr[startIndex + ii];
+        }
+        startIndex += tempSize;
+        int currentHullSize = 0;
+        std::vector<int> bIsIn(tempSize, 1);
+        computeConvexHull3d(cloudArrCuda.data(), tempSize, bIsIn.data());
+        for (int ii = 0; ii < tempSize; ++ii)
+        {
+          if (bIsIn[ii] == 0) { continue; }
+          hull[currentHullSize + hullSize] = cloudArrCuda[ii];
+          ++currentHullSize;
+        }
+        partitionsHull[pp] = currentHullSize;
+        hullSize += currentHullSize;
+      }
+    }
+    cloudSize = hullSize;
+    for (int ii = 0; ii < cloudSize; ++ii)
+    {
+      cloudArr[ii] = hull[ii];
+    }
+    for (int ii = 0; ii < partitionsLength; ++ii)
+    {
+      partitionsCloud[ii] = partitionsHull[ii];
+    }
+
+    for (; stackDepth > 0; --stackDepth)
+    {
+      int hullPartitionsLength = 0;
+      int increaseBy = 2;
+      hullSize = 0;
+      int indA = 0;
+      for (int ii = 0; ii < partitionsLength; ii = ii + increaseBy)
+      {
+        const int arrSizeA = partitionsCloud[ii];
+        int indB = indA + arrSizeA;
+        const int arrSizeB = partitionsCloud[ii + 1];
+        int hullSizeOut = 0;
+        MergeConvex3d(cloudArr.data() + indA, arrSizeA, cloudArr.data() + indB, arrSizeB,
+          hull.data() + hullSize, &hullSizeOut);
+        indA = indB + arrSizeB;
+        partitionsHull[hullPartitionsLength] = hullSizeOut;
+        hullSize += hullSizeOut;
+        ++hullPartitionsLength;
+      }
+      cloudSize = hullSize;
+      for (int ii = 0; ii < cloudSize; ++ii)
+      {
+        cloudArr[ii] = hull[ii];
+      }
+      partitionsLength = hullPartitionsLength;
+      for (int ii = 0; ii < partitionsLength; ++ii)
+      {
+        partitionsCloud[ii] = partitionsHull[ii];
+      }
+    }
+
+    hull.resize(hullSize);
+    return hull;
+  }
+
   __global__ void ComputationalGeometry::CenterOfMass(point2d* aa, int arrSize, point2d* bb)
   {
 #ifdef __CUDA_RUNTIME_H__
@@ -460,6 +624,50 @@ namespace ComputationalGeometry
     if (jj >= numArrays) { return; }  // Check boundary conditions.
     if (jj < 0) { return; }
     computeConvexHullCuda(pointArrays + jj * maxArrSize, arraySizes[jj], oIndicatorArrays + jj * maxArrSize);
+#endif // def __CUDA_RUNTIME_H__
+  }
+
+  __host__ __device__ void computeConvexHull3d(point3d* iPointArray, int iNumPoints, int* isInHull)
+  {
+#ifdef __CUDA_RUNTIME_H__
+    for (int ii = 0; ii < iNumPoints; ++ii)
+    {
+      for (int jj = 0; jj < iNumPoints; ++jj)
+      {
+        if (iPointArray[ii].sqDistance(iPointArray[jj]) <= threshold()) { continue; }
+        for (int kk = 0; kk < iNumPoints; ++kk)
+        {
+          if (iPointArray[ii].sqDistance(iPointArray[kk]) <= threshold()) { continue; }
+          if (iPointArray[kk].sqDistance(iPointArray[jj]) <= threshold()) { continue; }
+          for (int ll = 0; ll < iNumPoints; ++ll)
+          {
+            if (iPointArray[ii].sqDistance(iPointArray[ll]) <= threshold()) { continue; }
+            if (iPointArray[ll].sqDistance(iPointArray[jj]) <= threshold()) { continue; }
+            if (iPointArray[kk].sqDistance(iPointArray[ll]) <= threshold()) { continue; }
+            Tetrahedron3d face(iPointArray[ii], iPointArray[jj], iPointArray[kk], iPointArray[ll]);
+            for (int uu = 0; uu < iNumPoints; ++uu)
+            {
+              auto pointInterior = face.pointIsInterior(iPointArray[uu]);
+              if ((pointInterior != 0) && (pointInterior != 4))
+              {
+                isInHull[uu] = 0;
+              }
+            }
+          }
+        }
+      }
+    }
+#endif // def __CUDA_RUNTIME_H__
+  }
+
+  __global__ void ComputeConvexHulls3d(point3d* pointArrays, int* arraySizes, int maxArrSize, int numArrays, int* oIndicatorArrays)
+  {
+#ifdef __CUDA_RUNTIME_H__
+      int jj = blockIdx.y * blockDim.y + threadIdx.y; // row
+      int ii = blockIdx.x * blockDim.x + threadIdx.x; // col
+      if (jj >= numArrays) { return; }  // Check boundary conditions.
+      if (jj < 0) { return; }
+      computeConvexHull3d(pointArrays + jj * maxArrSize, arraySizes[jj], oIndicatorArrays + jj * maxArrSize);
 #endif // def __CUDA_RUNTIME_H__
   }
 
@@ -608,6 +816,28 @@ namespace ComputationalGeometry
     return a.x * b.y - a.y * b.x;
   }
 
+  Matrix2d Matrix2d::inverse(bool& bSuccess) const
+  {
+    auto determinant = det();
+    if (determinant <= threshold()) { bSuccess = false; return Matrix2d(); }
+    bSuccess = true;
+    Matrix2d inv(point2d(b.y, -a.y), point2d(-b.x, a.x));
+    inv.a.x = inv.a.x / determinant;
+    inv.a.y = inv.a.y / determinant;
+    inv.b.x = inv.b.x / determinant;
+    inv.b.y = inv.b.y / determinant;
+    return inv;
+  }
+
+  void Matrix2d::takeTranspose()
+  {
+    auto temp = b.x;
+    b.x = a.y;
+    a.y = temp;
+  }
+
+  point2d Matrix2d::operator*(const point2d& rhs) const { return point2d(a.dot(rhs), b.dot(rhs)); }
+
   Matrix3d::Matrix3d(const point3d& aa, const point3d& bb, const point3d& cc)
   {
     a = aa; b = bb; c = cc;
@@ -623,6 +853,41 @@ namespace ComputationalGeometry
     answer += a.z * cof.det();
     return answer;
   }
+
+  Matrix3d Matrix3d::inverse(bool& bSuccess) const
+  {
+    auto determinant = det();
+    if (determinant <= threshold()) { bSuccess = false; return Matrix3d(); }
+    bSuccess = true;
+    auto aa = a.x;
+    auto bb = a.y;
+    auto cc = a.z;
+    auto dd = b.x;
+    auto ee = b.y;
+    auto ff = b.z;
+    auto gg = c.x;
+    auto hh = c.y;
+    auto ii = c.z;
+    Matrix3d inv(point3d(ee * ii - ff * hh, cc * hh - ii * bb, ff * bb - cc * ee),
+        point3d(gg * ff - ii * dd, aa * ii - cc * gg, cc * dd - aa * ff),
+        point3d(dd * hh - gg * ee, bb * gg - aa * hh, aa * ee - bb * dd));
+    inv.a *= (1.0 / determinant);
+    inv.b *= (1.0 / determinant);
+    inv.c *= (1.0 / determinant);
+    return inv;
+  }
+
+  void Matrix3d::takeTranspose()
+  {
+    auto aa = a;
+    auto bb = b;
+    auto cc = c;
+    a = point3d(aa.x, bb.x, cc.x);
+    b = point3d(aa.y, bb.y, cc.y);
+    c = point3d(aa.z, bb.z, cc.z);
+  }
+
+  point3d Matrix3d::operator*(const point3d& rhs) const { return point3d(a.dot(rhs), b.dot(rhs), c.dot(rhs)); }
 
   Circle2d::Circle2d(const point2d& cen, double sqRad)
   {
@@ -766,16 +1031,13 @@ namespace ComputationalGeometry
     auto pp = point2d(tri.a.x - tri.b.x, tri.a.y - tri.b.y);
     auto qq = point2d(tri.c.x - tri.b.x, tri.c.y - tri.b.y);
     auto rr = point2d(pt.x - tri.b.x, pt.y - tri.b.y);
-    double x0 = pp.x;
-    double y0 = pp.y;
-    double x1 = qq.x;
-    double y1 = qq.y;
-    double determinant = x0 * y1 - x1 * y0;
-    point2d testPoint;
-    if (determinant > threshold())
+    Matrix2d AA(pp, qq);
+    AA.takeTranspose();
+    bool bInvertible = true;
+    auto BB = AA.inverse(bInvertible);
+    if (bInvertible)
     {
-      testPoint.x = (y1 * rr.x - x1 * rr.y) / determinant;
-      testPoint.y = (x0 * rr.y - y0 * rr.x) / determinant;
+      point2d testPoint = BB * rr;
       if ((testPoint.x < -threshold()) || (testPoint.y < -threshold())) { return 0; }
       if ((testPoint.x + testPoint.y) > 1 + threshold()) { return 0; }
       if ((testPoint.x >= threshold()) && (testPoint.y >= threshold())
@@ -801,7 +1063,7 @@ namespace ComputationalGeometry
     if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
     if (pt.point2d::sqDistance(c) <= threshold()) { return 3; }
     double oneThird = 1.0 / 3.0;
-    point2d barycenter = point2d(oneThird * (a.x + b.x + c.x), oneThird * (a.y + b.y + c.y));
+    auto barycenter = point2d(oneThird * (a.x + b.x + c.x), oneThird * (a.y + b.y + c.y));
     if (pointIsInteriorHelper(*this, barycenter) == 0)
     {
       Triangle2d face0(b, a, c); // Orient properly.
@@ -817,6 +1079,56 @@ namespace ComputationalGeometry
     edges.insert(Edge2d(b, c));
     edges.insert(Edge2d(c, a));
     return edges;
+  }
+
+  Tetrahedron3d::Tetrahedron3d(const point3d& aa, const point3d& bb, const point3d& cc, const point3d& dd)
+  {
+    a = aa; b = bb; c = cc; d = dd;
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
+  __host__ __device__ int pointIsInteriorHelper(const Tetrahedron3d& tri, const point3d& pt)
+  {
+    auto pp = point3d(tri.a.x - tri.b.x, tri.a.y - tri.b.y, tri.a.z - tri.b.z);
+    auto qq = point3d(tri.c.x - tri.b.x, tri.c.y - tri.b.y, tri.c.z - tri.b.z);
+    auto rr = point3d(tri.d.x - tri.d.x, tri.d.y - tri.b.y, tri.d.z - tri.b.z);
+    auto pointShifted = point3d(pt.x - tri.b.x, pt.y - tri.b.y, pt.z - tri.b.z);
+    Matrix3d AA(pp, qq, rr);
+    AA.takeTranspose();
+    bool bInvertible = true;
+    auto BB = AA.inverse(bInvertible);
+    if (bInvertible)
+    {
+      point3d testPoint = BB * pointShifted;
+      if ((testPoint.x < -threshold()) || (testPoint.y < -threshold()) || (testPoint.z < -threshold())) { return 0; }
+      if ((testPoint.x + testPoint.y + testPoint.z) > 1 + threshold()) { return 0; }
+      if ((testPoint.x >= threshold()) && (testPoint.y >= threshold()) && (testPoint.z >= threshold())
+        && ((testPoint.x + testPoint.y + testPoint.z) <= 1 - threshold()))
+      {
+        return 1;
+      }
+      return 2; // TODO: Refine this to distinguish between 2 or 3.
+    }
+    // TODO: Implement cases of returning 2 or 3.
+    return 0;
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
+  int Tetrahedron3d::pointIsInterior(const point3d& pt) const
+  {
+    if (pt.point3d::sqDistance(a) <= threshold()) { return 4; }
+    if (pt.point3d::sqDistance(b) <= threshold()) { return 4; }
+    if (pt.point3d::sqDistance(c) <= threshold()) { return 4; }
+    if (pt.point3d::sqDistance(d) <= threshold()) { return 4; }
+    double oneFourth = 1.0 / 4.0;
+    auto barycenter = point3d(oneFourth * (a.x + b.x + c.x + d.x),
+      oneFourth * (a.y + b.y + c.y + d.y), oneFourth * (a.z + b.z + c.z + d.z));
+    if (pointIsInteriorHelper(*this, barycenter) == 0)
+    {
+      Tetrahedron3d face0(b, a, c, d); // Orient properly.
+      return pointIsInteriorHelper(face0, pt);
+    }
+    return pointIsInteriorHelper(*this, pt);
   }
 
   class PointCloud::Impl
@@ -1307,8 +1619,42 @@ namespace ComputationalGeometry
       if ((int)(ioPointArray.size()) <= DelaunayMaxForNaive)
       {
         computeDelaunay(DelaunayMode::Naive, ioPointArray, ioTriangulation, ioHull, ioDelaunay);
-            return;
+        return;
       }
+
+      // Lift to 3d space and reduce computation to convex hull.
+      /*std::vector<point3d> pointArray3d(ioPointArray.size()); // TODO: Finish this.
+      point3d bboxMin, bboxMax;
+      for (int ii = 0; ii < ((int)ioPointArray.size()); ++ii)
+      {
+        const point2d& current = ioPointArray[ii];
+        pointArray3d[ii] = point3d(current.x, current.y, current.sqNorm()); // Lift to 3d-space.
+        if (ii == 0) { bboxMin = bboxMax = pointArray3d[ii]; }
+        else
+        {
+          if (pointArray3d[ii].x < bboxMin.x) { bboxMin.x = pointArray3d[ii].x; }
+          if (pointArray3d[ii].y < bboxMin.y) { bboxMin.y = pointArray3d[ii].y; }
+          if (pointArray3d[ii].z < bboxMin.z) { bboxMin.z = pointArray3d[ii].z; }
+          if (pointArray3d[ii].x > bboxMax.x) { bboxMax.x = pointArray3d[ii].x; }
+          if (pointArray3d[ii].y > bboxMax.y) { bboxMax.y = pointArray3d[ii].y; }
+          if (pointArray3d[ii].z > bboxMax.z) { bboxMax.z = pointArray3d[ii].z; }
+        }
+      }
+      bboxMax.x = bboxMax.x + 1.0;
+      bboxMax.y = bboxMax.y + 1.0;
+      bboxMax.z = bboxMax.z + 1.0;
+      bboxMin.x = bboxMin.x - 1.0;
+      bboxMin.y = bboxMin.y - 1.0;
+      bboxMin.z = bboxMin.z - 1.0;
+      if (ioTriangulation.empty()) { naiveTriangulate(ioTriangulation, ioPointArray, ioHull); }
+      auto hull3d = ConvexHull3d(pointArray3d);
+
+      //ioDelaunay.push_back(ioTriangulation[0]);
+      for (const auto& hullPoint : hull3d)
+      {
+      }
+
+      return;*/
 
 #ifdef USE_MULTI_THREADING
       auto& smallClouds = mSmallClouds;

@@ -42,9 +42,11 @@ namespace ComputationalGeometry
       /** \brief Necessary for set insertion to work. */
       bool operator< (const point3d& q) const;
       void print(const std::string& prequel = "") const;
-      double dot(const point3d& P) const;
+      __host__ __device__ double dot(const point3d& P) const;
       static double sqDistance(const point3d& P, const point3d& Q);
       __host__ __device__ double sqDistance(const point3d& Q) const;
+      __host__ __device__ double sqNorm() const;
+      __host__ __device__ point3d& operator*=(const double& scal);
   };
 
   class point2d : public point3d
@@ -72,11 +74,18 @@ namespace ComputationalGeometry
                    point2d* iConvexB, int iConvexBSize,
                    point2d* oMerged, int* oMergedSize);
 
+  void MergeConvex3d(point3d* iConvexA, int iConvexASize,
+                     point3d* iConvexB, int iConvexBSize,
+                     point3d* oMerged, int* oMergedSize);
+
   std::vector<point2d> ConvexHullDivideAndConquer(std::vector<point2d>& iCloud);
+  std::vector<point3d> ConvexHull3d(std::vector<point3d>& iCloud);
 
   __global__ void CenterOfMass(point2d* aa, int N, point2d* bb);
   __host__ __device__ void computeConvexHullCuda(point2d* iPointArray, int iNumPoints, int* isInHull);
   __global__ void ComputeConvexHulls(point2d* pointArrays, int* arraySizes, int maxArrSize, int numArrays, int* oIndicatorArrays);
+  __host__ __device__ void computeConvexHull3d(point3d* iPointArray, int iNumPoints, int* isInHull);
+  __global__ void ComputeConvexHulls3d(point3d* pointArrays, int* arraySizes, int maxArrSize, int numArrays, int* oIndicatorArrays);
 
   class Edge2d
   {
@@ -98,16 +107,22 @@ namespace ComputationalGeometry
   {
   public:
     point2d a, b; /**< Rows. */
-    Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
-    double det() const;
+    __host__ __device__ Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+    __host__ __device__ double det() const;
+    __host__ __device__ Matrix2d inverse(bool& bSuccess) const;
+    __host__ __device__ void takeTranspose();
+    __host__ __device__ point2d operator*(const point2d& rhs) const;
   };
 
   class Matrix3d
   {
   public:
     point3d a, b, c; /**< Rows. */
-    Matrix3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
-    double det() const;
+    __host__ __device__ Matrix3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+    __host__ __device__ double det() const;
+    __host__ __device__ Matrix3d inverse(bool& bSuccess) const;
+    __host__ __device__ void takeTranspose();
+    __host__ __device__ point3d operator*(const point3d& rhs) const;
   };
 
   class Circle2d
@@ -135,6 +150,16 @@ namespace ComputationalGeometry
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     __host__ __device__ int pointIsInterior(const point2d& pt) const;
     std::set<Edge2d> getEdges() const;
+  };
+
+  class Tetrahedron3d
+  {
+  public:
+    point3d a, b, c, d;
+    __host__ __device__ Tetrahedron3d(const point3d& aa = point3d(),
+      const point3d& bb = point3d(), const point3d& cc = point3d(), const point3d& dd = point3d());
+    /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
+    __host__ __device__ int pointIsInterior(const point3d& pt) const;
   };
 
   class PointCloud
