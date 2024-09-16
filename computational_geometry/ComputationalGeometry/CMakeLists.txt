@@ -61,6 +61,7 @@ set(HEADER_FILES
   ../gl_callbacks.h
   ../includes.h
   ../point_cloud.h
+  ../primitives.h
   ../rational.h
 )
 
@@ -72,6 +73,7 @@ set(SOURCE_FILES
   ../geometry_suite.cpp
   ../gl_callbacks.cpp
   ../point_cloud.cpp
+  ../primitives.cpp
   ../rational.cpp
 )
 
