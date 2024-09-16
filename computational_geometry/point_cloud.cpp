@@ -181,13 +181,16 @@ namespace ComputationalGeometry
 
     // TODO: Make this run in linear time.
     // For now the hull is so small that in practice the time O(h * log(h)) is linear O(h).
-
-    point2d* helperArr = (point2d*)malloc(sizeof(point2d) * (iConvexASize + iConvexBSize));
-    if (helperArr == nullptr) { return; }
-    for (int ii = 0; ii < iConvexASize; ++ii) { helperArr[ii] = iConvexA[ii]; }
-    for (int ii = 0; ii < iConvexBSize; ++ii) { helperArr[ii + iConvexASize] = iConvexB[ii]; }
     {
-      PointCloud pc(helperArr, iConvexASize + iConvexBSize);
+      PointCloud pc(iConvexASize + iConvexBSize);
+      for (int ii = 0; ii < iConvexASize; ++ii)
+      {
+        pc.setPoint(ii, iConvexA[ii]);
+      }
+      for (int ii = 0; ii < iConvexBSize; ++ii)
+      {
+        pc.setPoint(iConvexASize + ii, iConvexB[ii]);
+      }
       pc.computeConvexHull();
       *oMergedSize = (int)(pc.ConvexHull().size());
       for (int ii = 0; ii < *oMergedSize; ++ii)
@@ -195,46 +198,42 @@ namespace ComputationalGeometry
         oMerged[ii] = pc.ConvexHull()[ii];
       }
     }
-    free(helperArr);
-    helperArr = nullptr;
   }
 
   std::vector<point2d> ComputationalGeometry::ConvexHullDivideAndConquer(std::vector<point2d>& iCloud)
   {
-    const int convexHullSmall = 50;
+    const int convexHullSmall = 25;
     if (iCloud.size() == 0) { return iCloud; }
     std::sort(iCloud.begin(), iCloud.end()); // Sort by x-coordinate first and foremost;
     if (iCloud.size() <= 3) { return iCloud; }
     int cloudSize = (int)iCloud.size();
 
-    int* partitionsCloud = nullptr;
-    int* partitionsHull = nullptr;
+    std::vector<int> partitionsCloud;
+    std::vector<int> partitionsHull;
     int partitionsLength = 1;
     int stackDepth = 0;
     {
-      int smallSize = cloudSize;
-      while (smallSize > convexHullSmall)
+      int initialSize = 1;
+      for (int ii = 0; ii < 1000; ++ii)
+      {
+        initialSize *= 2;
+        if (initialSize >= cloudSize) { break; }
+      }
+      int smallSize = initialSize;
+      while ((smallSize > convexHullSmall) || (stackDepth == 0))
       {
         smallSize = smallSize / 2;
         partitionsLength *= 2;
         ++stackDepth;
       }
 
-      partitionsCloud = (int*)malloc(sizeof(int) * partitionsLength);
-      partitionsHull = (int*)malloc(sizeof(int) * partitionsLength);
-      for (int ii = 0; ii < partitionsLength; ++ii)
-      {
-        partitionsCloud[ii] = smallSize;
-      }
+      partitionsCloud = std::vector<int>(partitionsLength, smallSize);
+      partitionsHull.resize(partitionsLength);
     }
 
-    point2d* cloudArr = (point2d*)malloc(sizeof(point2d) * cloudSize);
-    point2d* hull = (point2d*)malloc(sizeof(point2d) * cloudSize);
+    std::vector<point2d> cloudArr = iCloud;
+    std::vector<point2d> hull(cloudSize);
 
-    for (int ii = 0; ii < cloudSize; ++ii)
-    {
-      cloudArr[ii] = iCloud[ii];
-    }
     // Try to ensure partition line does not occur along a common x-coordinate.
     {
       int startIndex = 1;
@@ -268,6 +267,7 @@ namespace ComputationalGeometry
         {
           for (int ii = 0; ii < partitionsCloud[pp]; ++ii)
           {
+            if ((startIndex + ii) >= (int)(cloudArr.size())) { break; }
             hostArrays[pp * maxPartitionSize + ii] = cloudArr[startIndex + ii];
           }
           startIndex += partitionsCloud[pp];
@@ -284,9 +284,9 @@ namespace ComputationalGeometry
         cudaMalloc((void**)&(d_oIndicatorArrays), sizeof(int) * partitionsLength * maxPartitionSize);
         cudaMemcpy(d_PointArrays, hostArrays.data(), sizeof(point2d) * partitionsLength * maxPartitionSize, cudaMemcpyHostToDevice);
         cudaMemcpy(d_oIndicatorArrays, oIndicatorArrays.data(), sizeof(int) * partitionsLength * maxPartitionSize, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_ArraySizes, partitionsCloud, sizeof(int) * partitionsLength, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_ArraySizes, partitionsCloud.data(), sizeof(int) * partitionsLength, cudaMemcpyHostToDevice);
 
-        int threadsPerBlock = 16;
+        int threadsPerBlock = 32;
         dim3 blockSize(threadsPerBlock, threadsPerBlock); // Product must be <= 1024
         int numBlocks = partitionsLength * maxPartitionSize / threadsPerBlock + 1;
         dim3 blocksPerGrid(numBlocks, numBlocks);
@@ -304,6 +304,7 @@ namespace ComputationalGeometry
           int currentHullSize = 0;
           for (int ii = 0; ii < partitionsCloud[pp]; ++ii)
           {
+            if ((startIndex + ii) >= (int)(cloudArr.size())) { break; }
             auto current = cloudArr[startIndex + ii];
             if (oIndicatorArrays[pp * maxPartitionSize + ii] == 0) { continue; }
             hull[currentHullSize + hullSize] = current;
@@ -351,7 +352,7 @@ namespace ComputationalGeometry
       for (int ii = 0; ii < partitionsLength; ++ii)
       {
         int tempSize = partitionsCloud[ii];
-        PointCloud pc(cloudArr + startIndex, tempSize);
+        PointCloud pc(cloudArr.data() + startIndex, tempSize);
         startIndex += tempSize;
         pc.computeConvexHull();
         const int currentHullSize = (int)(pc.ConvexHull().size());
@@ -388,8 +389,8 @@ namespace ComputationalGeometry
         int indB = indA + arrSizeA;
         const int arrSizeB = partitionsCloud[ii + 1];
         int hullSizeOut = 0;
-        MergeConvex(cloudArr + indA, arrSizeA, cloudArr + indB, arrSizeB,
-                    hull + hullSize, &hullSizeOut);
+        MergeConvex(cloudArr.data() + indA, arrSizeA, cloudArr.data() + indB, arrSizeB,
+                    hull.data() + hullSize, &hullSizeOut);
         indA = indB + arrSizeB;
         partitionsHull[hullPartitionsLength] = hullSizeOut;
         hullSize += hullSizeOut;
@@ -407,13 +408,8 @@ namespace ComputationalGeometry
       }
     }
 
-    std::vector<point2d> hull0; hull0.resize(hullSize);
-    for (int ii = 0; ii < hullSize; ++ii) { hull0[ii] = hull[ii]; }
-    free(cloudArr);
-    free(hull);
-    free(partitionsCloud);
-    free(partitionsHull);
-    return hull0;
+    hull.resize(hullSize);
+    return hull;
   }
 
   __global__ void ComputationalGeometry::CenterOfMass(point2d* aa, int arrSize, point2d* bb)
@@ -907,6 +903,14 @@ namespace ComputationalGeometry
     // make_unique requires C++ 14.
   }
 
+  PointCloud::PointCloud(int iNumPoints) : pImpl(std::make_unique<PointCloud::Impl>(this))
+  {
+    if (pImpl != nullptr) // Of course this should never happen.
+    {
+      pImpl->pointArray.resize(iNumPoints);
+    }
+  }
+
   PointCloud::PointCloud(point2d* iPoints, int iNumPoints) : pImpl(std::make_unique<PointCloud::Impl>(this))
   {
     if (pImpl != nullptr) // Of course this should never happen.
@@ -1044,6 +1048,14 @@ namespace ComputationalGeometry
         pImpl->computeVoronoi();
       }
     }
+  }
+
+  void PointCloud::setPoint(int index, const point2d& iPoint)
+  {
+    if (pImpl == nullptr) { return; }
+    if (index < 0) { return; }
+    if (index >= (int)(pImpl->pointArray.size())) { return; }
+    pImpl->pointArray[index] = iPoint;
   }
 
   PointCloud& PointCloud::Get()
