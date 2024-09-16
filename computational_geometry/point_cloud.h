@@ -134,8 +134,6 @@ namespace ComputationalGeometry
     bool operator< (const Triangle2d& rhs) const;
     /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
     __host__ __device__ int pointIsInterior(const point2d& pt) const;
-    /** \brief 0 = exterior, 1 = interior, 2 = on edge */
-    int pointIsInterior2(const point2d& pt) const;
     std::set<Edge2d> getEdges() const;
   };
 

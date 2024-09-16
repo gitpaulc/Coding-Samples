@@ -761,33 +761,6 @@ namespace ComputationalGeometry
   }
 
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
-  int Triangle2d::pointIsInterior2(const point2d& pt) const
-  {
-    if (point2d::sqDistance(a, pt) <= threshold()) { return 3; }
-    if (point2d::sqDistance(b, pt) <= threshold()) { return 3; }
-    if (point2d::sqDistance(c, pt) <= threshold()) { return 3; }
-    Edge2d u(a, b);
-    Edge2d v(b, c);
-    Edge2d w(c, a);
-    if (u.sqDistance(pt) <= threshold()) { return 2; }
-    if (v.sqDistance(pt) <= threshold()) { return 2; }
-    if (w.sqDistance(pt) <= threshold()) { return 2; }
-    if (sqArea() <= threshold()) { return 0; }
-    Triangle2d U(a, b, pt);
-    Triangle2d V(b, c, pt);
-    Triangle2d W(c, a, pt);
-    // Can we find a way to do this without taking square roots?
-    const double uArea = safeSqrt(U.sqArea());
-    const double vArea = safeSqrt(V.sqArea());
-    const double wArea = safeSqrt(W.sqArea());
-    const double AA = safeSqrt(sqArea());
-    if (uArea + vArea > AA) { return 0; }
-    if (vArea + wArea > AA) { return 0; }
-    if (wArea + uArea > AA) { return 0; }
-    return 1;
-  }
-
-  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
       if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
@@ -1580,12 +1553,13 @@ namespace ComputationalGeometry
     {
       // Pre- C++ 11 style of iteration:
       std::set<Triangle2d>::iterator it = faces.begin();
+      point2d basePoint = ioPointArray[i];
       for (; it != faces.end(); ++it)
       {
-        if ((it->pointIsInterior2(ioPointArray[i])) == 1) { break; }
+        Triangle2d face0(it->b, it->a, it->c); // Orient properly.
+        if ((face0.pointIsInterior(basePoint)) == 1) { break; }
       }
       if (it == faces.end()) { continue; }
-      point2d basePoint = ioPointArray[i];
       Triangle2d u(basePoint, it->a, it->b);
       Triangle2d v(basePoint, it->b, it->c);
       Triangle2d w(basePoint, it->c, it->a);
