@@ -62,17 +62,31 @@ public:
 class Edge2d
 {
 public:
-    point2d a, b;
-    __host__ __device__ Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
-    /** \brief For set and map insertion. */
-    bool operator< (const Edge2d& rhs) const;
-    /** \brief (sqLength.a < sqLength.b) if and only if (length.a < length.b). a^2 - b^2 = (a - b)(a + b) */
-    __host__ __device__ double sqLength() const;
-    __host__ __device__ double sqDistance(const point2d& P) const;
-    /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
-    int intersection(const Edge2d& other, point2d& intersection) const;
-    /** \brief Point that attains square distance from point P to line spanned by edge. */
-    point2d projection(const point2d& P) const;
+  point2d a, b;
+  __host__ __device__ Edge2d(const point2d& aa = point2d(), const point2d& bb = point2d());
+  /** \brief For set and map insertion. */
+  bool operator< (const Edge2d& rhs) const;
+  /** \brief (sqLength.a < sqLength.b) if and only if (length.a < length.b). a^2 - b^2 = (a - b)(a + b) */
+  __host__ __device__ double sqLength() const;
+  __host__ __device__ double sqDistance(const point2d& P) const;
+  /** \brief 0 = no intersection, 1 = point intersection, 2 = parallel intersection */
+  int intersection(const Edge2d& other, point2d& intersection) const;
+  /** \brief Point that attains square distance from point P to line spanned by edge. */
+  point2d projection(const point2d& P) const;
+};
+
+class Edge3d
+{
+public:
+  point3d a, b;
+  __host__ __device__ Edge3d(const point3d& aa = point3d(), const point3d& bb = point3d());
+  /** \brief For set and map insertion. */
+  bool operator< (const Edge3d& rhs) const;
+  /** \brief (sqLength.a < sqLength.b) if and only if (length.a < length.b). a^2 - b^2 = (a - b)(a + b) */
+  __host__ __device__ double sqLength() const;
+  __host__ __device__ double sqDistance(const point3d& P) const;
+  /** \brief Point that attains square distance from point P to line spanned by edge. */
+  __host__ __device__ point3d projection(const point3d& P) const;
 };
 
 class Matrix2d
@@ -113,15 +127,25 @@ public:
 class Triangle2d
 {
 public:
-    point2d a, b, c;
-    __host__ __device__ Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
-    bool adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const;
-    double sqArea() const;
-    /** \brief For set and map insertion. */
-    bool operator< (const Triangle2d& rhs) const;
-    /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
-    __host__ __device__ int pointIsInterior(const point2d& pt) const;
-    std::set<Edge2d> getEdges() const;
+  point2d a, b, c;
+  __host__ __device__ Triangle2d(const point2d& aa = point2d(), const point2d& bb = point2d(), const point2d& cc = point2d());
+  bool adjacentToByEdge(const Triangle2d& rhs, Edge2d& edge) const;
+  double sqArea() const;
+  /** \brief For set and map insertion. */
+  bool operator< (const Triangle2d& rhs) const;
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  __host__ __device__ int pointIsInterior(const point2d& pt) const;
+  std::set<Edge2d> getEdges() const;
+};
+
+class Triangle3d
+{
+public:
+  point3d a, b, c;
+  __host__ __device__ Triangle3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+  /** \brief For set and map insertion. */
+  bool operator<(const Triangle3d& rhs) const;
+  std::set<Edge3d> getEdges() const;
 };
 
 class Tetrahedron3d
