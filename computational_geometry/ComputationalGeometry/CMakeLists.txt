@@ -95,7 +95,8 @@ endif()
 # Compiler flags.
 
 if (${USE_CUDA})
-  set_source_files_properties(../point_cloud.cpp PROPERTIES LANGUAGE CUDA)
+  set_source_files_properties(../point_cloud.cpp ../primitives.cpp PROPERTIES LANGUAGE CUDA)
+  set_property(TARGET ComputationalGeometry PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 endif()
 
 # Linking.
