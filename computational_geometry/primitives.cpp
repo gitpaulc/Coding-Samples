@@ -252,6 +252,42 @@ namespace ComputationalGeometry
     return point2d(rr.x + a.x, rr.y + a.y);
   }
 
+  Edge3d::Edge3d(const point3d& aa, const point3d& bb)
+  {
+    a = aa; b = bb;
+  }
+
+  bool Edge3d::operator<(const Edge3d& rhs) const
+  {
+    if (rhs.a < a) { return false; }
+    if (a < rhs.a) { return true; }
+    if (rhs.b < b) { return false; }
+    if (b < rhs.b) { return true; }
+    return false;
+  }
+
+  double Edge3d::sqLength() const
+  {
+    return a.sqDistance(b);
+  }
+
+  double Edge3d::sqDistance(const point3d& P) const
+  {
+    auto proj = projection(P);
+    point3d orthog(P.x - proj.x, P.y - proj.y, P.z - proj.z);
+    return orthog.sqNorm();
+  }
+
+  point3d Edge3d::projection(const point3d& P) const
+  {
+    if (sqLength() <= threshold()) { return a; }
+    point3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
+    point3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
+    double coeff = pp.dot(qq) / sqLength();
+    point3d rr(qq.x * coeff, qq.y * coeff, qq.z * coeff);
+    return point3d(rr.x + a.x, rr.y + a.y, rr.y + a.z);
+  }
+
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
   {
     a = aa; b = bb;
@@ -524,6 +560,31 @@ namespace ComputationalGeometry
     edges.insert(Edge2d(a, b));
     edges.insert(Edge2d(b, c));
     edges.insert(Edge2d(c, a));
+    return edges;
+  }
+
+  Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  {
+    a = aa; b = bb; c = cc;
+  }
+
+  bool Triangle3d::operator<(const Triangle3d& rhs) const
+  {
+    if (rhs.a < a) { return false; }
+    if (a < rhs.a) { return true; }
+    if (rhs.b < b) { return false; }
+    if (b < rhs.b) { return true; }
+    if (rhs.c < c) { return false; }
+    if (c < rhs.c) { return true; }
+    return false;
+  }
+
+  std::set<Edge3d> Triangle3d::getEdges() const
+  {
+    std::set<Edge3d> edges;
+    edges.insert(Edge3d(a, b));
+    edges.insert(Edge3d(b, c));
+    edges.insert(Edge3d(c, a));
     return edges;
   }
 
