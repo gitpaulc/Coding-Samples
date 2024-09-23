@@ -563,6 +563,34 @@ namespace ComputationalGeometry
     return edges;
   }
 
+  Plane3d::Plane3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  {
+    const auto& origin = aa;
+    const auto v0 = point3d(bb.x - aa.x, bb.y - aa.y, bb.z - aa.z);
+    const auto v1 = point3d(cc.x - aa.x, cc.y - aa.y, cc.z - aa.z);
+    point3d normal(v0.y * v1.z - v0.z * v1.y, v0.z * v1.x - v0.x * v1.z, v0.x * v1.y - v0.y * v1.x);
+    A = normal.x;
+    B = normal.y;
+    C = normal.z;
+    D = -normal.dot(origin);
+  }
+
+  bool Plane3d::isValid() const
+  {
+    point3d normal(A, B, C);
+    return (normal.sqNorm() > threshold());
+  }
+
+  /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
+  int Plane3d::getSide(const point3d& pt) const
+  {
+    point3d normal(A, B, C);
+    auto discriminant = normal.dot(pt);
+    if ((discriminant <= threshold()) && ((-discriminant) <= threshold())) { return 0; }
+    if (discriminant > threshold()) { return 1; }
+    return 2;
+  }
+
   Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)
   {
     a = aa; b = bb; c = cc;
