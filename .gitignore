@@ -36,3 +36,6 @@ computational_biology/ComputationalBiology.vcxproj.user
 computational_biology/cmake_install.cmake
 computational_biology/Debug
 computational_biology/Release
+
+image_output/*.png
+video_output/*.avi
