@@ -148,6 +148,7 @@ public:
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
   __host__ __device__ bool isValid() const;
+  __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   __host__ __device__ int getSide(const point3d& pt) const;
 };

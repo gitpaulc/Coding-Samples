@@ -581,11 +581,21 @@ namespace ComputationalGeometry
     return (normal.sqNorm() > threshold());
   }
 
+  point3d Plane3d::pointInPlane() const
+  {
+    if ((D <= threshold()) && ((-D) <= threshold())) { return point3d(0, 0, 0); }
+    if ((C > threshold()) || ((-C) > threshold())) { return point3d(0, 0, -D / C); }
+    if ((B > threshold()) || ((-B) > threshold())) { return point3d(0, -D / B, 0); }
+    if ((A > threshold()) || ((-A) > threshold())) { return point3d(-D / A, 0, 0); }
+    return point3d(0, 0, 0);
+  }
+
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   int Plane3d::getSide(const point3d& pt) const
   {
     point3d normal(A, B, C);
-    auto discriminant = normal.dot(pt);
+    auto origin = pointInPlane();
+    auto discriminant = normal.dot(point3d(pt.x - origin.x, pt.y - origin.y, pt.z - origin.z));
     if ((discriminant <= threshold()) && ((-discriminant) <= threshold())) { return 0; }
     if (discriminant > threshold()) { return 1; }
     return 2;
