@@ -17,6 +17,7 @@ computational_geometry/ComputationalGeometry/freeglut/Copying.txt
 computational_geometry/ComputationalGeometry/freeglut/Readme.txt
 computational_geometry/ComputationalGeometry/opencv
 computational_geometry/ComputationalGeometry/Release
+computational_geometry/ComputationalGeometry/RelWithDebugInfo
 computational_geometry/ComputationalGeometry/x64
 
 *__pycache__
