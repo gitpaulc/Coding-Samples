@@ -20,6 +20,28 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
+  /** \brief Canny edge detection. */
+  cv::Mat detectEdges(const cv::Mat& imgIn)
+  {
+    int low = 30; // 0 - 100
+    if (low < 0) { low = 0; }
+    else if (low > 100) { low = 100; }
+    int high = 3 * low;
+    if (high < low) { high = low; }
+    else if (high > 300) { high = 300; }
+    const int kernelSize = 3;
+    const int blurSize = kernelSize;
+
+    cv::Mat imgOut, gray, edges;
+    imgOut.create(imgIn.size(), imgIn.type());
+    cv::cvtColor(imgIn, gray, cv::COLOR_BGR2GRAY);
+    cv::blur(gray, edges, cv::Size(blurSize, blurSize));
+    cv::Canny(edges, edges, low, high, kernelSize);
+    imgOut = cv::Scalar::all(255);
+    imgIn.copyTo(imgOut, edges);
+    return imgOut;
+  }
+
   bool createVideo(std::string& errMsg, VideoMode vm)
   {
     typedef cv::Point3_<uint8_t> Pixel;
@@ -78,6 +100,8 @@ namespace ComputationalGeometry
       }
       std::string imgOutFolder = IMG_OUTPUT_FOLDER;
       cv::imwrite(imgOutFolder + "/compGeoScreenshot.png", currentFrame);
+      // Edge detection.
+      cv::imwrite(imgOutFolder + "/compGeoEdges.png", detectEdges(currentFrame));
     }
     if (vm == VideoMode::Usual)
     {
@@ -91,6 +115,14 @@ namespace ComputationalGeometry
           cv::cvtColor(src, dst, cv::COLOR_RGB2GRAY);
           cv::cvtColor(dst, src, cv::COLOR_GRAY2RGB);
           videoOut.write(src);
+        }
+      }
+      // Edges
+      {
+        cv::VideoWriter videoOut(videoOutFolder + "/compGeoEdges.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+        for (const auto& currentFrame : arrayOfFrames)
+        {
+          videoOut.write(detectEdges(currentFrame.clone()));
         }
       }
     }
