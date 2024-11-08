@@ -13,7 +13,8 @@ namespace ComputationalGeometry
   {
     Usual = 0,
     Grayscale = 1,
-    FewerColors = 2
+    FewerColors = 2,
+    EdgeDetection = 3
   };
   /** \return `true` upon success. */
   bool createVideo(std::string& errMsg, VideoMode vm = VideoMode::Usual);

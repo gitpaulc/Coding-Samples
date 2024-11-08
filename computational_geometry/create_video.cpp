@@ -20,6 +20,16 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
+  // Declarations:
+
+  bool createVideo(std::string& errMsg, VideoMode vm);
+  /** \brief Canny edge detection. */
+  cv::Mat detectEdges(const cv::Mat& imgIn);
+  cv::Mat kMeansClustering(const cv::Mat& imgIn, int k);
+  int sqDist(const cv::Point3_<uint8_t>& pixA, const cv::Point3_<uint8_t>& pixB);
+
+  // Implementations:
+
   /** \brief Canny edge detection. */
   cv::Mat detectEdges(const cv::Mat& imgIn)
   {
@@ -42,12 +52,133 @@ namespace ComputationalGeometry
     return imgOut;
   }
 
+  cv::Mat kMeansClustering(const cv::Mat& imgIn, int k)
+  {
+    if (k <= 0) { k = 1; }
+    cv::Mat imgOut = imgIn.clone();
+    if (k >= imgOut.rows * imgOut.cols) { return imgOut; }
+    typedef cv::Point3_<uint8_t> Pixel;
+    auto centroids = std::vector<Pixel>(k);
+    std::vector<cv::Point3_<uint> > clusterSum(k);
+    std::vector<int> clusterCount(k);
+    {
+      int ind = 0; int counter = -1;
+      int spacing = imgOut.rows * imgOut.cols / k;
+      if (spacing <= 0) { spacing = 1; }
+      for (int row = 0; row < imgOut.rows; ++row)
+      {
+        Pixel* pix = imgOut.ptr<Pixel>(row, 0);
+        const Pixel* row_end = pix + imgOut.cols;
+        for (; pix != row_end; ++pix)
+        {
+          if (ind >= k) { break; }
+          ++counter;
+          if ((spacing > 1) && ((counter % spacing) != 0)) { continue; }
+          centroids[ind] = *pix;
+          ++ind;
+        }
+        if (ind >= k) { break; }
+      }
+    }
+    bool foundCentroids = false;
+    int prevDiff = -1;
+    while (!foundCentroids)
+    {
+      foundCentroids = true;
+      for (int ind = 0; ind < k; ++ind)
+      {
+        clusterSum[ind].x = 0;
+        clusterSum[ind].y = 0;
+        clusterSum[ind].z = 0;
+        clusterCount[ind] = 0;
+      }
+      for (int row = 0; row < imgOut.rows; ++row)
+      {
+        Pixel* pix = imgOut.ptr<Pixel>(row, 0);
+        const Pixel* row_end = pix + imgOut.cols;
+        for (; pix != row_end; ++pix)
+        {
+          int bestSqDist = sqDist(centroids[0], *pix);
+          int bestInd = 0;
+          for (int ind = 0; ind < k; ++ind)
+          {
+            auto current = sqDist(centroids[ind], *pix);
+            if (current >= bestSqDist) { continue; }
+            bestSqDist = current;
+            bestInd = ind;
+          }
+          clusterSum[bestInd].x += pix->x;
+          clusterSum[bestInd].y += pix->y;
+          clusterSum[bestInd].z += pix->z;
+          clusterCount[bestInd]++;
+        }
+      }
+      std::vector<Pixel> newCentroids(k);
+      for (int ind = 0; ind < k; ++ind)
+      {
+        int siz = clusterCount[ind];
+        if (siz == 0) { newCentroids[ind] = centroids[ind]; continue; }
+        int xx = clusterSum[ind].x / siz;
+        int yy = clusterSum[ind].y / siz;
+        int zz = clusterSum[ind].z / siz;
+        newCentroids[ind].x = (uint8_t)xx;
+        newCentroids[ind].y = (uint8_t)yy;
+        newCentroids[ind].z = (uint8_t)zz;
+      }
+      int diff = 0;
+      for (int ind = 0; ind < k; ++ind)
+      {
+        int du = sqDist(centroids[ind], newCentroids[ind]);
+        if (du == 0) { continue; }
+        diff += du;
+        foundCentroids = false; break;
+      }
+      if (prevDiff == diff) { break; }
+      prevDiff = diff;
+      if (foundCentroids) { break; }
+      for (int ind = 0; ind < k; ++ind) { centroids[ind] = newCentroids[ind]; }
+    }
+    // Update image:
+    for (int row = 0; row < imgOut.rows; ++row)
+    {
+      Pixel* pix = imgOut.ptr<Pixel>(row, 0);
+      const Pixel* row_end = pix + imgOut.cols;
+      for (; pix != row_end; ++pix)
+      {
+        int bestSqDist = sqDist(centroids[0], *pix);
+        int bestInd = 0;
+        for (int ind = 0; ind < k; ++ind)
+        {
+          auto current = sqDist(centroids[ind], *pix);
+          if (current >= bestSqDist) { continue; }
+          bestSqDist = current;
+          bestInd = ind;
+        }
+        pix->x = centroids[bestInd].x;
+        pix->y = centroids[bestInd].y;
+        pix->z = centroids[bestInd].z;
+      }
+    }
+    return imgOut;
+  }
+
+  int sqDist(const cv::Point3_<uint8_t>& pixA, const cv::Point3_<uint8_t>& pixB)
+  {
+    int sqDistCalc = 0;
+    int dt = (pixA.x - pixB.x); dt *= dt; sqDistCalc += dt;
+    dt = (pixA.y - pixB.y); dt *= dt; sqDistCalc += dt;
+    dt = (pixA.z - pixB.z); dt *= dt; sqDistCalc += dt;
+    return sqDistCalc;
+  }
+
   bool createVideo(std::string& errMsg, VideoMode vm)
   {
     typedef cv::Point3_<uint8_t> Pixel;
 
     int frameWidth = 0;
     int frameHeight = 0;
+
+    int numKMeansClusters = 6; // 30 is slower.
 
     std::string videoOutFolder = VIDEO_OUTPUT_FOLDER;
 
@@ -71,7 +202,7 @@ namespace ComputationalGeometry
         {
           arrayOfFrames.push_back(currentFrame.clone());
         }
-        if ((vm == VideoMode::Grayscale) || (vm == VideoMode::FewerColors))
+        else if ((vm == VideoMode::Grayscale) || (vm == VideoMode::FewerColors))
         {
           for (int row = 0; row < currentFrame.rows; ++row)
           {
@@ -93,6 +224,10 @@ namespace ComputationalGeometry
             }
           }
         }
+        else if (vm == VideoMode::EdgeDetection)
+        {
+          currentFrame = detectEdges(currentFrame.clone());
+        }
         videoOut.write(currentFrame);
         cv::imshow("Video - Press ESC to exit.", currentFrame); // Display current frame.
         char keyboardKey = (char)cv::waitKey(1);
@@ -102,6 +237,8 @@ namespace ComputationalGeometry
       cv::imwrite(imgOutFolder + "/compGeoScreenshot.png", currentFrame);
       // Edge detection.
       cv::imwrite(imgOutFolder + "/compGeoEdges.png", detectEdges(currentFrame));
+      // K-means clustering.
+      cv::imwrite(imgOutFolder + "/compGeoKmeans.png", kMeansClustering(currentFrame, numKMeansClusters));
     }
     if (vm == VideoMode::Usual)
     {
@@ -123,6 +260,17 @@ namespace ComputationalGeometry
         for (const auto& currentFrame : arrayOfFrames)
         {
           videoOut.write(detectEdges(currentFrame.clone()));
+        }
+      }
+      // K-Means Clustering
+      {
+        cv::VideoWriter videoOut(videoOutFolder + "/compGeoKmeans.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+        cv::VideoWriter videoOut2(videoOutFolder + "/compGeoKmeansEdges.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+        for (const auto& currentFrame : arrayOfFrames)
+        {
+          auto kMeans = kMeansClustering(currentFrame.clone(), numKMeansClusters);
+          videoOut.write(kMeans);
+          videoOut2.write(detectEdges(kMeans.clone()));
         }
       }
     }
