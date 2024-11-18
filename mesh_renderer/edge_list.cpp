@@ -8,8 +8,10 @@ All Rights Reserved.*/
 
 namespace MeshRenderer
 {
+  bool endsWith(const std::string& str, const std::string& suffix);
   std::size_t findFirstWhitespace(const std::string&);
   bool isWhitespace(char);
+  std::string reverse(const std::string&);
   bool startsWith(const std::string& str, const std::string& prefix);
   std::string trimLeft(const std::string&);
 
@@ -281,6 +283,7 @@ namespace MeshRenderer
     std::cout << "\nNum. faces: " << mesh.getNumFaces();
     {
       std::string logFile = filename + ".log";
+      if (endsWith(filename, ".obj")) { logFile = filename.substr(0, filename.length() - 4) + "Out.obj"; }
       if (mesh.Export(logFile))
       {
         std::cout << "\nFile " << logFile << " exported.";
@@ -290,6 +293,11 @@ namespace MeshRenderer
     std::cout << "\n\nPress any key to continue:\n-->  ";
     std::string dummy = "";
     std::cin >> dummy;
+  }
+
+  bool endsWith(const std::string& str, const std::string& suffix)
+  {
+    return startsWith(reverse(str), reverse(suffix));
   }
 
   std::size_t findFirstWhitespace(const std::string& str)
@@ -307,6 +315,17 @@ namespace MeshRenderer
     if (cc == '\t') { return true; }
     if (cc == '\n') { return true; }
     return false;
+  }
+
+  std::string reverse(const std::string& str)
+  {
+    std::string answer = str;
+    int strLen = (int)str.length();
+    for (int i = 0; i < strLen; ++i)
+    {
+      answer[i] = str[strLen - 1 - i];
+    }
+    return answer;
   }
 
   bool startsWith(const std::string& str, const std::string& prefix)
