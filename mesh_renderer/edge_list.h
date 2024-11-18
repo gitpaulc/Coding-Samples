@@ -15,6 +15,7 @@ namespace MeshRenderer
     public:
       DoublyConnectedEdgeList();
       DoublyConnectedEdgeList(const std::string& filename);
+      bool Export(const std::string& filename) const;
       int getNumEdges() const;
       int getNumFaces() const;
       int getNumHalfEdges() const;
