@@ -281,7 +281,11 @@ namespace MeshRenderer
     std::cout << "\nNum. faces: " << mesh.getNumFaces();
     {
       std::string logFile = filename + ".log";
-      mesh.Export(logFile);
+      if (mesh.Export(logFile))
+      {
+        std::cout << "\nFile " << logFile << " exported.";
+      }
+      else { std::cout << "\nExport failed."; }
     }
     std::cout << "\n\nPress any key to continue:\n-->  ";
     std::string dummy = "";
