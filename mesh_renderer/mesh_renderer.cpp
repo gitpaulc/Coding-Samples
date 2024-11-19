@@ -1,3 +1,5 @@
+/*  Copyright Paul Cernea, November 2024.
+All Rights Reserved.*/
 
 #include "gl_callbacks.h"
 
