@@ -18,6 +18,12 @@
 
 namespace ComputationalGeometry
 {
+  template <class T> T safeAbs(const T& arg)
+  {
+    if (arg < 0) { return -arg; }
+    return arg;
+  }
+
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
@@ -62,6 +68,14 @@ namespace ComputationalGeometry
       answer = answer + z * P.z;
     }
     return answer;
+  }
+
+  point3d point3d::cross(const point3d& P) const
+  {
+    auto crossX = y * P.z - z * P.y;
+    auto crossY = z * P.x - x * P.z;
+    auto crossZ = x * P.y - y * P.x;
+    return point3d(crossX, crossY, crossZ);
   }
 
   double point3d::sqDistance(const point3d& P, const point3d& Q)
@@ -596,9 +610,44 @@ namespace ComputationalGeometry
     point3d normal(A, B, C);
     auto origin = pointInPlane();
     auto discriminant = normal.dot(point3d(pt.x - origin.x, pt.y - origin.y, pt.z - origin.z));
-    if ((discriminant <= threshold()) && ((-discriminant) <= threshold())) { return 0; }
+    if (safeAbs(discriminant) <= threshold()) { return 0; }
     if (discriminant > threshold()) { return 1; }
     return 2;
+  }
+
+  void Plane3d::getOrthonormalBasis(point3d& e1, point3d& e2) const
+  {
+    auto nn = getNormal();
+    if (safeAbs(nn.x) <= threshold())
+    {
+      e1 = point3d(0, -nn.z, nn.y);
+      e2 = nn.cross(e1);
+      return;
+    }
+    if (safeAbs(nn.y) <= threshold())
+    {
+      e1 = point3d(-nn.z, 0, nn.x);
+      e2 = nn.cross(e1);
+      return;
+    }
+    if (safeAbs(nn.z) <= threshold())
+    {
+      e1 = point3d(-nn.y, nn.x, 0);
+      e2 = nn.cross(e1);
+      return;
+    }
+    point3d f1(2 * nn.x * nn.y, -nn.x * nn.z, -nn.y * nn.x);
+    auto mag = safeSqrt(f1.sqNorm());
+    e1 = point3d(f1.x / mag, f1.y / mag, f1.z / mag);
+    e2 = nn.cross(e1);
+  }
+
+  point3d Plane3d::getNormal() const
+  {
+    if (!isValid()) { return point3d(0, 0, 0); }
+    auto mag = point3d(A, B, C).sqNorm();
+    mag = safeSqrt(mag);
+    return point3d(A / mag, B / mag, C / mag);
   }
 
   Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)
