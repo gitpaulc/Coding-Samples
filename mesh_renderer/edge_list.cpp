@@ -219,6 +219,7 @@ namespace MeshRenderer
     {
       std::size_t ind = str.find('/');
       vertIdx = std::stoi(str.substr(0, ind));
+      vertIdx--; // Obj indices are ordered from 1 not 0.
       if (vertIdx < 0) { return false; }
       if (vertIdx >= (int)(vertices.size())) { return false; }
       faceBuffer.push_back(vertIdx);
@@ -230,6 +231,7 @@ namespace MeshRenderer
       if (!(textureInd.empty()))
       {
         textureIdx = std::stoi(textureInd);
+        textureIdx--; // Obj indices are ordered from 1 not 0.
         if (textureIdx < 0) { return false; }
         if (textureIdx >= (int)(vertexTextures.size())) { return false; }
       }
@@ -240,6 +242,7 @@ namespace MeshRenderer
         ind = str.find('/');
         if (ind != std::string::npos) { return false; }
         normalIdx = std::stoi(str);
+        normalIdx--; // Obj indices are ordered from 1 not 0.
         if (normalIdx < 0) { return false; }
         if (normalIdx >= (int)(vertexNormals.size())) { return false; }
       }
@@ -265,13 +268,18 @@ namespace MeshRenderer
         while (ind != std::string::npos)
         {
           std::string info = str.substr(0, ind);
-          str = trimLeft(str.substr(ind));
-          bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
+          bool ok = parseCurrentFaceVertex(i, faceBuffer, info, vertexNormals, vertexTextures);
           success = success && ok;
+          if (ind >= str.length() - 1) { break; }
+          str = trimLeft(str.substr(ind + 1));
           ind = findFirstWhitespace(str);
         }
-        bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
-        success = success && ok;
+        str = trimLeft(str);
+        if (!(str.empty()))
+        {
+          bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
+          success = success && ok;
+        }
       }
       success = success && (faceBuffer.size() >= 3);
     }
@@ -463,6 +471,7 @@ namespace MeshRenderer
     if (cc == ' ') { return true; }
     if (cc == '\t') { return true; }
     if (cc == '\n') { return true; }
+    if (cc == '\r') { return true; }
     return false;
   }
 
@@ -490,12 +499,14 @@ namespace MeshRenderer
 
   std::string trimLeft(const std::string& str)
   {
-    std::string answer = str;
-    if (answer.empty()) { return answer; }
-    while (isWhitespace(answer[0]))
+    std::string answer = "";
+    int strLen = (int)str.length();
+    if (strLen == 0) { return answer; }
+    bool started = false;
+    for (int i = 0; i < strLen; ++i)
     {
-      answer = answer.substr(1);
-      if (answer.empty()) { break; }
+      if (!isWhitespace(str[i])) { started = true; }
+      if (started) { answer += str[i]; }
     }
     return answer;
   }
