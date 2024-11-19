@@ -6,6 +6,8 @@ All Rights Reserved.*/
 #include "edge_list.h"
 #include "point_cloud.h"
 
+const int DcelNull = -1;
+
 namespace MeshRenderer
 {
   bool endsWith(const std::string& str, const std::string& suffix);
@@ -48,6 +50,7 @@ namespace MeshRenderer
     bool setNormal(int vertIdx, const std::string& vertexNormal);
 
     struct HalfEdge;
+    typedef int HalfEdgePtr;
     struct Vertex
     {
       ComputationalGeometry::point3d coords;
@@ -56,30 +59,32 @@ namespace MeshRenderer
       bool hasNormal = false;
       bool hasTexture = false;
       /** \brief The half-edge with this vertex as source. */
-      HalfEdge* halfEdgeFrom = nullptr;
+      HalfEdgePtr halfEdgeFrom = DcelNull;
     };
+    typedef int VertexPtr;
     struct Face;
+    typedef int FacePtr;
     struct HalfEdge
     {
       /** \brief The vertex which is the source of this half-edge. */
-      Vertex* source = nullptr;
+      VertexPtr source = DcelNull;
       /** \brief This same edge traversed backwards. */
-      HalfEdge* reverse = nullptr;
+      HalfEdgePtr reverse = DcelNull;
       /** A face which lies to the left of this half-edge.
        *  This half-edge is on the (inner portion of the) face's outer boundary.
        */
-      Face* faceFrom = nullptr;
+      FacePtr faceFrom = DcelNull;
       /** \brief A half-edge whose destination is this half-edge's source. */
-      HalfEdge* prev = nullptr;
+      HalfEdgePtr prev = DcelNull;
       /** \brief A half-edge whose source is this half-edge's destination. */
-      HalfEdge* next = nullptr;
-      /** \brief The vertex which is the destination of this half-edge. */
-      Vertex* getDest();
+      HalfEdgePtr next = DcelNull;
     };
+    /** \brief The vertex which is the destination of this half-edge. */
+    VertexPtr getDest(const HalfEdge&);
     struct Face
     {
       /** \brief A half-edge on (the inner portion of) this face's outer boundary. */
-      HalfEdge* outerComponent = nullptr;
+      HalfEdgePtr outerComponent = DcelNull;
     };
 
     std::vector<Vertex> vertices;
@@ -105,10 +110,10 @@ namespace MeshRenderer
     return pImpl->Export(filename);
   }
 
-  DoublyConnectedEdgeList::Impl::Vertex* DoublyConnectedEdgeList::Impl::HalfEdge::getDest()
+  DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge)
   {
-    if (reverse == nullptr) { return nullptr; }
-    return reverse->source;
+    if (halfEdge.reverse == DcelNull) { return DcelNull; }
+    return halfEdges[halfEdge.reverse].source;
   }
 
   DoublyConnectedEdgeList::Impl::Impl(DoublyConnectedEdgeList* pParent, const std::string& filename) : pDcel(pParent)
@@ -406,7 +411,7 @@ namespace MeshRenderer
     for (int i = 0; i < numHalfEdges; ++i)
     {
       const auto& halfEdge = (pImpl->halfEdges)[i];
-      if (halfEdge.reverse != nullptr) { continue; }
+      if (halfEdge.reverse != DcelNull) { continue; }
       ++numBoundaryEdges;
     }
     return ((numHalfEdges - numBoundaryEdges) / 2) + numBoundaryEdges;
