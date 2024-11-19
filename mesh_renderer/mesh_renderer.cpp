@@ -49,11 +49,12 @@ int main(int argc, char **argv)
     return 0;
   }
 
+  MeshRenderer::DoublyConnectedEdgeList::Run(filename);
+  MeshRenderer::Camera cam;
+
   srand((unsigned)time(NULL));
   //initialize_glut(&argc, argv);
   //glutMainLoop();
 
-  MeshRenderer::DoublyConnectedEdgeList::Run(filename);
-  MeshRenderer::Camera cam;
   return 0;
 }

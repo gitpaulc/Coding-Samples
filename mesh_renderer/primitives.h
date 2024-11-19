@@ -39,6 +39,8 @@ public:
     bool operator< (const point3d& q) const;
     void print(const std::string& prequel = "") const;
     __host__ __device__ double dot(const point3d& P) const;
+    /** \brief Interpreting point3d as vector3d. */
+    __host__ __device__ point3d cross(const point3d& P) const;
     static double sqDistance(const point3d& P, const point3d& Q);
     __host__ __device__ double sqDistance(const point3d& Q) const;
     __host__ __device__ double sqNorm() const;
@@ -147,10 +149,25 @@ public:
   double C = 1;
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+  __host__ __device__ bool isInPlane(const point3d&) const;
   __host__ __device__ bool isValid() const;
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   __host__ __device__ int getSide(const point3d& pt) const;
+  /** \brief Plane should be valid. */
+  __host__ __device__ void getOrthonormalBasis(point3d& e1, point3d& e2) const;
+  /** \brief Plane should be valid. */
+  __host__ __device__ point3d getNormal() const;
+  /**
+   *  \return Q: the point of intersection of the ray with the plane.
+   *  ray.a is the source of the ray, ray.b is the endpoint.
+   *  Given the vector V = (ray.b - ray.a), outputs the t-value such that
+   *  Q = ray.a + t x V.
+   *  Outputs parallel if the ray is parallel to the plane, in which case
+   *  success occurs if and only if the ray's origin ray.a is in the plane.
+   *  If t is negative this can be interpreted as failure.
+   */
+  __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const;
 };
 
 class Triangle3d
