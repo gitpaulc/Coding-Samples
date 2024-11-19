@@ -41,6 +41,8 @@ namespace MeshRenderer
       const std::vector<std::string>& vertexNormals,
       const std::vector<std::string>& vertexTextures,
       const std::vector<std::string>& faceBuffer);
+    bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
+    bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setVertex(int i, const std::string& vertexStr);
 
     struct HalfEdge;
@@ -79,6 +81,8 @@ namespace MeshRenderer
     std::vector<Vertex> vertices;
     std::vector<HalfEdge> halfEdges;
     std::vector<Face> faces;
+
+    std::string mtlFilepath = "";
   };
 
   DoublyConnectedEdgeList::DoublyConnectedEdgeList() : pImpl(std::make_unique<DoublyConnectedEdgeList::Impl>(this))
@@ -113,6 +117,7 @@ namespace MeshRenderer
     bool success = readObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     if (success)
     {
+      mtlFilepath = mtlLink;
       success = parseObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     }
     if (success)
@@ -126,6 +131,11 @@ namespace MeshRenderer
   {
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
+    obj << "\n";
+    if (!mtlFilepath.empty())
+    {
+      obj << "\nmtllib " << mtlFilepath << "\n";
+    }
     for (const auto& vertex : vertices)
     {
       obj << "\nv " << vertex.coords.x << " " << vertex.coords.y << " " << vertex.coords.z;
@@ -197,6 +207,75 @@ namespace MeshRenderer
     return answer;
   }
 
+  bool DoublyConnectedEdgeList::Impl::parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures)
+  {
+    std::string str = info;
+    bool success = true;
+    int vertIdx = -1;
+    int textureIdx = -1;
+    int normalIdx = -1;
+    try
+    {
+      std::size_t ind = str.find('/');
+      vertIdx = std::stoi(str.substr(0, ind));
+      if (vertIdx < 0) { return false; }
+      if (vertIdx >= (int)(vertices.size())) { return false; }
+      faceBuffer.push_back(vertIdx);
+      if (ind == std::string::npos) { return true; }
+      if (ind == str.length() - 1) { return false; }
+      str = str.substr(ind + 1);
+      ind = str.find('/');
+      std::string textureInd = trimLeft(str.substr(0, ind));
+      if (!(textureInd.empty()))
+      {
+        textureIdx = std::stoi(textureInd);
+        if (textureIdx < 0) { return false; }
+        if (textureIdx >= (int)(vertexTextures.size())) { return false; }
+      }
+      if (ind != std::string::npos)
+      {
+        if (ind == str.length() - 1) { return false; }
+        str = str.substr(ind + 1);
+        ind = str.find('/');
+        if (ind != std::string::npos) { return false; }
+        normalIdx = std::stoi(str);
+        if (normalIdx < 0) { return false; }
+        if (normalIdx >= (int)(vertexNormals.size())) { return false; }
+      }
+    }
+    catch (...) { success = false; }
+    return success;
+  }
+
+  bool DoublyConnectedEdgeList::Impl::setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures)
+  {
+    bool success = true;
+    try
+    {
+      std::vector<int> faceBuffer;
+      {
+        std::string str = faceStr;
+        std::size_t ind = findFirstWhitespace(str);
+        while (ind != std::string::npos)
+        {
+          std::string info = str.substr(0, ind);
+          str = trimLeft(str.substr(ind));
+          bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
+          success = success && ok;
+          ind = findFirstWhitespace(str);
+        }
+        bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
+        success = success && ok;
+      }
+      success = success && (faceBuffer.size() >= 3);
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
+  }
+
   bool DoublyConnectedEdgeList::Impl::setVertex(int i, const std::string& vertexStr)
   {
     bool success = true;
@@ -236,6 +315,11 @@ namespace MeshRenderer
     for (int i = 0; i < (int)vertexBuffer.size(); ++i)
     {
       bool success = setVertex(i, trimLeft(vertexBuffer[i]));
+      answer = answer && success;
+    }
+    for (int i = 0; i < (int)faceBuffer.size(); ++i)
+    {
+      bool success = setFace(i, trimLeft(faceBuffer[i]), vertexNormals, vertexTextures);
       answer = answer && success;
     }
     return answer;
