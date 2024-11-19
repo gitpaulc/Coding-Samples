@@ -2,6 +2,7 @@
 All Rights Reserved.*/
 
 #include <fstream>
+#include <map>
 
 #include "edge_list.h"
 #include "point_cloud.h"
@@ -60,6 +61,7 @@ namespace MeshRenderer
       bool hasTexture = false;
       /** \brief The half-edge with this vertex as source. */
       HalfEdgePtr halfEdgeFrom = DcelNull;
+      int ID = -1;
     };
     typedef int VertexPtr;
     struct Face;
@@ -298,13 +300,13 @@ namespace MeshRenderer
   bool DoublyConnectedEdgeList::Impl::setVertex(int i, const std::string& vertexStr)
   {
     bool success = true;
+    Vertex& vertex = vertices[i];
     try
     {
       std::string str = vertexStr;
       std::size_t ind = findFirstWhitespace(str);
       if (ind == std::string::npos) { return false; }
       std::string coord = str.substr(0, ind);
-      Vertex& vertex = vertices[i];
       vertex.coords.x = std::stod(coord);
       str = trimLeft(str.substr(ind));
       ind = findFirstWhitespace(str);
@@ -318,6 +320,7 @@ namespace MeshRenderer
       vertex.coords.z = std::stod(coord);
     }
     catch (...) { success = false; }
+    if (success) { vertex.ID = i; }
     return success;
   }
 
