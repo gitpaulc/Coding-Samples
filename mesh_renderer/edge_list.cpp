@@ -153,6 +153,34 @@ namespace MeshRenderer
       obj << "\nv " << vertex.coords.x << " " << vertex.coords.y << " " << vertex.coords.z;
     }
     obj << "\n\n# " << vertices.size() << " vertices in all.\n";
+    std::map<int, int> texturesIndMap;
+    std::map<int, int> normalsIndMap;
+    {
+      int textureCount = 0;
+      int loopInd = -1;
+      for (const auto& vertex : vertices)
+      {
+        ++loopInd;
+        if (!vertex.hasTexture) { continue; }
+        texturesIndMap[loopInd] = textureCount;
+        textureCount++;
+        obj << "\nvt " << vertex.texture.x << " " << vertex.texture.y << " " << vertex.texture.z;
+      }
+      obj << "\n\n# " << textureCount << " textures in all.\n";
+    }
+    {
+      int normalsCount = 0;
+      int loopInd = -1;
+      for (const auto& vertex : vertices)
+      {
+        ++loopInd;
+        if (!vertex.hasNormal) { continue; }
+        normalsIndMap[loopInd] = normalsCount;
+        normalsCount++;
+        obj << "\nvn " << vertex.normal.x << " " << vertex.normal.y << " " << vertex.normal.z;
+      }
+      obj << "\n\n# " << normalsCount << " normals in all.\n";
+    }
     for (const auto& face : faces)
     {
       if (face.outerComponent < 0) { continue; }
@@ -164,10 +192,22 @@ namespace MeshRenderer
       auto currentEdge = halfEdges[current];
       std::stringstream faceStrm;
       faceStrm << "\nf " << (firstEdge.source + 1);
+      {
+        const Vertex& vertex = vertices[currentEdge.source];
+        if (vertex.hasTexture || vertex.hasNormal) { faceStrm << "/"; }
+        if (vertex.hasTexture) { faceStrm << (texturesIndMap[firstEdge.source] + 1); }
+        if (vertex.hasNormal) { faceStrm << "/" << (normalsIndMap[firstEdge.source] + 1); }
+      }
       bool faceOk = true;
       for (int numCorners = 0; currentEdge.source != firstEdge.source; ++numCorners)
       {
+        if (currentEdge.source < 0) { faceOk = false; break; }
+        if (currentEdge.source >= (int)(vertices.size())) { faceOk = false; break; }
+        const Vertex& vertex = vertices[currentEdge.source];
         faceStrm << " " << (currentEdge.source + 1);
+        if (vertex.hasTexture || vertex.hasNormal) { faceStrm << "/"; }
+        if (vertex.hasTexture) { faceStrm << (texturesIndMap[currentEdge.source] + 1); }
+        if (vertex.hasNormal) { faceStrm << "/" << (normalsIndMap[currentEdge.source] + 1); }
         current = currentEdge.next;
         if (current < 0) { faceOk = false; break; }
         if (current >= (int)(halfEdges.size())) { faceOk = false; break; }
@@ -477,6 +517,31 @@ namespace MeshRenderer
       answer = answer && success;
     }
     return answer;
+  }
+
+  void DoublyConnectedEdgeList::getBoundingBox(ComputationalGeometry::point3d& maxCorner, ComputationalGeometry::point3d& minCorner) const
+  {
+    if (pImpl == nullptr) { return; }
+    using namespace ComputationalGeometry;
+    maxCorner = point3d();
+    minCorner = point3d();
+    bool started = false;
+    for (const auto& vertex : pImpl->vertices)
+    {
+      if (!started)
+      {
+        maxCorner = vertex.coords;
+        minCorner = vertex.coords;
+        started = true;
+        continue;
+      }
+      if (vertex.coords.x < minCorner.x) { minCorner.x = vertex.coords.x; }
+      else if (vertex.coords.x > maxCorner.x) { maxCorner.x = vertex.coords.x; }
+      if (vertex.coords.y < minCorner.y) { minCorner.y = vertex.coords.y; }
+      else if (vertex.coords.y > maxCorner.y) { maxCorner.y = vertex.coords.y; }
+      if (vertex.coords.z < minCorner.z) { minCorner.z = vertex.coords.z; }
+      else if (vertex.coords.z > maxCorner.z) { maxCorner.z = vertex.coords.z; }
+    }
   }
 
   int DoublyConnectedEdgeList::getNumEdges() const

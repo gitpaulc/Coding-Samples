@@ -1,7 +1,10 @@
+/*  Copyright Paul Cernea, November 2024.
+All Rights Reserved.*/
 
 #include "gl_callbacks.h"
 
 #include "includes.h"
+#include "camera.h"
 #include "edge_list.h"
 #include "point_cloud.h"
 
@@ -51,5 +54,6 @@ int main(int argc, char **argv)
   //glutMainLoop();
 
   MeshRenderer::DoublyConnectedEdgeList::Run(filename);
+  MeshRenderer::Camera cam;
   return 0;
 }
