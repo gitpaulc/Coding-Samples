@@ -589,6 +589,12 @@ namespace ComputationalGeometry
     D = -normal.dot(origin);
   }
 
+  bool Plane3d::isInPlane(const point3d& ptIn) const
+  {
+    auto quantity = A * ptIn.x + B * ptIn.y + C * ptIn.z + D;
+    return (safeAbs(quantity) <= threshold());
+  }
+
   bool Plane3d::isValid() const
   {
     point3d normal(A, B, C);
@@ -648,6 +654,35 @@ namespace ComputationalGeometry
     auto mag = point3d(A, B, C).sqNorm();
     mag = safeSqrt(mag);
     return point3d(A / mag, B / mag, C / mag);
+  }
+
+  point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
+  {
+    if (!isValid()) { success = false; return point3d(0, 0, 0); }
+    success = true;
+    point3d pp = ray.a;
+    point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
+    const auto nn = getNormal();
+    const auto vDotN = vv.dot(nn);
+    parallel = (safeAbs(vDotN) <= threshold());
+    if (parallel)
+    {
+      success = isInPlane(pp);
+      if (success) { tVal = 0.0; }
+      return pp;
+    }
+    const auto p0 = pointInPlane();
+    const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
+    tVal = -pMinusP0.dot(nn) / vDotN;
+    point3d e1, e2;
+    getOrthonormalBasis(e1, e2);
+    double ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
+    double rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
+    point3d answer;
+    answer.x = p0.x + ss * e1.x + rr * e2.x;
+    answer.y = p0.y + ss * e1.y + rr * e2.y;
+    answer.z = p0.z + ss * e1.z + rr * e2.z;
+    return answer;
   }
 
   Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)
