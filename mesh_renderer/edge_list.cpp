@@ -44,6 +44,8 @@ namespace MeshRenderer
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setVertex(int i, const std::string& vertexStr);
+    bool setTexture(int vertIdx, const std::string& vertexTexture);
+    bool setNormal(int vertIdx, const std::string& vertexNormal);
 
     struct HalfEdge;
     struct Vertex
@@ -200,10 +202,7 @@ namespace MeshRenderer
         }
       }
     }
-    catch (...)
-    {
-      answer = false;
-    }
+    catch (...) { answer = false; }
     return answer;
   }
 
@@ -244,6 +243,11 @@ namespace MeshRenderer
       }
     }
     catch (...) { success = false; }
+    bool ok = setTexture(vertIdx, vertexTextures[textureIdx]);
+    success = success && ok;
+    if (!success) { return success; }
+    ok = setNormal(vertIdx, vertexNormals[normalIdx]);
+    success = success && ok;
     return success;
   }
 
@@ -297,6 +301,32 @@ namespace MeshRenderer
       //if (ind == std::string::npos) { return false; } w-coordinate is optional.
       coord = str.substr(0, ind);
       vertex.coords.z = std::stod(coord);
+    }
+    catch (...) { success = false; }
+    return success;
+  }
+
+  bool DoublyConnectedEdgeList::Impl::setTexture(int vertIdx, const std::string& vertexTexture)
+  {
+    bool success = true;
+    if (vertIdx < 0) { return false; }
+    if (vertIdx >= (int)(vertices.size())) { return false; }
+    Vertex& vertex = vertices[vertIdx];
+    try
+    {
+    }
+    catch (...) { success = false; }
+    return success;
+  }
+
+  bool DoublyConnectedEdgeList::Impl::setNormal(int vertIdx, const std::string& vertexNormal)
+  {
+    bool success = true;
+    if (vertIdx < 0) { return false; }
+    if (vertIdx >= (int)(vertices.size())) { return false; }
+    Vertex& vertex = vertices[vertIdx];
+    try
+    {
     }
     catch (...) { success = false; }
     return success;
