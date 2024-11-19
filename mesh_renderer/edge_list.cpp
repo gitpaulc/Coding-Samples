@@ -195,8 +195,8 @@ namespace MeshRenderer
       {
         const Vertex& vertex = vertices[currentEdge.source];
         if (vertex.hasTexture || vertex.hasNormal) { faceStrm << "/"; }
-        if (vertex.hasTexture) { faceStrm << (texturesIndMap[currentEdge.source] + 1); }
-        if (vertex.hasNormal) { faceStrm << "/" << (normalsIndMap[currentEdge.source] + 1); }
+        if (vertex.hasTexture) { faceStrm << (texturesIndMap[firstEdge.source] + 1); }
+        if (vertex.hasNormal) { faceStrm << "/" << (normalsIndMap[firstEdge.source] + 1); }
       }
       bool faceOk = true;
       for (int numCorners = 0; currentEdge.source != firstEdge.source; ++numCorners)
