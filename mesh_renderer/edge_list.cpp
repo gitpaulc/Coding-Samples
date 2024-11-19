@@ -53,6 +53,8 @@ namespace MeshRenderer
       ComputationalGeometry::point3d coords;
       ComputationalGeometry::point3d normal;
       ComputationalGeometry::point3d texture;
+      bool hasNormal = false;
+      bool hasTexture = false;
       /** \brief The half-edge with this vertex as source. */
       HalfEdge* halfEdgeFrom = nullptr;
     };
@@ -314,8 +316,26 @@ namespace MeshRenderer
     Vertex& vertex = vertices[vertIdx];
     try
     {
+      std::string str = vertexTexture;
+      std::size_t ind = findFirstWhitespace(str);
+      if (ind == std::string::npos) { return false; }
+      std::string coord = str.substr(0, ind);
+      vertex.texture.x = std::stod(coord);
+      str = trimLeft(str.substr(ind));
+      ind = findFirstWhitespace(str);
+      if (ind != std::string::npos)
+      {
+        // 0.0 by default.
+        coord = str.substr(0, ind);
+        vertex.texture.y = std::stod(coord);
+        str = trimLeft(str.substr(ind));
+        ind = findFirstWhitespace(str);
+        coord = str.substr(0, ind);
+        vertex.texture.z = std::stod(coord);
+      }
     }
     catch (...) { success = false; }
+    if (success) { vertex.hasTexture = true; }
     return success;
   }
 
@@ -327,8 +347,23 @@ namespace MeshRenderer
     Vertex& vertex = vertices[vertIdx];
     try
     {
+      std::string str = vertexNormal;
+      std::size_t ind = findFirstWhitespace(str);
+      if (ind == std::string::npos) { return false; }
+      std::string coord = str.substr(0, ind);
+      vertex.normal.x = std::stod(coord);
+      str = trimLeft(str.substr(ind));
+      ind = findFirstWhitespace(str);
+      if (ind == std::string::npos) { return false; }
+      coord = str.substr(0, ind);
+      vertex.normal.y = std::stod(coord);
+      str = trimLeft(str.substr(ind));
+      ind = findFirstWhitespace(str);
+      coord = str.substr(0, ind);
+      vertex.normal.z = std::stod(coord);
     }
     catch (...) { success = false; }
+    if (success) { vertex.hasNormal = true; }
     return success;
   }
 
