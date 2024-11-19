@@ -10,6 +10,11 @@ namespace MeshRenderer
 class Camera
 {
 public:
+    Camera();
+    virtual ~Camera();
+private:
+    class Impl;
+    Impl* pImpl = nullptr;
 };
 
 }

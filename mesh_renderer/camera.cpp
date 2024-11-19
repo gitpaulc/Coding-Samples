@@ -7,4 +7,29 @@ All Rights Reserved.*/
 namespace MeshRenderer
 {
 
+class Camera::Impl
+{
+public:
+  Impl(Camera*);
+  virtual ~Impl();
+
+  Camera* pCam = nullptr;
+};
+
+Camera::Camera() : pImpl(new Impl(this))
+{
+}
+
+Camera::~Camera()
+{
+  delete pImpl;
+  pImpl = nullptr;
+}
+
+Camera::Impl::Impl(Camera* pCamera) : pCam(pCamera)
+{
+}
+
+Camera::Impl::~Impl() { }
+
 }
