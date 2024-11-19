@@ -1,13 +1,17 @@
-/*  Copyright Paul Cernea, August 2024.
+/*  Copyright Paul Cernea, November 2024.
 All Rights Reserved.*/
 
-#ifndef GL_CALLBACKS_H
-#define GL_CALLBACKS_H
+#ifndef MESH_CAMERA_H
+#define MESH_CAMERA_H
 
-static int& GetWindowId();
-void initialize_glut(int* argc_ptr, char** argv);
-void keyboard(unsigned char key, int x, int y);
-void mouse(int button, int state, int x, int y);
-void render();
+namespace MeshRenderer
+{
 
-#endif //def GL_CALLBACKS_H
+class Camera
+{
+public:
+};
+
+}
+
+#endif //def MESH_CAMERA_H
