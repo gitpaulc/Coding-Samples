@@ -3,6 +3,7 @@ All Rights Reserved.*/
 
 #include <fstream>
 #include <map>
+#include <sstream>
 
 #include "edge_list.h"
 #include "point_cloud.h"
@@ -151,6 +152,32 @@ namespace MeshRenderer
     {
       obj << "\nv " << vertex.coords.x << " " << vertex.coords.y << " " << vertex.coords.z;
     }
+    obj << "\n\n# " << vertices.size() << " vertices in all.\n";
+    for (const auto& face : faces)
+    {
+      if (face.outerComponent < 0) { continue; }
+      if (face.outerComponent >= (int)(halfEdges.size())) { continue; }
+      const HalfEdge& firstEdge = halfEdges[face.outerComponent];
+      int current = firstEdge.next;
+      if (current < 0) { continue; }
+      if (current >= (int)(halfEdges.size())) { continue; }
+      auto currentEdge = halfEdges[current];
+      std::stringstream faceStrm;
+      faceStrm << "\nf " << (firstEdge.source + 1);
+      bool faceOk = true;
+      for (int numCorners = 0; currentEdge.source != firstEdge.source; ++numCorners)
+      {
+        faceStrm << " " << (currentEdge.source + 1);
+        current = currentEdge.next;
+        if (current < 0) { faceOk = false; break; }
+        if (current >= (int)(halfEdges.size())) { faceOk = false; break; }
+        if (numCorners >= (int)(halfEdges.size())) { faceOk = false; break; }
+        currentEdge = halfEdges[current];
+      }
+      if (!faceOk) { continue; }
+      obj << faceStrm.str();
+    }
+    obj << "\n\n# " << faces.size() << " faces in all.\n";
     return true;
   }
 
