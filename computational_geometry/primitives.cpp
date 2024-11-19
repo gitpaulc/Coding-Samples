@@ -636,7 +636,7 @@ namespace ComputationalGeometry
       e2 = nn.cross(e1);
       return;
     }
-    point3d f1(2 * nn.x * nn.y, -nn.x * nn.z, -nn.y * nn.x);
+    point3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
     auto mag = safeSqrt(f1.sqNorm());
     e1 = point3d(f1.x / mag, f1.y / mag, f1.z / mag);
     e2 = nn.cross(e1);
