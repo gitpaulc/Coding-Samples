@@ -39,6 +39,8 @@ public:
     bool operator< (const point3d& q) const;
     void print(const std::string& prequel = "") const;
     __host__ __device__ double dot(const point3d& P) const;
+    /** \brief Interpreting point3d as vector3d. */
+    __host__ __device__ point3d cross(const point3d& P) const;
     static double sqDistance(const point3d& P, const point3d& Q);
     __host__ __device__ double sqDistance(const point3d& Q) const;
     __host__ __device__ double sqNorm() const;
@@ -151,6 +153,10 @@ public:
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   __host__ __device__ int getSide(const point3d& pt) const;
+  /** \brief Plane should be valid. */
+  __host__ __device__ void getOrthonormalBasis(point3d& e1, point3d& e2) const;
+  /** \brief Plane should be valid. */
+  __host__ __device__ point3d getNormal() const;
 };
 
 class Triangle3d
