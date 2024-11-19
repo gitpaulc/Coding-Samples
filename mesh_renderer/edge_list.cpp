@@ -2,7 +2,6 @@
 All Rights Reserved.*/
 
 #include <fstream>
-#include <map>
 
 #include "edge_list.h"
 #include "point_cloud.h"
@@ -45,7 +44,7 @@ namespace MeshRenderer
       const std::vector<std::string>& vertexTextures,
       const std::vector<std::string>& faceBuffer);
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
-    bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
+    bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::set<std::pair<int, int> >& halfEdgesCache);
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
     bool setNormal(int vertIdx, const std::string& vertexNormal);
@@ -263,37 +262,78 @@ namespace MeshRenderer
     return success;
   }
 
-  bool DoublyConnectedEdgeList::Impl::setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures)
+  bool DoublyConnectedEdgeList::Impl::setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::set<std::pair<int, int> >& halfEdgesCache)
   {
     bool success = true;
+    std::vector<int> faceBuffer;
     try
     {
-      std::vector<int> faceBuffer;
+      std::string str = faceStr;
+      std::size_t ind = findFirstWhitespace(str);
+      while (ind != std::string::npos)
       {
-        std::string str = faceStr;
-        std::size_t ind = findFirstWhitespace(str);
-        while (ind != std::string::npos)
-        {
-          std::string info = str.substr(0, ind);
-          bool ok = parseCurrentFaceVertex(i, faceBuffer, info, vertexNormals, vertexTextures);
-          success = success && ok;
-          if (ind >= str.length() - 1) { break; }
-          str = trimLeft(str.substr(ind + 1));
-          ind = findFirstWhitespace(str);
-        }
-        str = trimLeft(str);
-        if (!(str.empty()))
-        {
-          bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
-          success = success && ok;
-        }
+        std::string info = str.substr(0, ind);
+        bool ok = parseCurrentFaceVertex(i, faceBuffer, info, vertexNormals, vertexTextures);
+        success = success && ok;
+        if (ind >= str.length() - 1) { break; }
+        str = trimLeft(str.substr(ind + 1));
+        ind = findFirstWhitespace(str);
+      }
+      str = trimLeft(str);
+      if (!(str.empty()))
+      {
+        bool ok = parseCurrentFaceVertex(i, faceBuffer, str, vertexNormals, vertexTextures);
+        success = success && ok;
       }
       success = success && (faceBuffer.size() >= 3);
     }
-    catch (...)
+    catch (...) { success = false; }
+    if (!success) { return false; }
+
+    const int size0 = (int)halfEdges.size();
+    const int faceBufferSize = (int)faceBuffer.size();
+    for (int ind = 0; ind < faceBufferSize; ++ind)
     {
-      success = false;
+      int ind1 = ind + 1;
+      if (ind == (faceBufferSize - 1)) { ind1 = 0; }
+      std::pair<int, int> edgePair;
+      edgePair.first = faceBuffer[ind];
+      edgePair.second = faceBuffer[ind1];
+      if (halfEdgesCache.find(edgePair) != halfEdgesCache.end()) { return false; }
+      HalfEdge halfEdge;
+      if (ind == 0)
+      {
+        Face newFace;
+        newFace.outerComponent = (int)(halfEdges.size());
+        faces[i] = newFace;
+      }
+      halfEdge.source = edgePair.first;
+      halfEdge.faceFrom = i;
+      // halfEdge.current would be halfEdges.size().
+      if (ind == 0)
+      {
+        halfEdge.prev = size0 + faceBufferSize - 1;
+      }
+      else { halfEdge.prev = halfEdges.size() - 1; }
+      if (ind1 == 0)
+      {
+        halfEdge.next = size0;
+      }
+      else { halfEdge.next = halfEdges.size() + 1; }
+      // Fix reverse if applicable.
+      {
+        std::pair<int, int> edgeReverse;
+        edgeReverse.first = edgePair.second;
+        edgeReverse.second = edgePair.first;
+          
+          if (halfEdgesCache.find(edgeReverse) != halfEdgesCache.end())
+          {
+          }
+      }
+      halfEdges.push_back(halfEdge);
+      halfEdgesCache.insert(edgePair);
     }
+
     return success;
   }
 
@@ -398,9 +438,10 @@ namespace MeshRenderer
       bool success = setVertex(i, trimLeft(vertexBuffer[i]));
       answer = answer && success;
     }
+    std::set<std::pair<int, int> > halfEdgesCache;
     for (int i = 0; i < (int)faceBuffer.size(); ++i)
     {
-      bool success = setFace(i, trimLeft(faceBuffer[i]), vertexNormals, vertexTextures);
+      bool success = setFace(i, trimLeft(faceBuffer[i]), vertexNormals, vertexTextures, halfEdgesCache);
       answer = answer && success;
     }
     return answer;
