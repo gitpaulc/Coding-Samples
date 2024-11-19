@@ -519,6 +519,31 @@ namespace MeshRenderer
     return answer;
   }
 
+  void DoublyConnectedEdgeList::getBoundingBox(ComputationalGeometry::point3d& maxCorner, ComputationalGeometry::point3d& minCorner) const
+  {
+    if (pImpl == nullptr) { return; }
+    using namespace ComputationalGeometry;
+    maxCorner = point3d();
+    minCorner = point3d();
+    bool started = false;
+    for (const auto& vertex : pImpl->vertices)
+    {
+      if (!started)
+      {
+        maxCorner = vertex.coords;
+        minCorner = vertex.coords;
+        started = true;
+        continue;
+      }
+      if (vertex.coords.x < minCorner.x) { minCorner.x = vertex.coords.x; }
+      else if (vertex.coords.x > maxCorner.x) { maxCorner.x = vertex.coords.x; }
+      if (vertex.coords.y < minCorner.y) { minCorner.y = vertex.coords.y; }
+      else if (vertex.coords.y > maxCorner.y) { maxCorner.y = vertex.coords.y; }
+      if (vertex.coords.z < minCorner.z) { minCorner.z = vertex.coords.z; }
+      else if (vertex.coords.z > maxCorner.z) { maxCorner.z = vertex.coords.z; }
+    }
+  }
+
   int DoublyConnectedEdgeList::getNumEdges() const
   {
     if (pImpl == nullptr) { return 0; }

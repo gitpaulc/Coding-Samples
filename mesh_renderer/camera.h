@@ -4,17 +4,36 @@ All Rights Reserved.*/
 #ifndef MESH_CAMERA_H
 #define MESH_CAMERA_H
 
+namespace ComputationalGeometry
+{
+  class point3d; // Forward declaration.
+  class Plane3d; // Forward declaration.
+}
+
 namespace MeshRenderer
 {
+class DoublyConnectedEdgeList; // Mesh.
 
 class Camera
 {
+  ComputationalGeometry::Plane3d getFarPlane() const;
 public:
-    Camera();
-    virtual ~Camera();
+  Camera();
+  Camera(const DoublyConnectedEdgeList& mesh);
+  virtual ~Camera();
+  ComputationalGeometry::point3d getEye() const;
+  void setEye(const ComputationalGeometry::point3d&);
+  ComputationalGeometry::Plane3d getNearPlane() const;
+  /** \brief Same as near plane. */
+  ComputationalGeometry::Plane3d getScreen() const;
+  /** \brief Same as set near plane. */
+  void setScreen(const ComputationalGeometry::Plane3d&);
+  bool hasFarPlane() const;
+  bool viewIsOrthogonal() const;
+
 private:
-    class Impl;
-    Impl* pImpl = nullptr;
+  class Impl;
+  Impl* pImpl = nullptr;
 };
 
 }

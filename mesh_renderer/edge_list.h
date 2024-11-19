@@ -6,6 +6,12 @@ All Rights Reserved.*/
 
 #include "includes.h"
 
+namespace ComputationalGeometry
+{
+  class point3d; // Forward declaration.
+  class Plane3d; // Forward declaration.
+}
+
 namespace MeshRenderer
 {
   class DoublyConnectedEdgeList
@@ -16,6 +22,7 @@ namespace MeshRenderer
       DoublyConnectedEdgeList();
       DoublyConnectedEdgeList(const std::string& filename);
       bool Export(const std::string& filename) const;
+      void getBoundingBox(ComputationalGeometry::point3d& maxCorner, ComputationalGeometry::point3d& minCorner) const;
       int getNumEdges() const;
       int getNumFaces() const;
       int getNumHalfEdges() const;
