@@ -5,8 +5,9 @@ All Rights Reserved.*/
 #include <map>
 #include <sstream>
 
+#include "camera.h"
 #include "edge_list.h"
-#include "point_cloud.h"
+#include "primitives.h"
 
 const int DcelNull = -1;
 
@@ -27,6 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
+    bool project(const Camera&, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -62,7 +64,6 @@ namespace MeshRenderer
       bool hasTexture = false;
       /** \brief The half-edge with this vertex as source. */
       HalfEdgePtr halfEdgeFrom = DcelNull;
-      int ID = -1;
     };
     typedef int VertexPtr;
     struct Face;
@@ -218,6 +219,19 @@ namespace MeshRenderer
       obj << faceStrm.str();
     }
     obj << "\n\n# " << faces.size() << " faces in all.\n";
+    return true;
+  }
+
+  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const
+  {
+    using namespace ComputationalGeometry;
+    point3d eye = cam.getEye();
+    std::set<HalfEdgePtr> edgeCache;
+    for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
+    {
+        if (edgeCache.count(edgeIdx) > 0) { continue; }
+        //HalfEdge&
+    }
     return true;
   }
 
@@ -432,7 +446,6 @@ namespace MeshRenderer
       vertex.coords.z = std::stod(coord);
     }
     catch (...) { success = false; }
-    if (success) { vertex.ID = i; }
     return success;
   }
 
@@ -574,6 +587,12 @@ namespace MeshRenderer
   {
     if (pImpl == nullptr) { return 0; }
     return (int)(pImpl->vertices.size());
+  }
+
+  bool DoublyConnectedEdgeList::project(const Camera& cam, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const
+  {
+    if (pImpl == nullptr) { return false; }
+    return pImpl->project(cam, wireframeOut, numEdges);
   }
 
   void DoublyConnectedEdgeList::Run(const std::string& filename)

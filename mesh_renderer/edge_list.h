@@ -8,12 +8,15 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
+  class Edge2d;  // Forward declaration.
   class point3d; // Forward declaration.
   class Plane3d; // Forward declaration.
 }
 
 namespace MeshRenderer
 {
+  class Camera; // Forward declaration.
+
   class DoublyConnectedEdgeList
   {
     class Impl;
@@ -27,6 +30,8 @@ namespace MeshRenderer
       int getNumFaces() const;
       int getNumHalfEdges() const;
       int getNumVertices() const;
+      /** \brief Project mesh to the screen of the camera. */
+      bool project(const Camera&, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const;
       static void Run(const std::string& filename);
   };
 }
