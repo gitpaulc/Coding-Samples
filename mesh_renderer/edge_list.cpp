@@ -231,7 +231,7 @@ namespace MeshRenderer
     for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
     {
       if (edgeCache.count(edgeIdx) > 0) { continue; }
-      edgeCache.insert(edgeIdx);
+      //edgeCache.insert(edgeIdx); // Unnecessary.
       const HalfEdge& halfEdge = halfEdges[edgeIdx];
       if (halfEdge.reverse != DcelNull) { edgeCache.insert(halfEdge.reverse); }
     }

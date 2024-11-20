@@ -658,7 +658,14 @@ namespace ComputationalGeometry
 
   point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
   {
+    point2d xyOut;
+    return getRayCastResult(ray, tVal, pointInPlane(), xyOut, parallel, success);
+  }
+
+  point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, bool& success) const
+  {
     if (!isValid()) { success = false; return point3d(0, 0, 0); }
+    if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
     success = true;
     point3d pp = ray.a;
     point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
@@ -671,13 +678,15 @@ namespace ComputationalGeometry
       if (success) { tVal = 0.0; }
       return pp;
     }
-    const auto p0 = pointInPlane();
+    const auto& p0 = origin;
     const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
     tVal = -pMinusP0.dot(nn) / vDotN;
     point3d e1, e2;
     getOrthonormalBasis(e1, e2);
-    double ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
-    double rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
+    double& ss = xyOut.x;
+    double& rr = xyOut.y;
+    ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
+    rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
     point3d answer;
     answer.x = p0.x + ss * e1.x + rr * e2.x;
     answer.y = p0.y + ss * e1.y + rr * e2.y;
