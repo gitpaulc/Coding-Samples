@@ -84,7 +84,7 @@ namespace MeshRenderer
       HalfEdgePtr next = DcelNull;
     };
     /** \brief The vertex which is the destination of this half-edge. */
-    VertexPtr getDest(const HalfEdge&);
+    VertexPtr getDest(const HalfEdge&) const;
     struct Face
     {
       /** \brief A half-edge on (the inner portion of) this face's outer boundary. */
@@ -114,8 +114,12 @@ namespace MeshRenderer
     return pImpl->Export(filename);
   }
 
-  DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge)
+  DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge) const
   {
+    if (halfEdge.next != DcelNull)
+    {
+      return halfEdges[halfEdge.next].source;
+    }
     if (halfEdge.reverse == DcelNull) { return DcelNull; }
     return halfEdges[halfEdge.reverse].source;
   }
@@ -227,6 +231,8 @@ namespace MeshRenderer
     using namespace ComputationalGeometry;
     wireframeOut.resize(0);
     point3d eye = cam.getEye();
+    Plane3d screen = cam.getScreen();
+    point3d screenO = screen.pointInPlane();
     std::set<HalfEdgePtr> edgeCache;
     for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
     {
@@ -234,6 +240,32 @@ namespace MeshRenderer
       //edgeCache.insert(edgeIdx); // Unnecessary.
       const HalfEdge& halfEdge = halfEdges[edgeIdx];
       if (halfEdge.reverse != DcelNull) { edgeCache.insert(halfEdge.reverse); }
+      if (halfEdge.source < 0) { continue; }
+      if (halfEdge.source >= (int)(vertices.size())) { continue; }
+      VertexPtr halfEdgeDest = getDest(halfEdge);
+      if (halfEdgeDest < 0) { continue; }
+      if (halfEdgeDest >= (int)(vertices.size())) { continue; }
+      const Vertex& vertexA = vertices[halfEdge.source];
+      const Vertex& vertexB = vertices[halfEdgeDest];
+      Edge3d rayA(eye, vertexA.coords);
+      Edge3d rayB(eye, vertexB.coords);
+      point2d xyA, xyB;
+      double tValA = 0.0;
+      double tValB = 0.0;
+      bool parallel = false;
+      bool success = true;
+      point3d interceptA = screen.getRayCastResult(rayA, tValA, screenO, xyA, parallel, success);
+      if (!success) { continue; }
+      if (tValA < 0.0) { continue; }
+      // If projected pt is between screen and eye:
+      if (tValA > 1.0) { continue; }
+      point3d interceptB = screen.getRayCastResult(rayB, tValB, screenO, xyB, parallel, success);
+      if (!success) { continue; }
+      if (tValB < 0.0) { continue; }
+      // If projected pt is between screen and eye:
+      if (tValB > 1.0) { continue; }
+      Edge2d projected(xyA, xyB);
+      wireframeOut.push_back(projected);
     }
     return true;
   }

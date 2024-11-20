@@ -21,7 +21,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   ComputationalGeometry::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'D' Delaunay, 'V' Voronoi, 'N' Nearest Neighbor, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
