@@ -2,7 +2,9 @@
 #include "includes.h"
 #include "primitives.h"
 
+#ifdef POINT_CLOUD_PROJECT
 #include "point_cloud.h"
+#endif // def POINT_CLOUD_PROJECT
 
 #ifdef _WIN32
 #include <algorithm>
@@ -18,6 +20,12 @@
 
 namespace ComputationalGeometry
 {
+
+#ifndef POINT_CLOUD_PROJECT
+  double threshold() { return 1.0e-9; }
+#endif // ndef POINT_CLOUD_PROJECT
+
+
   template <class T> T safeAbs(const T& arg)
   {
     if (arg < 0) { return -arg; }

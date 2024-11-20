@@ -118,6 +118,7 @@ namespace MeshRenderer
     std::cout << "\nNum. edges: " << sMesh.getNumEdges();
     std::cout << "\nNum. half-edges: " << sMesh.getNumHalfEdges();
     std::cout << "\nNum. faces: " << sMesh.getNumFaces();
+    std::cout << "\n\n";
   }
 
   DoublyConnectedEdgeList& DoublyConnectedEdgeList::Get()

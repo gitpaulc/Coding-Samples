@@ -4,7 +4,7 @@
 #include "includes.h"
 #include "camera.h"
 #include "edge_list.h"
-#include "point_cloud.h"
+#include "primitives.h"
 
 int& GetWindowId()
 {
@@ -20,7 +20,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutInitWindowPosition(-1, -1);
   int ww = 0;
   int hh = 0;
-  ComputationalGeometry::GetWindowWidthHeight(ww, hh);
+  MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
   GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'R' to redraw, 'E' to export, 'q' to exit.");
@@ -71,7 +71,7 @@ void render()
 
   glPointSize(3.0f);
 
-  if (PointCloud::Get().pointsAreOn())
+  /*if (PointCloud::Get().pointsAreOn())
   {
     glColor3f(0.0f, 0.0f, 0.0f);
     glBegin(GL_POINTS);
@@ -99,7 +99,7 @@ void render()
       //P.print("\n");
     }
     glEnd();
-  }
+  }*/
 
   glutSwapBuffers();
 }
