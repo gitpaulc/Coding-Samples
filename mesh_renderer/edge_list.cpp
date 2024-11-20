@@ -95,6 +95,7 @@ namespace MeshRenderer
     std::vector<HalfEdge> halfEdges;
     std::vector<Face> faces;
 
+    std::string originalFilename = "";
     std::string mtlFilepath = "";
   };
 
@@ -108,10 +109,38 @@ namespace MeshRenderer
   {
   }
 
+  static DoublyConnectedEdgeList sMesh;
+  void DoublyConnectedEdgeList::Create(const std::string& filename)
+  {
+    sMesh = DoublyConnectedEdgeList(filename);
+    std::cout << "\nFilename: " << filename;
+    std::cout << "\nNum. vertices: " << sMesh.getNumVertices();
+    std::cout << "\nNum. edges: " << sMesh.getNumEdges();
+    std::cout << "\nNum. half-edges: " << sMesh.getNumHalfEdges();
+    std::cout << "\nNum. faces: " << sMesh.getNumFaces();
+  }
+
+  DoublyConnectedEdgeList& DoublyConnectedEdgeList::Get()
+  {
+    return sMesh;
+  }
+
   bool DoublyConnectedEdgeList::Export(const std::string& filename) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->Export(filename);
+    std::string exportName = filename;
+    if (filename.empty())
+    {
+      exportName = pImpl->originalFilename + ".log";
+      if (endsWith(pImpl->originalFilename, ".obj")) { exportName = pImpl->originalFilename.substr(0, pImpl->originalFilename.length() - 4) + "Out.obj"; }
+    }
+    bool success = pImpl->Export(exportName);
+    if (success)
+    {
+      std::cout << "\nFile " << exportName << " exported.";
+    }
+    else { std::cout << "\nExport failed."; }
+    return success;
   }
 
   DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge) const
@@ -134,6 +163,7 @@ namespace MeshRenderer
     bool success = readObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     if (success)
     {
+      originalFilename = filename;
       mtlFilepath = mtlLink;
       success = parseObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     }
@@ -628,28 +658,6 @@ namespace MeshRenderer
   {
     if (pImpl == nullptr) { return false; }
     return pImpl->project(cam, wireframeOut);
-  }
-
-  void DoublyConnectedEdgeList::Run(const std::string& filename)
-  {
-    MeshRenderer::DoublyConnectedEdgeList mesh(filename);
-    std::cout << "\nFilename: " << filename;
-    std::cout << "\nNum. vertices: " << mesh.getNumVertices();
-    std::cout << "\nNum. edges: " << mesh.getNumEdges();
-    std::cout << "\nNum. half-edges: " << mesh.getNumHalfEdges();
-    std::cout << "\nNum. faces: " << mesh.getNumFaces();
-    {
-      std::string logFile = filename + ".log";
-      if (endsWith(filename, ".obj")) { logFile = filename.substr(0, filename.length() - 4) + "Out.obj"; }
-      if (mesh.Export(logFile))
-      {
-        std::cout << "\nFile " << logFile << " exported.";
-      }
-      else { std::cout << "\nExport failed."; }
-    }
-    std::cout << "\n\nPress any key to continue:\n-->  ";
-    std::string dummy = "";
-    std::cin >> dummy;
   }
 
   bool endsWith(const std::string& str, const std::string& suffix)

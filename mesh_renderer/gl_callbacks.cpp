@@ -2,6 +2,8 @@
 #include "gl_callbacks.h"
 
 #include "includes.h"
+#include "camera.h"
+#include "edge_list.h"
 #include "point_cloud.h"
 
 int& GetWindowId()
@@ -21,7 +23,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   ComputationalGeometry::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'R' to redraw, 'E' to export, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -29,12 +31,16 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
-
-  ComputationalGeometry::PointCloud::Get().refresh();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
+  using namespace MeshRenderer;
+  if ((key == 'e') || (key == 'E'))
+  {
+    DoublyConnectedEdgeList::Get().Export();
+    return;
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -43,35 +49,10 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
     return;
   }
-  if ((key == 'p') || (key == 'P'))
+  if ((key == 'r') || (key == 'R'))
   {
-    ComputationalGeometry::PointCloud::Get().togglePointsVisibility();
+    MeshRenderer::Camera cam(DoublyConnectedEdgeList::Get());
   }
-  if ((key == 'c') || (key == 'C'))
-  {
-    ComputationalGeometry::PointCloud::Get().toggleConvexHull();
-  }
-  if ((key == 't') || (key == 'T'))
-  {
-    ComputationalGeometry::PointCloud::Get().toggleTriangulation();
-  }
-  if ((key == 'd') || (key == 'D'))
-  {
-    ComputationalGeometry::PointCloud::Get().toggleDelaunay();
-  }
-  if ((key == 'n') || (key == 'N'))
-  {
-    ComputationalGeometry::PointCloud::Get().toggleNearestNeighbor();
-  }
-  if ((key == 'v') || (key == 'V'))
-  {
-    if (ComputationalGeometry::PointCloud::Get().convexHullIsOn())
-    {
-      ComputationalGeometry::PointCloud::Get().toggleConvexHull();
-    }
-    ComputationalGeometry::PointCloud::Get().toggleVoronoi();
-  }
-  ComputationalGeometry::PointCloud::Get().refresh(false);
   glutPostRedisplay();
 }
 
@@ -79,11 +60,6 @@ void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
-    if (!(ComputationalGeometry::PointCloud::Get().pointsAreOn()))
-    {
-      ComputationalGeometry::PointCloud::Get().togglePointsVisibility();
-    }
-    ComputationalGeometry::PointCloud::Get().refresh();
   }
   glutPostRedisplay();
 }
@@ -108,72 +84,6 @@ void render()
       //P.print("\n");
     }
     glEnd();
-  }
-
-  if (PointCloud::Get().triangulationIsOn())
-  {
-    glColor3f(0.0f, 0.0f, 1.0f);
-    int numTriangles = (int)PointCloud::Get().Triangulation().size();
-
-    for (int i = 0; i < numTriangles; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& tri = PointCloud::Get().Triangulation()[i];
-      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
-      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
-      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().delaunayIsOn())
-  {
-    glColor3f(0.0f, 1.0f, 0.0f);
-    int numTriangles = (int)PointCloud::Get().Delaunay().size();
-
-    for (int i = 0; i < numTriangles; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& tri = PointCloud::Get().Delaunay()[i];
-      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
-      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
-      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().nearestNeighborIsOn())
-  {
-    glColor3f(0.5f, 0.5f, 0.5f);
-    int numEdges = (int)PointCloud::Get().NearestNeighbor().size();
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = PointCloud::Get().NearestNeighbor()[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().voronoiIsOn())
-  {
-    glColor3f(1.0f, 0.647f, 0.0f); // orange
-    int numEdges = (int)PointCloud::Get().Voronoi().size();
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = PointCloud::Get().Voronoi()[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      //P.print("\n");
-      glEnd();
-    }
   }
 
   if (PointCloud::Get().convexHullIsOn())

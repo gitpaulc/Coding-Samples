@@ -24,7 +24,9 @@ namespace MeshRenderer
     public:
       DoublyConnectedEdgeList();
       DoublyConnectedEdgeList(const std::string& filename);
-      bool Export(const std::string& filename) const;
+      static void Create(const std::string& filename);
+      static DoublyConnectedEdgeList& Get();
+      bool Export(const std::string& filename = "") const;
       void getBoundingBox(ComputationalGeometry::point3d& maxCorner, ComputationalGeometry::point3d& minCorner) const;
       int getNumEdges() const;
       int getNumFaces() const;
@@ -32,7 +34,6 @@ namespace MeshRenderer
       int getNumVertices() const;
       /** \brief Project mesh to the screen of the camera. */
       bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
-      static void Run(const std::string& filename);
   };
 }
 

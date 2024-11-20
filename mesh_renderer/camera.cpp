@@ -7,6 +7,25 @@ All Rights Reserved.*/
 
 namespace MeshRenderer
 {
+static int gWindowWidth = 1024;
+static int gWindowHeight = 1024;
+
+static ComputationalGeometry::point2d gWindowMin(-1, -1);
+static ComputationalGeometry::point2d gWindowMax(1, 1);
+
+void SetWindowWidthHeight(int ww, int hh)
+{
+  gWindowWidth = ww;
+  if (hh < 0) { hh = ww; }
+  gWindowHeight = hh;
+}
+
+void GetWindowWidthHeight(int& ww, int& hh)
+{
+  ww = gWindowWidth;
+  hh = gWindowHeight;
+}
+
 
 class Camera::Impl
 {
