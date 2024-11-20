@@ -28,7 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
-    bool project(const Camera&, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const;
+    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -222,15 +222,18 @@ namespace MeshRenderer
     return true;
   }
 
-  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const
+  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
   {
     using namespace ComputationalGeometry;
+    wireframeOut.resize(0);
     point3d eye = cam.getEye();
     std::set<HalfEdgePtr> edgeCache;
     for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
     {
-        if (edgeCache.count(edgeIdx) > 0) { continue; }
-        //HalfEdge&
+      if (edgeCache.count(edgeIdx) > 0) { continue; }
+      edgeCache.insert(edgeIdx);
+      const HalfEdge& halfEdge = halfEdges[edgeIdx];
+      if (halfEdge.reverse != DcelNull) { edgeCache.insert(halfEdge.reverse); }
     }
     return true;
   }
@@ -589,10 +592,10 @@ namespace MeshRenderer
     return (int)(pImpl->vertices.size());
   }
 
-  bool DoublyConnectedEdgeList::project(const Camera& cam, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const
+  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->project(cam, wireframeOut, numEdges);
+    return pImpl->project(cam, wireframeOut);
   }
 
   void DoublyConnectedEdgeList::Run(const std::string& filename)

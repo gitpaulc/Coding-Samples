@@ -31,7 +31,7 @@ namespace MeshRenderer
       int getNumHalfEdges() const;
       int getNumVertices() const;
       /** \brief Project mesh to the screen of the camera. */
-      bool project(const Camera&, ComputationalGeometry::Edge2d* wireframeOut, int& numEdges) const;
+      bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
       static void Run(const std::string& filename);
   };
 }
