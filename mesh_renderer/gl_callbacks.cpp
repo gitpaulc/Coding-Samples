@@ -6,6 +6,13 @@
 #include "edge_list.h"
 #include "primitives.h"
 
+namespace MeshRenderer
+{
+std::vector<ComputationalGeometry::Edge2d> gWireframe;
+bool gPointsHidden = false;
+bool gEdgesHidden = false;
+}
+
 int& GetWindowId()
 {
   static int window_id = -1;
@@ -41,6 +48,11 @@ void keyboard(unsigned char key, int x, int y)
     DoublyConnectedEdgeList::Get().Export();
     return;
   }
+  if ((key == 'h') || (key == 'H'))
+  {
+    gPointsHidden = !gPointsHidden;
+    gEdgesHidden = !gEdgesHidden;
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -51,7 +63,10 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'r') || (key == 'R'))
   {
-    MeshRenderer::Camera cam(DoublyConnectedEdgeList::Get());
+    const auto& mesh = DoublyConnectedEdgeList::Get();
+    Camera cam(mesh);
+    bool success = mesh.project(cam, gWireframe);
+    std::cout << "\nWireframe size = " << gWireframe.size();
   }
   glutPostRedisplay();
 }
@@ -67,39 +82,38 @@ void mouse(int button, int state, int x, int y)
 void render()
 {
   using namespace ComputationalGeometry;
+  using namespace MeshRenderer;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPointSize(3.0f);
-
-  /*if (PointCloud::Get().pointsAreOn())
+    
+  int numEdges = (int)gWireframe.size();
+  if (!gPointsHidden)
   {
     glColor3f(0.0f, 0.0f, 0.0f);
     glBegin(GL_POINTS);
-    int sizPointArray = (int)PointCloud::Get().PointArray().size();
 
-    for (int i = 0; i < sizPointArray; ++i)
+    for (int i = 0; i < numEdges; ++i)
     {
-      const auto& P = PointCloud::Get().PointArray()[i];
+      const auto& P = gWireframe[i].a;
       glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-      //P.print("\n");
     }
     glEnd();
   }
 
-  if (PointCloud::Get().convexHullIsOn())
+  if (!gEdgesHidden)
   {
     glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_LINE_LOOP);
-    int sizPointArray = (int)PointCloud::Get().ConvexHull().size();
 
-    for (int i = 0; i < sizPointArray; ++i)
+    for (int i = 0; i < numEdges; ++i)
     {
-      const auto& P = PointCloud::Get().ConvexHull()[i];
-      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-      //P.print("\n");
+      glBegin(GL_LINE_LOOP);
+      const auto& edge = gWireframe[i];
+      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
+      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
+      glEnd();
     }
-    glEnd();
-  }*/
+  }
 
   glutSwapBuffers();
 }
