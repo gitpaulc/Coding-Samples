@@ -2,7 +2,9 @@
 #include "includes.h"
 #include "primitives.h"
 
+#ifdef POINT_CLOUD_PROJECT
 #include "point_cloud.h"
+#endif // def POINT_CLOUD_PROJECT
 
 #ifdef _WIN32
 #include <algorithm>
@@ -18,6 +20,18 @@
 
 namespace ComputationalGeometry
 {
+
+#ifndef POINT_CLOUD_PROJECT
+  double threshold() { return 1.0e-9; }
+#endif // ndef POINT_CLOUD_PROJECT
+
+
+  template <class T> T safeAbs(const T& arg)
+  {
+    if (arg < 0) { return -arg; }
+    return arg;
+  }
+
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
@@ -62,6 +76,14 @@ namespace ComputationalGeometry
       answer = answer + z * P.z;
     }
     return answer;
+  }
+
+  point3d point3d::cross(const point3d& P) const
+  {
+    auto crossX = y * P.z - z * P.y;
+    auto crossY = z * P.x - x * P.z;
+    auto crossZ = x * P.y - y * P.x;
+    return point3d(crossX, crossY, crossZ);
   }
 
   double point3d::sqDistance(const point3d& P, const point3d& Q)
@@ -575,6 +597,22 @@ namespace ComputationalGeometry
     D = -normal.dot(origin);
   }
 
+  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
+  {
+    Plane3d plan;
+    plan.A = normal.x;
+    plan.B = normal.y;
+    plan.C = normal.z;
+    plan.D = -normal.dot(origin);
+    return plan;
+  }
+
+  bool Plane3d::isInPlane(const point3d& ptIn) const
+  {
+    auto quantity = A * ptIn.x + B * ptIn.y + C * ptIn.z + D;
+    return (safeAbs(quantity) <= threshold());
+  }
+
   bool Plane3d::isValid() const
   {
     point3d normal(A, B, C);
@@ -596,9 +634,82 @@ namespace ComputationalGeometry
     point3d normal(A, B, C);
     auto origin = pointInPlane();
     auto discriminant = normal.dot(point3d(pt.x - origin.x, pt.y - origin.y, pt.z - origin.z));
-    if ((discriminant <= threshold()) && ((-discriminant) <= threshold())) { return 0; }
+    if (safeAbs(discriminant) <= threshold()) { return 0; }
     if (discriminant > threshold()) { return 1; }
     return 2;
+  }
+
+  void Plane3d::getOrthonormalBasis(point3d& e1, point3d& e2) const
+  {
+    auto nn = getNormal();
+    if (safeAbs(nn.x) <= threshold())
+    {
+      e1 = point3d(0, -nn.z, nn.y);
+      e2 = nn.cross(e1);
+      return;
+    }
+    if (safeAbs(nn.y) <= threshold())
+    {
+      e1 = point3d(-nn.z, 0, nn.x);
+      e2 = nn.cross(e1);
+      return;
+    }
+    if (safeAbs(nn.z) <= threshold())
+    {
+      e1 = point3d(-nn.y, nn.x, 0);
+      e2 = nn.cross(e1);
+      return;
+    }
+    point3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
+    auto mag = safeSqrt(f1.sqNorm());
+    e1 = point3d(f1.x / mag, f1.y / mag, f1.z / mag);
+    e2 = nn.cross(e1);
+  }
+
+  point3d Plane3d::getNormal() const
+  {
+    if (!isValid()) { return point3d(0, 0, 0); }
+    auto mag = point3d(A, B, C).sqNorm();
+    mag = safeSqrt(mag);
+    return point3d(A / mag, B / mag, C / mag);
+  }
+
+  point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
+  {
+    point2d xyOut;
+    return getRayCastResult(ray, tVal, pointInPlane(), xyOut, parallel, success);
+  }
+
+  point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, bool& success) const
+  {
+    if (!isValid()) { success = false; return point3d(0, 0, 0); }
+    if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
+    success = true;
+    point3d pp = ray.a;
+    point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
+    const auto nn = getNormal();
+    const auto vDotN = vv.dot(nn);
+    parallel = (safeAbs(vDotN) <= threshold());
+    if (parallel)
+    {
+      success = isInPlane(pp);
+      if (success) { tVal = 0.0; }
+      return pp;
+    }
+    const auto& p0 = origin;
+    const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
+    tVal = -pMinusP0.dot(nn) / vDotN;
+    point3d e1, e2;
+    getOrthonormalBasis(e1, e2);
+    double& ss = xyOut.x;
+    double& rr = xyOut.y;
+    ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
+    rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
+    point3d answer;
+    answer.x = p0.x + ss * e1.x + rr * e2.x;
+    answer.y = p0.y + ss * e1.y + rr * e2.y;
+    answer.z = p0.z + ss * e1.z + rr * e2.z;
+    return answer;
   }
 
   Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)
