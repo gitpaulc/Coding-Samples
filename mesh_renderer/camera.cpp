@@ -122,6 +122,7 @@ Camera::Impl::Impl(Camera* pCamera, const DoublyConnectedEdgeList& mesh) : pCam(
   auto diffZ = (boxMax.z - center.z) * 0.25;
   auto screenZ = boxMin.z - diffZ;
   auto farPlaneZ = boxMax.z + diffZ;
+  eye = point3d(center.x, center.y, screenZ - diffZ);
   screen = Plane3d(point3d(center.x, center.y, screenZ), point3d(center.x + 1.0, center.y, screenZ), point3d(center.x, center.y + 1.0, screenZ));
   farPlane = Plane3d(point3d(center.x, center.y, farPlaneZ), point3d(center.x + 1.0, center.y, farPlaneZ), point3d(center.x, center.y + 1.0, farPlaneZ));
 }

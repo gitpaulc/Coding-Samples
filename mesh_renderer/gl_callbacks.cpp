@@ -8,10 +8,18 @@
 
 namespace MeshRenderer
 {
-std::vector<ComputationalGeometry::Edge2d> gWireframe;
-bool gPointsHidden = false;
-bool gEdgesHidden = false;
+  static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static bool gPointsHidden = false;
+  static bool gEdgesHidden = false;
+
+  // World to viewer:
+  ComputationalGeometry::point3d gOrigin = ComputationalGeometry::point3d(0.0, 0.0, 0.0);
+  double gRot = 0.0; // Rotation parallel to screen.
+  double gYaw = 0.0; // Rotate screen from left to right.
+  double gPitch = 0.0; // Rotate screen up and down.
 }
+
+void recalculate();
 
 int& GetWindowId()
 {
@@ -30,7 +38,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'R' to redraw, 'E' to export, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -38,6 +46,60 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
+
+  recalculate();
+  glutPostRedisplay();
+}
+
+void recalculate()
+{
+  using namespace MeshRenderer;
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  auto cam = MeshRenderer::Camera(mesh);
+  {
+    using namespace ComputationalGeometry;
+    auto eye = cam.getEye();
+    auto screen = cam.getScreen();
+    auto normal = screen.getNormal();
+    Edge3d ray(eye, point3d(eye.x + normal.x, eye.y + normal.y, eye.z + normal.z));
+    double tVal = 0.0;
+    bool parallel = false;
+    bool success = true;
+    auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
+    if (success)
+    {
+      double rr = point3d(screenPt.x - eye.x, screenPt.y - eye.y, screenPt.z - eye.z).sqNorm();
+      if (rr >= 1.0e-9)
+      {
+        rr = sqrt(rr);
+        point3d e1, e2;
+        screen.getOrthonormalBasis(e1, e2);
+        Matrix3d yaw(point3d(1, 0, 0), point3d(0, cos(gYaw), -sin(gYaw)), point3d(0, sin(gYaw), cos(gYaw)));
+        Matrix3d pitch(point3d(cos(gPitch), 0, -sin(gPitch)), point3d(0, 1, 0), point3d(sin(gPitch), 0, cos(gPitch)));
+        normal = pitch * (yaw * normal);
+        screenPt = point3d(eye.x + rr * normal.x, eye.y + rr * normal.y, eye.z + rr * normal.z);
+      }
+    }
+    if (success)
+    {
+      double gZoom = gOrigin.z;
+      eye = ComputationalGeometry::point3d(eye.x + gZoom * normal.x, eye.y + gZoom * normal.y, eye.z + gZoom * normal.z);
+      screenPt = ComputationalGeometry::point3d(screenPt.x + gZoom * normal.x, screenPt.y + gZoom * normal.y, screenPt.z + gZoom * normal.z);
+      screen = ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal);
+      cam.setEye(eye);
+      cam.setScreen(screen);
+    }
+  }
+
+  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe, gRot);
+  for (auto& edge : gWireframe)
+  {
+    edge.a.x -= gOrigin.x;
+    edge.a.y -= gOrigin.y;
+    edge.b.x -= gOrigin.x;
+    edge.b.y -= gOrigin.y;
+  }
+  //std::cout << "\nWireframe size = " << gWireframe.size();
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -61,12 +123,44 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
     return;
   }
-  if ((key == 'r') || (key == 'R'))
+
+  if ((key == 'j') || (key == 'J')) { gOrigin.x -= 0.1; recalculate(); } // Pan left.
+  if ((key == 'l') || (key == 'L')) { gOrigin.x += 0.1; recalculate(); } // Pan right.
+  if ((key == 'i') || (key == 'I')) { gOrigin.y += 0.1; recalculate(); } // Pan up.
+  if ((key == 'k') || (key == 'K')) { gOrigin.y -= 0.1; recalculate(); } // Pan down.
+  if ((key == 'z') || (key == 'Z')) { gOrigin.z += 0.1; recalculate(); } // Zoom in.
+  if ((key == 'y') || (key == 'Y')) { gOrigin.z -= 0.1; recalculate(); } // Zoom out.
+
+  const double fullAngle = 2.0 * 3.14159;
+  if ((key == 'r') || (key == 'R')) // Rotate clockwise.
   {
-    const auto& mesh = DoublyConnectedEdgeList::Get();
-    Camera cam(mesh);
-    bool success = mesh.project(cam, gWireframe);
-    std::cout << "\nWireframe size = " << gWireframe.size();
+    gRot += 0.1;  if (gRot >= fullAngle) { gRot -= fullAngle; }
+    recalculate();
+  }
+  if ((key == 't') || (key == 'T')) // Rotate counter-clockwise.
+  {
+    gRot -= 0.1;  if (gRot <= -fullAngle) { gRot += fullAngle; }
+    recalculate();
+  }
+  if ((key == 'a') || (key == 'A')) // Rotate yaw.
+  {
+    gYaw += 0.1;  if (gYaw >= fullAngle) { gYaw -= fullAngle; }
+    recalculate();
+  }
+  if ((key == 'd') || (key == 'D')) // Rotate yaw.
+  {
+    gYaw -= 0.1;  if (gYaw <= -fullAngle) { gYaw += fullAngle; }
+    recalculate();
+  }
+  if ((key == 'w') || (key == 'W')) // Rotate pitch.
+  {
+    gPitch += 0.1;  if (gPitch >= fullAngle) { gPitch -= fullAngle; }
+    recalculate();
+  }
+  if ((key == 's') || (key == 'S')) // Rotate counter-clockwise.
+  {
+    gPitch -= 0.1;  if (gPitch <= -fullAngle) { gPitch += fullAngle; }
+    recalculate();
   }
   glutPostRedisplay();
 }

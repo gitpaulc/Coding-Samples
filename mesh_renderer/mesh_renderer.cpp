@@ -6,7 +6,6 @@ All Rights Reserved.*/
 #include "includes.h"
 #include "camera.h"
 #include "edge_list.h"
-//#include "point_cloud.h"
 
 #ifdef USE_OPEN_CV
 #include "create_video.h"
@@ -48,6 +47,9 @@ int main(int argc, char **argv)
     std::cin >> filename;
     return 0;
   }
+
+  std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.\n";
+  std::cout << "Rotation: Press R to rotate clockwise, T counter-clockwise. W, A, S, and D to rotate screen.\n";
 
   MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));

@@ -597,6 +597,16 @@ namespace ComputationalGeometry
     D = -normal.dot(origin);
   }
 
+  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
+  {
+    Plane3d plan;
+    plan.A = normal.x;
+    plan.B = normal.y;
+    plan.C = normal.z;
+    plan.D = -normal.dot(origin);
+    return plan;
+  }
+
   bool Plane3d::isInPlane(const point3d& ptIn) const
   {
     auto quantity = A * ptIn.x + B * ptIn.y + C * ptIn.z + D;

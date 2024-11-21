@@ -28,7 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
-    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
+    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -257,7 +257,8 @@ namespace MeshRenderer
     return true;
   }
 
-  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
+  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam,
+    std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
   {
     using namespace ComputationalGeometry;
     wireframeOut.resize(0);
@@ -295,6 +296,12 @@ namespace MeshRenderer
       if (tValB < 0.0) { continue; }
       // If projected pt is between screen and eye:
       if (tValB > 1.0) { continue; }
+      double xyA_x = xyA.x; double xyA_y = xyA.y;
+      xyA.x = cos(theta) * xyA_x + sin(theta) * xyA_y;
+      xyA.y = -sin(theta) * xyA_x + cos(theta) * xyA_y;
+      double xyB_x = xyB.x; double xyB_y = xyB.y;
+      xyB.x = cos(theta) * xyB_x + sin(theta) * xyB_y;
+      xyB.y = -sin(theta) * xyB_x + cos(theta) * xyB_y;
       Edge2d projected(xyA, xyB);
       wireframeOut.push_back(projected);
     }
@@ -462,12 +469,12 @@ namespace MeshRenderer
       {
         halfEdge.prev = size0 + faceBufferSize - 1;
       }
-      else { halfEdge.prev = halfEdges.size() - 1; }
+      else { halfEdge.prev = (int)halfEdges.size() - 1; }
       if (ind1 == 0)
       {
         halfEdge.next = size0;
       }
-      else { halfEdge.next = halfEdges.size() + 1; }
+      else { halfEdge.next = (int)halfEdges.size() + 1; }
       // Fix reverse if applicable.
       {
         std::pair<int, int> edgeReverse;
@@ -655,10 +662,10 @@ namespace MeshRenderer
     return (int)(pImpl->vertices.size());
   }
 
-  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
+  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->project(cam, wireframeOut);
+    return pImpl->project(cam, wireframeOut, theta);
   }
 
   bool endsWith(const std::string& str, const std::string& suffix)

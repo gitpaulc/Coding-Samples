@@ -149,6 +149,7 @@ public:
   double C = 1;
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+  static Plane3d fromPointAndNormal(const point3d& origin, const point3d& normal);
   __host__ __device__ bool isInPlane(const point3d&) const;
   __host__ __device__ bool isValid() const;
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
