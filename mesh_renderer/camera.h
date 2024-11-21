@@ -14,6 +14,9 @@ namespace MeshRenderer
 {
 class DoublyConnectedEdgeList; // Mesh.
 
+void SetWindowWidthHeight(int ww, int hh = -1);
+void GetWindowWidthHeight(int& ww, int& hh);
+
 class Camera
 {
   ComputationalGeometry::Plane3d getFarPlane() const;

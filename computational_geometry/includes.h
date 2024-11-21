@@ -13,6 +13,7 @@ All Rights Reserved.*/
 #include <time.h>       // time function
 #include <math.h>       // atan2 function
 
+#define POINT_CLOUD_PROJECT
 //#define USE_OPEN_CV
 
 /*  OpenGL */

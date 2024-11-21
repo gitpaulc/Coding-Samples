@@ -7,6 +7,25 @@ All Rights Reserved.*/
 
 namespace MeshRenderer
 {
+static int gWindowWidth = 1024;
+static int gWindowHeight = 1024;
+
+static ComputationalGeometry::point2d gWindowMin(-1, -1);
+static ComputationalGeometry::point2d gWindowMax(1, 1);
+
+void SetWindowWidthHeight(int ww, int hh)
+{
+  gWindowWidth = ww;
+  if (hh < 0) { hh = ww; }
+  gWindowHeight = hh;
+}
+
+void GetWindowWidthHeight(int& ww, int& hh)
+{
+  ww = gWindowWidth;
+  hh = gWindowHeight;
+}
+
 
 class Camera::Impl
 {
@@ -103,6 +122,7 @@ Camera::Impl::Impl(Camera* pCamera, const DoublyConnectedEdgeList& mesh) : pCam(
   auto diffZ = (boxMax.z - center.z) * 0.25;
   auto screenZ = boxMin.z - diffZ;
   auto farPlaneZ = boxMax.z + diffZ;
+  eye = point3d(center.x, center.y, screenZ - diffZ);
   screen = Plane3d(point3d(center.x, center.y, screenZ), point3d(center.x + 1.0, center.y, screenZ), point3d(center.x, center.y + 1.0, screenZ));
   farPlane = Plane3d(point3d(center.x, center.y, farPlaneZ), point3d(center.x + 1.0, center.y, farPlaneZ), point3d(center.x, center.y + 1.0, farPlaneZ));
 }

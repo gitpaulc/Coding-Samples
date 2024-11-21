@@ -2,7 +2,9 @@
 #include "includes.h"
 #include "primitives.h"
 
+#ifdef POINT_CLOUD_PROJECT
 #include "point_cloud.h"
+#endif // def POINT_CLOUD_PROJECT
 
 #ifdef _WIN32
 #include <algorithm>
@@ -18,6 +20,12 @@
 
 namespace ComputationalGeometry
 {
+
+#ifndef POINT_CLOUD_PROJECT
+  double threshold() { return 1.0e-9; }
+#endif // ndef POINT_CLOUD_PROJECT
+
+
   template <class T> T safeAbs(const T& arg)
   {
     if (arg < 0) { return -arg; }
@@ -589,6 +597,16 @@ namespace ComputationalGeometry
     D = -normal.dot(origin);
   }
 
+  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
+  {
+    Plane3d plan;
+    plan.A = normal.x;
+    plan.B = normal.y;
+    plan.C = normal.z;
+    plan.D = -normal.dot(origin);
+    return plan;
+  }
+
   bool Plane3d::isInPlane(const point3d& ptIn) const
   {
     auto quantity = A * ptIn.x + B * ptIn.y + C * ptIn.z + D;
@@ -658,7 +676,14 @@ namespace ComputationalGeometry
 
   point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
   {
+    point2d xyOut;
+    return getRayCastResult(ray, tVal, pointInPlane(), xyOut, parallel, success);
+  }
+
+  point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, bool& success) const
+  {
     if (!isValid()) { success = false; return point3d(0, 0, 0); }
+    if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
     success = true;
     point3d pp = ray.a;
     point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
@@ -671,13 +696,15 @@ namespace ComputationalGeometry
       if (success) { tVal = 0.0; }
       return pp;
     }
-    const auto p0 = pointInPlane();
+    const auto& p0 = origin;
     const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
     tVal = -pMinusP0.dot(nn) / vDotN;
     point3d e1, e2;
     getOrthonormalBasis(e1, e2);
-    double ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
-    double rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
+    double& ss = xyOut.x;
+    double& rr = xyOut.y;
+    ss = pMinusP0.dot(e1) + tVal * vv.dot(e1);
+    rr = pMinusP0.dot(e2) + tVal * vv.dot(e2);
     point3d answer;
     answer.x = p0.x + ss * e1.x + rr * e2.x;
     answer.y = p0.y + ss * e1.y + rr * e2.y;

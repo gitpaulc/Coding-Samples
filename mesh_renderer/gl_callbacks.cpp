@@ -2,7 +2,24 @@
 #include "gl_callbacks.h"
 
 #include "includes.h"
-#include "point_cloud.h"
+#include "camera.h"
+#include "edge_list.h"
+#include "primitives.h"
+
+namespace MeshRenderer
+{
+  static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static bool gPointsHidden = false;
+  static bool gEdgesHidden = false;
+
+  // World to viewer:
+  ComputationalGeometry::point3d gOrigin = ComputationalGeometry::point3d(0.0, 0.0, 0.0);
+  double gRot = 0.0; // Rotation parallel to screen.
+  double gYaw = 0.0; // Rotate screen from left to right.
+  double gPitch = 0.0; // Rotate screen up and down.
+}
+
+void recalculate();
 
 int& GetWindowId()
 {
@@ -18,10 +35,10 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutInitWindowPosition(-1, -1);
   int ww = 0;
   int hh = 0;
-  ComputationalGeometry::GetWindowWidthHeight(ww, hh);
+  MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Computational Geometry - Paul Cernea - 'D' Delaunay, 'V' Voronoi, 'N' Nearest Neighbor, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -30,11 +47,74 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
 
-  ComputationalGeometry::PointCloud::Get().refresh();
+  recalculate();
+  glutPostRedisplay();
+}
+
+void recalculate()
+{
+  using namespace MeshRenderer;
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  auto cam = MeshRenderer::Camera(mesh);
+  {
+    using namespace ComputationalGeometry;
+    auto eye = cam.getEye();
+    auto screen = cam.getScreen();
+    auto normal = screen.getNormal();
+    Edge3d ray(eye, point3d(eye.x + normal.x, eye.y + normal.y, eye.z + normal.z));
+    double tVal = 0.0;
+    bool parallel = false;
+    bool success = true;
+    auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
+    if (success)
+    {
+      double rr = point3d(screenPt.x - eye.x, screenPt.y - eye.y, screenPt.z - eye.z).sqNorm();
+      if (rr >= 1.0e-9)
+      {
+        rr = sqrt(rr);
+        point3d e1, e2;
+        screen.getOrthonormalBasis(e1, e2);
+        Matrix3d yaw(point3d(1, 0, 0), point3d(0, cos(gYaw), -sin(gYaw)), point3d(0, sin(gYaw), cos(gYaw)));
+        Matrix3d pitch(point3d(cos(gPitch), 0, -sin(gPitch)), point3d(0, 1, 0), point3d(sin(gPitch), 0, cos(gPitch)));
+        normal = pitch * (yaw * normal);
+        screenPt = point3d(eye.x + rr * normal.x, eye.y + rr * normal.y, eye.z + rr * normal.z);
+      }
+    }
+    if (success)
+    {
+      double gZoom = gOrigin.z;
+      eye = ComputationalGeometry::point3d(eye.x + gZoom * normal.x, eye.y + gZoom * normal.y, eye.z + gZoom * normal.z);
+      screenPt = ComputationalGeometry::point3d(screenPt.x + gZoom * normal.x, screenPt.y + gZoom * normal.y, screenPt.z + gZoom * normal.z);
+      screen = ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal);
+      cam.setEye(eye);
+      cam.setScreen(screen);
+    }
+  }
+
+  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe, gRot);
+  for (auto& edge : gWireframe)
+  {
+    edge.a.x -= gOrigin.x;
+    edge.a.y -= gOrigin.y;
+    edge.b.x -= gOrigin.x;
+    edge.b.y -= gOrigin.y;
+  }
+  //std::cout << "\nWireframe size = " << gWireframe.size();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
+  using namespace MeshRenderer;
+  if ((key == 'e') || (key == 'E'))
+  {
+    DoublyConnectedEdgeList::Get().Export();
+    return;
+  }
+  if ((key == 'h') || (key == 'H'))
+  {
+    gPointsHidden = !gPointsHidden;
+    gEdgesHidden = !gEdgesHidden;
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -43,35 +123,45 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
     return;
   }
-  if ((key == 'p') || (key == 'P'))
+
+  if ((key == 'j') || (key == 'J')) { gOrigin.x -= 0.1; recalculate(); } // Pan left.
+  if ((key == 'l') || (key == 'L')) { gOrigin.x += 0.1; recalculate(); } // Pan right.
+  if ((key == 'i') || (key == 'I')) { gOrigin.y += 0.1; recalculate(); } // Pan up.
+  if ((key == 'k') || (key == 'K')) { gOrigin.y -= 0.1; recalculate(); } // Pan down.
+  if ((key == 'z') || (key == 'Z')) { gOrigin.z += 0.1; recalculate(); } // Zoom in.
+  if ((key == 'y') || (key == 'Y')) { gOrigin.z -= 0.1; recalculate(); } // Zoom out.
+
+  const double fullAngle = 2.0 * 3.14159;
+  if ((key == 'r') || (key == 'R')) // Rotate clockwise.
   {
-    ComputationalGeometry::PointCloud::Get().togglePointsVisibility();
+    gRot += 0.1;  if (gRot >= fullAngle) { gRot -= fullAngle; }
+    recalculate();
   }
-  if ((key == 'c') || (key == 'C'))
+  if ((key == 't') || (key == 'T')) // Rotate counter-clockwise.
   {
-    ComputationalGeometry::PointCloud::Get().toggleConvexHull();
+    gRot -= 0.1;  if (gRot <= -fullAngle) { gRot += fullAngle; }
+    recalculate();
   }
-  if ((key == 't') || (key == 'T'))
+  if ((key == 'a') || (key == 'A')) // Rotate yaw.
   {
-    ComputationalGeometry::PointCloud::Get().toggleTriangulation();
+    gYaw += 0.1;  if (gYaw >= fullAngle) { gYaw -= fullAngle; }
+    recalculate();
   }
-  if ((key == 'd') || (key == 'D'))
+  if ((key == 'd') || (key == 'D')) // Rotate yaw.
   {
-    ComputationalGeometry::PointCloud::Get().toggleDelaunay();
+    gYaw -= 0.1;  if (gYaw <= -fullAngle) { gYaw += fullAngle; }
+    recalculate();
   }
-  if ((key == 'n') || (key == 'N'))
+  if ((key == 'w') || (key == 'W')) // Rotate pitch.
   {
-    ComputationalGeometry::PointCloud::Get().toggleNearestNeighbor();
+    gPitch += 0.1;  if (gPitch >= fullAngle) { gPitch -= fullAngle; }
+    recalculate();
   }
-  if ((key == 'v') || (key == 'V'))
+  if ((key == 's') || (key == 'S')) // Rotate counter-clockwise.
   {
-    if (ComputationalGeometry::PointCloud::Get().convexHullIsOn())
-    {
-      ComputationalGeometry::PointCloud::Get().toggleConvexHull();
-    }
-    ComputationalGeometry::PointCloud::Get().toggleVoronoi();
+    gPitch -= 0.1;  if (gPitch <= -fullAngle) { gPitch += fullAngle; }
+    recalculate();
   }
-  ComputationalGeometry::PointCloud::Get().refresh(false);
   glutPostRedisplay();
 }
 
@@ -79,11 +169,6 @@ void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
-    if (!(ComputationalGeometry::PointCloud::Get().pointsAreOn()))
-    {
-      ComputationalGeometry::PointCloud::Get().togglePointsVisibility();
-    }
-    ComputationalGeometry::PointCloud::Get().refresh();
   }
   glutPostRedisplay();
 }
@@ -91,104 +176,37 @@ void mouse(int button, int state, int x, int y)
 void render()
 {
   using namespace ComputationalGeometry;
+  using namespace MeshRenderer;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPointSize(3.0f);
-
-  if (PointCloud::Get().pointsAreOn())
+    
+  int numEdges = (int)gWireframe.size();
+  if (!gPointsHidden)
   {
     glColor3f(0.0f, 0.0f, 0.0f);
     glBegin(GL_POINTS);
-    int sizPointArray = (int)PointCloud::Get().PointArray().size();
 
-    for (int i = 0; i < sizPointArray; ++i)
+    for (int i = 0; i < numEdges; ++i)
     {
-      const auto& P = PointCloud::Get().PointArray()[i];
+      const auto& P = gWireframe[i].a;
       glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-      //P.print("\n");
     }
     glEnd();
   }
 
-  if (PointCloud::Get().triangulationIsOn())
-  {
-    glColor3f(0.0f, 0.0f, 1.0f);
-    int numTriangles = (int)PointCloud::Get().Triangulation().size();
-
-    for (int i = 0; i < numTriangles; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& tri = PointCloud::Get().Triangulation()[i];
-      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
-      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
-      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().delaunayIsOn())
-  {
-    glColor3f(0.0f, 1.0f, 0.0f);
-    int numTriangles = (int)PointCloud::Get().Delaunay().size();
-
-    for (int i = 0; i < numTriangles; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& tri = PointCloud::Get().Delaunay()[i];
-      glVertex2f((GLfloat)tri.a.x, (GLfloat)tri.a.y);
-      glVertex2f((GLfloat)tri.b.x, (GLfloat)tri.b.y);
-      glVertex2f((GLfloat)tri.c.x, (GLfloat)tri.c.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().nearestNeighborIsOn())
-  {
-    glColor3f(0.5f, 0.5f, 0.5f);
-    int numEdges = (int)PointCloud::Get().NearestNeighbor().size();
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = PointCloud::Get().NearestNeighbor()[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().voronoiIsOn())
-  {
-    glColor3f(1.0f, 0.647f, 0.0f); // orange
-    int numEdges = (int)PointCloud::Get().Voronoi().size();
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = PointCloud::Get().Voronoi()[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      //P.print("\n");
-      glEnd();
-    }
-  }
-
-  if (PointCloud::Get().convexHullIsOn())
+  if (!gEdgesHidden)
   {
     glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_LINE_LOOP);
-    int sizPointArray = (int)PointCloud::Get().ConvexHull().size();
 
-    for (int i = 0; i < sizPointArray; ++i)
+    for (int i = 0; i < numEdges; ++i)
     {
-      const auto& P = PointCloud::Get().ConvexHull()[i];
-      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-      //P.print("\n");
+      glBegin(GL_LINE_LOOP);
+      const auto& edge = gWireframe[i];
+      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
+      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
+      glEnd();
     }
-    glEnd();
   }
 
   glutSwapBuffers();

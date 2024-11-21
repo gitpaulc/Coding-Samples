@@ -149,6 +149,7 @@ public:
   double C = 1;
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
+  static Plane3d fromPointAndNormal(const point3d& origin, const point3d& normal);
   __host__ __device__ bool isInPlane(const point3d&) const;
   __host__ __device__ bool isValid() const;
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
@@ -163,10 +164,15 @@ public:
    *  ray.a is the source of the ray, ray.b is the endpoint.
    *  Given the vector V = (ray.b - ray.a), outputs the t-value such that
    *  Q = ray.a + t x V.
+   *  The origin must be in the plane. xyOut is the coords of Q.
    *  Outputs parallel if the ray is parallel to the plane, in which case
-   *  success occurs if and only if the ray's origin ray.a is in the plane.
-   *  If t is negative this can be interpreted as failure.
+   *  success occurs if and only if the ray's origin ray.a is in the plane
+   *  and the inputted origin is in the plane.
+   *  If t is negative it can be considered failure, but will not affect
+   *  the success output boolean.
    */
+  __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, bool& success) const;
+  /** \brief Uses arbitrary origin. */
   __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const;
 };
 

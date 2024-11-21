@@ -5,8 +5,9 @@ All Rights Reserved.*/
 #include <map>
 #include <sstream>
 
+#include "camera.h"
 #include "edge_list.h"
-#include "point_cloud.h"
+#include "primitives.h"
 
 const int DcelNull = -1;
 
@@ -27,6 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
+    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -62,7 +64,6 @@ namespace MeshRenderer
       bool hasTexture = false;
       /** \brief The half-edge with this vertex as source. */
       HalfEdgePtr halfEdgeFrom = DcelNull;
-      int ID = -1;
     };
     typedef int VertexPtr;
     struct Face;
@@ -83,7 +84,7 @@ namespace MeshRenderer
       HalfEdgePtr next = DcelNull;
     };
     /** \brief The vertex which is the destination of this half-edge. */
-    VertexPtr getDest(const HalfEdge&);
+    VertexPtr getDest(const HalfEdge&) const;
     struct Face
     {
       /** \brief A half-edge on (the inner portion of) this face's outer boundary. */
@@ -94,6 +95,7 @@ namespace MeshRenderer
     std::vector<HalfEdge> halfEdges;
     std::vector<Face> faces;
 
+    std::string originalFilename = "";
     std::string mtlFilepath = "";
   };
 
@@ -107,14 +109,47 @@ namespace MeshRenderer
   {
   }
 
+  static DoublyConnectedEdgeList sMesh;
+  void DoublyConnectedEdgeList::Create(const std::string& filename)
+  {
+    sMesh = DoublyConnectedEdgeList(filename);
+    std::cout << "\nFilename: " << filename;
+    std::cout << "\nNum. vertices: " << sMesh.getNumVertices();
+    std::cout << "\nNum. edges: " << sMesh.getNumEdges();
+    std::cout << "\nNum. half-edges: " << sMesh.getNumHalfEdges();
+    std::cout << "\nNum. faces: " << sMesh.getNumFaces();
+    std::cout << "\n\n";
+  }
+
+  DoublyConnectedEdgeList& DoublyConnectedEdgeList::Get()
+  {
+    return sMesh;
+  }
+
   bool DoublyConnectedEdgeList::Export(const std::string& filename) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->Export(filename);
+    std::string exportName = filename;
+    if (filename.empty())
+    {
+      exportName = pImpl->originalFilename + ".log";
+      if (endsWith(pImpl->originalFilename, ".obj")) { exportName = pImpl->originalFilename.substr(0, pImpl->originalFilename.length() - 4) + "Out.obj"; }
+    }
+    bool success = pImpl->Export(exportName);
+    if (success)
+    {
+      std::cout << "\nFile " << exportName << " exported.";
+    }
+    else { std::cout << "\nExport failed."; }
+    return success;
   }
 
-  DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge)
+  DoublyConnectedEdgeList::Impl::VertexPtr DoublyConnectedEdgeList::Impl::getDest(const HalfEdge& halfEdge) const
   {
+    if (halfEdge.next != DcelNull)
+    {
+      return halfEdges[halfEdge.next].source;
+    }
     if (halfEdge.reverse == DcelNull) { return DcelNull; }
     return halfEdges[halfEdge.reverse].source;
   }
@@ -129,6 +164,7 @@ namespace MeshRenderer
     bool success = readObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     if (success)
     {
+      originalFilename = filename;
       mtlFilepath = mtlLink;
       success = parseObj(filename, mtlLink, vertexBuffer, vertexNormals, vertexTextures, faceBuffer);
     }
@@ -218,6 +254,57 @@ namespace MeshRenderer
       obj << faceStrm.str();
     }
     obj << "\n\n# " << faces.size() << " faces in all.\n";
+    return true;
+  }
+
+  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam,
+    std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
+  {
+    using namespace ComputationalGeometry;
+    wireframeOut.resize(0);
+    point3d eye = cam.getEye();
+    Plane3d screen = cam.getScreen();
+    point3d screenO = screen.pointInPlane();
+    std::set<HalfEdgePtr> edgeCache;
+    for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
+    {
+      if (edgeCache.count(edgeIdx) > 0) { continue; }
+      //edgeCache.insert(edgeIdx); // Unnecessary.
+      const HalfEdge& halfEdge = halfEdges[edgeIdx];
+      if (halfEdge.reverse != DcelNull) { edgeCache.insert(halfEdge.reverse); }
+      if (halfEdge.source < 0) { continue; }
+      if (halfEdge.source >= (int)(vertices.size())) { continue; }
+      VertexPtr halfEdgeDest = getDest(halfEdge);
+      if (halfEdgeDest < 0) { continue; }
+      if (halfEdgeDest >= (int)(vertices.size())) { continue; }
+      const Vertex& vertexA = vertices[halfEdge.source];
+      const Vertex& vertexB = vertices[halfEdgeDest];
+      Edge3d rayA(eye, vertexA.coords);
+      Edge3d rayB(eye, vertexB.coords);
+      point2d xyA, xyB;
+      double tValA = 0.0;
+      double tValB = 0.0;
+      bool parallel = false;
+      bool success = true;
+      point3d interceptA = screen.getRayCastResult(rayA, tValA, screenO, xyA, parallel, success);
+      if (!success) { continue; }
+      if (tValA < 0.0) { continue; }
+      // If projected pt is between screen and eye:
+      if (tValA > 1.0) { continue; }
+      point3d interceptB = screen.getRayCastResult(rayB, tValB, screenO, xyB, parallel, success);
+      if (!success) { continue; }
+      if (tValB < 0.0) { continue; }
+      // If projected pt is between screen and eye:
+      if (tValB > 1.0) { continue; }
+      double xyA_x = xyA.x; double xyA_y = xyA.y;
+      xyA.x = cos(theta) * xyA_x + sin(theta) * xyA_y;
+      xyA.y = -sin(theta) * xyA_x + cos(theta) * xyA_y;
+      double xyB_x = xyB.x; double xyB_y = xyB.y;
+      xyB.x = cos(theta) * xyB_x + sin(theta) * xyB_y;
+      xyB.y = -sin(theta) * xyB_x + cos(theta) * xyB_y;
+      Edge2d projected(xyA, xyB);
+      wireframeOut.push_back(projected);
+    }
     return true;
   }
 
@@ -382,12 +469,12 @@ namespace MeshRenderer
       {
         halfEdge.prev = size0 + faceBufferSize - 1;
       }
-      else { halfEdge.prev = halfEdges.size() - 1; }
+      else { halfEdge.prev = (int)halfEdges.size() - 1; }
       if (ind1 == 0)
       {
         halfEdge.next = size0;
       }
-      else { halfEdge.next = halfEdges.size() + 1; }
+      else { halfEdge.next = (int)halfEdges.size() + 1; }
       // Fix reverse if applicable.
       {
         std::pair<int, int> edgeReverse;
@@ -432,7 +519,6 @@ namespace MeshRenderer
       vertex.coords.z = std::stod(coord);
     }
     catch (...) { success = false; }
-    if (success) { vertex.ID = i; }
     return success;
   }
 
@@ -576,26 +662,10 @@ namespace MeshRenderer
     return (int)(pImpl->vertices.size());
   }
 
-  void DoublyConnectedEdgeList::Run(const std::string& filename)
+  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
   {
-    MeshRenderer::DoublyConnectedEdgeList mesh(filename);
-    std::cout << "\nFilename: " << filename;
-    std::cout << "\nNum. vertices: " << mesh.getNumVertices();
-    std::cout << "\nNum. edges: " << mesh.getNumEdges();
-    std::cout << "\nNum. half-edges: " << mesh.getNumHalfEdges();
-    std::cout << "\nNum. faces: " << mesh.getNumFaces();
-    {
-      std::string logFile = filename + ".log";
-      if (endsWith(filename, ".obj")) { logFile = filename.substr(0, filename.length() - 4) + "Out.obj"; }
-      if (mesh.Export(logFile))
-      {
-        std::cout << "\nFile " << logFile << " exported.";
-      }
-      else { std::cout << "\nExport failed."; }
-    }
-    std::cout << "\n\nPress any key to continue:\n-->  ";
-    std::string dummy = "";
-    std::cin >> dummy;
+    if (pImpl == nullptr) { return false; }
+    return pImpl->project(cam, wireframeOut, theta);
   }
 
   bool endsWith(const std::string& str, const std::string& suffix)

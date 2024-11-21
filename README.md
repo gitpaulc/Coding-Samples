@@ -67,3 +67,11 @@
 
 * Besides the Django service, the `computational_biology` folder contains a CUDA computational biology implementation. See the CUDA and CMake instructions as listed above.
 * Although the typical longest common substring algorithm does not leave a lot of room for parallelization, nevertheless parallel preprocessing can be performed. The longest common substring of N strings is at most as long as the LCS of any two of the strings. So by computing the smallest LCS of all pairs in parallel, we can obtain a bound to speed up the algorithm.
+
+**Mesh Renderer.**
+
+* Build in mesh_renderer folder. Use CMake to generate a VS project file, a sample is included.
+* Usage: mesh_renderer.exe <path to .obj file>
+* Press E to export the loaded mesh if desired, Q to exit the app.
+* Navigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.
+* Rotation: R = rotate clockwise, T = rotate counter-clockwise. W, A, S, and D to rotate the screen.

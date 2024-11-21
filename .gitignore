@@ -41,3 +41,24 @@ computational_biology/Release
 
 image_output/*.png
 video_output/*.avi
+
+mesh_renderer/*.exe
+mesh_renderer/MeshRenderer/.vs
+
+mesh_renderer/MeshRenderer/CMakeCache.txt
+mesh_renderer/MeshRenderer/CMakeFiles/
+mesh_renderer/MeshRenderer/cmake_install.cmake
+
+mesh_renderer/MeshRenderer/MeshRend.*
+mesh_renderer/MeshRenderer/MeshRenderer.dir/
+mesh_renderer/MeshRenderer/Debug
+mesh_renderer/MeshRenderer/freeglut/bin
+mesh_renderer/MeshRenderer/freeglut/include
+mesh_renderer/MeshRenderer/freeglut/lib
+mesh_renderer/MeshRenderer/freeglut/Copying.txt
+mesh_renderer/MeshRenderer/freeglut/Readme.txt
+mesh_renderer/MeshRenderer/opencv
+mesh_renderer/MeshRenderer/Release
+mesh_renderer/MeshRenderer/RelWithDebInfo
+mesh_renderer/MeshRenderer/RelWithDebugInfo
+mesh_renderer/MeshRenderer/x64

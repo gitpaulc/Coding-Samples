@@ -6,7 +6,6 @@ All Rights Reserved.*/
 #include "includes.h"
 #include "camera.h"
 #include "edge_list.h"
-#include "point_cloud.h"
 
 #ifdef USE_OPEN_CV
 #include "create_video.h"
@@ -23,9 +22,9 @@ int main(int argc, char **argv)
   }
 #endif // def USE_OPEN_CV
 #ifdef __APPLE__
-  ComputationalGeometry::SetWindowWidthHeight(1024);
+  MeshRenderer::SetWindowWidthHeight(1024);
 #else
-  ComputationalGeometry::SetWindowWidthHeight(750);
+  MeshRenderer::SetWindowWidthHeight(750);
 #endif
   std::string filename = "";
   if (argc < 2)
@@ -49,12 +48,13 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  MeshRenderer::DoublyConnectedEdgeList::Run(filename);
-  MeshRenderer::Camera cam;
+  std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.\n";
+  std::cout << "Rotation: Press R to rotate clockwise, T counter-clockwise. W, A, S, and D to rotate screen.\n";
 
+  MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));
-  //initialize_glut(&argc, argv);
-  //glutMainLoop();
+  initialize_glut(&argc, argv);
+  glutMainLoop();
 
   return 0;
 }
