@@ -21,8 +21,6 @@ All Rights Reserved.*/
 #define __constant__
 #endif // def USE_CUDA
 
-//#define USE_VIRTUAL_FUNC_POINT2D
-
 namespace ComputationalGeometry
 {
 
@@ -32,9 +30,6 @@ public:
     double x;  double y;  double z;
     __host__ __device__ point3d();
     __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     /** \brief Necessary for set insertion to work. */
     bool operator< (const point3d& q) const;
     void print(const std::string& prequel = "") const;
@@ -52,9 +47,6 @@ class point2d : public point3d
 public:
     __host__ __device__ point2d();
     __host__ __device__ point2d(const double& xx, const double& yy);
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    virtual int GetDimension() const; // Causes a crash when managing memory with malloc.
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
     __host__ __device__ double orientation(const point2d& Q, const point2d& O = point2d()) const;
     static bool comparator(const point2d& P, const point2d& Q);

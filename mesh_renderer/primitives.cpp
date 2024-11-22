@@ -35,20 +35,12 @@ namespace ComputationalGeometry
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-  int point3d::GetDimension() const { return 3; }
-#endif // def USE_VIRTUAL_FUNC_POINT2D
-
   bool point3d::operator< (const point3d& q) const
   {
     if (x > q.x) {return false;}
     if (x < q.x) {return true;}
     if (y > q.y) {return false;}
     if (y < q.y) {return true;}
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if (GetDimension() <= 2) { return false; }
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     if (z > q.z) {return false;}
     if (z < q.z) {return true;}
     return false;
@@ -57,21 +49,13 @@ namespace ComputationalGeometry
   void point3d::print(const std::string& prequel) const
   {
     std::cout << prequel << "(" << x << ", " << y;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if (GetDimension() > 2) { std::cout << ", " << z; }
-#else
     std::cout << ", " << z;
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     std::cout << ")";
   }
 
   double point3d::dot(const point3d& P) const
   {
     double answer = x * P.x + y * P.y;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if ((GetDimension() > 2) || (P.GetDimension() > 2))
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     {
       answer = answer + z * P.z;
     }
@@ -99,10 +83,6 @@ namespace ComputationalGeometry
     answer = answer + dt * dt;
     dt = (P.y - Q.y);
     answer = answer + dt * dt;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if ((P.GetDimension() > 2) || (Q.GetDimension() > 2))
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     {
       dt = (P.z - Q.z);
       answer = answer + dt * dt;
@@ -115,10 +95,6 @@ namespace ComputationalGeometry
 
   point2d::point2d() : point3d(0, 0, 0) {}
   point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
-
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-  int point2d::GetDimension() const { return 2; }
-#endif // def USE_VIRTUAL_FUNC_POINT2D
 
   double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
