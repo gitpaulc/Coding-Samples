@@ -33,6 +33,7 @@ namespace ComputationalGeometry
 
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
+  point3d::point3d(const point2d& P) : x(P.x), y(P.y), z(0) {}
 
   bool point3d::operator< (const point3d& q) const
   {

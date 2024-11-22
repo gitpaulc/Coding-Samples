@@ -23,13 +23,14 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
-
+class point2d;
 class point3d
 {
 public:
   double x;  double y;  double z;
   __host__ __device__ point3d();
   __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
+  __host__ __device__ point3d(const point2d& P);
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point3d& q) const;
   void print(const std::string& prequel = "") const;
