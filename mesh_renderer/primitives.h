@@ -27,30 +27,39 @@ namespace ComputationalGeometry
 class point3d
 {
 public:
-    double x;  double y;  double z;
-    __host__ __device__ point3d();
-    __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
-    /** \brief Necessary for set insertion to work. */
-    bool operator< (const point3d& q) const;
-    void print(const std::string& prequel = "") const;
-    __host__ __device__ double dot(const point3d& P) const;
-    /** \brief Interpreting point3d as vector3d. */
-    __host__ __device__ point3d cross(const point3d& P) const;
-    static double sqDistance(const point3d& P, const point3d& Q);
-    __host__ __device__ double sqDistance(const point3d& Q) const;
-    __host__ __device__ double sqNorm() const;
-    __host__ __device__ point3d& operator*=(const double& scal);
+  double x;  double y;  double z;
+  __host__ __device__ point3d();
+  __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
+  /** \brief Necessary for set insertion to work. */
+  bool operator< (const point3d& q) const;
+  void print(const std::string& prequel = "") const;
+  __host__ __device__ double dot(const point3d& P) const;
+  /** \brief Interpreting point3d as vector3d. */
+  __host__ __device__ point3d cross(const point3d& P) const;
+  static double sqDistance(const point3d& P, const point3d& Q);
+  __host__ __device__ double sqDistance(const point3d& Q) const;
+  __host__ __device__ double sqNorm() const;
+  __host__ __device__ point3d& operator*=(const double& scal);
 };
 
-class point2d : public point3d
+class point2d
 {
 public:
-    __host__ __device__ point2d();
-    __host__ __device__ point2d(const double& xx, const double& yy);
-    static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
-    __host__ __device__ double orientation(const point2d& Q, const point2d& O = point2d()) const;
-    static bool comparator(const point2d& P, const point2d& Q);
-    __host__ __device__ bool compare(const point2d& Q) const;
+  double x;  double y;
+  __host__ __device__ point2d();
+  __host__ __device__ point2d(const double& xx, const double& yy);
+  /** \brief Necessary for set insertion to work. */
+  bool operator< (const point2d& q) const;
+  static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
+  __host__ __device__ double orientation(const point2d& Q, const point2d& O = point2d()) const;
+  static bool comparator(const point2d& P, const point2d& Q);
+  __host__ __device__ bool compare(const point2d& Q) const;
+  void print(const std::string& prequel = "") const;
+  __host__ __device__ double dot(const point2d& P) const;
+  static double sqDistance(const point2d& P, const point2d& Q);
+  __host__ __device__ double sqDistance(const point2d& Q) const;
+  __host__ __device__ double sqNorm() const;
+  __host__ __device__ point2d& operator*=(const double& scal);
 };
 
 class Edge2d

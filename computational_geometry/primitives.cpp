@@ -25,7 +25,6 @@ namespace ComputationalGeometry
   double threshold() { return 1.0e-9; }
 #endif // ndef POINT_CLOUD_PROJECT
 
-
   template <class T> T safeAbs(const T& arg)
   {
     if (arg < 0) { return -arg; }
@@ -48,18 +47,12 @@ namespace ComputationalGeometry
 
   void point3d::print(const std::string& prequel) const
   {
-    std::cout << prequel << "(" << x << ", " << y;
-    std::cout << ", " << z;
-    std::cout << ")";
+    std::cout << prequel << "(" << x << ", " << y << ", " << z << ")";
   }
 
   double point3d::dot(const point3d& P) const
   {
-    double answer = x * P.x + y * P.y;
-    {
-      answer = answer + z * P.z;
-    }
-    return answer;
+    return x * P.x + y * P.y + z * P.z;
   }
 
   point3d point3d::cross(const point3d& P) const
@@ -93,8 +86,17 @@ namespace ComputationalGeometry
   double point3d::sqNorm() const { return (*this).dot(*this); }
   point3d& point3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
 
-  point2d::point2d() : point3d(0, 0, 0) {}
-  point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
+  point2d::point2d() : x(0), y(0) {}
+  point2d::point2d(const double& xx, const double& yy) : x(xx), y(yy) {}
+
+  bool point2d::operator< (const point2d& q) const
+  {
+    if (x > q.x) {return false;}
+    if (x < q.x) {return true;}
+    if (y > q.y) {return false;}
+    if (y < q.y) {return true;}
+    return false;
+  }
 
   double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
@@ -114,6 +116,35 @@ namespace ComputationalGeometry
     double theta_Q = atan2(Q.y, Q.x);
     return theta_P < theta_Q; // Also can use return getOrientation(*this, Q) < 0;
   }
+
+  void point2d::print(const std::string& prequel) const
+  {
+    std::cout << prequel << "(" << x << ", " << y << ")";
+  }
+
+  double point2d::dot(const point2d& P) const
+  {
+    return x * P.x + y * P.y;
+  }
+
+  double point2d::sqDistance(const point2d& P, const point2d& Q)
+  {
+    return P.sqDistance(Q);
+  }
+
+  double point2d::sqDistance(const point2d& Q) const
+  {
+    double answer = 0;
+    auto P = *this;
+    double dt = (P.x - Q.x);
+    answer = answer + dt * dt;
+    dt = (P.y - Q.y);
+    answer = answer + dt * dt;
+    return answer;
+  }
+
+  double point2d::sqNorm() const { return (*this).dot(*this); }
+  point2d& point2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
 
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
   {
