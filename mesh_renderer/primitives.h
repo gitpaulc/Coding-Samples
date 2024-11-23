@@ -24,6 +24,7 @@ All Rights Reserved.*/
 namespace ComputationalGeometry
 {
 class point2d;
+class vector3d;
 class point3d
 {
 public:
@@ -31,16 +32,28 @@ public:
   __host__ __device__ point3d();
   __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
   __host__ __device__ point3d(const point2d& P);
+  vector3d operator-(const point3d& rhs) const;
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point3d& q) const;
   void print(const std::string& prequel = "") const;
-  __host__ __device__ double dot(const point3d& P) const;
-  /** \brief Interpreting point3d as vector3d. */
-  __host__ __device__ point3d cross(const point3d& P) const;
   static double sqDistance(const point3d& P, const point3d& Q);
   __host__ __device__ double sqDistance(const point3d& Q) const;
+};
+
+class vector3d
+{
+public:
+  double x;  double y;  double z;
+  __host__ __device__ vector3d();
+  __host__ __device__ vector3d(const double& xx, const double& yy, const double& zz);
+  /** \brief Necessary for set insertion to work. */
+  bool operator< (const vector3d& q) const;
+  void print(const std::string& prequel = "") const;
+  __host__ __device__ double dot(const vector3d& P) const;
+  /** \brief Interpreting point3d as vector3d. */
+  __host__ __device__ vector3d cross(const vector3d& P) const;
   __host__ __device__ double sqNorm() const;
-  __host__ __device__ point3d& operator*=(const double& scal);
+  __host__ __device__ vector3d& operator*=(const double& scal);
 };
 
 class point2d
@@ -107,12 +120,12 @@ public:
 class Matrix3d
 {
 public:
-    point3d a, b, c; /**< Rows. */
-    __host__ __device__ Matrix3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
-    __host__ __device__ double det() const;
-    __host__ __device__ Matrix3d inverse(bool& bSuccess) const;
-    __host__ __device__ void takeTranspose();
-    __host__ __device__ point3d operator*(const point3d& rhs) const;
+  vector3d a, b, c; /**< Rows. */
+  __host__ __device__ Matrix3d(const vector3d& aa = vector3d(), const vector3d& bb = vector3d(), const vector3d& cc = vector3d());
+  __host__ __device__ double det() const;
+  __host__ __device__ Matrix3d inverse(bool& bSuccess) const;
+  __host__ __device__ void takeTranspose();
+  __host__ __device__ vector3d operator*(const vector3d& rhs) const;
 };
 
 class Circle2d
@@ -151,16 +164,16 @@ public:
   double C = 1;
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
-  static Plane3d fromPointAndNormal(const point3d& origin, const point3d& normal);
+  static Plane3d fromPointAndNormal(const point3d& origin, const vector3d& normal);
   __host__ __device__ bool isInPlane(const point3d&) const;
   __host__ __device__ bool isValid() const;
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   __host__ __device__ int getSide(const point3d& pt) const;
   /** \brief Plane should be valid. */
-  __host__ __device__ void getOrthonormalBasis(point3d& e1, point3d& e2) const;
+  __host__ __device__ void getOrthonormalBasis(vector3d& e1, vector3d& e2) const;
   /** \brief Plane should be valid. */
-  __host__ __device__ point3d getNormal() const;
+  __host__ __device__ vector3d getNormal() const;
   /**
    *  \return Q: the point of intersection of the ray with the plane.
    *  ray.a is the source of the ray, ray.b is the endpoint.
