@@ -109,6 +109,11 @@ namespace ComputationalGeometry
   point2d::point2d() : x(0), y(0) {}
   point2d::point2d(const double& xx, const double& yy) : x(xx), y(yy) {}
 
+  vector2d point2d::operator-(const point2d& rhs) const
+  {
+    return vector2d(x - rhs.x, y - rhs.y);
+  }
+
   bool point2d::operator< (const point2d& q) const
   {
     if (x > q.x) {return false;}
@@ -308,11 +313,11 @@ namespace ComputationalGeometry
   point2d Edge2d::projection(const point2d& P) const
   {
     if (sqLength() <= threshold()) { return a; }
-    point2d pp(P.x - a.x, P.y - a.y);
-    point2d qq(b.x - a.x, b.y - a.y);
+    vector2d pp = P - a;
+    vector2d qq = b - a;
     double coeff = pp.dot(qq) / sqLength();
-    point2d rr(qq.x * coeff, qq.y * coeff);
-    return point2d(rr.x + a.x, rr.y + a.y);
+    qq *= coeff;
+    return point2d(qq.x + a.x, qq.y + a.y);
   }
 
   Edge3d::Edge3d(const point3d& aa, const point3d& bb)
@@ -351,7 +356,7 @@ namespace ComputationalGeometry
     return point3d(qq.x + a.x, qq.y + a.y, qq.z + a.z);
   }
 
-  Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
+  Matrix2d::Matrix2d(const vector2d& aa, const vector2d& bb)
   {
     a = aa; b = bb;
   }
@@ -366,11 +371,10 @@ namespace ComputationalGeometry
     auto determinant = det();
     if (determinant <= threshold()) { bSuccess = false; return Matrix2d(); }
     bSuccess = true;
-    Matrix2d inv(point2d(b.y, -a.y), point2d(-b.x, a.x));
-    inv.a.x = inv.a.x / determinant;
-    inv.a.y = inv.a.y / determinant;
-    inv.b.x = inv.b.x / determinant;
-    inv.b.y = inv.b.y / determinant;
+    Matrix2d inv(vector2d(b.y, -a.y), vector2d(-b.x, a.x));
+    auto factor = 1.0 / determinant;
+    inv.a *= factor;
+    inv.b *= factor;
     return inv;
   }
 
@@ -381,7 +385,7 @@ namespace ComputationalGeometry
     a.y = temp;
   }
 
-  point2d Matrix2d::operator*(const point2d& rhs) const { return point2d(a.dot(rhs), b.dot(rhs)); }
+  vector2d Matrix2d::operator*(const vector2d& rhs) const { return vector2d(a.dot(rhs), b.dot(rhs)); }
 
   Matrix3d::Matrix3d(const vector3d& aa, const vector3d& bb, const vector3d& cc)
   {
@@ -390,11 +394,11 @@ namespace ComputationalGeometry
 
   double Matrix3d::det() const
   {
-    Matrix2d cof(point2d(b.y, b.z), point2d(c.y, c.z));
+    Matrix2d cof(vector2d(b.y, b.z), vector2d(c.y, c.z));
     double answer = a.x * cof.det();
-    cof = Matrix2d(point2d(b.x, b.z), point2d(c.x, c.z));
+    cof = Matrix2d(vector2d(b.x, b.z), vector2d(c.x, c.z));
     answer -= a.y * cof.det();
-    cof = Matrix2d(point2d(b.x, b.y), point2d(c.x, c.y));
+    cof = Matrix2d(vector2d(b.x, b.y), vector2d(c.x, c.y));
     answer += a.z * cof.det();
     return answer;
   }
@@ -573,16 +577,16 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   __host__ __device__ int pointIsInteriorHelper(const Triangle2d& tri, const point2d& pt)
   {
-    auto pp = point2d(tri.a.x - tri.b.x, tri.a.y - tri.b.y);
-    auto qq = point2d(tri.c.x - tri.b.x, tri.c.y - tri.b.y);
-    auto rr = point2d(pt.x - tri.b.x, pt.y - tri.b.y);
+    vector2d pp = tri.a - tri.b;
+    vector2d qq = tri.c - tri.b;
+    vector2d rr = pt - tri.b;
     Matrix2d AA(pp, qq);
     AA.takeTranspose();
     bool bInvertible = true;
     auto BB = AA.inverse(bInvertible);
     if (bInvertible)
     {
-      point2d testPoint = BB * rr;
+      vector2d testPoint = BB * rr;
       if ((testPoint.x < -threshold()) || (testPoint.y < -threshold())) { return 0; }
       if ((testPoint.x + testPoint.y) > 1 + threshold()) { return 0; }
       if ((testPoint.x >= threshold()) && (testPoint.y >= threshold())

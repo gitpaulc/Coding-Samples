@@ -63,6 +63,7 @@ public:
   double x;  double y;
   __host__ __device__ point2d();
   __host__ __device__ point2d(const double& xx, const double& yy);
+  vector2d operator-(const point2d& rhs) const;
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point2d& q) const;
   static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
@@ -122,12 +123,12 @@ public:
 class Matrix2d
 {
 public:
-    point2d a, b; /**< Rows. */
-    __host__ __device__ Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
-    __host__ __device__ double det() const;
-    __host__ __device__ Matrix2d inverse(bool& bSuccess) const;
-    __host__ __device__ void takeTranspose();
-    __host__ __device__ point2d operator*(const point2d& rhs) const;
+  vector2d a, b; /**< Rows. */
+  __host__ __device__ Matrix2d(const vector2d& aa = vector2d(), const vector2d& bb = vector2d());
+  __host__ __device__ double det() const;
+  __host__ __device__ Matrix2d inverse(bool& bSuccess) const;
+  __host__ __device__ void takeTranspose();
+  __host__ __device__ vector2d operator*(const vector2d& rhs) const;
 };
 
 class Matrix3d
