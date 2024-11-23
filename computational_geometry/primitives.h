@@ -219,8 +219,7 @@ class Tetrahedron3d
 {
 public:
     point3d a, b, c, d;
-    __host__ __device__ Tetrahedron3d(const point3d& aa = point3d(),
-                                      const point3d& bb = point3d(), const point3d& cc = point3d(), const point3d& dd = point3d());
+    __host__ __device__ Tetrahedron3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d(), const point3d& dd = point3d());
     /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
     __host__ __device__ int pointIsInterior(const point3d& pt) const;
 };
