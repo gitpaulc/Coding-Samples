@@ -142,11 +142,6 @@ namespace ComputationalGeometry
     std::cout << prequel << "(" << x << ", " << y << ")";
   }
 
-  double point2d::dot(const point2d& P) const
-  {
-    return x * P.x + y * P.y;
-  }
-
   double point2d::sqDistance(const point2d& P, const point2d& Q)
   {
     return P.sqDistance(Q);
@@ -163,8 +158,27 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point2d::sqNorm() const { return (*this).dot(*this); }
-  point2d& point2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
+  vector2d::vector2d() : x(0), y(0) {}
+  vector2d::vector2d(const double& xx, const double& yy) : x(xx), y(yy) {}
+
+  bool vector2d::operator< (const vector2d& q) const
+  {
+    point2d pp(x, y); point2d qq(q.x, q.y);
+    return (pp < qq);
+  }
+
+  void vector2d::print(const std::string& prequel) const
+  {
+    return point2d(x, y).print(prequel);
+  }
+
+  double vector2d::dot(const vector2d& P) const
+  {
+    return x * P.x + y * P.y;
+  }
+
+  double vector2d::sqNorm() const { return (*this).dot(*this); }
+  vector2d& vector2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
 
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
   {
