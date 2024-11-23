@@ -608,9 +608,9 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
-    if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
-    if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
-    if (pt.point2d::sqDistance(c) <= threshold()) { return 3; }
+    if (pt.sqDistance(a) <= threshold()) { return 3; }
+    if (pt.sqDistance(b) <= threshold()) { return 3; }
+    if (pt.sqDistance(c) <= threshold()) { return 3; }
     double oneThird = 1.0 / 3.0;
     auto barycenter = point2d(oneThird * (a.x + b.x + c.x), oneThird * (a.y + b.y + c.y));
     if (pointIsInteriorHelper(*this, barycenter) == 0)
@@ -627,6 +627,73 @@ namespace ComputationalGeometry
     edges.insert(Edge2d(a, b));
     edges.insert(Edge2d(b, c));
     edges.insert(Edge2d(c, a));
+    return edges;
+  }
+
+  bool Face2d::isValid() const
+  {
+    return (vertices.size() >= 3);
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  int Face2d::pointIsInterior(const point2d& pt) const
+  {
+    const int numVertices = (int)vertices.size();
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      if (pt.sqDistance(vertices[ii]) <= threshold()) { return 3; }
+    }
+    std::set<Edge2d> edges = getEdges();
+    for (const auto& edge : edges)
+    {
+      if (edge.sqDistance(pt) <= threshold()) { return 2; }
+    }
+    std::set<double> angles;
+    // TODO: Can we do the same thing without using square root or inverse trig?
+    // Calculate all angles subtended by lines from point to vertices.
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      vector2d diff = vertices[ii] - pt;
+      angles.insert(atan2(diff.y, diff.x));
+    }
+    // Now get a unique angle:
+    double fullAngle = 2.0 * 3.14159;
+    double angle = fullAngle / ((double)(numVertices + 2));
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      if (angles.count(angle) == 0) { break; }
+      angle = (2 + ii) / ((double)(numVertices + 2));
+    }
+    int numIntersections = 0;
+    for (const auto& edge : edges)
+    {
+      double rr = edge.a.sqDistance(pt);
+      if (rr < 2) { rr = 2; } // > distance.
+      {
+        double rr1 = edge.b.sqDistance(pt);
+        if (rr1 < 2) { rr1 = 2; } // > distance.
+        if (rr1 > rr) { rr = rr1; }
+      }
+      Edge2d intersector(pt, point2d(rr * cos(angle), rr * sin(angle)));
+      point2d intersection;
+      int intersectValue = intersector.intersection(edge, intersection);
+      if (intersectValue != 0) { ++numIntersections; }
+    }
+    if ((numIntersections % 2) == 0) { return 0; }
+    return 1;
+  }
+
+  std::set<Edge2d> Face2d::getEdges() const
+  {
+    std::set<Edge2d> edges;
+    const int numVertices = (int)vertices.size();
+    if (numVertices < 2) { return edges; }
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      int jj = ii + 1;
+      if (ii == (numVertices - 1)) { jj = 0; }
+      edges.insert(Edge2d(vertices[ii], vertices[jj]));
+    }
     return edges;
   }
 
