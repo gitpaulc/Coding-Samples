@@ -164,16 +164,16 @@ public:
   double C = 1;
   double D = 0;
   __host__ __device__ Plane3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d());
-  static Plane3d fromPointAndNormal(const point3d& origin, const point3d& normal);
+  static Plane3d fromPointAndNormal(const point3d& origin, const vector3d& normal);
   __host__ __device__ bool isInPlane(const point3d&) const;
   __host__ __device__ bool isValid() const;
   __host__ __device__ point3d pointInPlane() const; /** \brief Not necessarily unique. */
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   __host__ __device__ int getSide(const point3d& pt) const;
   /** \brief Plane should be valid. */
-  __host__ __device__ void getOrthonormalBasis(point3d& e1, point3d& e2) const;
+  __host__ __device__ void getOrthonormalBasis(vector3d& e1, vector3d& e2) const;
   /** \brief Plane should be valid. */
-  __host__ __device__ point3d getNormal() const;
+  __host__ __device__ vector3d getNormal() const;
   /**
    *  \return Q: the point of intersection of the ray with the plane.
    *  ray.a is the source of the ray, ray.b is the endpoint.

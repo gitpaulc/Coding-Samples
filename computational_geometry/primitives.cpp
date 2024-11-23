@@ -624,13 +624,13 @@ namespace ComputationalGeometry
     D = -normal.dot(vector3d(origin.x, origin.y, origin.z));
   }
 
-  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
+  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const vector3d& normal)
   {
     Plane3d plan;
     plan.A = normal.x;
     plan.B = normal.y;
     plan.C = normal.z;
-    plan.D = -normal.dot(origin);
+    plan.D = -normal.dot(vector3d(origin.x, origin.y, origin.z));
     return plan;
   }
 
@@ -642,7 +642,7 @@ namespace ComputationalGeometry
 
   bool Plane3d::isValid() const
   {
-    point3d normal(A, B, C);
+    vector3d normal(A, B, C);
     return (normal.sqNorm() > threshold());
   }
 
@@ -658,47 +658,47 @@ namespace ComputationalGeometry
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   int Plane3d::getSide(const point3d& pt) const
   {
-    point3d normal(A, B, C);
+    vector3d normal(A, B, C);
     auto origin = pointInPlane();
-    auto discriminant = normal.dot(point3d(pt.x - origin.x, pt.y - origin.y, pt.z - origin.z));
+    auto discriminant = normal.dot(pt - origin);
     if (safeAbs(discriminant) <= threshold()) { return 0; }
     if (discriminant > threshold()) { return 1; }
     return 2;
   }
 
-  void Plane3d::getOrthonormalBasis(point3d& e1, point3d& e2) const
+  void Plane3d::getOrthonormalBasis(vector3d& e1, vector3d& e2) const
   {
     auto nn = getNormal();
     if (safeAbs(nn.x) <= threshold())
     {
-      e1 = point3d(0, -nn.z, nn.y);
+      e1 = vector3d(0, -nn.z, nn.y);
       e2 = nn.cross(e1);
       return;
     }
     if (safeAbs(nn.y) <= threshold())
     {
-      e1 = point3d(-nn.z, 0, nn.x);
+      e1 = vector3d(-nn.z, 0, nn.x);
       e2 = nn.cross(e1);
       return;
     }
     if (safeAbs(nn.z) <= threshold())
     {
-      e1 = point3d(-nn.y, nn.x, 0);
+      e1 = vector3d(-nn.y, nn.x, 0);
       e2 = nn.cross(e1);
       return;
     }
-    point3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
+    vector3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
     auto mag = safeSqrt(f1.sqNorm());
-    e1 = point3d(f1.x / mag, f1.y / mag, f1.z / mag);
+    e1 = vector3d(f1.x / mag, f1.y / mag, f1.z / mag);
     e2 = nn.cross(e1);
   }
 
-  point3d Plane3d::getNormal() const
+  vector3d Plane3d::getNormal() const
   {
-    if (!isValid()) { return point3d(0, 0, 0); }
-    auto mag = point3d(A, B, C).sqNorm();
+    if (!isValid()) { return vector3d(0, 0, 0); }
+    auto mag = vector3d(A, B, C).sqNorm();
     mag = safeSqrt(mag);
-    return point3d(A / mag, B / mag, C / mag);
+    return vector3d(A / mag, B / mag, C / mag);
   }
 
   point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
@@ -713,7 +713,7 @@ namespace ComputationalGeometry
     if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
     success = true;
     point3d pp = ray.a;
-    point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
+    vector3d vv = ray.b - ray.a;
     const auto nn = getNormal();
     const auto vDotN = vv.dot(nn);
     parallel = (safeAbs(vDotN) <= threshold());
@@ -724,9 +724,9 @@ namespace ComputationalGeometry
       return pp;
     }
     const auto& p0 = origin;
-    const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
+    const vector3d pMinusP0 = pp - p0;
     tVal = -pMinusP0.dot(nn) / vDotN;
-    point3d e1, e2;
+    vector3d e1, e2;
     getOrthonormalBasis(e1, e2);
     double& ss = xyOut.x;
     double& rr = xyOut.y;
@@ -772,17 +772,17 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
   __host__ __device__ int pointIsInteriorHelper(const Tetrahedron3d& tri, const point3d& pt)
   {
-    auto pp = point3d(tri.a.x - tri.b.x, tri.a.y - tri.b.y, tri.a.z - tri.b.z);
-    auto qq = point3d(tri.c.x - tri.b.x, tri.c.y - tri.b.y, tri.c.z - tri.b.z);
-    auto rr = point3d(tri.d.x - tri.d.x, tri.d.y - tri.b.y, tri.d.z - tri.b.z);
-    auto pointShifted = point3d(pt.x - tri.b.x, pt.y - tri.b.y, pt.z - tri.b.z);
+    auto pp = tri.a - tri.b;
+    auto qq = tri.c - tri.b;
+    auto rr = tri.d - tri.b;
+    auto pointShifted = pt - tri.b;
     Matrix3d AA(pp, qq, rr);
     AA.takeTranspose();
     bool bInvertible = true;
     auto BB = AA.inverse(bInvertible);
     if (bInvertible)
     {
-      point3d testPoint = BB * pointShifted;
+      vector3d testPoint = BB * pointShifted;
       if ((testPoint.x < -threshold()) || (testPoint.y < -threshold()) || (testPoint.z < -threshold())) { return 0; }
       if ((testPoint.x + testPoint.y + testPoint.z) > 1 + threshold()) { return 0; }
       if ((testPoint.x >= threshold()) && (testPoint.y >= threshold()) && (testPoint.z >= threshold())
