@@ -24,7 +24,9 @@ All Rights Reserved.*/
 namespace ComputationalGeometry
 {
 class point2d;
+class vector2d;
 class vector3d;
+
 class point3d
 {
 public:
@@ -50,7 +52,6 @@ public:
   bool operator< (const vector3d& q) const;
   void print(const std::string& prequel = "") const;
   __host__ __device__ double dot(const vector3d& P) const;
-  /** \brief Interpreting point3d as vector3d. */
   __host__ __device__ vector3d cross(const vector3d& P) const;
   __host__ __device__ double sqNorm() const;
   __host__ __device__ vector3d& operator*=(const double& scal);
@@ -62,6 +63,7 @@ public:
   double x;  double y;
   __host__ __device__ point2d();
   __host__ __device__ point2d(const double& xx, const double& yy);
+  vector2d operator-(const point2d& rhs) const;
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point2d& q) const;
   static double getOrientation(const point2d& P, const point2d& Q, const point2d& O = point2d());
@@ -69,12 +71,24 @@ public:
   static bool comparator(const point2d& P, const point2d& Q);
   __host__ __device__ bool compare(const point2d& Q) const;
   void print(const std::string& prequel = "") const;
-  __host__ __device__ double dot(const point2d& P) const;
   static double sqDistance(const point2d& P, const point2d& Q);
   __host__ __device__ double sqDistance(const point2d& Q) const;
-  __host__ __device__ double sqNorm() const;
-  __host__ __device__ point2d& operator*=(const double& scal);
 };
+
+class vector2d
+{
+public:
+  double x;  double y;
+  __host__ __device__ vector2d();
+  __host__ __device__ vector2d(const double& xx, const double& yy);
+  /** \brief Necessary for set insertion to work. */
+  bool operator< (const vector2d& q) const;
+  void print(const std::string& prequel = "") const;
+  __host__ __device__ double dot(const vector2d& P) const;
+  __host__ __device__ double sqNorm() const;
+  __host__ __device__ vector2d& operator*=(const double& scal);
+};
+
 
 class Edge2d
 {
@@ -109,12 +123,12 @@ public:
 class Matrix2d
 {
 public:
-    point2d a, b; /**< Rows. */
-    __host__ __device__ Matrix2d(const point2d& aa = point2d(), const point2d& bb = point2d());
-    __host__ __device__ double det() const;
-    __host__ __device__ Matrix2d inverse(bool& bSuccess) const;
-    __host__ __device__ void takeTranspose();
-    __host__ __device__ point2d operator*(const point2d& rhs) const;
+  vector2d a, b; /**< Rows. */
+  __host__ __device__ Matrix2d(const vector2d& aa = vector2d(), const vector2d& bb = vector2d());
+  __host__ __device__ double det() const;
+  __host__ __device__ Matrix2d inverse(bool& bSuccess) const;
+  __host__ __device__ void takeTranspose();
+  __host__ __device__ vector2d operator*(const vector2d& rhs) const;
 };
 
 class Matrix3d
@@ -150,6 +164,16 @@ public:
   double sqArea() const;
   /** \brief For set and map insertion. */
   bool operator< (const Triangle2d& rhs) const;
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  __host__ __device__ int pointIsInterior(const point2d& pt) const;
+  std::set<Edge2d> getEdges() const;
+};
+
+class Face2d
+{
+public:
+  std::vector<point2d> vertices;
+  bool isValid() const;
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   __host__ __device__ int pointIsInterior(const point2d& pt) const;
   std::set<Edge2d> getEdges() const;
@@ -205,8 +229,7 @@ class Tetrahedron3d
 {
 public:
     point3d a, b, c, d;
-    __host__ __device__ Tetrahedron3d(const point3d& aa = point3d(),
-                                      const point3d& bb = point3d(), const point3d& cc = point3d(), const point3d& dd = point3d());
+    __host__ __device__ Tetrahedron3d(const point3d& aa = point3d(), const point3d& bb = point3d(), const point3d& cc = point3d(), const point3d& dd = point3d());
     /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
     __host__ __device__ int pointIsInterior(const point3d& pt) const;
 };

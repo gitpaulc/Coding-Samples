@@ -109,6 +109,11 @@ namespace ComputationalGeometry
   point2d::point2d() : x(0), y(0) {}
   point2d::point2d(const double& xx, const double& yy) : x(xx), y(yy) {}
 
+  vector2d point2d::operator-(const point2d& rhs) const
+  {
+    return vector2d(x - rhs.x, y - rhs.y);
+  }
+
   bool point2d::operator< (const point2d& q) const
   {
     if (x > q.x) {return false;}
@@ -142,11 +147,6 @@ namespace ComputationalGeometry
     std::cout << prequel << "(" << x << ", " << y << ")";
   }
 
-  double point2d::dot(const point2d& P) const
-  {
-    return x * P.x + y * P.y;
-  }
-
   double point2d::sqDistance(const point2d& P, const point2d& Q)
   {
     return P.sqDistance(Q);
@@ -163,8 +163,27 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point2d::sqNorm() const { return (*this).dot(*this); }
-  point2d& point2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
+  vector2d::vector2d() : x(0), y(0) {}
+  vector2d::vector2d(const double& xx, const double& yy) : x(xx), y(yy) {}
+
+  bool vector2d::operator< (const vector2d& q) const
+  {
+    point2d pp(x, y); point2d qq(q.x, q.y);
+    return (pp < qq);
+  }
+
+  void vector2d::print(const std::string& prequel) const
+  {
+    return point2d(x, y).print(prequel);
+  }
+
+  double vector2d::dot(const vector2d& P) const
+  {
+    return x * P.x + y * P.y;
+  }
+
+  double vector2d::sqNorm() const { return (*this).dot(*this); }
+  vector2d& vector2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
 
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
   {
@@ -294,11 +313,11 @@ namespace ComputationalGeometry
   point2d Edge2d::projection(const point2d& P) const
   {
     if (sqLength() <= threshold()) { return a; }
-    point2d pp(P.x - a.x, P.y - a.y);
-    point2d qq(b.x - a.x, b.y - a.y);
+    vector2d pp = P - a;
+    vector2d qq = b - a;
     double coeff = pp.dot(qq) / sqLength();
-    point2d rr(qq.x * coeff, qq.y * coeff);
-    return point2d(rr.x + a.x, rr.y + a.y);
+    qq *= coeff;
+    return point2d(qq.x + a.x, qq.y + a.y);
   }
 
   Edge3d::Edge3d(const point3d& aa, const point3d& bb)
@@ -337,7 +356,7 @@ namespace ComputationalGeometry
     return point3d(qq.x + a.x, qq.y + a.y, qq.z + a.z);
   }
 
-  Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
+  Matrix2d::Matrix2d(const vector2d& aa, const vector2d& bb)
   {
     a = aa; b = bb;
   }
@@ -352,11 +371,10 @@ namespace ComputationalGeometry
     auto determinant = det();
     if (determinant <= threshold()) { bSuccess = false; return Matrix2d(); }
     bSuccess = true;
-    Matrix2d inv(point2d(b.y, -a.y), point2d(-b.x, a.x));
-    inv.a.x = inv.a.x / determinant;
-    inv.a.y = inv.a.y / determinant;
-    inv.b.x = inv.b.x / determinant;
-    inv.b.y = inv.b.y / determinant;
+    Matrix2d inv(vector2d(b.y, -a.y), vector2d(-b.x, a.x));
+    auto factor = 1.0 / determinant;
+    inv.a *= factor;
+    inv.b *= factor;
     return inv;
   }
 
@@ -367,7 +385,7 @@ namespace ComputationalGeometry
     a.y = temp;
   }
 
-  point2d Matrix2d::operator*(const point2d& rhs) const { return point2d(a.dot(rhs), b.dot(rhs)); }
+  vector2d Matrix2d::operator*(const vector2d& rhs) const { return vector2d(a.dot(rhs), b.dot(rhs)); }
 
   Matrix3d::Matrix3d(const vector3d& aa, const vector3d& bb, const vector3d& cc)
   {
@@ -376,11 +394,11 @@ namespace ComputationalGeometry
 
   double Matrix3d::det() const
   {
-    Matrix2d cof(point2d(b.y, b.z), point2d(c.y, c.z));
+    Matrix2d cof(vector2d(b.y, b.z), vector2d(c.y, c.z));
     double answer = a.x * cof.det();
-    cof = Matrix2d(point2d(b.x, b.z), point2d(c.x, c.z));
+    cof = Matrix2d(vector2d(b.x, b.z), vector2d(c.x, c.z));
     answer -= a.y * cof.det();
-    cof = Matrix2d(point2d(b.x, b.y), point2d(c.x, c.y));
+    cof = Matrix2d(vector2d(b.x, b.y), vector2d(c.x, c.y));
     answer += a.z * cof.det();
     return answer;
   }
@@ -559,16 +577,16 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   __host__ __device__ int pointIsInteriorHelper(const Triangle2d& tri, const point2d& pt)
   {
-    auto pp = point2d(tri.a.x - tri.b.x, tri.a.y - tri.b.y);
-    auto qq = point2d(tri.c.x - tri.b.x, tri.c.y - tri.b.y);
-    auto rr = point2d(pt.x - tri.b.x, pt.y - tri.b.y);
+    vector2d pp = tri.a - tri.b;
+    vector2d qq = tri.c - tri.b;
+    vector2d rr = pt - tri.b;
     Matrix2d AA(pp, qq);
     AA.takeTranspose();
     bool bInvertible = true;
     auto BB = AA.inverse(bInvertible);
     if (bInvertible)
     {
-      point2d testPoint = BB * rr;
+      vector2d testPoint = BB * rr;
       if ((testPoint.x < -threshold()) || (testPoint.y < -threshold())) { return 0; }
       if ((testPoint.x + testPoint.y) > 1 + threshold()) { return 0; }
       if ((testPoint.x >= threshold()) && (testPoint.y >= threshold())
@@ -590,9 +608,9 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
   int Triangle2d::pointIsInterior(const point2d& pt) const
   {
-    if (pt.point2d::sqDistance(a) <= threshold()) { return 3; }
-    if (pt.point2d::sqDistance(b) <= threshold()) { return 3; }
-    if (pt.point2d::sqDistance(c) <= threshold()) { return 3; }
+    if (pt.sqDistance(a) <= threshold()) { return 3; }
+    if (pt.sqDistance(b) <= threshold()) { return 3; }
+    if (pt.sqDistance(c) <= threshold()) { return 3; }
     double oneThird = 1.0 / 3.0;
     auto barycenter = point2d(oneThird * (a.x + b.x + c.x), oneThird * (a.y + b.y + c.y));
     if (pointIsInteriorHelper(*this, barycenter) == 0)
@@ -609,6 +627,73 @@ namespace ComputationalGeometry
     edges.insert(Edge2d(a, b));
     edges.insert(Edge2d(b, c));
     edges.insert(Edge2d(c, a));
+    return edges;
+  }
+
+  bool Face2d::isValid() const
+  {
+    return (vertices.size() >= 3);
+  }
+
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  int Face2d::pointIsInterior(const point2d& pt) const
+  {
+    const int numVertices = (int)vertices.size();
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      if (pt.sqDistance(vertices[ii]) <= threshold()) { return 3; }
+    }
+    std::set<Edge2d> edges = getEdges();
+    for (const auto& edge : edges)
+    {
+      if (edge.sqDistance(pt) <= threshold()) { return 2; }
+    }
+    std::set<double> angles;
+    // TODO: Can we do the same thing without using square root or inverse trig?
+    // Calculate all angles subtended by lines from point to vertices.
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      vector2d diff = vertices[ii] - pt;
+      angles.insert(atan2(diff.y, diff.x));
+    }
+    // Now get a unique angle:
+    double fullAngle = 2.0 * 3.14159;
+    double angle = fullAngle / ((double)(numVertices + 2));
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      if (angles.count(angle) == 0) { break; }
+      angle = (2 + ii) / ((double)(numVertices + 2));
+    }
+    int numIntersections = 0;
+    for (const auto& edge : edges)
+    {
+      double rr = edge.a.sqDistance(pt);
+      if (rr < 2) { rr = 2; } // > distance.
+      {
+        double rr1 = edge.b.sqDistance(pt);
+        if (rr1 < 2) { rr1 = 2; } // > distance.
+        if (rr1 > rr) { rr = rr1; }
+      }
+      Edge2d intersector(pt, point2d(rr * cos(angle), rr * sin(angle)));
+      point2d intersection;
+      int intersectValue = intersector.intersection(edge, intersection);
+      if (intersectValue != 0) { ++numIntersections; }
+    }
+    if ((numIntersections % 2) == 0) { return 0; }
+    return 1;
+  }
+
+  std::set<Edge2d> Face2d::getEdges() const
+  {
+    std::set<Edge2d> edges;
+    const int numVertices = (int)vertices.size();
+    if (numVertices < 2) { return edges; }
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      int jj = ii + 1;
+      if (ii == (numVertices - 1)) { jj = 0; }
+      edges.insert(Edge2d(vertices[ii], vertices[jj]));
+    }
     return edges;
   }
 
