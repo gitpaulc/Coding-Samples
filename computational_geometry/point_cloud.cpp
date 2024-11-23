@@ -635,6 +635,8 @@ namespace ComputationalGeometry
     void computeConvexHull(const std::vector<point2d>& iPointArray, std::vector<point2d>& ioHull);
     template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min);
     template <class Container> static double naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2);
+    template <class Container> static double naiveMinSqDistance(Container& A, Container& B, point2d& A_min, point2d& B_min);
+    template <class Container> static double naiveMinSqDistance(Container& arr, point2d& min_1, point2d& min_2);
     template <class Container> static double minSqDistanceHelper(Container& arr, point2d& min_1, point2d& min_2);
     template <class Container> static double minSqDistance(Container& arr, point2d& min_1, point2d& min_2);
   };
@@ -1754,6 +1756,15 @@ namespace ComputationalGeometry
     ioHull.resize(hullCount);
   }
 
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& A, Container& B, point2d& A_min, point2d& B_min)
+  {
+    point3d A_min3, B_min3;
+    double answer = naiveMinSqDistance(A, B, A_min3, B_min3);
+    A_min = point2d(A_min3.x, A_min3.y);
+    B_min = point2d(B_min3.x, B_min3.y);
+    return answer;
+  }
+
   template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& A, Container& B, point3d& A_min, point3d& B_min)
   {
     double min = 0;  bool started = false;
@@ -1782,6 +1793,15 @@ namespace ComputationalGeometry
       if (min == 0) {break;}
     }
     return min;
+  }
+
+  template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& arr, point2d& min_1, point2d& min_2)
+  {
+    point3d A_min, B_min;
+    double answer = naiveMinSqDistance(arr, A_min, B_min);
+    min_1 = point2d(A_min.x, A_min.y);
+    min_2 = point2d(B_min.x, B_min.y);
+    return answer;
   }
 
   template <class Container> double PointCloud::Impl::naiveMinSqDistance(Container& arr, point3d& min_1, point3d& min_2)

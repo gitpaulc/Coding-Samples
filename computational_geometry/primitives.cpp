@@ -25,7 +25,6 @@ namespace ComputationalGeometry
   double threshold() { return 1.0e-9; }
 #endif // ndef POINT_CLOUD_PROJECT
 
-
   template <class T> T safeAbs(const T& arg)
   {
     if (arg < 0) { return -arg; }
@@ -34,10 +33,12 @@ namespace ComputationalGeometry
 
   point3d::point3d() : x(0), y(0), z(0) {}
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
+  point3d::point3d(const point2d& P) : x(P.x), y(P.y), z(0) {}
 
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-  int point3d::GetDimension() const { return 3; }
-#endif // def USE_VIRTUAL_FUNC_POINT2D
+  vector3d point3d::operator-(const point3d& rhs) const
+  {
+    return vector3d(x - rhs.x, y - rhs.y, z - rhs.z);
+  }
 
   bool point3d::operator< (const point3d& q) const
   {
@@ -45,10 +46,6 @@ namespace ComputationalGeometry
     if (x < q.x) {return true;}
     if (y > q.y) {return false;}
     if (y < q.y) {return true;}
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if (GetDimension() <= 2) { return false; }
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     if (z > q.z) {return false;}
     if (z < q.z) {return true;}
     return false;
@@ -56,34 +53,7 @@ namespace ComputationalGeometry
 
   void point3d::print(const std::string& prequel) const
   {
-    std::cout << prequel << "(" << x << ", " << y;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if (GetDimension() > 2) { std::cout << ", " << z; }
-#else
-    std::cout << ", " << z;
-#endif // def USE_VIRTUAL_FUNC_POINT2D
-    std::cout << ")";
-  }
-
-  double point3d::dot(const point3d& P) const
-  {
-    double answer = x * P.x + y * P.y;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if ((GetDimension() > 2) || (P.GetDimension() > 2))
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
-    {
-      answer = answer + z * P.z;
-    }
-    return answer;
-  }
-
-  point3d point3d::cross(const point3d& P) const
-  {
-    auto crossX = y * P.z - z * P.y;
-    auto crossY = z * P.x - x * P.z;
-    auto crossZ = x * P.y - y * P.x;
-    return point3d(crossX, crossY, crossZ);
+    std::cout << prequel << "(" << x << ", " << y << ", " << z << ")";
   }
 
   double point3d::sqDistance(const point3d& P, const point3d& Q)
@@ -99,10 +69,6 @@ namespace ComputationalGeometry
     answer = answer + dt * dt;
     dt = (P.y - Q.y);
     answer = answer + dt * dt;
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-    if ((P.GetDimension() > 2) || (Q.GetDimension() > 2))
-#else
-#endif // def USE_VIRTUAL_FUNC_POINT2D
     {
       dt = (P.z - Q.z);
       answer = answer + dt * dt;
@@ -110,15 +76,47 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point3d::sqNorm() const { return (*this).dot(*this); }
-  point3d& point3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
+  vector3d::vector3d() : x(0), y(0), z(0) {}
+  vector3d::vector3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
 
-  point2d::point2d() : point3d(0, 0, 0) {}
-  point2d::point2d(const double& xx, const double& yy) : point3d(xx, yy, 0) {}
+  bool vector3d::operator< (const vector3d& q) const
+  {
+    point3d pp(x, y, z); point3d qq(q.x, q.y, q.z);
+    return (pp < qq);
+  }
 
-#ifdef USE_VIRTUAL_FUNC_POINT2D
-  int point2d::GetDimension() const { return 2; }
-#endif // def USE_VIRTUAL_FUNC_POINT2D
+  void vector3d::print(const std::string& prequel) const
+  {
+    point3d(x, y, z).print(prequel);
+  }
+
+  double vector3d::dot(const vector3d& P) const
+  {
+    return x * P.x + y * P.y + z * P.z;
+  }
+
+  vector3d vector3d::cross(const vector3d& P) const
+  {
+    auto crossX = y * P.z - z * P.y;
+    auto crossY = z * P.x - x * P.z;
+    auto crossZ = x * P.y - y * P.x;
+    return vector3d(crossX, crossY, crossZ);
+  }
+
+  double vector3d::sqNorm() const { return (*this).dot(*this); }
+  vector3d& vector3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
+
+  point2d::point2d() : x(0), y(0) {}
+  point2d::point2d(const double& xx, const double& yy) : x(xx), y(yy) {}
+
+  bool point2d::operator< (const point2d& q) const
+  {
+    if (x > q.x) {return false;}
+    if (x < q.x) {return true;}
+    if (y > q.y) {return false;}
+    if (y < q.y) {return true;}
+    return false;
+  }
 
   double point2d::getOrientation(const point2d& P, const point2d& Q, const point2d& O)
   {
@@ -138,6 +136,35 @@ namespace ComputationalGeometry
     double theta_Q = atan2(Q.y, Q.x);
     return theta_P < theta_Q; // Also can use return getOrientation(*this, Q) < 0;
   }
+
+  void point2d::print(const std::string& prequel) const
+  {
+    std::cout << prequel << "(" << x << ", " << y << ")";
+  }
+
+  double point2d::dot(const point2d& P) const
+  {
+    return x * P.x + y * P.y;
+  }
+
+  double point2d::sqDistance(const point2d& P, const point2d& Q)
+  {
+    return P.sqDistance(Q);
+  }
+
+  double point2d::sqDistance(const point2d& Q) const
+  {
+    double answer = 0;
+    auto P = *this;
+    double dt = (P.x - Q.x);
+    answer = answer + dt * dt;
+    dt = (P.y - Q.y);
+    answer = answer + dt * dt;
+    return answer;
+  }
+
+  double point2d::sqNorm() const { return (*this).dot(*this); }
+  point2d& point2d::operator*=(const double& scal) { x *= scal; y *= scal; return *this; }
 
   Edge2d::Edge2d(const point2d& aa, const point2d& bb)
   {
@@ -296,18 +323,18 @@ namespace ComputationalGeometry
   double Edge3d::sqDistance(const point3d& P) const
   {
     auto proj = projection(P);
-    point3d orthog(P.x - proj.x, P.y - proj.y, P.z - proj.z);
+    vector3d orthog(P.x - proj.x, P.y - proj.y, P.z - proj.z);
     return orthog.sqNorm();
   }
 
   point3d Edge3d::projection(const point3d& P) const
   {
     if (sqLength() <= threshold()) { return a; }
-    point3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
-    point3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
+    vector3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
+    vector3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
     double coeff = pp.dot(qq) / sqLength();
-    point3d rr(qq.x * coeff, qq.y * coeff, qq.z * coeff);
-    return point3d(rr.x + a.x, rr.y + a.y, rr.y + a.z);
+    qq *= coeff;
+    return point3d(qq.x + a.x, qq.y + a.y, qq.z + a.z);
   }
 
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
@@ -342,7 +369,7 @@ namespace ComputationalGeometry
 
   point2d Matrix2d::operator*(const point2d& rhs) const { return point2d(a.dot(rhs), b.dot(rhs)); }
 
-  Matrix3d::Matrix3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  Matrix3d::Matrix3d(const vector3d& aa, const vector3d& bb, const vector3d& cc)
   {
     a = aa; b = bb; c = cc;
   }
@@ -372,9 +399,9 @@ namespace ComputationalGeometry
     auto gg = c.x;
     auto hh = c.y;
     auto ii = c.z;
-    Matrix3d inv(point3d(ee * ii - ff * hh, cc * hh - ii * bb, ff * bb - cc * ee),
-        point3d(gg * ff - ii * dd, aa * ii - cc * gg, cc * dd - aa * ff),
-        point3d(dd * hh - gg * ee, bb * gg - aa * hh, aa * ee - bb * dd));
+    Matrix3d inv(vector3d(ee * ii - ff * hh, cc * hh - ii * bb, ff * bb - cc * ee),
+      vector3d(gg * ff - ii * dd, aa * ii - cc * gg, cc * dd - aa * ff),
+      vector3d(dd * hh - gg * ee, bb * gg - aa * hh, aa * ee - bb * dd));
     inv.a *= (1.0 / determinant);
     inv.b *= (1.0 / determinant);
     inv.c *= (1.0 / determinant);
@@ -386,12 +413,12 @@ namespace ComputationalGeometry
     auto aa = a;
     auto bb = b;
     auto cc = c;
-    a = point3d(aa.x, bb.x, cc.x);
-    b = point3d(aa.y, bb.y, cc.y);
-    c = point3d(aa.z, bb.z, cc.z);
+    a = vector3d(aa.x, bb.x, cc.x);
+    b = vector3d(aa.y, bb.y, cc.y);
+    c = vector3d(aa.z, bb.z, cc.z);
   }
 
-  point3d Matrix3d::operator*(const point3d& rhs) const { return point3d(a.dot(rhs), b.dot(rhs), c.dot(rhs)); }
+  vector3d Matrix3d::operator*(const vector3d& rhs) const { return vector3d(a.dot(rhs), b.dot(rhs), c.dot(rhs)); }
 
   Circle2d::Circle2d(const point2d& cen, double sqRad)
   {
@@ -405,7 +432,7 @@ namespace ComputationalGeometry
 
   Circle2d::Circle2d(const point2d& a, const point2d& b, const point2d& c)
   {
-    Matrix3d AA(point3d(a.x, a.y, 1), point3d(b.x, b.y, 1), point3d(c.x, c.y, 1));
+    Matrix3d AA(vector3d(a.x, a.y, 1), vector3d(b.x, b.y, 1), vector3d(c.x, c.y, 1));
     double den = AA.det();
     double absDen = (den > 0) ? den : -den;
     bool bCollinear = (absDen <= threshold());
@@ -429,10 +456,10 @@ namespace ComputationalGeometry
       double a2 = point2d::sqDistance(a, point2d(0, 0));
       double b2 = point2d::sqDistance(b, point2d(0, 0));
       double c2 = point2d::sqDistance(c, point2d(0, 0));
-      Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
-      Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
+      Matrix3d CX(vector3d(a2, a.y, 1), vector3d(b2, b.y, 1), vector3d(c2, c.y, 1));
+      Matrix3d CY(vector3d(a.x, a2, 1), vector3d(b.x, b2, 1), vector3d(c.x, c2, 1));
       center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
-      Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
+      Matrix3d BB(vector3d(a.x, a.y, a2), vector3d(b.x, b.y, b2), vector3d(c.x, c.y, c2));
       sqRadius = (BB.det() / den) + point2d::sqDistance(center, point2d(0, 0));
     }
   }
@@ -588,22 +615,22 @@ namespace ComputationalGeometry
   Plane3d::Plane3d(const point3d& aa, const point3d& bb, const point3d& cc)
   {
     const auto& origin = aa;
-    const auto v0 = point3d(bb.x - aa.x, bb.y - aa.y, bb.z - aa.z);
-    const auto v1 = point3d(cc.x - aa.x, cc.y - aa.y, cc.z - aa.z);
-    point3d normal(v0.y * v1.z - v0.z * v1.y, v0.z * v1.x - v0.x * v1.z, v0.x * v1.y - v0.y * v1.x);
+    const auto v0 = bb - aa;
+    const auto v1 = cc - aa;
+    vector3d normal(v0.y * v1.z - v0.z * v1.y, v0.z * v1.x - v0.x * v1.z, v0.x * v1.y - v0.y * v1.x);
     A = normal.x;
     B = normal.y;
     C = normal.z;
-    D = -normal.dot(origin);
+    D = -normal.dot(vector3d(origin.x, origin.y, origin.z));
   }
 
-  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
+  Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const vector3d& normal)
   {
     Plane3d plan;
     plan.A = normal.x;
     plan.B = normal.y;
     plan.C = normal.z;
-    plan.D = -normal.dot(origin);
+    plan.D = -normal.dot(vector3d(origin.x, origin.y, origin.z));
     return plan;
   }
 
@@ -615,7 +642,7 @@ namespace ComputationalGeometry
 
   bool Plane3d::isValid() const
   {
-    point3d normal(A, B, C);
+    vector3d normal(A, B, C);
     return (normal.sqNorm() > threshold());
   }
 
@@ -631,47 +658,47 @@ namespace ComputationalGeometry
   /** \brief Which side of the plane is the point on? 2 for left, 1 for right, 0 for on plane. */
   int Plane3d::getSide(const point3d& pt) const
   {
-    point3d normal(A, B, C);
+    vector3d normal(A, B, C);
     auto origin = pointInPlane();
-    auto discriminant = normal.dot(point3d(pt.x - origin.x, pt.y - origin.y, pt.z - origin.z));
+    auto discriminant = normal.dot(pt - origin);
     if (safeAbs(discriminant) <= threshold()) { return 0; }
     if (discriminant > threshold()) { return 1; }
     return 2;
   }
 
-  void Plane3d::getOrthonormalBasis(point3d& e1, point3d& e2) const
+  void Plane3d::getOrthonormalBasis(vector3d& e1, vector3d& e2) const
   {
     auto nn = getNormal();
     if (safeAbs(nn.x) <= threshold())
     {
-      e1 = point3d(0, -nn.z, nn.y);
+      e1 = vector3d(0, -nn.z, nn.y);
       e2 = nn.cross(e1);
       return;
     }
     if (safeAbs(nn.y) <= threshold())
     {
-      e1 = point3d(-nn.z, 0, nn.x);
+      e1 = vector3d(-nn.z, 0, nn.x);
       e2 = nn.cross(e1);
       return;
     }
     if (safeAbs(nn.z) <= threshold())
     {
-      e1 = point3d(-nn.y, nn.x, 0);
+      e1 = vector3d(-nn.y, nn.x, 0);
       e2 = nn.cross(e1);
       return;
     }
-    point3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
+    vector3d f1(2 * nn.y * nn.z, -nn.x * nn.z, -nn.y * nn.x);
     auto mag = safeSqrt(f1.sqNorm());
-    e1 = point3d(f1.x / mag, f1.y / mag, f1.z / mag);
+    e1 = vector3d(f1.x / mag, f1.y / mag, f1.z / mag);
     e2 = nn.cross(e1);
   }
 
-  point3d Plane3d::getNormal() const
+  vector3d Plane3d::getNormal() const
   {
-    if (!isValid()) { return point3d(0, 0, 0); }
-    auto mag = point3d(A, B, C).sqNorm();
+    if (!isValid()) { return vector3d(0, 0, 0); }
+    auto mag = vector3d(A, B, C).sqNorm();
     mag = safeSqrt(mag);
-    return point3d(A / mag, B / mag, C / mag);
+    return vector3d(A / mag, B / mag, C / mag);
   }
 
   point3d Plane3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const
@@ -686,7 +713,7 @@ namespace ComputationalGeometry
     if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
     success = true;
     point3d pp = ray.a;
-    point3d vv(ray.b.x - ray.a.x, ray.b.y - ray.a.y, ray.b.z - ray.a.z);
+    vector3d vv = ray.b - ray.a;
     const auto nn = getNormal();
     const auto vDotN = vv.dot(nn);
     parallel = (safeAbs(vDotN) <= threshold());
@@ -697,9 +724,9 @@ namespace ComputationalGeometry
       return pp;
     }
     const auto& p0 = origin;
-    const point3d pMinusP0(pp.x - p0.x, pp.y - p0.y, pp.z - p0.z);
+    const vector3d pMinusP0 = pp - p0;
     tVal = -pMinusP0.dot(nn) / vDotN;
-    point3d e1, e2;
+    vector3d e1, e2;
     getOrthonormalBasis(e1, e2);
     double& ss = xyOut.x;
     double& rr = xyOut.y;
@@ -745,17 +772,17 @@ namespace ComputationalGeometry
   /** \brief 0 = exterior, 1 = interior, 2 = on face, 3 = on edge, 4 = on vertex */
   __host__ __device__ int pointIsInteriorHelper(const Tetrahedron3d& tri, const point3d& pt)
   {
-    auto pp = point3d(tri.a.x - tri.b.x, tri.a.y - tri.b.y, tri.a.z - tri.b.z);
-    auto qq = point3d(tri.c.x - tri.b.x, tri.c.y - tri.b.y, tri.c.z - tri.b.z);
-    auto rr = point3d(tri.d.x - tri.d.x, tri.d.y - tri.b.y, tri.d.z - tri.b.z);
-    auto pointShifted = point3d(pt.x - tri.b.x, pt.y - tri.b.y, pt.z - tri.b.z);
+    auto pp = tri.a - tri.b;
+    auto qq = tri.c - tri.b;
+    auto rr = tri.d - tri.b;
+    auto pointShifted = pt - tri.b;
     Matrix3d AA(pp, qq, rr);
     AA.takeTranspose();
     bool bInvertible = true;
     auto BB = AA.inverse(bInvertible);
     if (bInvertible)
     {
-      point3d testPoint = BB * pointShifted;
+      vector3d testPoint = BB * pointShifted;
       if ((testPoint.x < -threshold()) || (testPoint.y < -threshold()) || (testPoint.z < -threshold())) { return 0; }
       if ((testPoint.x + testPoint.y + testPoint.z) > 1 + threshold()) { return 0; }
       if ((testPoint.x >= threshold()) && (testPoint.y >= threshold()) && (testPoint.z >= threshold())

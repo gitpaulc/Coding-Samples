@@ -68,14 +68,14 @@ void recalculate()
     auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
     if (success)
     {
-      double rr = point3d(screenPt.x - eye.x, screenPt.y - eye.y, screenPt.z - eye.z).sqNorm();
+      double rr = (screenPt - eye).sqNorm();
       if (rr >= 1.0e-9)
       {
         rr = sqrt(rr);
-        point3d e1, e2;
+        vector3d e1, e2;
         screen.getOrthonormalBasis(e1, e2);
-        Matrix3d yaw(point3d(1, 0, 0), point3d(0, cos(gYaw), -sin(gYaw)), point3d(0, sin(gYaw), cos(gYaw)));
-        Matrix3d pitch(point3d(cos(gPitch), 0, -sin(gPitch)), point3d(0, 1, 0), point3d(sin(gPitch), 0, cos(gPitch)));
+        Matrix3d yaw(vector3d(1, 0, 0), vector3d(0, cos(gYaw), -sin(gYaw)), vector3d(0, sin(gYaw), cos(gYaw)));
+        Matrix3d pitch(vector3d(cos(gPitch), 0, -sin(gPitch)), vector3d(0, 1, 0), vector3d(sin(gPitch), 0, cos(gPitch)));
         normal = pitch * (yaw * normal);
         screenPt = point3d(eye.x + rr * normal.x, eye.y + rr * normal.y, eye.z + rr * normal.z);
       }
