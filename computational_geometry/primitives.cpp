@@ -35,6 +35,11 @@ namespace ComputationalGeometry
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
   point3d::point3d(const point2d& P) : x(P.x), y(P.y), z(0) {}
 
+  vector3d point3d::operator-(const point3d& rhs) const
+  {
+    return vector3d(x - rhs.x, y - rhs.y, z - rhs.z);
+  }
+
   bool point3d::operator< (const point3d& q) const
   {
     if (x > q.x) {return false;}
@@ -328,8 +333,8 @@ namespace ComputationalGeometry
     vector3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
     vector3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
     double coeff = pp.dot(qq) / sqLength();
-    vector3d rr = qq * coeff;
-    return point3d(rr.x + a.x, rr.y + a.y, rr.z + a.z);
+    qq *= coeff;
+    return point3d(qq.x + a.x, qq.y + a.y, qq.z + a.z);
   }
 
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
@@ -364,7 +369,7 @@ namespace ComputationalGeometry
 
   point2d Matrix2d::operator*(const point2d& rhs) const { return point2d(a.dot(rhs), b.dot(rhs)); }
 
-  Matrix3d::Matrix3d(const point3d& aa, const point3d& bb, const point3d& cc)
+  Matrix3d::Matrix3d(const vector3d& aa, const vector3d& bb, const vector3d& cc)
   {
     a = aa; b = bb; c = cc;
   }
@@ -394,9 +399,9 @@ namespace ComputationalGeometry
     auto gg = c.x;
     auto hh = c.y;
     auto ii = c.z;
-    Matrix3d inv(point3d(ee * ii - ff * hh, cc * hh - ii * bb, ff * bb - cc * ee),
-        point3d(gg * ff - ii * dd, aa * ii - cc * gg, cc * dd - aa * ff),
-        point3d(dd * hh - gg * ee, bb * gg - aa * hh, aa * ee - bb * dd));
+    Matrix3d inv(vector3d(ee * ii - ff * hh, cc * hh - ii * bb, ff * bb - cc * ee),
+      vector3d(gg * ff - ii * dd, aa * ii - cc * gg, cc * dd - aa * ff),
+      vector3d(dd * hh - gg * ee, bb * gg - aa * hh, aa * ee - bb * dd));
     inv.a *= (1.0 / determinant);
     inv.b *= (1.0 / determinant);
     inv.c *= (1.0 / determinant);
@@ -408,12 +413,12 @@ namespace ComputationalGeometry
     auto aa = a;
     auto bb = b;
     auto cc = c;
-    a = point3d(aa.x, bb.x, cc.x);
-    b = point3d(aa.y, bb.y, cc.y);
-    c = point3d(aa.z, bb.z, cc.z);
+    a = vector3d(aa.x, bb.x, cc.x);
+    b = vector3d(aa.y, bb.y, cc.y);
+    c = vector3d(aa.z, bb.z, cc.z);
   }
 
-  point3d Matrix3d::operator*(const point3d& rhs) const { return point3d(a.dot(rhs), b.dot(rhs), c.dot(rhs)); }
+  vector3d Matrix3d::operator*(const vector3d& rhs) const { return vector3d(a.dot(rhs), b.dot(rhs), c.dot(rhs)); }
 
   Circle2d::Circle2d(const point2d& cen, double sqRad)
   {
@@ -427,7 +432,7 @@ namespace ComputationalGeometry
 
   Circle2d::Circle2d(const point2d& a, const point2d& b, const point2d& c)
   {
-    Matrix3d AA(point3d(a.x, a.y, 1), point3d(b.x, b.y, 1), point3d(c.x, c.y, 1));
+    Matrix3d AA(vector3d(a.x, a.y, 1), vector3d(b.x, b.y, 1), vector3d(c.x, c.y, 1));
     double den = AA.det();
     double absDen = (den > 0) ? den : -den;
     bool bCollinear = (absDen <= threshold());
@@ -451,10 +456,10 @@ namespace ComputationalGeometry
       double a2 = point2d::sqDistance(a, point2d(0, 0));
       double b2 = point2d::sqDistance(b, point2d(0, 0));
       double c2 = point2d::sqDistance(c, point2d(0, 0));
-      Matrix3d CX(point3d(a2, a.y, 1), point3d(b2, b.y, 1), point3d(c2, c.y, 1));
-      Matrix3d CY(point3d(a.x, a2, 1), point3d(b.x, b2, 1), point3d(c.x, c2, 1));
+      Matrix3d CX(vector3d(a2, a.y, 1), vector3d(b2, b.y, 1), vector3d(c2, c.y, 1));
+      Matrix3d CY(vector3d(a.x, a2, 1), vector3d(b.x, b2, 1), vector3d(c.x, c2, 1));
       center = point2d(CX.det() / (den * 2.0), CY.det() / (den * 2.0));
-      Matrix3d BB(point3d(a.x, a.y, a2), point3d(b.x, b.y, b2), point3d(c.x, c.y, c2));
+      Matrix3d BB(vector3d(a.x, a.y, a2), vector3d(b.x, b.y, b2), vector3d(c.x, c.y, c2));
       sqRadius = (BB.det() / den) + point2d::sqDistance(center, point2d(0, 0));
     }
   }
@@ -610,13 +615,13 @@ namespace ComputationalGeometry
   Plane3d::Plane3d(const point3d& aa, const point3d& bb, const point3d& cc)
   {
     const auto& origin = aa;
-    const auto v0 = point3d(bb.x - aa.x, bb.y - aa.y, bb.z - aa.z);
-    const auto v1 = point3d(cc.x - aa.x, cc.y - aa.y, cc.z - aa.z);
-    point3d normal(v0.y * v1.z - v0.z * v1.y, v0.z * v1.x - v0.x * v1.z, v0.x * v1.y - v0.y * v1.x);
+    const auto v0 = bb - aa;
+    const auto v1 = cc - aa;
+    vector3d normal(v0.y * v1.z - v0.z * v1.y, v0.z * v1.x - v0.x * v1.z, v0.x * v1.y - v0.y * v1.x);
     A = normal.x;
     B = normal.y;
     C = normal.z;
-    D = -normal.dot(origin);
+    D = -normal.dot(vector3d(origin.x, origin.y, origin.z));
   }
 
   Plane3d Plane3d::fromPointAndNormal(const point3d& origin, const point3d& normal)
