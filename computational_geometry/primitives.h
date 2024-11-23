@@ -34,13 +34,24 @@ public:
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point3d& q) const;
   void print(const std::string& prequel = "") const;
-  __host__ __device__ double dot(const point3d& P) const;
-  /** \brief Interpreting point3d as vector3d. */
-  __host__ __device__ point3d cross(const point3d& P) const;
   static double sqDistance(const point3d& P, const point3d& Q);
   __host__ __device__ double sqDistance(const point3d& Q) const;
+};
+
+class vector3d
+{
+public:
+  double x;  double y;  double z;
+  __host__ __device__ vector3d();
+  __host__ __device__ vector3d(const double& xx, const double& yy, const double& zz);
+  /** \brief Necessary for set insertion to work. */
+  bool operator< (const vector3d& q) const;
+  void print(const std::string& prequel = "") const;
+  __host__ __device__ double dot(const vector3d& P) const;
+  /** \brief Interpreting point3d as vector3d. */
+  __host__ __device__ vector3d cross(const vector3d& P) const;
   __host__ __device__ double sqNorm() const;
-  __host__ __device__ point3d& operator*=(const double& scal);
+  __host__ __device__ vector3d& operator*=(const double& scal);
 };
 
 class point2d

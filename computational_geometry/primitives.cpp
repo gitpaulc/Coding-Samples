@@ -51,19 +51,6 @@ namespace ComputationalGeometry
     std::cout << prequel << "(" << x << ", " << y << ", " << z << ")";
   }
 
-  double point3d::dot(const point3d& P) const
-  {
-    return x * P.x + y * P.y + z * P.z;
-  }
-
-  point3d point3d::cross(const point3d& P) const
-  {
-    auto crossX = y * P.z - z * P.y;
-    auto crossY = z * P.x - x * P.z;
-    auto crossZ = x * P.y - y * P.x;
-    return point3d(crossX, crossY, crossZ);
-  }
-
   double point3d::sqDistance(const point3d& P, const point3d& Q)
   {
     return P.sqDistance(Q);
@@ -84,8 +71,35 @@ namespace ComputationalGeometry
     return answer;
   }
 
-  double point3d::sqNorm() const { return (*this).dot(*this); }
-  point3d& point3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
+  vector3d::vector3d() : x(0), y(0), z(0) {}
+  vector3d::vector3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
+
+  bool vector3d::operator< (const vector3d& q) const
+  {
+    point3d pp(x, y, z); point3d qq(q.x, q.y, q.z);
+    return (pp < qq);
+  }
+
+  void vector3d::print(const std::string& prequel) const
+  {
+    point3d(x, y, z).print(prequel);
+  }
+
+  double vector3d::dot(const vector3d& P) const
+  {
+    return x * P.x + y * P.y + z * P.z;
+  }
+
+  vector3d vector3d::cross(const vector3d& P) const
+  {
+    auto crossX = y * P.z - z * P.y;
+    auto crossY = z * P.x - x * P.z;
+    auto crossZ = x * P.y - y * P.x;
+    return vector3d(crossX, crossY, crossZ);
+  }
+
+  double vector3d::sqNorm() const { return (*this).dot(*this); }
+  vector3d& vector3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
 
   point2d::point2d() : x(0), y(0) {}
   point2d::point2d(const double& xx, const double& yy) : x(xx), y(yy) {}
@@ -304,18 +318,18 @@ namespace ComputationalGeometry
   double Edge3d::sqDistance(const point3d& P) const
   {
     auto proj = projection(P);
-    point3d orthog(P.x - proj.x, P.y - proj.y, P.z - proj.z);
+    vector3d orthog(P.x - proj.x, P.y - proj.y, P.z - proj.z);
     return orthog.sqNorm();
   }
 
   point3d Edge3d::projection(const point3d& P) const
   {
     if (sqLength() <= threshold()) { return a; }
-    point3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
-    point3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
+    vector3d pp(P.x - a.x, P.y - a.y, P.z - a.z);
+    vector3d qq(b.x - a.x, b.y - a.y, b.z - a.z);
     double coeff = pp.dot(qq) / sqLength();
-    point3d rr(qq.x * coeff, qq.y * coeff, qq.z * coeff);
-    return point3d(rr.x + a.x, rr.y + a.y, rr.y + a.z);
+    vector3d rr = qq * coeff;
+    return point3d(rr.x + a.x, rr.y + a.y, rr.z + a.z);
   }
 
   Matrix2d::Matrix2d(const point2d& aa, const point2d& bb)
