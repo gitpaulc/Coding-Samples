@@ -215,6 +215,21 @@ public:
   __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const;
 };
 
+class Face3d /** \brief Should be planar in 3d. */
+{
+public:
+  std::vector<point3d> vertices;
+  bool isValid() const;
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  __host__ __device__ int pointIsInterior(const point3d& pt) const;
+  std::set<Edge3d> getEdges() const;
+  Plane3d getPlane() const;
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, int& interior) const;
+  /** \brief Uses arbitrary origin. */
+  __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, int& interior) const;
+};
+
 class Triangle3d
 {
 public:
