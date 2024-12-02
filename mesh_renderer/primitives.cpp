@@ -635,7 +635,9 @@ namespace ComputationalGeometry
     return (vertices.size() >= 3);
   }
 
-  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex */
+  /** \brief 0 = exterior, 1 = interior, 2 = on edge, 3 = on vertex
+   *  Uses criterion: Cast a ray. If number of intersections == 0 (mod 2) point is exterior.
+   */
   int Face2d::pointIsInterior(const point2d& pt) const
   {
     const int numVertices = (int)vertices.size();
@@ -797,7 +799,7 @@ namespace ComputationalGeometry
     if (!isValid()) { success = false; return point3d(0, 0, 0); }
     if (!isInPlane(origin)) { success = false; return point3d(0, 0, 0); }
     success = true;
-    point3d pp = ray.a;
+    const point3d& pp = ray.a;
     vector3d vv = ray.b - ray.a;
     const auto nn = getNormal();
     const auto vDotN = vv.dot(nn);
@@ -806,6 +808,10 @@ namespace ComputationalGeometry
     {
       success = isInPlane(pp);
       if (success) { tVal = 0.0; }
+      vector3d e1, e2;
+      getOrthonormalBasis(e1, e2);
+      xyOut.x = (pp - origin).dot(e1);
+      xyOut.y = (pp - origin).dot(e2);
       return pp;
     }
     const auto& p0 = origin;
@@ -822,6 +828,77 @@ namespace ComputationalGeometry
     answer.y = p0.y + ss * e1.y + rr * e2.y;
     answer.z = p0.z + ss * e1.z + rr * e2.z;
     return answer;
+  }
+
+  bool Face3d::isValid() const
+  {
+    if (vertices.size() < 3) { return false; }
+    Plane3d span = getPlane();
+    for (const point3d& vertex : vertices)
+    {
+      if (!(span.isInPlane(vertex))) { return false; }
+    }
+    return true;
+  }
+
+  int Face3d::pointIsInterior(const point3d& pt) const
+  {
+    Plane3d span = getPlane();
+    point3d span0 = span.pointInPlane();
+    bool success = false;  bool parallel = false;
+    double tVal = 0.0;
+    point2d xyOut;
+    point3d answer = span.getRayCastResult(Edge3d(pt, pt), tVal, span0, xyOut, parallel, success);
+    if (!parallel) { return 0; }
+    if (!success) { return 0; }
+    point2d tester = xyOut;
+    Face2d planar;
+    for (const point3d& vertex : vertices)
+    {
+      answer = span.getRayCastResult(Edge3d(vertex, vertex), tVal, span0, xyOut, parallel, success);
+      planar.vertices.push_back(xyOut);
+    }
+    return planar.pointIsInterior(tester);
+  }
+
+  std::set<Edge3d> Face3d::getEdges() const
+  {
+    std::set<Edge3d> edges;
+    const int numVertices = (int)vertices.size();
+    if (numVertices < 2) { return edges; }
+    for (int ii = 0; ii < numVertices; ++ii)
+    {
+      int jj = ii + 1;
+      if (ii == (numVertices - 1)) { jj = 0; }
+      edges.insert(Edge3d(vertices[ii], vertices[jj]));
+    }
+    return edges;
+  }
+
+  Plane3d Face3d::getPlane() const
+  {
+    if (vertices.size() == 0) { return Plane3d(); }
+    if (vertices.size() == 1) { return Plane3d(vertices[0]); }
+    if (vertices.size() == 2) { return Plane3d(vertices[0], vertices[1]); }
+    return Plane3d(vertices[0], vertices[1], vertices[2]);
+  }
+
+  point3d Face3d::getRayCastResult(const Edge3d& ray, double& tVal, const point3d& origin, point2d& xyOut, bool& parallel, int& interior) const
+  {
+    Plane3d span = getPlane();
+    // if (!span.isValid()) { interior = 0; return point3d(); }
+    bool success = true;
+    point3d answer = span.getRayCastResult(ray, tVal, origin, xyOut, parallel, success);
+    if (!success) { interior = 0; return answer; }
+    interior = pointIsInterior(answer);
+    return answer;
+  }
+
+  point3d Face3d::getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, int& interior) const
+  {
+    if (vertices.size() == 0) { interior = 0; return point3d(); }
+    point2d xyOut;
+    return getRayCastResult(ray, tVal, vertices[0], xyOut, parallel, interior);
   }
 
   Triangle3d::Triangle3d(const point3d& aa, const point3d& bb, const point3d& cc)

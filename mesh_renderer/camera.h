@@ -33,6 +33,7 @@ public:
   void setScreen(const ComputationalGeometry::Plane3d&);
   bool hasFarPlane() const;
   bool viewIsOrthogonal() const;
+  void setViewOrthogonal(bool);
 
 private:
   class Impl;

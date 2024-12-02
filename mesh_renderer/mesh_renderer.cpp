@@ -50,6 +50,7 @@ int main(int argc, char **argv)
 
   std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.\n";
   std::cout << "Rotation: Press R to rotate clockwise, T counter-clockwise. W, A, S, and D to rotate screen.\n";
+  std::cout << "Orthogonal/Perspective: O to toggle.\n";
 
   MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));
