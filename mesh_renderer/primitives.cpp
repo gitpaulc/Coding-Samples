@@ -35,6 +35,11 @@ namespace ComputationalGeometry
   point3d::point3d(const double& xx, const double& yy, const double& zz) : x(xx), y(yy), z(zz) {}
   point3d::point3d(const point2d& P) : x(P.x), y(P.y), z(0) {}
 
+  point3d point3d::operator+(const vector3d& rhs) const
+  {
+    return point3d(x + rhs.x, y + rhs.y, z + rhs.z);
+  }
+
   vector3d point3d::operator-(const point3d& rhs) const
   {
     return vector3d(x - rhs.x, y - rhs.y, z - rhs.z);
@@ -104,6 +109,22 @@ namespace ComputationalGeometry
   }
 
   double vector3d::sqNorm() const { return (*this).dot(*this); }
+
+  vector3d vector3d::operator+(const vector3d& rhs) const
+  {
+    return vector3d(x + rhs.x, y + rhs.y, z + rhs.z);
+  }
+
+  vector3d vector3d::operator-(const vector3d& rhs) const
+  {
+    return vector3d(x - rhs.x, y - rhs.y, z - rhs.z);
+  }
+
+  vector3d vector3d::operator*(const double& rhs) const
+  {
+    return vector3d(x * rhs, y * rhs, z * rhs);
+  }
+
   vector3d& vector3d::operator*=(const double& scal) { x *= scal; y *= scal; z *= scal; return *this; }
 
   point2d::point2d() : x(0), y(0) {}

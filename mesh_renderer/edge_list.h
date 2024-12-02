@@ -38,7 +38,7 @@ namespace MeshRenderer
       int getNumHalfEdges() const;
       int getNumVertices() const;
       /** \brief Project mesh to the screen of the camera. Theta is the screen rotation. */
-      bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const;
+      bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
   };
 }
 

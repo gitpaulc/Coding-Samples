@@ -34,6 +34,7 @@ public:
   __host__ __device__ point3d();
   __host__ __device__ point3d(const double& xx, const double& yy, const double& zz);
   __host__ __device__ point3d(const point2d& P);
+  point3d operator+(const vector3d& rhs) const;
   vector3d operator-(const point3d& rhs) const;
   /** \brief Necessary for set insertion to work. */
   bool operator< (const point3d& q) const;
@@ -54,6 +55,9 @@ public:
   __host__ __device__ double dot(const vector3d& P) const;
   __host__ __device__ vector3d cross(const vector3d& P) const;
   __host__ __device__ double sqNorm() const;
+  vector3d operator+(const vector3d& rhs) const;
+  vector3d operator-(const vector3d& rhs) const;
+  vector3d operator*(const double& rhs) const;
   __host__ __device__ vector3d& operator*=(const double& scal);
 };
 

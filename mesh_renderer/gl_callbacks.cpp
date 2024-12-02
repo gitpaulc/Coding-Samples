@@ -62,7 +62,7 @@ void recalculate()
     auto eye = cam.getEye();
     auto screen = cam.getScreen();
     auto normal = screen.getNormal();
-    Edge3d ray(eye, point3d(eye.x + normal.x, eye.y + normal.y, eye.z + normal.z));
+    Edge3d ray(eye, eye + normal);
     double tVal = 0.0;
     bool parallel = false;
     bool success = true;
@@ -75,17 +75,15 @@ void recalculate()
         rr = sqrt(rr);
         vector3d e1, e2;
         screen.getOrthonormalBasis(e1, e2);
-        Matrix3d yaw(vector3d(1, 0, 0), vector3d(0, cos(gYaw), -sin(gYaw)), vector3d(0, sin(gYaw), cos(gYaw)));
-        Matrix3d pitch(vector3d(cos(gPitch), 0, -sin(gPitch)), vector3d(0, 1, 0), vector3d(sin(gPitch), 0, cos(gPitch)));
-        normal = pitch * (yaw * normal);
-        screenPt = point3d(eye.x + rr * normal.x, eye.y + rr * normal.y, eye.z + rr * normal.z);
+        normal = (normal * cos(gYaw)) + (e1 * sin(gYaw) * cos(gPitch)) + (e2 * sin(gYaw) * sin(gPitch));
+        screenPt = eye + (normal * rr);
       }
     }
     if (success)
     {
       double gZoom = gOrigin.z;
-      eye = ComputationalGeometry::point3d(eye.x + gZoom * normal.x, eye.y + gZoom * normal.y, eye.z + gZoom * normal.z);
-      screenPt = ComputationalGeometry::point3d(screenPt.x + gZoom * normal.x, screenPt.y + gZoom * normal.y, screenPt.z + gZoom * normal.z);
+      eye = eye + (normal * gZoom);
+      screenPt = screenPt + (normal * gZoom);
       screen = ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal);
       cam.setEye(eye);
       cam.setScreen(screen);
@@ -93,7 +91,8 @@ void recalculate()
   }
 
   if (gOrthogonal) { cam.setViewOrthogonal(true); }
-  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe, gRot);
+  cam.setScreenAxesRotation(gRot);
+  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe);
   for (auto& edge : gWireframe)
   {
     edge.a.x -= gOrigin.x;

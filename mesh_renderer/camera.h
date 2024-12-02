@@ -29,10 +29,12 @@ public:
   ComputationalGeometry::Plane3d getNearPlane() const;
   /** \brief Same as near plane. */
   ComputationalGeometry::Plane3d getScreen() const;
-  /** \brief Same as set near plane. */
-  void setScreen(const ComputationalGeometry::Plane3d&);
+  double getScreenAxesRotation() const;
   bool hasFarPlane() const;
   bool viewIsOrthogonal() const;
+  void setScreenAxesRotation(double theta);
+  /** \brief Same as set near plane. */
+  void setScreen(const ComputationalGeometry::Plane3d&);
   void setViewOrthogonal(bool);
 
 private:

@@ -26,7 +26,6 @@ void GetWindowWidthHeight(int& ww, int& hh)
   hh = gWindowHeight;
 }
 
-
 class Camera::Impl
 {
 public:
@@ -36,6 +35,7 @@ public:
 
   Camera* pCam = nullptr;
   ComputationalGeometry::point3d eye;
+  double axesRot = 0.0;
   bool orthogonalView = false;
   ComputationalGeometry::Plane3d screen; // Near plane.
   ComputationalGeometry::Plane3d farPlane;
@@ -92,6 +92,12 @@ void Camera::setScreen(const ComputationalGeometry::Plane3d& scr)
   pImpl->screen = scr;
 }
 
+double Camera::getScreenAxesRotation() const
+{
+  if (pImpl == nullptr) { return 0.0; }
+  return pImpl->axesRot;
+}
+
 bool Camera::hasFarPlane() const
 {
   if (pImpl == nullptr) { return false; }
@@ -102,6 +108,11 @@ bool Camera::viewIsOrthogonal() const
 {
   if (pImpl == nullptr) { return false; }
   return pImpl->orthogonalView;
+}
+
+void Camera::setScreenAxesRotation(double theta)
+{
+  if (pImpl != nullptr) { pImpl->axesRot = theta; }
 }
 
 void Camera::setViewOrthogonal(bool orthogonalView)
