@@ -28,7 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
-    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const;
+    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -260,7 +260,7 @@ namespace MeshRenderer
   }
 
   bool DoublyConnectedEdgeList::Impl::project(const Camera& cam,
-    std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
+    std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
   {
     using namespace ComputationalGeometry;
     wireframeOut.resize(0);
@@ -293,6 +293,7 @@ namespace MeshRenderer
         if (tVal > 1.0) { addFace = false; break; }
         if ((currentTVal < 0.0) || (tVal < currentTVal)) { currentTVal = tVal; }
         // Rotate by theta:
+        double theta = cam.getScreenAxesRotation();
         double xy_x = xy.x; double xy_y = xy.y;
         xy.x = cos(theta) * xy_x + sin(theta) * xy_y;
         xy.y = -sin(theta) * xy_x + cos(theta) * xy_y;
@@ -719,10 +720,10 @@ namespace MeshRenderer
     return (int)(pImpl->vertices.size());
   }
 
-  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut, double theta) const
+  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->project(cam, wireframeOut, theta);
+    return pImpl->project(cam, wireframeOut);
   }
 
   bool endsWith(const std::string& str, const std::string& suffix)

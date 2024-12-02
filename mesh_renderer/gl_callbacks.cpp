@@ -91,7 +91,8 @@ void recalculate()
   }
 
   if (gOrthogonal) { cam.setViewOrthogonal(true); }
-  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe, gRot);
+  cam.setScreenAxesRotation(gRot);
+  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe);
   for (auto& edge : gWireframe)
   {
     edge.a.x -= gOrigin.x;
