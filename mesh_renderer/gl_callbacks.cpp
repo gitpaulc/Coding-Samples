@@ -9,6 +9,7 @@
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static bool gOrthogonal = false;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
 
@@ -38,7 +39,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'O' toggle orthogonal, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -91,6 +92,7 @@ void recalculate()
     }
   }
 
+  if (gOrthogonal) { cam.setViewOrthogonal(true); }
   bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe, gRot);
   for (auto& edge : gWireframe)
   {
@@ -109,6 +111,10 @@ void keyboard(unsigned char key, int x, int y)
   {
     DoublyConnectedEdgeList::Get().Export();
     return;
+  }
+  if ((key == 'o') || (key == 'O'))
+  {
+    gOrthogonal = !gOrthogonal; recalculate();
   }
   if ((key == 'h') || (key == 'H'))
   {

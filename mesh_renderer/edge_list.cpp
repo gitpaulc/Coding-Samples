@@ -49,6 +49,7 @@ namespace MeshRenderer
       const std::vector<std::string>& faceBuffer);
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::map<std::pair<int, int>, int>& halfEdgesCache);
+    std::map<int, ComputationalGeometry::Face3d> getFaces() const;
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
     bool setNormal(int vertIdx, const std::string& vertexNormal);
@@ -97,6 +98,7 @@ namespace MeshRenderer
 
     std::string originalFilename = "";
     std::string mtlFilepath = "";
+    DoublyConnectedEdgeList::RenderMode renderMode = DoublyConnectedEdgeList::RenderMode::Wireframe;
   };
 
   DoublyConnectedEdgeList::DoublyConnectedEdgeList() : pImpl(std::make_unique<DoublyConnectedEdgeList::Impl>(this))
@@ -262,48 +264,69 @@ namespace MeshRenderer
   {
     using namespace ComputationalGeometry;
     wireframeOut.resize(0);
+    std::map<int, Face3d> renderFaces = getFaces();
     point3d eye = cam.getEye();
     Plane3d screen = cam.getScreen();
     point3d screenO = screen.pointInPlane();
-    std::set<HalfEdgePtr> edgeCache;
-    for (int edgeIdx = 0; edgeIdx < (int)(halfEdges.size()); ++edgeIdx)
+    for (const auto& faceIt : renderFaces)
     {
-      if (edgeCache.count(edgeIdx) > 0) { continue; }
-      //edgeCache.insert(edgeIdx); // Unnecessary.
-      const HalfEdge& halfEdge = halfEdges[edgeIdx];
-      if (halfEdge.reverse != DcelNull) { edgeCache.insert(halfEdge.reverse); }
-      if (halfEdge.source < 0) { continue; }
-      if (halfEdge.source >= (int)(vertices.size())) { continue; }
-      VertexPtr halfEdgeDest = getDest(halfEdge);
-      if (halfEdgeDest < 0) { continue; }
-      if (halfEdgeDest >= (int)(vertices.size())) { continue; }
-      const Vertex& vertexA = vertices[halfEdge.source];
-      const Vertex& vertexB = vertices[halfEdgeDest];
-      Edge3d rayA(eye, vertexA.coords);
-      Edge3d rayB(eye, vertexB.coords);
-      point2d xyA, xyB;
-      double tValA = 0.0;
-      double tValB = 0.0;
-      bool parallel = false;
-      bool success = true;
-      point3d interceptA = screen.getRayCastResult(rayA, tValA, screenO, xyA, parallel, success);
-      if (!success) { continue; }
-      if (tValA < 0.0) { continue; }
-      // If projected pt is between screen and eye:
-      if (tValA > 1.0) { continue; }
-      point3d interceptB = screen.getRayCastResult(rayB, tValB, screenO, xyB, parallel, success);
-      if (!success) { continue; }
-      if (tValB < 0.0) { continue; }
-      // If projected pt is between screen and eye:
-      if (tValB > 1.0) { continue; }
-      double xyA_x = xyA.x; double xyA_y = xyA.y;
-      xyA.x = cos(theta) * xyA_x + sin(theta) * xyA_y;
-      xyA.y = -sin(theta) * xyA_x + cos(theta) * xyA_y;
-      double xyB_x = xyB.x; double xyB_y = xyB.y;
-      xyB.x = cos(theta) * xyB_x + sin(theta) * xyB_y;
-      xyB.y = -sin(theta) * xyB_x + cos(theta) * xyB_y;
-      Edge2d projected(xyA, xyB);
-      wireframeOut.push_back(projected);
+      std::vector<point2d> projections;
+      bool addFace = (faceIt.second.vertices.size() >= 3);
+      double currentTVal = -1.0;
+      for (const point3d& target : faceIt.second.vertices)
+      {
+        if (cam.viewIsOrthogonal())
+        {
+          eye.x = target.x - 2.0 * screen.getNormal().x;
+          eye.y = target.y - 2.0 * screen.getNormal().y;
+          eye.z = target.z - 2.0 * screen.getNormal().z;
+        }
+        Edge3d ray(eye, target);
+        point2d xy;
+        double tVal = 0.0;
+        bool parallel = false;
+        bool success = true;
+        point3d intercept = screen.getRayCastResult(ray, tVal, screenO, xy, parallel, success);
+        if (!success) { addFace = false; break; }
+        if (tVal < 0.0) { addFace = false; break; }
+        // If projected pt is between screen and eye:
+        if (tVal > 1.0) { addFace = false; break; }
+        if ((currentTVal < 0.0) || (tVal < currentTVal)) { currentTVal = tVal; }
+        // Rotate by theta:
+        double xy_x = xy.x; double xy_y = xy.y;
+        xy.x = cos(theta) * xy_x + sin(theta) * xy_y;
+        xy.y = -sin(theta) * xy_x + cos(theta) * xy_y;
+        projections.push_back(xy);
+      }
+      if (!addFace) { continue; }
+      if (renderMode == DoublyConnectedEdgeList::RenderMode::Opaque)
+      {
+        Edge3d ray(eye, faceIt.second.vertices[0]);
+        double bestTVal = 1.0;
+        bool found = false;
+        // Only render nearest raycast.
+        for (const auto& it : renderFaces)
+        {
+          const Face3d& face3d = it.second;
+          bool faceParallel = false;
+          int interiorResult = 0;
+          double tValFace = 1.0;
+          point3d facePt = face3d.getRayCastResult(ray, tValFace, faceParallel, interiorResult);
+          if (tValFace < 0.0) { continue; }
+          if (interiorResult == 0) { continue; }
+          if (!found) { bestTVal = tValFace; found = true; continue; }
+          if (tValFace < bestTVal) { bestTVal = tValFace; }
+        }
+        const double rayThreshold = 1.0e-4;
+        if (bestTVal + rayThreshold < currentTVal) { continue; }
+      }
+      for (int ii = 0; ii < (int)projections.size(); ++ii)
+      {
+        int jj = ii + 1;
+        if (jj == (int)projections.size()) { jj = 0; }
+        Edge2d projected(projections[ii], projections[jj]);
+        wireframeOut.push_back(projected);
+      }
     }
     return true;
   }
@@ -454,7 +477,7 @@ namespace MeshRenderer
       std::pair<int, int> edgePair;
       edgePair.first = faceBuffer[ind];
       edgePair.second = faceBuffer[ind1];
-      if (halfEdgesCache.find(edgePair) != halfEdgesCache.end()) { return false; }
+      // if (halfEdgesCache.find(edgePair) != halfEdgesCache.end()) { return false; }
       HalfEdge halfEdge;
       int halfEdgeCurrent = (int)halfEdges.size();
       if (ind == 0)
@@ -494,6 +517,40 @@ namespace MeshRenderer
     }
 
     return success;
+  }
+
+  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces() const
+  {
+    std::map<int, ComputationalGeometry::Face3d> faceMap;
+    for (int ind = 0; ind < (int)(faces.size()); ++ind)
+    {
+      HalfEdgePtr initialPtr = faces[ind].outerComponent;
+      if (initialPtr == DcelNull) { continue; }
+      if (initialPtr < 0) { continue; }
+      if (initialPtr >= (int)(halfEdges.size())) { continue; }
+      const HalfEdge& initial = halfEdges[initialPtr];
+      if (initial.source == DcelNull) { continue; }
+      if (initial.source < 0) { continue; }
+      if (initial.source >= (int)(vertices.size())) { continue; }
+      const Vertex& initialSrc = vertices[initial.source];
+      ComputationalGeometry::Face3d face;
+      face.vertices.push_back(initialSrc.coords);
+      HalfEdge current = initial;
+      for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
+      {
+        if (current.next == DcelNull) { break; }
+        if (current.next < 0) { break; }
+        if (current.next >= (int)(halfEdges.size())) { break; }
+        current = halfEdges[current.next];
+        if (current.source == DcelNull) { break; }
+        if (current.source < 0) { break; }
+        if (current.source >= (int)(vertices.size())) { break; }
+        const Vertex& currentSrc = vertices[current.source];
+        face.vertices.push_back(currentSrc.coords);
+      }
+      faceMap[ind] = face;
+    }
+    return faceMap;
   }
 
   bool DoublyConnectedEdgeList::Impl::setVertex(int i, const std::string& vertexStr)

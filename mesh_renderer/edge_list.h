@@ -22,6 +22,11 @@ namespace MeshRenderer
     class Impl;
     std::unique_ptr<Impl> pImpl;
     public:
+      enum class RenderMode
+      {
+        Opaque = 0,
+        Wireframe = 1
+      };
       DoublyConnectedEdgeList();
       DoublyConnectedEdgeList(const std::string& filename);
       static void Create(const std::string& filename);

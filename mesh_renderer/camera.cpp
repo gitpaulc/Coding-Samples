@@ -104,6 +104,11 @@ bool Camera::viewIsOrthogonal() const
   return pImpl->orthogonalView;
 }
 
+void Camera::setViewOrthogonal(bool orthogonalView)
+{
+  if (pImpl != nullptr) { pImpl->orthogonalView = orthogonalView; }
+}
+
 Camera::Impl::Impl(Camera* pCamera) : pCam(pCamera)
 {
   using namespace ComputationalGeometry;
