@@ -851,6 +851,16 @@ namespace ComputationalGeometry
     return answer;
   }
 
+  void OrientedPlane3d::getOrthonormalBasis(vector3d& e1, vector3d& e2) const
+  {
+    plane.getOrthonormalBasis(e1, e2);
+    double cosTheta = cos(angle);
+    double sinTheta = sin(angle);
+    auto v1 = (e1 * cosTheta) + (e2 * sinTheta);
+    auto v2 = (e1 * (-sinTheta)) + (e2 * cosTheta);
+    e1 = v1; e2 = v2;
+  }
+
   bool Face3d::isValid() const
   {
     if (vertices.size() < 3) { return false; }
