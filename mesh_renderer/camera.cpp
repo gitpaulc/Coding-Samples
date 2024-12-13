@@ -35,6 +35,7 @@ public:
 
   Camera* pCam = nullptr;
   ComputationalGeometry::point3d eye;
+  /** \brief Interprets screen as oriented plane instead of just plane. */
   double axesRot = 0.0;
   bool orthogonalView = false;
   ComputationalGeometry::Plane3d screen; // Near plane.
@@ -96,6 +97,30 @@ double Camera::getScreenAxesRotation() const
 {
   if (pImpl == nullptr) { return 0.0; }
   return pImpl->axesRot;
+}
+
+ComputationalGeometry::Matrix2d Camera::getScreenAxesRotMatrix() const
+{
+  using namespace ComputationalGeometry;
+  double theta = getScreenAxesRotation();
+  return Matrix2d(vector2d(cos(theta), sin(theta)), vector2d(-sin(theta), cos(theta)));
+}
+
+ComputationalGeometry::point3d Camera::getEyeCast() const
+{
+  auto eye = getEye();
+  auto screen = getScreen();
+  auto normal = screen.getNormal();
+  ComputationalGeometry::Edge3d ray(eye, eye + normal);
+  double tVal = 0.0;
+  bool parallel = false;
+  bool success = true;
+  auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
+  if (!success) { return screen.pointInPlane(); }
+  double rr = (screenPt - eye).sqNorm();
+  if (rr <= 1.0e-9) { return eye; }
+  rr = sqrt(rr);
+  return eye + (normal * rr);
 }
 
 bool Camera::hasFarPlane() const
