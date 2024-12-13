@@ -9,15 +9,14 @@
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge2d> gWireframe;
-  static bool gOrthogonal = false;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
 
-  // World to viewer:
-  ComputationalGeometry::point3d gOrigin = ComputationalGeometry::point3d(0.0, 0.0, 0.0);
-  double gRot = 0.0; // Rotation parallel to screen.
-  double gYaw = 0.0; // Rotate screen from left to right.
-  double gPitch = 0.0; // Rotate screen up and down.
+  static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
+  {
+    static Camera gCam(mesh);
+    return gCam;
+  }
 }
 
 void recalculate();
@@ -56,56 +55,16 @@ void recalculate()
 {
   using namespace MeshRenderer;
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
-  auto cam = MeshRenderer::Camera(mesh);
-  {
-    using namespace ComputationalGeometry;
-    auto eye = cam.getEye();
-    auto screen = cam.getScreen();
-    auto normal = screen.getNormal();
-    Edge3d ray(eye, eye + normal);
-    double tVal = 0.0;
-    bool parallel = false;
-    bool success = true;
-    auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
-    if (success)
-    {
-      double rr = (screenPt - eye).sqNorm();
-      if (rr >= 1.0e-9)
-      {
-        rr = sqrt(rr);
-        vector3d e1, e2;
-        screen.getOrthonormalBasis(e1, e2);
-        normal = (normal * cos(gYaw)) + (e1 * sin(gYaw) * cos(gPitch)) + (e2 * sin(gYaw) * sin(gPitch));
-        screenPt = eye + (normal * rr);
-      }
-    }
-    if (success)
-    {
-      double gZoom = gOrigin.z;
-      eye = eye + (normal * gZoom);
-      screenPt = screenPt + (normal * gZoom);
-      screen = ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal);
-      cam.setEye(eye);
-      cam.setScreen(screen);
-    }
-  }
-
-  if (gOrthogonal) { cam.setViewOrthogonal(true); }
-  cam.setScreenAxesRotation(gRot);
-  bool success = DoublyConnectedEdgeList::Get().project(cam, gWireframe);
-  for (auto& edge : gWireframe)
-  {
-    edge.a.x -= gOrigin.x;
-    edge.a.y -= gOrigin.y;
-    edge.b.x -= gOrigin.x;
-    edge.b.y -= gOrigin.y;
-  }
+  Camera& gCam = GetCamera(mesh);
+  DoublyConnectedEdgeList::Get().project(gCam, gWireframe);
   //std::cout << "\nWireframe size = " << gWireframe.size();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
   using namespace MeshRenderer;
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  Camera& gCam = GetCamera(mesh);
   if ((key == 'e') || (key == 'E'))
   {
     DoublyConnectedEdgeList::Get().Export();
@@ -113,7 +72,7 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'o') || (key == 'O'))
   {
-    gOrthogonal = !gOrthogonal; recalculate();
+    gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal())); recalculate();
   }
   if ((key == 'h') || (key == 'H'))
   {
@@ -129,43 +88,90 @@ void keyboard(unsigned char key, int x, int y)
     return;
   }
 
-  if ((key == 'j') || (key == 'J')) { gOrigin.x -= 0.1; recalculate(); } // Pan left.
-  if ((key == 'l') || (key == 'L')) { gOrigin.x += 0.1; recalculate(); } // Pan right.
-  if ((key == 'i') || (key == 'I')) { gOrigin.y += 0.1; recalculate(); } // Pan up.
-  if ((key == 'k') || (key == 'K')) { gOrigin.y -= 0.1; recalculate(); } // Pan down.
-  if ((key == 'z') || (key == 'Z')) { gOrigin.z += 0.1; recalculate(); } // Zoom in.
-  if ((key == 'y') || (key == 'Y')) { gOrigin.z -= 0.1; recalculate(); } // Zoom out.
+  {
+    auto eye0 = gCam.getEye();
+    auto eye = eye0;
+    bool success;
+    auto rot = gCam.getScreenAxesRotMatrix().inverse(success);
+    double cX = 0; double cY = 0;
+    bool recalc = false;
+    if ((key == 'j') || (key == 'J')) { cY = -1; recalc = true; } // Pan left.
+    if ((key == 'l') || (key == 'L')) { cY =  1; recalc = true; } // Pan right.
+    if ((key == 'i') || (key == 'I')) { cX = -1; recalc = true; } // Pan up.
+    if ((key == 'k') || (key == 'K')) { cX =  1; recalc = true; } // Pan down.
+    if ((key == 'z') || (key == 'Z')) { eye.z += 0.1; recalc = true; } // Zoom in.
+    if ((key == 'y') || (key == 'Y')) { eye.z -= 0.1; recalc = true; } // Zoom out.
+    if (recalc)
+    {
+      auto dT = rot * ComputationalGeometry::vector2d(cX * 0.1, cY * 0.1);
+      eye.x += dT.x; eye.y += dT.y;
+      auto screen = gCam.getScreen();
+      auto normal = screen.getNormal();
+      auto screenPt = gCam.getEyeCast() + (eye - eye0);
+      gCam.setEye(eye);
+      gCam.setScreen(ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal));
+      recalculate();
+    }
+  }
 
   const double fullAngle = 2.0 * 3.14159;
   if ((key == 'r') || (key == 'R')) // Rotate clockwise.
   {
-    gRot += 0.1;  if (gRot >= fullAngle) { gRot -= fullAngle; }
+    double rot = gCam.getScreenAxesRotation();
+    rot += 0.1;  if (rot >= fullAngle) { rot -= fullAngle; }
+    gCam.setScreenAxesRotation(rot);
     recalculate();
   }
   if ((key == 't') || (key == 'T')) // Rotate counter-clockwise.
   {
-    gRot -= 0.1;  if (gRot <= -fullAngle) { gRot += fullAngle; }
+    double rot = gCam.getScreenAxesRotation();
+    rot -= 0.1;  if (rot <= -fullAngle) { rot += fullAngle; }
+    gCam.setScreenAxesRotation(rot);
     recalculate();
   }
-  if ((key == 'a') || (key == 'A')) // Rotate yaw.
   {
-    gYaw += 0.1;  if (gYaw >= fullAngle) { gYaw -= fullAngle; }
-    recalculate();
-  }
-  if ((key == 'd') || (key == 'D')) // Rotate yaw.
-  {
-    gYaw -= 0.1;  if (gYaw <= -fullAngle) { gYaw += fullAngle; }
-    recalculate();
-  }
-  if ((key == 'w') || (key == 'W')) // Rotate pitch.
-  {
-    gPitch += 0.1;  if (gPitch >= fullAngle) { gPitch -= fullAngle; }
-    recalculate();
-  }
-  if ((key == 's') || (key == 'S')) // Rotate counter-clockwise.
-  {
-    gPitch -= 0.1;  if (gPitch <= -fullAngle) { gPitch += fullAngle; }
-    recalculate();
+    double dYaw = 0.0; double dPitch = 0.0;
+    bool yaw = false; bool pitch = false;
+    if ((key == 'a') || (key == 'A')) // Rotate yaw.
+    {
+      dYaw = 0.1; yaw = true;
+    }
+    if ((key == 'd') || (key == 'D')) // Rotate yaw.
+    {
+      dYaw = -0.1; yaw = true;
+    }
+    if ((key == 'w') || (key == 'W')) // Rotate pitch.
+    {
+      dPitch = 0.1; pitch = true;
+    }
+    if ((key == 's') || (key == 'S')) // Rotate pitch.
+    {
+      dPitch = -0.1; pitch = true;
+    }
+    if (yaw || pitch)
+    {
+      auto eye = gCam.getEye();
+      auto screen = gCam.getScreen();
+      auto normal = screen.getNormal();
+      ComputationalGeometry::Edge3d ray(eye, eye + normal);
+      double tVal = 0.0;
+      bool parallel = false;
+      bool success = true;
+      auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
+      if (success)
+      {
+        using namespace ComputationalGeometry;
+        double rr = (screenPt - eye).sqNorm();
+        if (rr >= 1.0e-9) { rr = sqrt(rr); }
+        vector3d e1, e2;
+        screen.getOrthonormalBasis(e1, e2);
+        if (yaw) { normal = normal * cos(dYaw) + e1 * sin(dYaw); }
+        if (pitch) { normal = normal * cos(dPitch) + e2 * sin(dPitch); }
+        screenPt = eye + (normal * rr);
+        gCam.setScreen(Plane3d::fromPointAndNormal(screenPt, normal));
+      }
+      recalculate();
+    }
   }
   glutPostRedisplay();
 }
