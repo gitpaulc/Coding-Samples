@@ -219,6 +219,15 @@ public:
   __host__ __device__ point3d getRayCastResult(const Edge3d& ray, double& tVal, bool& parallel, bool& success) const;
 };
 
+class OrientedPlane3d
+{
+public:
+  Plane3d plane;
+  double angle; /**< Angle of orientation. */
+  /** \brief Plane should be valid. */
+  __host__ __device__ void getOrthonormalBasis(vector3d& e1, vector3d& e2) const;
+};
+
 class Face3d /** \brief Should be planar in 3d. */
 {
 public:
