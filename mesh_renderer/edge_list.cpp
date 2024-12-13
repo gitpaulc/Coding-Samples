@@ -292,11 +292,10 @@ namespace MeshRenderer
         // If projected pt is between screen and eye:
         if (tVal > 1.0) { addFace = false; break; }
         if ((currentTVal < 0.0) || (tVal < currentTVal)) { currentTVal = tVal; }
-        // Rotate by theta:
-        double theta = cam.getScreenAxesRotation();
-        double xy_x = xy.x; double xy_y = xy.y;
-        xy.x = cos(theta) * xy_x + sin(theta) * xy_y;
-        xy.y = -sin(theta) * xy_x + cos(theta) * xy_y;
+        const auto rotTheta = cam.getScreenAxesRotMatrix();
+        auto xyVec = xy - point2d(0, 0);
+        xyVec = rotTheta * xyVec;
+        xy.x = xyVec.x; xy.y = xyVec.y;
         projections.push_back(xy);
       }
       if (!addFace) { continue; }
