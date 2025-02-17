@@ -9,6 +9,7 @@
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
 
@@ -26,6 +27,8 @@ int& GetWindowId()
   static int window_id = -1;
   return window_id;
 }
+
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut);
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
@@ -46,6 +49,8 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
+
+  glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
 
   recalculate();
   glutPostRedisplay();
@@ -190,35 +195,47 @@ void render()
   using namespace MeshRenderer;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glPointSize(3.0f);
+  std::vector<float> vertexData;
+  toVertex3dData(gWireframe, vertexData);
     
-  int numEdges = (int)gWireframe.size();
-  if (!gPointsHidden)
-  {
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glBegin(GL_POINTS);
+  if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
 
-    for (int i = 0; i < numEdges; ++i)
-    {
-      const auto& P = gWireframe[i].a;
-      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-    }
-    glEnd();
-  }
+  glPointSize(3.0f);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+  glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
 
-  if (!gEdgesHidden)
-  {
-    glColor3f(1.0f, 0.0f, 0.0f);
+  int stride = 0;
+  glVertexPointer(3, GL_FLOAT, stride, NULL);
+  glEnableClientState(GL_VERTEX_ARRAY);
+    
+  int whichArray = 0;
+  glColor3f(0.0f, 0.0f, 0.0f);
+  glDrawArrays(GL_POINTS, whichArray, vertexData.size() / 3);
+    
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glDrawArrays(GL_LINES, whichArray, vertexData.size() / 3);
 
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = gWireframe[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      glEnd();
-    }
-  }
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glutSwapBuffers();
+}
+
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut)
+{
+  const auto oldSize = dataIn.size();
+  const auto newSize = dataIn.size() * 6;
+  dataOut.resize(newSize);
+  if (oldSize == 0) { return; }
+  for (int ind = 0; ind < oldSize; ++ind)
+  {
+    int ind0 = ind;
+    dataOut[ind * 6] = dataIn[ind0].a.x;
+    dataOut[ind * 6 + 1] = dataIn[ind0].a.y;
+    dataOut[ind * 6 + 2] = 0;
+    dataOut[ind * 6 + 3] = dataIn[ind0].b.x;
+    dataOut[ind * 6 + 4] = dataIn[ind0].b.y;
+    dataOut[ind * 6 + 5] = 0;
+  }
 }
