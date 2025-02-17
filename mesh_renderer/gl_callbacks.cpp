@@ -9,6 +9,7 @@
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
 
@@ -46,6 +47,8 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutKeyboardFunc(keyboard);
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
+
+  glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
 
   recalculate();
   glutPostRedisplay();
