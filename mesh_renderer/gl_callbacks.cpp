@@ -198,35 +198,24 @@ void render()
   std::vector<float> vertexData;
   toVertex3dData(gWireframe, vertexData);
 
+  if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
+
   glPointSize(3.0f);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData.data()), vertexData.data(), GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     
-  int numEdges = (int)gWireframe.size();
-  if (!gPointsHidden)
-  {
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glBegin(GL_POINTS);
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      const auto& P = gWireframe[i].a;
-      glVertex2f((GLfloat)P.x, (GLfloat)P.y);
-    }
-    glEnd();
-  }
-
-  if (!gEdgesHidden)
-  {
-    glColor3f(1.0f, 0.0f, 0.0f);
-
-    for (int i = 0; i < numEdges; ++i)
-    {
-      glBegin(GL_LINE_LOOP);
-      const auto& edge = gWireframe[i];
-      glVertex2f((GLfloat)edge.a.x, (GLfloat)edge.a.y);
-      glVertex2f((GLfloat)edge.b.x, (GLfloat)edge.b.y);
-      glEnd();
-    }
-  }
+  glVertexPointer(3, GL_FLOAT, 0, NULL);
+  glEnableClientState(GL_VERTEX_ARRAY);
+    
+  int whichArray = 0;
+  glColor3f(0.0f, 0.0f, 0.0f);
+  glDrawArrays(GL_POINTS, whichArray, sizeof(vertexData.data()) / sizeof(float));
+    
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glDrawArrays(GL_LINE_LOOP, whichArray, sizeof(vertexData.data()) / sizeof(float));
+  glFlush();
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glutSwapBuffers();
 }
