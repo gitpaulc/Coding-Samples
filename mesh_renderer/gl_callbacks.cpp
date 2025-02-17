@@ -28,6 +28,8 @@ int& GetWindowId()
   return window_id;
 }
 
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut);
+
 void initialize_glut(int* argc_ptr, char** argv)
 {
   // Initialize GLUT and create a window.
@@ -193,6 +195,9 @@ void render()
   using namespace MeshRenderer;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  std::vector<float> vertexData;
+  toVertex3dData(gWireframe, vertexData);
+
   glPointSize(3.0f);
     
   int numEdges = (int)gWireframe.size();
@@ -224,4 +229,27 @@ void render()
   }
 
   glutSwapBuffers();
+}
+
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut)
+{
+  const auto oldSize = dataIn.size();
+  auto newSize = dataIn.size();
+  if (newSize > 1) { newSize++; }
+  newSize = newSize * 3;
+  dataOut.resize(newSize);
+  if (oldSize == 0) { return; }
+  for (int ind = 0; ind < oldSize + 1; ++ind)
+  {
+    int ind0 = ind;
+    if (ind == oldSize)
+    {
+      if (oldSize == 1) { break; }
+      ind0 = 0;
+    }
+    if ((ind * 3 + 2) >= newSize) { break; }
+    dataOut[ind * 3] = dataIn[ind0].a.x;
+    dataOut[ind * 3 + 1] = dataIn[ind0].a.y;
+    dataOut[ind * 3 + 2] = 0;
+  }
 }
