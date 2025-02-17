@@ -205,7 +205,8 @@ void render()
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData.data()), vertexData.data(), GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     
-  glVertexPointer(3, GL_FLOAT, 0, NULL);
+  int stride = 0;
+  glVertexPointer(3, GL_FLOAT, stride, NULL);
   glEnableClientState(GL_VERTEX_ARRAY);
     
   int whichArray = 0;
@@ -214,7 +215,6 @@ void render()
     
   glColor3f(1.0f, 0.0f, 0.0f);
   glDrawArrays(GL_LINE_LOOP, whichArray, sizeof(vertexData.data()) / sizeof(float));
-  glFlush();
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glutSwapBuffers();
