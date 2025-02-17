@@ -214,7 +214,7 @@ void render()
   glDrawArrays(GL_POINTS, whichArray, vertexData.size() / 3);
     
   glColor3f(1.0f, 0.0f, 0.0f);
-  glDrawArrays(GL_LINE_LOOP, whichArray, vertexData.size() / 3);
+  glDrawArrays(GL_LINES, whichArray, vertexData.size() / 3);
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -225,22 +225,17 @@ void render()
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut)
 {
   const auto oldSize = dataIn.size();
-  auto newSize = dataIn.size();
-  if (newSize > 1) { newSize++; }
-  newSize = newSize * 3;
+  const auto newSize = dataIn.size() * 6;
   dataOut.resize(newSize);
   if (oldSize == 0) { return; }
-  for (int ind = 0; ind < oldSize + 1; ++ind)
+  for (int ind = 0; ind < oldSize; ++ind)
   {
     int ind0 = ind;
-    if (ind == oldSize)
-    {
-      if (oldSize == 1) { break; }
-      ind0 = 0;
-    }
-    if ((ind * 3 + 2) >= newSize) { break; }
-    dataOut[ind * 3] = dataIn[ind0].a.x;
-    dataOut[ind * 3 + 1] = dataIn[ind0].a.y;
-    dataOut[ind * 3 + 2] = 0;
+    dataOut[ind * 6] = dataIn[ind0].a.x;
+    dataOut[ind * 6 + 1] = dataIn[ind0].a.y;
+    dataOut[ind * 6 + 2] = 0;
+    dataOut[ind * 6 + 3] = dataIn[ind0].b.x;
+    dataOut[ind * 6 + 4] = dataIn[ind0].b.y;
+    dataOut[ind * 6 + 5] = 0;
   }
 }
