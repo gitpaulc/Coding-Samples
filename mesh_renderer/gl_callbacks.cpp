@@ -83,7 +83,9 @@ void updateView()
   glLoadIdentity();
   if (gCam.viewIsOrthogonal())
   {
-      //glOrtho();
+    int ww = glutGet(GLUT_WINDOW_WIDTH);
+    int hh = glutGet(GLUT_WINDOW_HEIGHT);
+    glOrtho(0.0f, ww, hh, 0.0, 0.01, 10000);
   }
   else
   {
