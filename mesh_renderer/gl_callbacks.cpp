@@ -19,6 +19,7 @@ namespace MeshRenderer
     return gCam;
   }
   static double gScale;
+  static ComputationalGeometry::point3d gOrigin;
 }
 
 void recalculate();
@@ -100,30 +101,13 @@ void keyboard(unsigned char key, int x, int y)
     return;
   }
 
-  {
-    auto eye0 = gCam.getEye();
-    auto eye = eye0;
-    bool success;
-    auto rot = gCam.getScreenAxesRotMatrix().inverse(success);
-    double cX = 0; double cY = 0;
-    if ((key == 'j') || (key == 'J')) { cX = 1; } // Pan left.
-    if ((key == 'l') || (key == 'L')) { cX = -1; } // Pan right.
-    if ((key == 'i') || (key == 'I')) { cY = -1; } // Pan up.
-    if ((key == 'k') || (key == 'K')) { cY = 1; } // Pan down.
-    if ((key == 'b') || (key == 'B')) { eye.z -= 0.1; } // Zoom out.
-    if ((key == 'z') || (key == 'Z')) { gScale *= 1.1; } // Zoom in.
-    if ((key == 'y') || (key == 'Y')) { gScale /= 1.1; } // Zoom out.
-
-    {
-      auto dT = rot * ComputationalGeometry::vector2d(cX * 0.1, cY * 0.1);
-      eye.x += dT.x; eye.y += dT.y;
-      auto screen = gCam.getScreen();
-      auto normal = screen.getNormal();
-      auto screenPt = gCam.getEyeCast() + (eye - eye0);
-      gCam.setEye(eye);
-      gCam.setScreen(ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal));
-    }
-  }
+  if ((key == 'j') || (key == 'J')) { gOrigin.x += 0.1; } // Pan left.
+  if ((key == 'l') || (key == 'L')) { gOrigin.x -= 0.1; } // Pan right.
+  if ((key == 'i') || (key == 'I')) { gOrigin.y -= 0.1; } // Pan up.
+  if ((key == 'k') || (key == 'K')) { gOrigin.y += 0.1; } // Pan down.
+  if ((key == 'b') || (key == 'B')) { gOrigin.z -= 0.1; } // Zoom out.
+  if ((key == 'z') || (key == 'Z')) { gScale *= 1.1; } // Zoom in.
+  if ((key == 'y') || (key == 'Y')) { gScale /= 1.1; } // Zoom out.
 
   const double fullAngle = 2.0 * 3.14159;
   if ((key == 'r') || (key == 'R')) // Rotate clockwise.
@@ -185,8 +169,7 @@ void keyboard(unsigned char key, int x, int y)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   {
-    auto eye = gCam.getEye();
-    glTranslatef(eye.x, eye.y, eye.z); // Fix this.
+    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
   }
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -200,8 +183,13 @@ void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
+  using namespace MeshRenderer;
+    gOrigin.z += 0.1;
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+    glutPostRedisplay();
   }
-  glutPostRedisplay();
 }
 
 void render()
