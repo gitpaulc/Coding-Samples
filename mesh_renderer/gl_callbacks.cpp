@@ -58,11 +58,9 @@ void initialize_glut(int* argc_ptr, char** argv)
 
 void recalculate()
 {
-  using namespace MeshRenderer;
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
-  Camera& gCam = GetCamera(mesh);
-  DoublyConnectedEdgeList::Get().getWireframe(gWireframe);
-  //std::cout << "\nWireframe size = " << gWireframe.size();
+  mesh.getWireframe(MeshRenderer::gWireframe);
+  //std::cout << "\nWireframe size = " << MeshRenderer::gWireframe.size();
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -72,7 +70,7 @@ void keyboard(unsigned char key, int x, int y)
   Camera& gCam = GetCamera(mesh);
   if ((key == 'e') || (key == 'E'))
   {
-    DoublyConnectedEdgeList::Get().Export();
+    mesh.Export();
     return;
   }
   if ((key == 'o') || (key == 'O'))
