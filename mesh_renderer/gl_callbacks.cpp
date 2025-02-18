@@ -43,7 +43,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'Z' zoom in, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -58,11 +58,14 @@ void initialize_glut(int* argc_ptr, char** argv)
     ComputationalGeometry::point3d minPt, maxPt;
     double scale = (maxPt - minPt).sqNorm();
     if (scale < 0.001) { scale = 1.0; }
-    scale = 1.0 / scale;
+    scale = 0.2 / scale;
     MeshRenderer::gScale = scale;
   }
 
   recalculate();
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  auto& gCam = GetCamera(mesh);
+  gCam.setEye(ComputationalGeometry::point3d());
   keyboard('J', 0, 0);
 }
 
@@ -85,7 +88,7 @@ void updateView()
   {
     int ww = glutGet(GLUT_WINDOW_WIDTH);
     int hh = glutGet(GLUT_WINDOW_HEIGHT);
-    glOrtho(0.0f, ww, hh, 0.0, 0.01, 10000);
+    glOrtho(0.0f, ww, hh, 0.0, 0.001, 10000);
   }
   else
   {
@@ -93,7 +96,7 @@ void updateView()
     int ww = glutGet(GLUT_WINDOW_WIDTH);
     int hh = glutGet(GLUT_WINDOW_HEIGHT);
     double aspectRatio = (double)ww / (double)hh;
-    double nearPlane = 0.01;
+    double nearPlane = 0.001;
     double farPlane = 10000;
     gluPerspective(fov, aspectRatio, nearPlane, farPlane);
   }
