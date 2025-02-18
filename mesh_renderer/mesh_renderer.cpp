@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.\n";
+  std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Pan Back = B, Pan Forward = Mouse Click, Zoom In = Z, Zoom Out = Y.\n";
   std::cout << "Rotation: Press R to rotate clockwise, T counter-clockwise. W, A, S, and D to rotate screen.\n";
   std::cout << "Orthogonal/Perspective: O to toggle.\n";
 

@@ -18,6 +18,7 @@ namespace MeshRenderer
     static Camera gCam(mesh);
     return gCam;
   }
+  static double gScale;
 }
 
 void recalculate();
@@ -51,6 +52,14 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutDisplayFunc(render);
 
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
+
+  {
+    ComputationalGeometry::point3d minPt, maxPt;
+    double scale = (maxPt - minPt).sqNorm();
+    if (scale < 0.001) { scale = 1.0; }
+    scale = 1.0 / scale;
+    MeshRenderer::gScale = scale;
+  }
 
   recalculate();
   glutPostRedisplay();
@@ -101,8 +110,9 @@ void keyboard(unsigned char key, int x, int y)
     if ((key == 'l') || (key == 'L')) { cX = -1; } // Pan right.
     if ((key == 'i') || (key == 'I')) { cY = -1; } // Pan up.
     if ((key == 'k') || (key == 'K')) { cY = 1; } // Pan down.
-    if ((key == 'z') || (key == 'Z')) { eye.z += 0.1; } // Zoom in.
-    if ((key == 'y') || (key == 'Y')) { eye.z -= 0.1; } // Zoom out.
+    if ((key == 'b') || (key == 'B')) { eye.z -= 0.1; } // Zoom out.
+    if ((key == 'z') || (key == 'Z')) { gScale *= 1.1; } // Zoom in.
+    if ((key == 'y') || (key == 'Y')) { gScale /= 1.1; } // Zoom out.
 
     {
       auto dT = rot * ComputationalGeometry::vector2d(cX * 0.1, cY * 0.1);
@@ -176,16 +186,12 @@ void keyboard(unsigned char key, int x, int y)
   glLoadIdentity();
   {
     auto eye = gCam.getEye();
-    glTranslatef(eye.x, eye.y, eye.z);
+    glTranslatef(eye.x, eye.y, eye.z); // Fix this.
   }
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   {
-    ComputationalGeometry::point3d minPt, maxPt;
-    double scale = (maxPt - minPt).sqNorm();
-    if (scale < 0.001) { scale = 1.0; }
-    scale = 1.0 / scale;
-    glScalef((float)scale, (float)scale, (float)scale);
+    glScalef((float)gScale, (float)gScale, (float)gScale);
   }
   glutPostRedisplay();
 }
