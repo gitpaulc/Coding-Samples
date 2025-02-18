@@ -80,15 +80,44 @@ void updateView()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   {
-    glRotatef(gXAngle, 1.0f, 0.0f, 0.0f);
-    glRotatef(gYAngle, 0.0f, 1.0f, 0.0f);
-    glRotatef(gZAngle, 0.0f, 0.0f, 1.0f);
-    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+    //glRotatef(gXAngle, 1.0f, 0.0f, 0.0f);
+    //glRotatef(gYAngle, 0.0f, 1.0f, 0.0f);
+    //glRotatef(gZAngle, 0.0f, 0.0f, 1.0f);
+    //glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+
+    float cosA = cos(gXAngle);
+    float sinA = sin(gXAngle);
+    float cosB = cos(gYAngle);
+    float sinB = sin(gYAngle);
+    float cosC = cos(gZAngle);
+    float sinC = sin(gZAngle);
+
+    std::vector<GLfloat> projMatrix(16, 0.0f);
+    projMatrix[0] = cosB * cosC;
+    projMatrix[1] = sinA * sinB * cosC - cosA * sinC;
+    projMatrix[2] = cosA * sinB * cosC - sinA * cosC;
+    projMatrix[4] = cosB * sinC;
+    projMatrix[5] = sinA * sinB * sinC + cosA * cosC;
+    projMatrix[6] = cosA * sinB * sinC - sinA * cosC;
+    projMatrix[8] = -sinB;
+    projMatrix[9] = sinA * cosB;
+    projMatrix[10] = cosA * cosB;
+    projMatrix[12] = gOrigin.x;
+    projMatrix[13] = gOrigin.y;
+    projMatrix[14] = gOrigin.z;
+    projMatrix[15] = 1.0f;
+    glLoadMatrixf(projMatrix.data());
   }
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   {
-    glScalef(gScale, gScale, gScale);
+    //glScalef(gScale, gScale, gScale);
+    std::vector<GLfloat> mvMatrix(16, 0.0f);
+    mvMatrix[0] = gScale;
+    mvMatrix[5] = gScale;
+    mvMatrix[10] = gScale;
+    mvMatrix[15] = 1.0f;
+    glLoadMatrixf(mvMatrix.data());
   }
   glutPostRedisplay();
 }
