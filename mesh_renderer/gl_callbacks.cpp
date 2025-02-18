@@ -75,7 +75,7 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'o') || (key == 'O'))
   {
-    gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal())); recalculate();
+    gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal()));
   }
   if ((key == 'h') || (key == 'H'))
   {
@@ -97,14 +97,13 @@ void keyboard(unsigned char key, int x, int y)
     bool success;
     auto rot = gCam.getScreenAxesRotMatrix().inverse(success);
     double cX = 0; double cY = 0;
-    bool recalc = false;
-    if ((key == 'j') || (key == 'J')) { cY = -1; recalc = true; } // Pan left.
-    if ((key == 'l') || (key == 'L')) { cY =  1; recalc = true; } // Pan right.
-    if ((key == 'i') || (key == 'I')) { cX = -1; recalc = true; } // Pan up.
-    if ((key == 'k') || (key == 'K')) { cX =  1; recalc = true; } // Pan down.
-    if ((key == 'z') || (key == 'Z')) { eye.z += 0.1; recalc = true; } // Zoom in.
-    if ((key == 'y') || (key == 'Y')) { eye.z -= 0.1; recalc = true; } // Zoom out.
-    if (recalc)
+    if ((key == 'j') || (key == 'J')) { cX = 1; } // Pan left.
+    if ((key == 'l') || (key == 'L')) { cX = -1; } // Pan right.
+    if ((key == 'i') || (key == 'I')) { cY = -1; } // Pan up.
+    if ((key == 'k') || (key == 'K')) { cY = 1; } // Pan down.
+    if ((key == 'z') || (key == 'Z')) { eye.z += 0.1; } // Zoom in.
+    if ((key == 'y') || (key == 'Y')) { eye.z -= 0.1; } // Zoom out.
+
     {
       auto dT = rot * ComputationalGeometry::vector2d(cX * 0.1, cY * 0.1);
       eye.x += dT.x; eye.y += dT.y;
@@ -113,7 +112,6 @@ void keyboard(unsigned char key, int x, int y)
       auto screenPt = gCam.getEyeCast() + (eye - eye0);
       gCam.setEye(eye);
       gCam.setScreen(ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal));
-      recalculate();
     }
   }
 
@@ -130,7 +128,6 @@ void keyboard(unsigned char key, int x, int y)
     double rot = gCam.getScreenAxesRotation();
     rot -= 0.1;  if (rot <= -fullAngle) { rot += fullAngle; }
     gCam.setScreenAxesRotation(rot);
-    recalculate();
   }
   {
     double dYaw = 0.0; double dPitch = 0.0;
@@ -173,8 +170,22 @@ void keyboard(unsigned char key, int x, int y)
         screenPt = eye + (normal * rr);
         gCam.setScreen(Plane3d::fromPointAndNormal(screenPt, normal));
       }
-      recalculate();
     }
+  }
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  {
+    auto eye = gCam.getEye();
+    glTranslatef(eye.x, eye.y, eye.z);
+  }
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  {
+    ComputationalGeometry::point3d minPt, maxPt;
+    double scale = (maxPt - minPt).sqNorm();
+    if (scale < 0.001) { scale = 1.0; }
+    scale = 1.0 / scale;
+    glScalef((float)scale, (float)scale, (float)scale);
   }
   glutPostRedisplay();
 }
