@@ -8,7 +8,7 @@
 
 namespace MeshRenderer
 {
-  static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static std::vector<ComputationalGeometry::Edge3d> gWireframe;
   static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
@@ -28,7 +28,7 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
@@ -61,7 +61,7 @@ void recalculate()
   using namespace MeshRenderer;
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
   Camera& gCam = GetCamera(mesh);
-  DoublyConnectedEdgeList::Get().project(gCam, gWireframe);
+  DoublyConnectedEdgeList::Get().getWireframe(gWireframe);
   //std::cout << "\nWireframe size = " << gWireframe.size();
 }
 
@@ -222,7 +222,7 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
 {
   const auto oldSize = dataIn.size();
   const auto newSize = dataIn.size() * 6;
@@ -233,9 +233,9 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, st
     int ind0 = ind;
     dataOut[ind * 6] = dataIn[ind0].a.x;
     dataOut[ind * 6 + 1] = dataIn[ind0].a.y;
-    dataOut[ind * 6 + 2] = 0;
+    dataOut[ind * 6 + 2] = dataIn[ind0].a.z;
     dataOut[ind * 6 + 3] = dataIn[ind0].b.x;
     dataOut[ind * 6 + 4] = dataIn[ind0].b.y;
-    dataOut[ind * 6 + 5] = 0;
+    dataOut[ind * 6 + 5] = dataIn[ind0].b.z;
   }
 }
