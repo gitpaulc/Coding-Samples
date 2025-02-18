@@ -77,8 +77,24 @@ void recalculate()
 void updateView()
 {
   using namespace MeshRenderer;
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  Camera& gCam = GetCamera(mesh);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  if (gCam.viewIsOrthogonal())
+  {
+      //glOrtho();
+  }
+  else
+  {
+    double fov = 90.0;
+    int ww = glutGet(GLUT_WINDOW_WIDTH);
+    int hh = glutGet(GLUT_WINDOW_HEIGHT);
+    double aspectRatio = (double)ww / (double)hh;
+    double nearPlane = 0.01;
+    double farPlane = 10000;
+    gluPerspective(fov, aspectRatio, nearPlane, farPlane);
+  }
   {
     //glRotatef(gXAngle, 1.0f, 0.0f, 0.0f);
     //glRotatef(gYAngle, 0.0f, 1.0f, 0.0f);
