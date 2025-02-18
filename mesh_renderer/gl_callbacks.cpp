@@ -8,7 +8,7 @@
 
 namespace MeshRenderer
 {
-  static std::vector<ComputationalGeometry::Edge2d> gWireframe;
+  static std::vector<ComputationalGeometry::Edge3d> gWireframe;
   static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
@@ -18,6 +18,8 @@ namespace MeshRenderer
     static Camera gCam(mesh);
     return gCam;
   }
+  static double gScale;
+  static double gXAngle, gYAngle, gZAngle;
 }
 
 void recalculate();
@@ -28,7 +30,7 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
@@ -41,7 +43,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'O' toggle orthogonal, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'Z' zoom in, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -52,32 +54,108 @@ void initialize_glut(int* argc_ptr, char** argv)
 
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
 
+  {
+    ComputationalGeometry::point3d minPt, maxPt;
+    double scale = (maxPt - minPt).sqNorm();
+    if (scale < 0.001) { scale = 1.0; }
+    scale = 0.2 / scale;
+    MeshRenderer::gScale = scale;
+  }
+
   recalculate();
-  glutPostRedisplay();
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  auto& gCam = GetCamera(mesh);
+  gCam.setEye(ComputationalGeometry::point3d());
+  keyboard('J', 0, 0);
 }
 
 void recalculate()
 {
+  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  mesh.getWireframe(MeshRenderer::gWireframe);
+  //std::cout << "\nWireframe size = " << MeshRenderer::gWireframe.size();
+}
+
+void updateView()
+{
   using namespace MeshRenderer;
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
   Camera& gCam = GetCamera(mesh);
-  DoublyConnectedEdgeList::Get().project(gCam, gWireframe);
-  //std::cout << "\nWireframe size = " << gWireframe.size();
+  auto origin = gCam.getEye();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  if (gCam.viewIsOrthogonal())
+  {
+    int ww = glutGet(GLUT_WINDOW_WIDTH);
+    int hh = glutGet(GLUT_WINDOW_HEIGHT);
+    glOrtho(0.0f, ww, hh, 0.0, 0.001, 10000);
+  }
+  else
+  {
+    double fov = 90.0;
+    int ww = glutGet(GLUT_WINDOW_WIDTH);
+    int hh = glutGet(GLUT_WINDOW_HEIGHT);
+    double aspectRatio = (double)ww / (double)hh;
+    double nearPlane = 0.001;
+    double farPlane = 10000;
+    gluPerspective(fov, aspectRatio, nearPlane, farPlane);
+  }
+  {
+    //glRotatef(gXAngle, 1.0f, 0.0f, 0.0f);
+    //glRotatef(gYAngle, 0.0f, 1.0f, 0.0f);
+    //glRotatef(gZAngle, 0.0f, 0.0f, 1.0f);
+    //glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+
+    float cosA = cos(gXAngle);
+    float sinA = sin(gXAngle);
+    float cosB = cos(gYAngle);
+    float sinB = sin(gYAngle);
+    float cosC = cos(gZAngle);
+    float sinC = sin(gZAngle);
+
+    std::vector<GLfloat> projMatrix(16, 0.0f);
+    projMatrix[0] = cosB * cosC;
+    projMatrix[1] = sinA * sinB * cosC - cosA * sinC;
+    projMatrix[2] = cosA * sinB * cosC - sinA * cosC;
+    projMatrix[4] = cosB * sinC;
+    projMatrix[5] = sinA * sinB * sinC + cosA * cosC;
+    projMatrix[6] = cosA * sinB * sinC - sinA * cosC;
+    projMatrix[8] = -sinB;
+    projMatrix[9] = sinA * cosB;
+    projMatrix[10] = cosA * cosB;
+    projMatrix[12] = origin.x;
+    projMatrix[13] = origin.y;
+    projMatrix[14] = origin.z;
+    projMatrix[15] = 1.0f;
+    glLoadMatrixf(projMatrix.data());
+  }
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  {
+    //glScalef(gScale, gScale, gScale);
+    std::vector<GLfloat> mvMatrix(16, 0.0f);
+    mvMatrix[0] = gScale;
+    mvMatrix[5] = gScale;
+    mvMatrix[10] = gScale;
+    mvMatrix[15] = 1.0f;
+    glLoadMatrixf(mvMatrix.data());
+  }
+  glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
   using namespace MeshRenderer;
-  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  const auto& mesh = DoublyConnectedEdgeList::Get();
   Camera& gCam = GetCamera(mesh);
   if ((key == 'e') || (key == 'E'))
   {
-    DoublyConnectedEdgeList::Get().Export();
+    mesh.Export();
     return;
   }
   if ((key == 'o') || (key == 'O'))
   {
-    gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal())); recalculate();
+    gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal()));
   }
   if ((key == 'h') || (key == 'H'))
   {
@@ -93,100 +171,64 @@ void keyboard(unsigned char key, int x, int y)
     return;
   }
 
-  {
-    auto eye0 = gCam.getEye();
-    auto eye = eye0;
-    bool success;
-    auto rot = gCam.getScreenAxesRotMatrix().inverse(success);
-    double cX = 0; double cY = 0;
-    bool recalc = false;
-    if ((key == 'j') || (key == 'J')) { cY = -1; recalc = true; } // Pan left.
-    if ((key == 'l') || (key == 'L')) { cY =  1; recalc = true; } // Pan right.
-    if ((key == 'i') || (key == 'I')) { cX = -1; recalc = true; } // Pan up.
-    if ((key == 'k') || (key == 'K')) { cX =  1; recalc = true; } // Pan down.
-    if ((key == 'z') || (key == 'Z')) { eye.z += 0.1; recalc = true; } // Zoom in.
-    if ((key == 'y') || (key == 'Y')) { eye.z -= 0.1; recalc = true; } // Zoom out.
-    if (recalc)
-    {
-      auto dT = rot * ComputationalGeometry::vector2d(cX * 0.1, cY * 0.1);
-      eye.x += dT.x; eye.y += dT.y;
-      auto screen = gCam.getScreen();
-      auto normal = screen.getNormal();
-      auto screenPt = gCam.getEyeCast() + (eye - eye0);
-      gCam.setEye(eye);
-      gCam.setScreen(ComputationalGeometry::Plane3d::fromPointAndNormal(screenPt, normal));
-      recalculate();
-    }
-  }
+  auto origin = gCam.getEye();
+
+  if ((key == 'j') || (key == 'J')) { origin.x += 0.1; } // Pan left.
+  if ((key == 'l') || (key == 'L')) { origin.x -= 0.1; } // Pan right.
+  if ((key == 'i') || (key == 'I')) { origin.y -= 0.1; } // Pan up.
+  if ((key == 'k') || (key == 'K')) { origin.y += 0.1; } // Pan down.
+  if ((key == 'b') || (key == 'B')) { origin.z -= 0.1; } // Zoom out.
+  if ((key == 'z') || (key == 'Z')) { gScale *= 1.1; } // Zoom in.
+  if ((key == 'y') || (key == 'Y')) { gScale /= 1.1; } // Zoom out.
+
+  gCam.setEye(origin);
 
   const double fullAngle = 2.0 * 3.14159;
   if ((key == 'r') || (key == 'R')) // Rotate clockwise.
   {
-    double rot = gCam.getScreenAxesRotation();
-    rot += 0.1;  if (rot >= fullAngle) { rot -= fullAngle; }
-    gCam.setScreenAxesRotation(rot);
-    recalculate();
+    gZAngle += 0.1;
+    if (gZAngle >= 10.0 * fullAngle) { gZAngle -= 9.0 * fullAngle; }
   }
   if ((key == 't') || (key == 'T')) // Rotate counter-clockwise.
   {
-    double rot = gCam.getScreenAxesRotation();
-    rot -= 0.1;  if (rot <= -fullAngle) { rot += fullAngle; }
-    gCam.setScreenAxesRotation(rot);
-    recalculate();
+    gZAngle -= 0.1;
+    if (gZAngle <= -10.0 * fullAngle) { gZAngle += 9.0 * fullAngle; }
   }
+  if ((key == 'a') || (key == 'A')) // Rotate yaw.
   {
-    double dYaw = 0.0; double dPitch = 0.0;
-    bool yaw = false; bool pitch = false;
-    if ((key == 'a') || (key == 'A')) // Rotate yaw.
-    {
-      dYaw = 0.1; yaw = true;
-    }
-    if ((key == 'd') || (key == 'D')) // Rotate yaw.
-    {
-      dYaw = -0.1; yaw = true;
-    }
-    if ((key == 'w') || (key == 'W')) // Rotate pitch.
-    {
-      dPitch = 0.1; pitch = true;
-    }
-    if ((key == 's') || (key == 'S')) // Rotate pitch.
-    {
-      dPitch = -0.1; pitch = true;
-    }
-    if (yaw || pitch)
-    {
-      auto eye = gCam.getEye();
-      auto screen = gCam.getScreen();
-      auto normal = screen.getNormal();
-      ComputationalGeometry::Edge3d ray(eye, eye + normal);
-      double tVal = 0.0;
-      bool parallel = false;
-      bool success = true;
-      auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
-      if (success)
-      {
-        using namespace ComputationalGeometry;
-        double rr = (screenPt - eye).sqNorm();
-        if (rr >= 1.0e-9) { rr = sqrt(rr); }
-        vector3d e1, e2;
-        screen.getOrthonormalBasis(e1, e2);
-        if (yaw) { normal = normal * cos(dYaw) + e1 * sin(dYaw); }
-        if (pitch) { normal = normal * cos(dPitch) + e2 * sin(dPitch); }
-        screenPt = eye + (normal * rr);
-        gCam.setScreen(Plane3d::fromPointAndNormal(screenPt, normal));
-      }
-      recalculate();
-    }
+    gYAngle += 0.1;
+    if (gYAngle >= 10.0 * fullAngle) { gYAngle -= 9.0 * fullAngle; }
   }
-  glutPostRedisplay();
+  if ((key == 'd') || (key == 'D')) // Rotate yaw.
+  {
+    gYAngle -= 0.1;
+    if (gYAngle <= -10.0 * fullAngle) { gYAngle += 9.0 * fullAngle; }
+  }
+  if ((key == 'w') || (key == 'W')) // Rotate pitch.
+  {
+    gXAngle += 0.1;
+    if (gXAngle >= 10.0 * fullAngle) { gXAngle -= 9.0 * fullAngle; }
+  }
+  if ((key == 's') || (key == 'S')) // Rotate pitch.
+  {
+    gXAngle -= 0.1;
+    if (gXAngle <= -10.0 * fullAngle) { gXAngle += 9.0 * fullAngle; }
+  }
+  updateView();
 }
 
 void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
+    using namespace MeshRenderer;
+    const auto& mesh = DoublyConnectedEdgeList::Get();
+    Camera& gCam = GetCamera(mesh);
+    auto origin = gCam.getEye();
+    origin.z += 0.1;
+    gCam.setEye(origin);
+    updateView();
   }
-  glutPostRedisplay();
 }
 
 void render()
@@ -222,7 +264,7 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, std::vector<float>& dataOut)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
 {
   const auto oldSize = dataIn.size();
   const auto newSize = dataIn.size() * 6;
@@ -233,9 +275,9 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge2d>& dataIn, st
     int ind0 = ind;
     dataOut[ind * 6] = dataIn[ind0].a.x;
     dataOut[ind * 6 + 1] = dataIn[ind0].a.y;
-    dataOut[ind * 6 + 2] = 0;
+    dataOut[ind * 6 + 2] = dataIn[ind0].a.z;
     dataOut[ind * 6 + 3] = dataIn[ind0].b.x;
     dataOut[ind * 6 + 4] = dataIn[ind0].b.y;
-    dataOut[ind * 6 + 5] = 0;
+    dataOut[ind * 6 + 5] = dataIn[ind0].b.z;
   }
 }

@@ -8,7 +8,7 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
-  class Edge2d;  // Forward declaration.
+  class Edge3d;  // Forward declaration.
   class point3d; // Forward declaration.
   class Plane3d; // Forward declaration.
 }
@@ -37,8 +37,7 @@ namespace MeshRenderer
       int getNumFaces() const;
       int getNumHalfEdges() const;
       int getNumVertices() const;
-      /** \brief Project mesh to the screen of the camera. Theta is the screen rotation. */
-      bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
+      bool getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const;
   };
 }
 

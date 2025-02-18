@@ -28,7 +28,7 @@ namespace MeshRenderer
     Impl(DoublyConnectedEdgeList* pParent, const std::string& filename);
 
     bool Export(const std::string& filename) const;
-    bool project(const Camera&, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const;
+    bool getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const;
     /**
      * vertexBuffer line starts with "v"
      * vertexNormals line starts with "vn"
@@ -259,73 +259,30 @@ namespace MeshRenderer
     return true;
   }
 
-  bool DoublyConnectedEdgeList::Impl::project(const Camera& cam,
-    std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
+  bool DoublyConnectedEdgeList::Impl::getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const
   {
     using namespace ComputationalGeometry;
     wireframeOut.resize(0);
+    std::set<Edge3d> added;
     std::map<int, Face3d> renderFaces = getFaces();
-    point3d eye = cam.getEye();
-    Plane3d screen = cam.getScreen();
-    point3d screenO = screen.pointInPlane();
     for (const auto& faceIt : renderFaces)
     {
-      std::vector<point2d> projections;
+      std::vector<point3d> corners;
       bool addFace = (faceIt.second.vertices.size() >= 3);
-      double currentTVal = -1.0;
+      if (!addFace) { continue; }
       for (const point3d& target : faceIt.second.vertices)
       {
-        if (cam.viewIsOrthogonal())
-        {
-          eye.x = target.x - 2.0 * screen.getNormal().x;
-          eye.y = target.y - 2.0 * screen.getNormal().y;
-          eye.z = target.z - 2.0 * screen.getNormal().z;
-        }
-        Edge3d ray(eye, target);
-        point2d xy;
-        double tVal = 0.0;
-        bool parallel = false;
-        bool success = true;
-        point3d intercept = screen.getRayCastResult(ray, tVal, screenO, xy, parallel, success);
-        if (!success) { addFace = false; break; }
-        if (tVal < 0.0) { addFace = false; break; }
-        // If projected pt is between screen and eye:
-        if (tVal > 1.0) { addFace = false; break; }
-        if ((currentTVal < 0.0) || (tVal < currentTVal)) { currentTVal = tVal; }
-        const auto rotTheta = cam.getScreenAxesRotMatrix();
-        auto xyVec = xy - point2d(0, 0);
-        xyVec = rotTheta * xyVec;
-        xy.x = xyVec.x; xy.y = xyVec.y;
-        projections.push_back(xy);
+        corners.push_back(target);
       }
-      if (!addFace) { continue; }
-      if (renderMode == DoublyConnectedEdgeList::RenderMode::Opaque)
-      {
-        Edge3d ray(eye, faceIt.second.vertices[0]);
-        double bestTVal = 1.0;
-        bool found = false;
-        // Only render nearest raycast.
-        for (const auto& it : renderFaces)
-        {
-          const Face3d& face3d = it.second;
-          bool faceParallel = false;
-          int interiorResult = 0;
-          double tValFace = 1.0;
-          point3d facePt = face3d.getRayCastResult(ray, tValFace, faceParallel, interiorResult);
-          if (tValFace < 0.0) { continue; }
-          if (interiorResult == 0) { continue; }
-          if (!found) { bestTVal = tValFace; found = true; continue; }
-          if (tValFace < bestTVal) { bestTVal = tValFace; }
-        }
-        const double rayThreshold = 1.0e-4;
-        if (bestTVal + rayThreshold < currentTVal) { continue; }
-      }
-      for (int ii = 0; ii < (int)projections.size(); ++ii)
+      for (int ii = 0; ii < (int)corners.size(); ++ii)
       {
         int jj = ii + 1;
-        if (jj == (int)projections.size()) { jj = 0; }
-        Edge2d projected(projections[ii], projections[jj]);
-        wireframeOut.push_back(projected);
+        if (jj == (int)corners.size()) { jj = 0; }
+        Edge3d toAdd(corners[ii], corners[jj]);
+        if (added.count(toAdd) > 0) { continue; }
+        wireframeOut.push_back(toAdd);
+        added.insert(toAdd);
+        added.insert(Edge3d(corners[jj], corners[ii]));
       }
     }
     return true;
@@ -719,10 +676,10 @@ namespace MeshRenderer
     return (int)(pImpl->vertices.size());
   }
 
-  bool DoublyConnectedEdgeList::project(const Camera& cam, std::vector<ComputationalGeometry::Edge2d>& wireframeOut) const
+  bool DoublyConnectedEdgeList::getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const
   {
     if (pImpl == nullptr) { return false; }
-    return pImpl->project(cam, wireframeOut);
+    return pImpl->getWireframe(wireframeOut);
   }
 
   bool endsWith(const std::string& str, const std::string& suffix)
