@@ -19,7 +19,6 @@ namespace MeshRenderer
     return gCam;
   }
   static double gScale;
-  static ComputationalGeometry::point3d gOrigin;
   static double gXAngle, gYAngle, gZAngle;
 }
 
@@ -44,7 +43,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'O' toggle orthogonal, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'q' to exit.");
     
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
@@ -64,7 +63,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   }
 
   recalculate();
-  glutPostRedisplay();
+  keyboard('J', 0, 0);
 }
 
 void recalculate()
@@ -79,6 +78,7 @@ void updateView()
   using namespace MeshRenderer;
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
   Camera& gCam = GetCamera(mesh);
+  auto origin = gCam.getEye();
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   if (gCam.viewIsOrthogonal())
@@ -120,9 +120,9 @@ void updateView()
     projMatrix[8] = -sinB;
     projMatrix[9] = sinA * cosB;
     projMatrix[10] = cosA * cosB;
-    projMatrix[12] = gOrigin.x;
-    projMatrix[13] = gOrigin.y;
-    projMatrix[14] = gOrigin.z;
+    projMatrix[12] = origin.x;
+    projMatrix[13] = origin.y;
+    projMatrix[14] = origin.z;
     projMatrix[15] = 1.0f;
     glLoadMatrixf(projMatrix.data());
   }
@@ -143,7 +143,7 @@ void updateView()
 void keyboard(unsigned char key, int x, int y)
 {
   using namespace MeshRenderer;
-  const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
+  const auto& mesh = DoublyConnectedEdgeList::Get();
   Camera& gCam = GetCamera(mesh);
   if ((key == 'e') || (key == 'E'))
   {
@@ -168,13 +168,17 @@ void keyboard(unsigned char key, int x, int y)
     return;
   }
 
-  if ((key == 'j') || (key == 'J')) { gOrigin.x += 0.1; } // Pan left.
-  if ((key == 'l') || (key == 'L')) { gOrigin.x -= 0.1; } // Pan right.
-  if ((key == 'i') || (key == 'I')) { gOrigin.y -= 0.1; } // Pan up.
-  if ((key == 'k') || (key == 'K')) { gOrigin.y += 0.1; } // Pan down.
-  if ((key == 'b') || (key == 'B')) { gOrigin.z -= 0.1; } // Zoom out.
+  auto origin = gCam.getEye();
+
+  if ((key == 'j') || (key == 'J')) { origin.x += 0.1; } // Pan left.
+  if ((key == 'l') || (key == 'L')) { origin.x -= 0.1; } // Pan right.
+  if ((key == 'i') || (key == 'I')) { origin.y -= 0.1; } // Pan up.
+  if ((key == 'k') || (key == 'K')) { origin.y += 0.1; } // Pan down.
+  if ((key == 'b') || (key == 'B')) { origin.z -= 0.1; } // Zoom out.
   if ((key == 'z') || (key == 'Z')) { gScale *= 1.1; } // Zoom in.
   if ((key == 'y') || (key == 'Y')) { gScale /= 1.1; } // Zoom out.
+
+  gCam.setEye(origin);
 
   const double fullAngle = 2.0 * 3.14159;
   if ((key == 'r') || (key == 'R')) // Rotate clockwise.
@@ -214,7 +218,13 @@ void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
-    MeshRenderer::gOrigin.z += 0.1; updateView();
+    using namespace MeshRenderer;
+    const auto& mesh = DoublyConnectedEdgeList::Get();
+    Camera& gCam = GetCamera(mesh);
+    auto origin = gCam.getEye();
+    origin.z += 0.1;
+    gCam.setEye(origin);
+    updateView();
   }
 }
 
