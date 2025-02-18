@@ -20,6 +20,7 @@ namespace MeshRenderer
   }
   static double gScale;
   static ComputationalGeometry::point3d gOrigin;
+  static double gXAngle, gYAngle, gZAngle;
 }
 
 void recalculate();
@@ -73,6 +74,25 @@ void recalculate()
   //std::cout << "\nWireframe size = " << MeshRenderer::gWireframe.size();
 }
 
+void updateView()
+{
+  using namespace MeshRenderer;
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  {
+    glRotatef(gXAngle, 1.0f, 0.0f, 0.0f);
+    glRotatef(gYAngle, 0.0f, 1.0f, 0.0f);
+    glRotatef(gZAngle, 0.0f, 0.0f, 1.0f);
+    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+  }
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  {
+    glScalef(gScale, gScale, gScale);
+  }
+  glutPostRedisplay();
+}
+
 void keyboard(unsigned char key, int x, int y)
 {
   using namespace MeshRenderer;
@@ -112,83 +132,42 @@ void keyboard(unsigned char key, int x, int y)
   const double fullAngle = 2.0 * 3.14159;
   if ((key == 'r') || (key == 'R')) // Rotate clockwise.
   {
-    double rot = gCam.getScreenAxesRotation();
-    rot += 0.1;  if (rot >= fullAngle) { rot -= fullAngle; }
-    gCam.setScreenAxesRotation(rot);
-    recalculate();
+    gZAngle += 0.1;
+    if (gZAngle >= 10.0 * fullAngle) { gZAngle -= 9.0 * fullAngle; }
   }
   if ((key == 't') || (key == 'T')) // Rotate counter-clockwise.
   {
-    double rot = gCam.getScreenAxesRotation();
-    rot -= 0.1;  if (rot <= -fullAngle) { rot += fullAngle; }
-    gCam.setScreenAxesRotation(rot);
+    gZAngle -= 0.1;
+    if (gZAngle <= -10.0 * fullAngle) { gZAngle += 9.0 * fullAngle; }
   }
+  if ((key == 'a') || (key == 'A')) // Rotate yaw.
   {
-    double dYaw = 0.0; double dPitch = 0.0;
-    bool yaw = false; bool pitch = false;
-    if ((key == 'a') || (key == 'A')) // Rotate yaw.
-    {
-      dYaw = 0.1; yaw = true;
-    }
-    if ((key == 'd') || (key == 'D')) // Rotate yaw.
-    {
-      dYaw = -0.1; yaw = true;
-    }
-    if ((key == 'w') || (key == 'W')) // Rotate pitch.
-    {
-      dPitch = 0.1; pitch = true;
-    }
-    if ((key == 's') || (key == 'S')) // Rotate pitch.
-    {
-      dPitch = -0.1; pitch = true;
-    }
-    if (yaw || pitch)
-    {
-      auto eye = gCam.getEye();
-      auto screen = gCam.getScreen();
-      auto normal = screen.getNormal();
-      ComputationalGeometry::Edge3d ray(eye, eye + normal);
-      double tVal = 0.0;
-      bool parallel = false;
-      bool success = true;
-      auto screenPt = screen.getRayCastResult(ray, tVal, parallel, success);
-      if (success)
-      {
-        using namespace ComputationalGeometry;
-        double rr = (screenPt - eye).sqNorm();
-        if (rr >= 1.0e-9) { rr = sqrt(rr); }
-        vector3d e1, e2;
-        screen.getOrthonormalBasis(e1, e2);
-        if (yaw) { normal = normal * cos(dYaw) + e1 * sin(dYaw); }
-        if (pitch) { normal = normal * cos(dPitch) + e2 * sin(dPitch); }
-        screenPt = eye + (normal * rr);
-        gCam.setScreen(Plane3d::fromPointAndNormal(screenPt, normal));
-      }
-    }
+    gYAngle += 0.1;
+    if (gYAngle >= 10.0 * fullAngle) { gYAngle -= 9.0 * fullAngle; }
   }
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
+  if ((key == 'd') || (key == 'D')) // Rotate yaw.
   {
-    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
+    gYAngle -= 0.1;
+    if (gYAngle <= -10.0 * fullAngle) { gYAngle += 9.0 * fullAngle; }
   }
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  if ((key == 'w') || (key == 'W')) // Rotate pitch.
   {
-    glScalef((float)gScale, (float)gScale, (float)gScale);
+    gXAngle += 0.1;
+    if (gXAngle >= 10.0 * fullAngle) { gXAngle -= 9.0 * fullAngle; }
   }
-  glutPostRedisplay();
+  if ((key == 's') || (key == 'S')) // Rotate pitch.
+  {
+    gXAngle -= 0.1;
+    if (gXAngle <= -10.0 * fullAngle) { gXAngle += 9.0 * fullAngle; }
+  }
+  updateView();
 }
 
 void mouse(int button, int state, int x, int y)
 {
   if((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP))
   {
-  using namespace MeshRenderer;
-    gOrigin.z += 0.1;
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
-    glutPostRedisplay();
+    MeshRenderer::gOrigin.z += 0.1; updateView();
   }
 }
 
