@@ -57,6 +57,7 @@ mesh_renderer/MeshRenderer/freeglut/include
 mesh_renderer/MeshRenderer/freeglut/lib
 mesh_renderer/MeshRenderer/freeglut/Copying.txt
 mesh_renderer/MeshRenderer/freeglut/Readme.txt
+mesh_renderer/MeshRenderer/glew*
 mesh_renderer/MeshRenderer/opencv
 mesh_renderer/MeshRenderer/Release
 mesh_renderer/MeshRenderer/RelWithDebInfo

@@ -22,11 +22,13 @@ All Rights Reserved.*/
 #else
 #ifdef _WIN64
 #include <windows.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
 #else
 #ifdef _WIN32
 #include <windows.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
 #else
