@@ -71,6 +71,9 @@
 **Mesh Renderer.**
 
 * Build in mesh_renderer folder. Use CMake to generate a VS project file, a sample is included.
+* If you are using Windows, download `glew` in order to enable function calls like `glGenBuffers` in Windows.
+* This can be found at https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download
+* Copy the `glew-2.1.0` folder to `Coding-Samples\mesh_renderer\MeshRenderer` or configure CMake to point to the relevant include, lib, and binary paths.
 * Usage: mesh_renderer.exe <path to .obj file>
 * Press E to export the loaded mesh if desired, Q to exit the app.
 * Navigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.

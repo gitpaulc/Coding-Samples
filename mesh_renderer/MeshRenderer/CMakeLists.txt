@@ -34,6 +34,10 @@ if (${USE_OPEN_GL})
   set(FREE_GLUT_INCLUDE "freeglut/include" CACHE PATH "Location of FreeGlut headers.")
   set(FREE_GLUT_LIB_DIR "freeglut/lib${PATH_64}" CACHE PATH "Location of FreeGlut static libraries.")
   set(FREE_GLUT_BIN_DIR "freeglut/bin${PATH_64}" CACHE PATH "Location of FreeGlut DLLs.")
+  set(USE_GLEW_STATIC_LIB OFF CACHE BOOL "Use GLEW static lib?")
+  set(GLEW_INCLUDE "glew-2.1.0/include" CACHE PATH "Location of GLEW headers.")
+  set(GLEW_LIB_DIR "glew-2.1.0/lib/Release${PATH_64}" CACHE PATH "Location of GLEW static libraries.")
+  set(GLEW_BIN_DIR "glew-2.1.0/bin/Release${PATH_64}" CACHE PATH "Location of GLEW DLLs.")
 endif()
 if (${USE_OPEN_CV})
   set(OPEN_CV_VERSION "4.9.0" CACHE STRING "Which version of OpenCV to use?")
@@ -82,6 +86,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT M
 
 if (${USE_OPEN_GL})
   target_include_directories(MeshRenderer PUBLIC "${FREE_GLUT_INCLUDE}")
+  target_include_directories(MeshRenderer PUBLIC "${GLEW_INCLUDE}")
 endif()
 
 if (${USE_OPEN_CV})
@@ -99,7 +104,12 @@ endif()
 
 if (${USE_OPEN_GL})
   target_link_directories(MeshRenderer PUBLIC "${FREE_GLUT_LIB_DIR}")
+  target_link_directories(MeshRenderer PUBLIC "${GLEW_LIB_DIR}")
   target_link_libraries(MeshRenderer PUBLIC "freeglut.lib")
+  target_link_libraries(MeshRenderer PUBLIC "glew32.lib")
+  if (${USE_GLEW_STATIC_LIB})
+    target_link_libraries(MeshRenderer PUBLIC "glew32s.lib")
+  endif()
 endif()
 
 if (${USE_OPEN_CV})
@@ -112,6 +122,10 @@ endif()
 if (${USE_OPEN_GL})
   add_custom_command(TARGET MeshRenderer POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "${FREE_GLUT_BIN_DIR}/freeglut.dll" "$<TARGET_FILE_DIR:MeshRenderer>")
+  if (NOT ${USE_GLEW_STATIC_LIB})
+    add_custom_command(TARGET MeshRenderer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "${GLEW_BIN_DIR}/glew32.dll" "$<TARGET_FILE_DIR:MeshRenderer>")
+  endif()
 endif()
 
 if (${USE_OPEN_CV})

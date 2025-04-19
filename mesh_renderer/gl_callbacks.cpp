@@ -44,7 +44,17 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutInitWindowSize(ww, hh);
 
   GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'Z' zoom in, 'q' to exit.");
-    
+
+#ifdef __GLEW_H__
+  {
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      fprintf(stderr, "\nError initializing GLEW: %s", glewGetErrorString(err));
+    }
+  }
+#endif
+  
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   
   glutSetCursor(GLUT_CURSOR_INFO);
