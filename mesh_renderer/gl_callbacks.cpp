@@ -37,7 +37,7 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool withColor);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -260,7 +260,7 @@ void render()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData);
+  toVertex3dData(gWireframe, vertexData, !gWireframeOn);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn)
@@ -272,14 +272,18 @@ void render()
     glEnableVertexAttribArray(gColLocation);
     glVertexAttribPointer(gColLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)(sizeof(float) * 3));
     glUseProgram(gShaderProgram);
+    glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
-    glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     int whichArray = 0;
-    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 6);
+    toVertex3dData(gWireframe, vertexData, false);
+    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
     return;
   }
 
+  glUseProgram(0);
   glPointSize(3.0f);
   glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
   glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
@@ -302,10 +306,10 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool withColor)
 {
   const auto oldSize = dataIn.size();
-  if (!MeshRenderer::gWireframeOn)
+  if (withColor)
   {
     const auto newSize = dataIn.size() * 12;
     dataOut.resize(newSize);
