@@ -8,9 +8,9 @@ All Rights Reserved.*/
 
 namespace ComputationalGeometry
 {
-  class Edge3d;  // Forward declaration.
-  class point3d; // Forward declaration.
-  class Plane3d; // Forward declaration.
+  class Edge3d;   // Forward declaration.
+  class point3d;  // Forward declaration.
+  class Plane3d;  // Forward declaration.
 }
 
 namespace MeshRenderer
@@ -37,6 +37,7 @@ namespace MeshRenderer
       int getNumFaces() const;
       int getNumHalfEdges() const;
       int getNumVertices() const;
+      bool getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut) const;
       bool getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const;
   };
 }

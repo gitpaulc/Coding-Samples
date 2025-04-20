@@ -91,8 +91,14 @@ void initialize_glut(int* argc_ptr, char** argv)
 void recalculate()
 {
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
-  mesh.getWireframe(MeshRenderer::gWireframe);
-  //std::cout << "\nWireframe size = " << MeshRenderer::gWireframe.size();
+  if (MeshRenderer::gWireframeOn)
+  {
+    mesh.getWireframe(MeshRenderer::gWireframe);
+  }
+  else
+  {
+    mesh.getSkeleton(MeshRenderer::gWireframe);
+  }
 }
 
 void updateView()
@@ -183,6 +189,7 @@ void keyboard(unsigned char key, int x, int y)
   if ((key == 'u') || (key == 'U'))
   {
     gWireframeOn = !gWireframeOn;
+    recalculate();
   }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
