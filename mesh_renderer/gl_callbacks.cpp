@@ -37,7 +37,7 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -267,7 +267,7 @@ void render()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData);
+  toVertex3dData(gWireframe, vertexData, !gWireframeOn);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn)
@@ -312,9 +312,30 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles)
 {
   const auto oldSize = dataIn.size();
+  if (triangles)
+  {
+    const auto newSize = dataIn.size() * 3;
+    dataOut.resize(newSize);
+    if (oldSize == 0) { return; }
+    for (int ind = 0; ind < oldSize; ind += 3)
+    {
+      if (ind + 1 > oldSize) { break; }
+      if (ind + 2 > oldSize) { break; }
+      dataOut[ind * 3] = (float)dataIn[ind].a.x;
+      dataOut[ind * 3 + 1] = (float)dataIn[ind].a.y;
+      dataOut[ind * 3 + 2] = (float)dataIn[ind].a.z;
+      dataOut[ind * 3 + 3] = (float)dataIn[ind + 1].a.x;
+      dataOut[ind * 3 + 4] = (float)dataIn[ind + 1].a.y;
+      dataOut[ind * 3 + 5] = (float)dataIn[ind + 1].a.z;
+      dataOut[ind * 3 + 6] = (float)dataIn[ind + 2].a.x;
+      dataOut[ind * 3 + 7] = (float)dataIn[ind + 2].a.y;
+      dataOut[ind * 3 + 8] = (float)dataIn[ind + 2].a.z;
+    }
+    return;
+  }
   const auto newSize = dataIn.size() * 6;
   dataOut.resize(newSize);
   if (oldSize == 0) { return; }
