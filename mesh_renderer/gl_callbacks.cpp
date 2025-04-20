@@ -26,7 +26,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gMvMatrix(16, 0.0f);
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
-  static GLint gPosLocation, gColLocation, gMvLocation, gProjLocation;
+  static GLint gPosLocation, gMvLocation, gProjLocation;
 }
 
 void recalculate();
@@ -37,7 +37,7 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool withColor);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -260,25 +260,23 @@ void render()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !gWireframeOn);
+  toVertex3dData(gWireframe, vertexData);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn)
   {
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glEnableVertexAttribArray(gPosLocation);
     glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)0);
-    glEnableVertexAttribArray(gColLocation);
-    glVertexAttribPointer(gColLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)(sizeof(float) * 3));
     glUseProgram(gShaderProgram);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
-    std::vector<float> vertexSpatial;
-    toVertex3dData(gWireframe, vertexSpatial, false);
-    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexSpatial.size() / 3);
+    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
 
+    glDisableVertexAttribArray(gPosLocation);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
     return;
@@ -307,32 +305,9 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool withColor)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
 {
   const auto oldSize = dataIn.size();
-  if (withColor)
-  {
-    const auto newSize = dataIn.size() * 12;
-    dataOut.resize(newSize);
-    if (oldSize == 0) { return; }
-    for (int ind = 0; ind < oldSize; ++ind)
-    {
-      int ind0 = ind;
-      dataOut[ind * 12] = (float)dataIn[ind0].a.x;
-      dataOut[ind * 12 + 1] = (float)dataIn[ind0].a.y;
-      dataOut[ind * 12 + 2] = (float)dataIn[ind0].a.z;
-      dataOut[ind * 12 + 3] = 0.0f;
-      dataOut[ind * 12 + 4] = 0.0f;
-      dataOut[ind * 12 + 5] = 1.0f;
-      dataOut[ind * 12 + 6] = (float)dataIn[ind0].b.x;
-      dataOut[ind * 12 + 7] = (float)dataIn[ind0].b.y;
-      dataOut[ind * 12 + 8] = (float)dataIn[ind0].b.z;
-      dataOut[ind * 12 + 9] = 0.0f;
-      dataOut[ind * 12 + 10] = 0.0f;
-      dataOut[ind * 12 + 11] = 1.0f;
-    }
-    return;
-  }
   const auto newSize = dataIn.size() * 6;
   dataOut.resize(newSize);
   if (oldSize == 0) { return; }
@@ -355,12 +330,11 @@ std::string glslVertexShaderCode()
   glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
   glsl << "\nuniform mat4 proj;";
   glsl << "\nattribute vec3 posVec;";
-  glsl << "\nattribute vec3 colorVec;";
   glsl << "\nvarying vec3 color;";
   glsl << "\nvoid main()";
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
-  glsl << "\n  color = colorVec;";
+  glsl << "\n  color = vec3(0.0, 0.0, 0.5 + gl_Position.z);";
   glsl << "\n}";
   return glsl.str();
 }
@@ -416,7 +390,6 @@ void linkShaderProgram()
     std::cout << "\nShader linking failed:\n" << errorLog << "\n";
   }
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
-  gColLocation = glGetAttribLocation(gShaderProgram, "colorVec");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);
