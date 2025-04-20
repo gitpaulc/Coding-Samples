@@ -24,6 +24,8 @@ namespace MeshRenderer
   static double gXAngle, gYAngle, gZAngle;
   static std::vector<GLfloat> gMvMatrix(16, 0.0f);
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
+  static GLuint gVertexShader, gFragmentShader, gShaderProgram;
+  static GLint gPosLocation, gColLocation, gMvLocation, gProjLocation;
 }
 
 void recalculate();
@@ -35,6 +37,7 @@ int& GetWindowId()
 }
 
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut);
+void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
@@ -67,6 +70,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutDisplayFunc(render);
 
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
+  linkShaderProgram();
 
   {
     ComputationalGeometry::point3d minPt, maxPt;
@@ -321,5 +325,51 @@ std::string glslFragmentShaderCode()
   glsl << "\n{";
   glsl << "\n  gl_FragColor = vec4(color, 1.0);";
   glsl << "\n}";
-    return glsl.str();
+  return glsl.str();
+}
+
+void linkShaderProgram()
+{
+  using namespace MeshRenderer;
+  auto vertexShaderStr = glslVertexShaderCode();
+  auto fragmentShaderStr = glslFragmentShaderCode();
+  const char* vertexShaderCode = vertexShaderStr.c_str();
+  const char* fragmentShaderCode = fragmentShaderStr.c_str();
+  gVertexShader = glCreateShader(GL_VERTEX_SHADER);
+  gFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(gVertexShader, 1, &vertexShaderCode, NULL);
+  glCompileShader(gVertexShader);
+  int errOut = 0;
+  char errorLog[512];
+  glGetShaderiv(gVertexShader, GL_COMPILE_STATUS, &errOut);
+  if (!errOut)
+  {
+    glGetShaderInfoLog(gVertexShader, 512, NULL, errorLog);
+    std::cout << "\nVertex shader compilation failed:\n" << errorLog << "\n";
+  }
+  glShaderSource(gFragmentShader, 1, &fragmentShaderCode, NULL);
+  glCompileShader(gFragmentShader);
+  errOut = 0;
+  glGetShaderiv(gFragmentShader, GL_COMPILE_STATUS, &errOut);
+  if (!errOut)
+  {
+    glGetShaderInfoLog(gFragmentShader, 512, NULL, errorLog);
+    std::cout << "\nFragment shader compilation failed:\n" << errorLog << "\n";
+  }
+  gShaderProgram = glCreateProgram();
+  glAttachShader(gShaderProgram, gVertexShader);
+  glAttachShader(gShaderProgram, gFragmentShader);
+  glLinkProgram(gShaderProgram);
+  glGetShaderiv(gShaderProgram, GL_LINK_STATUS, &errOut);
+  if (!errOut)
+  {
+    glGetShaderInfoLog(gShaderProgram, 512, NULL, errorLog);
+    std::cout << "\nShader linking failed:\n" << errorLog << "\n";
+  }
+  gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
+  gColLocation = glGetAttribLocation(gShaderProgram, "colorVec");
+  gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
+  gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
+  glDeleteShader(gVertexShader);
+  glDeleteShader(gFragmentShader);
 }
