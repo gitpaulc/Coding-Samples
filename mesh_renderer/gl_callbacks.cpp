@@ -272,11 +272,12 @@ void render()
     glEnableVertexAttribArray(gColLocation);
     glVertexAttribPointer(gColLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)(sizeof(float) * 3));
     glUseProgram(gShaderProgram);
-    glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
+    glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
-    toVertex3dData(gWireframe, vertexData, false);
-    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
+    std::vector<float> vertexSpatial;
+    toVertex3dData(gWireframe, vertexSpatial, false);
+    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexSpatial.size() / 3);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
