@@ -6,6 +6,8 @@
 #include "edge_list.h"
 #include "primitives.h"
 
+#include <sstream>
+
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge3d> gWireframe;
@@ -20,6 +22,8 @@ namespace MeshRenderer
   }
   static double gScale;
   static double gXAngle, gYAngle, gZAngle;
+  static std::vector<GLfloat> gMvMatrix(16, 0.0f);
+  static std::vector<GLfloat> gProjMatrix(16, 0.0f);
 }
 
 void recalculate();
@@ -116,39 +120,38 @@ void updateView()
     //glRotatef(gZAngle, 0.0f, 0.0f, 1.0f);
     //glTranslatef(gOrigin.x, gOrigin.y, gOrigin.z);
 
-    float cosA = cos(gXAngle);
-    float sinA = sin(gXAngle);
-    float cosB = cos(gYAngle);
-    float sinB = sin(gYAngle);
-    float cosC = cos(gZAngle);
-    float sinC = sin(gZAngle);
+    float cosA = (float)cos(gXAngle);
+    float sinA = (float)sin(gXAngle);
+    float cosB = (float)cos(gYAngle);
+    float sinB = (float)sin(gYAngle);
+    float cosC = (float)cos(gZAngle);
+    float sinC = (float)sin(gZAngle);
 
-    std::vector<GLfloat> projMatrix(16, 0.0f);
-    projMatrix[0] = cosB * cosC;
-    projMatrix[1] = sinA * sinB * cosC - cosA * sinC;
-    projMatrix[2] = cosA * sinB * cosC - sinA * cosC;
-    projMatrix[4] = cosB * sinC;
-    projMatrix[5] = sinA * sinB * sinC + cosA * cosC;
-    projMatrix[6] = cosA * sinB * sinC - sinA * cosC;
-    projMatrix[8] = -sinB;
-    projMatrix[9] = sinA * cosB;
-    projMatrix[10] = cosA * cosB;
-    projMatrix[12] = origin.x;
-    projMatrix[13] = origin.y;
-    projMatrix[14] = origin.z;
-    projMatrix[15] = 1.0f;
-    glLoadMatrixf(projMatrix.data());
+    gProjMatrix[0] = cosB * cosC;
+    gProjMatrix[1] = sinA * sinB * cosC - cosA * sinC;
+    gProjMatrix[2] = cosA * sinB * cosC - sinA * cosC;
+    gProjMatrix[4] = cosB * sinC;
+    gProjMatrix[5] = sinA * sinB * sinC + cosA * cosC;
+    gProjMatrix[6] = cosA * sinB * sinC - sinA * cosC;
+    gProjMatrix[8] = -sinB;
+    gProjMatrix[9] = sinA * cosB;
+    gProjMatrix[10] = cosA * cosB;
+    gProjMatrix[12] = (float)origin.x;
+    gProjMatrix[13] = (float)origin.y;
+    gProjMatrix[14] = (float)origin.z;
+    gProjMatrix[15] = 1.0f;
+    glLoadMatrixf(gProjMatrix.data());
   }
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   {
     //glScalef(gScale, gScale, gScale);
-    std::vector<GLfloat> mvMatrix(16, 0.0f);
-    mvMatrix[0] = gScale;
-    mvMatrix[5] = gScale;
-    mvMatrix[10] = gScale;
-    mvMatrix[15] = 1.0f;
-    glLoadMatrixf(mvMatrix.data());
+    gMvMatrix = std::vector<GLfloat>(16, 0.0f);
+    gMvMatrix[0] = (float)gScale;
+    gMvMatrix[5] = (float)gScale;
+    gMvMatrix[10] = (float)gScale;
+    gMvMatrix[15] = 1.0f;
+    glLoadMatrixf(gMvMatrix.data());
   }
   glutPostRedisplay();
 }
@@ -263,10 +266,10 @@ void render()
     
   int whichArray = 0;
   glColor3f(0.0f, 0.0f, 0.0f);
-  glDrawArrays(GL_POINTS, whichArray, vertexData.size() / 3);
+  glDrawArrays(GL_POINTS, whichArray, (GLsizei)vertexData.size() / 3);
     
   glColor3f(1.0f, 0.0f, 0.0f);
-  glDrawArrays(GL_LINES, whichArray, vertexData.size() / 3);
+  glDrawArrays(GL_LINES, whichArray, (GLsizei)vertexData.size() / 3);
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -283,11 +286,40 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
   for (int ind = 0; ind < oldSize; ++ind)
   {
     int ind0 = ind;
-    dataOut[ind * 6] = dataIn[ind0].a.x;
-    dataOut[ind * 6 + 1] = dataIn[ind0].a.y;
-    dataOut[ind * 6 + 2] = dataIn[ind0].a.z;
-    dataOut[ind * 6 + 3] = dataIn[ind0].b.x;
-    dataOut[ind * 6 + 4] = dataIn[ind0].b.y;
-    dataOut[ind * 6 + 5] = dataIn[ind0].b.z;
+    dataOut[ind * 6] = (float)dataIn[ind0].a.x;
+    dataOut[ind * 6 + 1] = (float)dataIn[ind0].a.y;
+    dataOut[ind * 6 + 2] = (float)dataIn[ind0].a.z;
+    dataOut[ind * 6 + 3] = (float)dataIn[ind0].b.x;
+    dataOut[ind * 6 + 4] = (float)dataIn[ind0].b.y;
+    dataOut[ind * 6 + 5] = (float)dataIn[ind0].b.z;
   }
+}
+
+std::string glslVertexShaderCode()
+{
+  std::stringstream glsl;
+  glsl << "\n#version 110";
+  glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
+  glsl << "\nuniform mat4 proj;";
+  glsl << "\nattribute vec3 posVec;";
+  glsl << "\nattribute vec3 colorVec;";
+  glsl << "\nvarying vec3 color;";
+  glsl << "\nvoid main()";
+  glsl << "\n{";
+  glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
+  glsl << "\n  color = colorVec;";
+  glsl << "\n}";
+  return glsl.str();
+}
+
+std::string glslFragmentShaderCode()
+{
+  std::stringstream glsl;
+  glsl << "\n#version 110";
+  glsl << "\nvarying vec3 color;";
+  glsl << "\nvoid main()";
+  glsl << "\n{";
+  glsl << "\n  gl_FragColor = vec4(color, 1.0);";
+  glsl << "\n}";
+    return glsl.str();
 }
