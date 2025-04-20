@@ -644,6 +644,40 @@ namespace MeshRenderer
     }
   }
 
+  bool DoublyConnectedEdgeList::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut) const
+  {
+    meshOut.resize(0);
+    if (pImpl == nullptr) { return false; }
+
+    using namespace ComputationalGeometry;
+    std::map<int, Face3d> renderFaces = pImpl->getFaces();
+    for (const auto& faceIt : renderFaces)
+    {
+      bool addFace = (faceIt.second.vertices.size() >= 3);
+      if (!addFace) { continue; }
+      int i = 0;
+      Triangle3d tri;
+      for (const point3d& target : faceIt.second.vertices)
+      {
+        if (i >= 3) { break; }
+        if (i == 0) { tri.a = point3d(target.x, target.y, target.z); }
+        else if (i == 1) { tri.b = point3d(target.x, target.y, target.z); }
+        else if (i == 2) { tri.c = point3d(target.x, target.y, target.z); }
+        ++i;
+      }
+      auto edgeSet = tri.getEdges();
+      if (edgeSet.size() < 3) { continue; }
+      i = 0;
+      for (const auto& edg : edgeSet)
+      {
+        if (i >= 3) { break; }
+        meshOut.push_back(edg);
+        ++i;
+      }
+    }
+    return true;
+  }
+
   int DoublyConnectedEdgeList::getNumEdges() const
   {
     if (pImpl == nullptr) { return 0; }
