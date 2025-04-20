@@ -14,6 +14,7 @@ namespace MeshRenderer
   static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gEdgesHidden = false;
+  static bool gWireframeOn = true;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
   {
@@ -179,6 +180,10 @@ void keyboard(unsigned char key, int x, int y)
     gPointsHidden = !gPointsHidden;
     gEdgesHidden = !gEdgesHidden;
   }
+  if ((key == 'u') || (key == 'U'))
+  {
+    gWireframeOn = !gWireframeOn;
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -258,6 +263,22 @@ void render()
   toVertex3dData(gWireframe, vertexData);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
+  else if (!gWireframeOn)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(gPosLocation);
+    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)0);
+    glEnableVertexAttribArray(gColLocation);
+    glVertexAttribPointer(gColLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)(sizeof(float) * 3));
+    glUseProgram(gShaderProgram);
+    glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
+    glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
+    int whichArray = 0;
+    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 6);
+    glutSwapBuffers();
+    return;
+  }
 
   glPointSize(3.0f);
   glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
@@ -284,6 +305,29 @@ void render()
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut)
 {
   const auto oldSize = dataIn.size();
+  if (!MeshRenderer::gWireframeOn)
+  {
+    const auto newSize = dataIn.size() * 12;
+    dataOut.resize(newSize);
+    if (oldSize == 0) { return; }
+    for (int ind = 0; ind < oldSize; ++ind)
+    {
+      int ind0 = ind;
+      dataOut[ind * 12] = (float)dataIn[ind0].a.x;
+      dataOut[ind * 12 + 1] = (float)dataIn[ind0].a.y;
+      dataOut[ind * 12 + 2] = (float)dataIn[ind0].a.z;
+      dataOut[ind * 12 + 3] = 0.0f;
+      dataOut[ind * 12 + 4] = 0.0f;
+      dataOut[ind * 12 + 5] = 1.0f;
+      dataOut[ind * 12 + 6] = (float)dataIn[ind0].b.x;
+      dataOut[ind * 12 + 7] = (float)dataIn[ind0].b.y;
+      dataOut[ind * 12 + 8] = (float)dataIn[ind0].b.z;
+      dataOut[ind * 12 + 9] = 0.0f;
+      dataOut[ind * 12 + 10] = 0.0f;
+      dataOut[ind * 12 + 11] = 1.0f;
+    }
+    return;
+  }
   const auto newSize = dataIn.size() * 6;
   dataOut.resize(newSize);
   if (oldSize == 0) { return; }
