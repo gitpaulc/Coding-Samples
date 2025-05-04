@@ -14,10 +14,8 @@ int main(int argc, char **argv)
   std::cout << "\n\t2. cubic";
   std::cout << "\n\t3. circle";
   std::cout << "\n\t4. hyperbola";
-  std::cout << "\n\t5. sine";
-  std::cout << "\n\t6. sinc";
-  std::cout << "\n\t7. exp";
-  std::cout << "\n\t8. log";
+  std::cout << "\n\t5. sine\t6. sinc\t7. exp\t8. log";
+  std::cout << "\n\t9. 9 a b OR ellipticcurve a b";
   std::cout << std::endl;
   std::string graphType = "";
   if (argc >= 2)
@@ -25,6 +23,36 @@ int main(int argc, char **argv)
     graphType = argv[1];
   }
   auto& math = Math::Get();
+  if (argc >= 3)
+  {
+    std::string param1 = argv[2];
+    if (!(param1.empty()))
+    {
+      math.hasParam1 = true;
+      math.param1 = std::stod(param1);
+    }
+    else if ((graphType.compare("9") == 0) || (graphType.compare("ellipticcurve") == 0))
+    {
+      math.hasParam1 = true;
+      math.param1 = -1;
+      std::cout << "\n\tNo parameter \"a\" provided for the elliptic curve. Setting a = -1." << std::endl;
+    }
+  }
+  if (argc >= 4)
+  {
+    std::string param2 = argv[3];
+    if (!(param2.empty()))
+    {
+      math.hasParam2 = true;
+      math.param2 = std::stod(param2);
+    }
+    else if ((graphType.compare("9") == 0) || (graphType.compare("ellipticcurve") == 0))
+    {
+      math.hasParam2 = true;
+      math.param2 = 0;
+      std::cout << "\n\tNo parameter \"b\" provided for the elliptic curve. Setting b = 0." << std::endl;
+    }
+  }
   math.SetType(graphType);
   Graphing::initialize(&argc, argv);
   glutMainLoop();

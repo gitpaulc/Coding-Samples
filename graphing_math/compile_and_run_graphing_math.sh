@@ -9,8 +9,8 @@ main()
 	g++ *.cpp -o graphing_math.o -framework OpenGL -framework GLUT -w
 
 	if [[ -a graphing_math.o ]] ; then
-		./graphing_math.o "${1}" "${2}"
+		./graphing_math.o "${1}" "${2}" "${3}"
 	fi
 }
 
-time main "${1}" "${2}"
+time main "${1}" "${2}" "${3}"

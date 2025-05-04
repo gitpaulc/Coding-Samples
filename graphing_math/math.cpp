@@ -16,6 +16,7 @@ namespace // anonymous
     x = math.scale * xTemp;
     y = math.scale * yTemp;
   }
+
   double linear(double x, double y)
   {
     rescale(x, y);
@@ -107,6 +108,17 @@ namespace // anonymous
     //return expOneVar(y) - x;
     return y - std::log(x);
   }
+
+  double ellipticcurve(double x, double y)
+  {
+    Math& math = Math::Get();
+    rescale(x, y);
+    double aa = math.param1;
+    double bb = math.param2;
+    double ans = (x * x + aa) * x + bb;
+    return y * y - ans;
+  }
+
 }
 
 Math::Math()
@@ -171,6 +183,12 @@ void Math::SetType(const std::string& mathType)
   {
     scale = 4;
     Function = &natlog;
+    return;
+  }
+  if ((mathType.compare("9") == 0) || (mathType.compare("ellipticcurve") == 0))
+  {
+    scale = 4;
+    Function = &ellipticcurve;
     return;
   }
   Function = &linear;
