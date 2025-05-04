@@ -11,7 +11,7 @@ void Graphing::initialize(int * argc_ptr, char **argv)
   glutInitWindowPosition(0, 0);
   glutInitWindowSize(Graphing::WindowWidth, Graphing::WindowHeight);
 
-  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y = zoom, R/T = rotate, Q = quit. M to toggle to 3d: Red > 0, Blue < 0.";
+  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y = zoom, I/J/K/L = pan, R/T = rotate, Q = quit. M = toggle 3d: Red > 0, Blue < 0.";
 
   Graphing::window_id = glutCreateWindow(windowCaption.c_str());
 	
@@ -193,16 +193,16 @@ void Graphing::render()
       {
         if (!isBoundary(i, j, scale_x, scale_y)) { continue; }
           
-        glColor3f(255, 0, 0);
+        glColor3f(0, 0.5, 0);
         glVertex2f(i * bounds_x, j * bounds_y);
         continue;
       }
       if (mode == 1)
       {
-        glColor3f(0, 0, 255);
+        glColor3f(0, 0, 1.0);
         bool undefined = false;
-        if (isNonnegative(i, j, scale_x, scale_y, undefined)) {glColor3f(255, 0, 0);}
-        if (undefined) {glColor3f(125, 125, 125);}
+        if (isNonnegative(i, j, scale_x, scale_y, undefined)) {glColor3f(1.0, 0, 0);}
+        if (undefined) {glColor3f(0.5, 0.5, 0.5);}
         glVertex2f(i * bounds_x, j * bounds_y);
       }
     }

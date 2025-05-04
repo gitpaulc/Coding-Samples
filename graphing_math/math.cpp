@@ -60,6 +60,19 @@ namespace // anonymous
     double ans = sin(x);
     return y - ans;
   }
+
+  double sinc(double x, double y)
+  {
+    rescale(x, y);
+    if (abs(x) <= 1.0e-6)
+    {
+      double x2 = x * x;
+      double ans = 1.0 - x2 / 6.0 + x2 * x2 / 120.0;
+      return y - ans;
+    }
+    double ans = sin(x) / x;
+    return y - ans;
+  }
 }
 
 Math::Math()
@@ -104,8 +117,14 @@ void Math::SetType(const std::string& mathType)
   }
   if ((mathType.compare("5") == 0) || (mathType.compare("sine") == 0))
   {
-    scale = 8;
+    scale = 6;
     Function = &sine;
+    return;
+  }
+  if ((mathType.compare("6") == 0) || (mathType.compare("sinc") == 0))
+  {
+    scale = 10;
+    Function = &sinc;
     return;
   }
   Function = &linear;
