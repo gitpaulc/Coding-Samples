@@ -134,62 +134,79 @@ Math& Math::Get()
 
 void Math::SetType(const std::string& mathType)
 {
+  math_type = "line";
   if (mathType.empty() || (mathType.compare("0") == 0) || (mathType.compare("line") == 0))
   {
+    math_type = "line";
     Function = &linear;
     return;
   }
   if ((mathType.compare("1") == 0) || (mathType.compare("parabola") == 0))
   {
+    math_type = "parabola";
     Function = &parabola;
     return;
   }
   if ((mathType.compare("2") == 0) || (mathType.compare("cubic") == 0))
   {
+    math_type = "cubic";
     Function = &cubic;
     return;
   }
   if ((mathType.compare("3") == 0) || (mathType.compare("circle") == 0))
   {
+    math_type = "circle";
     scale = 1.5;
     Function = &circle;
     return;
   }
   if ((mathType.compare("4") == 0) || (mathType.compare("hyperbola") == 0))
   {
+    math_type = "hyperbola";
     scale = 4;
     Function = &hyperbola;
     return;
   }
   if ((mathType.compare("5") == 0) || (mathType.compare("sine") == 0))
   {
+    math_type = "sine";
     scale = 6;
     Function = &sine;
     return;
   }
   if ((mathType.compare("6") == 0) || (mathType.compare("sinc") == 0))
   {
+    math_type = "sinc";
     scale = 10;
     Function = &sinc;
     return;
   }
   if ((mathType.compare("7") == 0) || (mathType.compare("exp") == 0))
   {
+    math_type = "exp";
     scale = 4;
     Function = &exponential;
     return;
   }
   if ((mathType.compare("8") == 0) || (mathType.compare("log") == 0))
   {
+    math_type = "log";
     scale = 4;
     Function = &natlog;
     return;
   }
   if ((mathType.compare("9") == 0) || (mathType.compare("ellipticcurve") == 0))
   {
+    math_type = "ellipticcurve";
     scale = 4;
     Function = &ellipticcurve;
     return;
   }
   Function = &linear;
+}
+
+bool Math::canDivideByZero() const
+{
+  if (math_type.compare("hyperbola") == 0) { return true; }
+  return false;
 }

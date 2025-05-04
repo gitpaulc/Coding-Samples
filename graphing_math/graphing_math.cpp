@@ -150,7 +150,7 @@ bool Graphing::isBoundary(int x, int y, const double& scaleX, const double& scal
       if (undefined) { return false; }
       if ((val > 0) && (other < 0)) { signChange = true; }
       if ((val < 0) && (other > 0)) { signChange = true; }
-      if (signChange)
+      if (signChange && math.canDivideByZero())
       {
         // Discontinuous jump.
         // Must be over asymptote, not part of the graph.
