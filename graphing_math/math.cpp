@@ -144,7 +144,8 @@ void Math::SetType(const std::string& mathType)
     {
       return std::to_string(key);
     }
-    static void Add(std::map<int, MathType>& mathMap, const std::string& nameIn, double (*funcIn)(double x, double y), double scaleIn = 1.0)
+    typedef double (*MathFunction)(double x, double y);
+    static void Add(std::map<int, MathType>& mathMap, const std::string& nameIn, MathFunction funcIn, double scaleIn = 1.0)
     {
       int keyIn = (int)mathMap.size();
       MathType mathType;
@@ -178,6 +179,7 @@ void Math::SetType(const std::string& mathType)
     auto& mathTypeStruct = mathIt.second;
     if ((mathType.compare(mathTypeStruct.str()) == 0) || (mathType.compare(mathTypeStruct.name) == 0))
     {
+      scale = mathTypeStruct.scale;
       math_type = mathTypeStruct.name;
       Function = mathTypeStruct.Function;
       return;
