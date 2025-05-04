@@ -16,6 +16,8 @@ int main(int argc, char **argv)
   std::cout << "\n\t4. hyperbola";
   std::cout << "\n\t5. sine";
   std::cout << "\n\t6. sinc";
+  std::cout << "\n\t7. exp";
+  std::cout << "\n\t8. log";
   std::cout << std::endl;
   std::string graphType = "";
   if (argc >= 2)

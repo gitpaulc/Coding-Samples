@@ -1,5 +1,6 @@
 #include "math.h"
 #include <stdexcept>
+#include <cmath>
 
 namespace // anonymous
 {
@@ -73,6 +74,39 @@ namespace // anonymous
     double ans = sin(x) / x;
     return y - ans;
   }
+
+  double expOneVar(double x)
+  {
+    if (abs(x) >= 1.0)
+    {
+      double ans = expOneVar(x / 2.0);
+      return ans * ans;
+    }
+    double xPower = 1.0;
+    double ans = 1.0;
+    double factorialNum = 1.0;
+    for (int i = 1; i <= 10; ++i)
+    {
+      xPower *= x;
+      factorialNum *= i;
+      ans += xPower / factorialNum;
+    }
+    return ans;
+  }
+
+  double exponential(double x, double y)
+  {
+    rescale(x, y);
+    //return y - expOneVar(x);
+    return y - std::exp(x);
+  }
+
+  double natlog(double x, double y)
+  {
+    rescale(x, y);
+    //return expOneVar(y) - x;
+    return y - std::log(x);
+  }
 }
 
 Math::Math()
@@ -125,6 +159,18 @@ void Math::SetType(const std::string& mathType)
   {
     scale = 10;
     Function = &sinc;
+    return;
+  }
+  if ((mathType.compare("7") == 0) || (mathType.compare("exp") == 0))
+  {
+    scale = 4;
+    Function = &exponential;
+    return;
+  }
+  if ((mathType.compare("8") == 0) || (mathType.compare("log") == 0))
+  {
+    scale = 4;
+    Function = &natlog;
     return;
   }
   Function = &linear;
