@@ -42,6 +42,13 @@ computational_biology/Release
 image_output/*.png
 video_output/*.avi
 
+graphing_math/*.exe
+graphing_math/GraphingMath/.vs
+
+graphing_math/GraphingMath/CMakeCache.txt
+graphing_math/GraphingMath/CMakeFiles/
+graphing_math/GraphingMath/cmake_install.cmake
+
 mesh_renderer/*.exe
 mesh_renderer/MeshRenderer/.vs
 
