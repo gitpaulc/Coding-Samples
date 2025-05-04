@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   std::cout << "\n\t2. cubic";
   std::cout << "\n\t3. circle with optional param r";
   std::cout << "\n\t4. hyperbola";
-  std::cout << "\n\t5. sine\t6. sinc\t7. exp\t8. log";
+  std::cout << "\n\t5. sine\t6. sinc\n\t7. exp OR exp b\t8. log OR log b (where b is the base)";
   std::cout << "\n\t9. 9 a b OR ellipse a b";
   std::cout << "\n\t10. 10 a b OR ellipticcurve a b";
   std::cout << std::endl;

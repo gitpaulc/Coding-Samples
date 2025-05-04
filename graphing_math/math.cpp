@@ -97,19 +97,33 @@ namespace // anonymous
     return ans;
   }
 
-  double exponential(double x, double y)
+  double exponentialFunc(double x, double y)
   {
-    rescale(x, y);
     //return y - expOneVar(x);
     return y - std::exp(x);
   }
 
-  double natlog(double x, double y)
+  double natlogFunc(double x, double y)
   {
-    rescale(x, y);
     //return expOneVar(y) - x;
     return y - std::log(x);
   }
+
+double exponential(double x, double y)
+{
+  rescale(x, y);
+  Math& math = Math::Get();
+  double coeff = math.hasParam1 ? std::log(math.param1) : 1;
+  return y - std::exp(coeff * x);
+}
+
+double natlog(double x, double y)
+{
+  rescale(x, y);
+  Math& math = Math::Get();
+  double coeff = math.hasParam1 ? (1.0 / std::log(math.param1)) : 1;
+  return y - std::log(x) * coeff;
+}
 
   double ellipticcurve(double x, double y)
   {
