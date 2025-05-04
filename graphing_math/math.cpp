@@ -1,6 +1,4 @@
 #include "math.h"
-#include <stdexcept>
-#include <cmath>
 
 namespace // anonymous
 {
@@ -135,73 +133,57 @@ Math& Math::Get()
 void Math::SetType(const std::string& mathType)
 {
   math_type = "line";
-  if (mathType.empty() || (mathType.compare("0") == 0) || (mathType.compare("line") == 0))
+
+  struct MathType
+  {
+    int key = 0;
+    std::string name = "line";
+    double (*Function)(double x, double y);
+    double scale = 1.0;
+    std::string str() const
+    {
+      return std::to_string(key);
+    }
+    static void Add(std::map<int, MathType>& mathMap, const std::string& nameIn, double (*funcIn)(double x, double y), double scaleIn = 1.0)
+    {
+      int keyIn = (int)mathMap.size();
+      MathType mathType;
+      mathType.key = keyIn;
+      mathType.name = nameIn;
+      mathType.Function = funcIn;
+      mathType.scale = scaleIn;
+      mathMap[keyIn] = mathType;
+    }
+  };
+
+  std::map<int, MathType> types;
+  MathType::Add(types, "line", &linear);
+  MathType::Add(types, "parabola", &parabola);
+  MathType::Add(types, "cubic", &cubic);
+  MathType::Add(types, "circle", &circle, 1.5);
+  MathType::Add(types, "hyperbola", &hyperbola, 5);
+  MathType::Add(types, "sine", &sine, 6);
+  MathType::Add(types, "sinc", &sinc, 10);
+  MathType::Add(types, "exp", &exponential, 4);
+  MathType::Add(types, "log", &natlog, 4);
+  MathType::Add(types, "ellipticcurve", &ellipticcurve, 4);
+  if (mathType.empty() || (mathType.compare(std::to_string(0)) == 0) || (mathType.compare(types[0].name) == 0))
   {
     math_type = "line";
     Function = &linear;
     return;
   }
-  if ((mathType.compare("1") == 0) || (mathType.compare("parabola") == 0))
+  for (auto& mathIt : types)
   {
-    math_type = "parabola";
-    Function = &parabola;
-    return;
+    auto& mathTypeStruct = mathIt.second;
+    if ((mathType.compare(mathTypeStruct.str()) == 0) || (mathType.compare(mathTypeStruct.name) == 0))
+    {
+      math_type = mathTypeStruct.name;
+      Function = mathTypeStruct.Function;
+      return;
+    }
   }
-  if ((mathType.compare("2") == 0) || (mathType.compare("cubic") == 0))
-  {
-    math_type = "cubic";
-    Function = &cubic;
-    return;
-  }
-  if ((mathType.compare("3") == 0) || (mathType.compare("circle") == 0))
-  {
-    math_type = "circle";
-    scale = 1.5;
-    Function = &circle;
-    return;
-  }
-  if ((mathType.compare("4") == 0) || (mathType.compare("hyperbola") == 0))
-  {
-    math_type = "hyperbola";
-    scale = 4;
-    Function = &hyperbola;
-    return;
-  }
-  if ((mathType.compare("5") == 0) || (mathType.compare("sine") == 0))
-  {
-    math_type = "sine";
-    scale = 6;
-    Function = &sine;
-    return;
-  }
-  if ((mathType.compare("6") == 0) || (mathType.compare("sinc") == 0))
-  {
-    math_type = "sinc";
-    scale = 10;
-    Function = &sinc;
-    return;
-  }
-  if ((mathType.compare("7") == 0) || (mathType.compare("exp") == 0))
-  {
-    math_type = "exp";
-    scale = 4;
-    Function = &exponential;
-    return;
-  }
-  if ((mathType.compare("8") == 0) || (mathType.compare("log") == 0))
-  {
-    math_type = "log";
-    scale = 4;
-    Function = &natlog;
-    return;
-  }
-  if ((mathType.compare("9") == 0) || (mathType.compare("ellipticcurve") == 0))
-  {
-    math_type = "ellipticcurve";
-    scale = 4;
-    Function = &ellipticcurve;
-    return;
-  }
+
   Function = &linear;
 }
 
