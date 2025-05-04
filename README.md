@@ -44,6 +44,14 @@
 * See the screenshots seven_points.png, hundred_points_1.png, hundred_points_2.png for examples.
 * Press **Q** or **ESC** to exit.
 
+**Graphing Math.**
+
+* This is a graphing calculator implemented with C++ and OpenGL.
+* If you are using Windows, create a Visual Studio project and add OpenGL dependencies.
+* If you are using Mac, cd to graphing_math.
+* Run `bash compile_and_run_graphing_math.sh` to run the graphing calculator.  By default a line is graphed.
+* See the "Usage:" explanation output to the console for a more indepth guide.
+
 **Computational Biology.**
 
 * This repo also contains a sample Django service written using Python, HTML, and JavaScript. It demonstrates finding the longest common subsequence of DNA strings. The source code along with a screenshot is contained in the `DjangoService` folder. To run this...
