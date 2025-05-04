@@ -36,10 +36,14 @@ namespace // anonymous
     return y - ans;
   }
 
-  double circle(double x, double y)
+  double ellipse(double x, double y)
   {
+    Math& math = Math::Get();
     rescale(x, y);
-    return 1.0 - x * x - y * y;
+    double aa = math.hasParam1 ? math.param1 : 1;
+    double bb = math.hasParam2 ? math.param2 : 1;
+    if (math.math_type.compare("circle") == 0) { bb = aa; }
+    return 1.0 - x * x / (aa * aa) - y * y / (bb * bb);
   }
 
   double hyperbola(double x, double y)
@@ -161,14 +165,15 @@ void Math::SetType(const std::string& mathType)
   MathType::Add(types, "line", &linear);
   MathType::Add(types, "parabola", &parabola);
   MathType::Add(types, "cubic", &cubic);
-  MathType::Add(types, "circle", &circle, 1.5);
+  MathType::Add(types, "circle", &ellipse, 1.5);
   MathType::Add(types, "hyperbola", &hyperbola, 5);
   MathType::Add(types, "sine", &sine, 6);
   MathType::Add(types, "sinc", &sinc, 10);
   MathType::Add(types, "exp", &exponential, 4);
   MathType::Add(types, "log", &natlog, 4);
+  MathType::Add(types, "ellipse", &ellipse, 1.5);
   MathType::Add(types, "ellipticcurve", &ellipticcurve, 4);
-  if (mathType.empty() || (mathType.compare(std::to_string(0)) == 0) || (mathType.compare(types[0].name) == 0))
+  if (mathType.empty())
   {
     math_type = "line";
     Function = &linear;
