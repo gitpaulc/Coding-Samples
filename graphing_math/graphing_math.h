@@ -7,8 +7,8 @@ namespace Graphing
 {
   extern int window_id;
 
-  const int WindowWidth = 800;
-  const int WindowHeight = 600;
+  const int WindowWidth = 900;
+  const int WindowHeight = 900;
 
   /**
    * 0 = 2D Graph: f(x, y) = 0
@@ -21,7 +21,7 @@ namespace Graphing
   void keyboard(unsigned char key, int x, int y);
   void mouse(int button, int state, int x, int y);
   bool isBoundary(int x, int y, const double& scaleX, const double& scaleY);
-  bool isNonnegative(int x, int y, const double& scaleX, const double& scaleY);
+  bool isNonnegative(int x, int y, const double& scaleX, const double& scaleY, bool& undefined);
   void render();
 };
 

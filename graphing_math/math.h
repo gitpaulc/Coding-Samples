@@ -12,6 +12,8 @@ class Math
   void SetType(const std::string& mathType);
   double scale = 1.0;
   double angle = 0.0;
+  double origin_x = 0.0;
+  double origin_y = 0.0;
 };
 
 #endif // def MATH_H

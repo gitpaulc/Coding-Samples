@@ -1,10 +1,13 @@
 #include "math.h"
+#include <stdexcept>
 
 namespace // anonymous
 {
   void rescale(double& x, double& y)
   {
     Math& math = Math::Get();
+    x = x - math.origin_x;
+    y = y - math.origin_y;
     double cosTheta = cos(math.angle);
     double sinTheta = sin(math.angle);
     double xTemp = x * cosTheta + y * (-sinTheta);
@@ -38,6 +41,25 @@ namespace // anonymous
     rescale(x, y);
     return 1.0 - x * x - y * y;
   }
+
+  double hyperbola(double x, double y)
+  {
+    rescale(x, y);
+    if (abs(x) <= 1.0e-9)
+    {
+      throw std::runtime_error("Division by zero.");
+      return 1;
+    }
+    double ans = 1.0 / x;
+    return y - ans;
+  }
+
+  double sine(double x, double y)
+  {
+    rescale(x, y);
+    double ans = sin(x);
+    return y - ans;
+  }
 }
 
 Math::Math()
@@ -70,7 +92,20 @@ void Math::SetType(const std::string& mathType)
   }
   if ((mathType.compare("3") == 0) || (mathType.compare("circle") == 0))
   {
+    scale = 1.5;
     Function = &circle;
+    return;
+  }
+  if ((mathType.compare("4") == 0) || (mathType.compare("hyperbola") == 0))
+  {
+    scale = 4;
+    Function = &hyperbola;
+    return;
+  }
+  if ((mathType.compare("5") == 0) || (mathType.compare("sine") == 0))
+  {
+    scale = 8;
+    Function = &sine;
     return;
   }
   Function = &linear;

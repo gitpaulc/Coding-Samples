@@ -11,7 +11,7 @@ void Graphing::initialize(int * argc_ptr, char **argv)
   glutInitWindowPosition(0, 0);
   glutInitWindowSize(Graphing::WindowWidth, Graphing::WindowHeight);
 
-  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y to zoom, R/T to rotate. M to toggle to 3d level sets: Red > 0, Blue < 0.";
+  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y = zoom, R/T = rotate, Q = quit. M to toggle to 3d: Red > 0, Blue < 0.";
 
   Graphing::window_id = glutCreateWindow(windowCaption.c_str());
 	
@@ -26,6 +26,7 @@ void Graphing::initialize(int * argc_ptr, char **argv)
 
 void Graphing::keyboard(unsigned char key, int x, int y)
 {
+  double dPan = 0.1;
   if ((key == 27) // ESC
      || (key == 'q')
      || (key == 'Q'))
@@ -67,6 +68,26 @@ void Graphing::keyboard(unsigned char key, int x, int y)
       math.angle += 2.0 * piNumber;
     }
   }
+  else if ((key == 'i') || (key == 'I'))
+  {
+    Math& math = Math::Get();
+    math.origin_y -= dPan;
+  }
+  else if ((key == 'k') || (key == 'K'))
+  {
+    Math& math = Math::Get();
+    math.origin_y += dPan;
+  }
+  else if ((key == 'j') || (key == 'J'))
+  {
+    Math& math = Math::Get();
+    math.origin_x += dPan;
+  }
+  else if ((key == 'l') || (key == 'L'))
+  {
+    Math& math = Math::Get();
+    math.origin_x -= dPan;
+  }
 	
   glutPostRedisplay();
 }
@@ -80,29 +101,67 @@ void Graphing::mouse(int button, int state, int x, int y)
   glutPostRedisplay();
 }
 
-bool Graphing::isNonnegative(int x, int y, const double& scaleX, const double& scaleY)
+bool Graphing::isNonnegative(int x, int y, const double& scaleX, const double& scaleY, bool& undefined)
 {
   auto& math = Math::Get();
-  double val = math.Function(x * scaleX, y * scaleY);
+  double val = 0.0;
+  try
+  {
+    val = math.Function(x * scaleX, y * scaleY);
+  }
+  catch (...)
+  {
+    undefined = true;
+  }
+  if (undefined) { return true; }
   return (val >= 0);
 }
 
 bool Graphing::isBoundary(int x, int y, const double& scaleX, const double& scaleY)
 {
   auto& math = Math::Get();
-  double val = math.Function(x * scaleX, y * scaleY);
+  double val = 0.0;
+  bool undefined = false;
+  try
+  {
+    val = math.Function(x * scaleX, y * scaleY);
+  }
+  catch (...)
+  {
+    undefined = true;
+  }
+  if (undefined) { return false; }
   if (val == 0) { return true; }
+  bool signChange = false;
   for (int i = -1; i <= 1; ++i)
   {
     for (int j = -1; j <= 1; ++j)
     {
       if (abs(i) == abs(j)) { continue; }
-      double other = math.Function((x + i) * scaleX, (y + j) * scaleY);
-      if ((val > 0) && (other < 0)) { return true; }
-      if ((val < 0) && (other > 0)) { return true; }
+      double other = 0.0;
+      try
+      {
+        other = math.Function((x + i) * scaleX, (y + j) * scaleY);
+      }
+      catch (...)
+      {
+        undefined = true;
+      }
+      if (undefined) { return false; }
+      if ((val > 0) && (other < 0)) { signChange = true; }
+      if ((val < 0) && (other > 0)) { signChange = true; }
+      if (signChange)
+      {
+        // Discontinuous jump.
+        // Must be over asymptote, not part of the graph.
+        if (abs(val - other) >= 100)
+        {
+          return false;
+        }
+      }
     }
   }
-  return false;
+  return signChange;
 }
 
 void Graphing::render()
@@ -141,7 +200,9 @@ void Graphing::render()
       if (mode == 1)
       {
         glColor3f(0, 0, 255);
-        if (isNonnegative(i, j, scale_x, scale_y)) {glColor3f(255, 0, 0);}
+        bool undefined = false;
+        if (isNonnegative(i, j, scale_x, scale_y, undefined)) {glColor3f(255, 0, 0);}
+        if (undefined) {glColor3f(125, 125, 125);}
         glVertex2f(i * bounds_x, j * bounds_y);
       }
     }
