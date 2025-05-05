@@ -16,6 +16,7 @@ namespace // anonymous
     x = math.scale * xTemp;
     y = math.scale * yTemp;
   }
+
   double linear(double x, double y)
   {
     rescale(x, y);
@@ -37,10 +38,14 @@ namespace // anonymous
     return y - ans;
   }
 
-  double circle(double x, double y)
+  double ellipse(double x, double y)
   {
+    Math& math = Math::Get();
     rescale(x, y);
-    return 1.0 - x * x - y * y;
+    double aa = math.hasParam1 ? math.param1 : 1;
+    double bb = math.hasParam2 ? math.param2 : 1;
+    if (math.math_type.compare("circle") == 0) { bb = aa; }
+    return 1.0 - x * x / (aa * aa) - y * y / (bb * bb);
   }
 
   double hyperbola(double x, double y)
@@ -94,19 +99,60 @@ namespace // anonymous
     return ans;
   }
 
+  double exponentialFunc(double x, double y)
+  {
+    //return y - expOneVar(x);
+    return y - std::exp(x);
+  }
+
+  double natlogFunc(double x, double y)
+  {
+    //return expOneVar(y) - x;
+    return y - std::log(x);
+  }
+
   double exponential(double x, double y)
   {
     rescale(x, y);
-    //return y - expOneVar(x);
-    return y - std::exp(x);
+    Math& math = Math::Get();
+    double coeff = math.hasParam1 ? std::log(math.param1) : 1;
+    return y - std::exp(coeff * x);
   }
 
   double natlog(double x, double y)
   {
     rescale(x, y);
-    //return expOneVar(y) - x;
-    return y - std::log(x);
+    Math& math = Math::Get();
+    double coeff = math.hasParam1 ? (1.0 / std::log(math.param1)) : 1;
+    return y - std::log(x) * coeff;
   }
+
+  double ellipticcurve(double x, double y)
+  {
+    Math& math = Math::Get();
+    rescale(x, y);
+    double aa = math.param1;
+    double bb = math.param2;
+    double ans = (x * x + aa) * x + bb;
+    return y * y - ans;
+  }
+
+  double equilateral(double x, double y)
+  {
+    Math& math = Math::Get();
+    rescale(x, y);
+    double mm = math.hasParam1 ? math.param1 : 1;
+    double nn = math.hasParam2 ? math.param2 : 1;
+    double halfSqrt3 = std::sqrt(3.0) * 0.5;
+    double piNum = Math::getPi();
+    double xx = x;
+    double yy = y - 0.5;
+    double uu = sin((2.0 * piNum * mm / halfSqrt3) * yy);
+    uu += sin((2.0 * piNum * nn / halfSqrt3) * (halfSqrt3 * xx - 0.5 * yy));
+    uu += sin((2.0 * piNum * nn / halfSqrt3) * (halfSqrt3 - halfSqrt3 * xx - 0.5 * yy));
+    return uu;
+  }
+
 }
 
 Math::Math()
@@ -122,56 +168,72 @@ Math& Math::Get()
 
 void Math::SetType(const std::string& mathType)
 {
-  if (mathType.empty() || (mathType.compare("0") == 0) || (mathType.compare("line") == 0))
+  math_type = "line";
+
+  struct MathType
   {
+    int key = 0;
+    std::string name = "line";
+    double (*Function)(double x, double y);
+    double scale = 1.0;
+    std::string str() const
+    {
+      return std::to_string(key);
+    }
+    typedef double (*MathFunction)(double x, double y);
+    static void Add(std::map<int, MathType>& mathMap, const std::string& nameIn, MathFunction funcIn, double scaleIn = 1.0)
+    {
+      int keyIn = (int)mathMap.size();
+      MathType mathType;
+      mathType.key = keyIn;
+      mathType.name = nameIn;
+      mathType.Function = funcIn;
+      mathType.scale = scaleIn;
+      mathMap[keyIn] = mathType;
+    }
+  };
+
+  std::map<int, MathType> types;
+  MathType::Add(types, "line", &linear);
+  MathType::Add(types, "parabola", &parabola);
+  MathType::Add(types, "cubic", &cubic);
+  MathType::Add(types, "circle", &ellipse, 1.5);
+  MathType::Add(types, "hyperbola", &hyperbola, 5);
+  MathType::Add(types, "sine", &sine, 6);
+  MathType::Add(types, "sinc", &sinc, 10);
+  MathType::Add(types, "exp", &exponential, 4);
+  MathType::Add(types, "log", &natlog, 4);
+  MathType::Add(types, "ellipse", &ellipse, 1.5);
+  MathType::Add(types, "ellipticcurve", &ellipticcurve, 4);
+  MathType::Add(types, "equilateral", &equilateral);
+  if (mathType.empty())
+  {
+    math_type = "line";
     Function = &linear;
     return;
   }
-  if ((mathType.compare("1") == 0) || (mathType.compare("parabola") == 0))
+  for (auto& mathIt : types)
   {
-    Function = &parabola;
-    return;
+    auto& mathTypeStruct = mathIt.second;
+    if ((mathType.compare(mathTypeStruct.str()) == 0) || (mathType.compare(mathTypeStruct.name) == 0))
+    {
+      scale = mathTypeStruct.scale;
+      math_type = mathTypeStruct.name;
+      Function = mathTypeStruct.Function;
+      return;
+    }
   }
-  if ((mathType.compare("2") == 0) || (mathType.compare("cubic") == 0))
-  {
-    Function = &cubic;
-    return;
-  }
-  if ((mathType.compare("3") == 0) || (mathType.compare("circle") == 0))
-  {
-    scale = 1.5;
-    Function = &circle;
-    return;
-  }
-  if ((mathType.compare("4") == 0) || (mathType.compare("hyperbola") == 0))
-  {
-    scale = 4;
-    Function = &hyperbola;
-    return;
-  }
-  if ((mathType.compare("5") == 0) || (mathType.compare("sine") == 0))
-  {
-    scale = 6;
-    Function = &sine;
-    return;
-  }
-  if ((mathType.compare("6") == 0) || (mathType.compare("sinc") == 0))
-  {
-    scale = 10;
-    Function = &sinc;
-    return;
-  }
-  if ((mathType.compare("7") == 0) || (mathType.compare("exp") == 0))
-  {
-    scale = 4;
-    Function = &exponential;
-    return;
-  }
-  if ((mathType.compare("8") == 0) || (mathType.compare("log") == 0))
-  {
-    scale = 4;
-    Function = &natlog;
-    return;
-  }
+
   Function = &linear;
+}
+
+bool Math::canDivideByZero() const
+{
+  if (math_type.compare("hyperbola") == 0) { return true; }
+  return false;
+}
+
+double Math::getPi()
+{
+  return 3.1415926535;
 }

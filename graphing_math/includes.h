@@ -5,6 +5,7 @@ All Rights Reserved.*/
 #define INCLUDES_H
 #include <vector>
 #include <set>
+#include <map>
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -13,6 +14,7 @@ All Rights Reserved.*/
 #include <stdlib.h>     // randomness functions - srand and rand
 #include <time.h>       // time function
 #include <cmath>
+#include <stdexcept>    // Exception handling.
 #include <math.h>       // atan2 function
 
 /*  OpenGL */
