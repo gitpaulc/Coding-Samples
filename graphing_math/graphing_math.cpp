@@ -57,7 +57,7 @@ void Graphing::keyboard(unsigned char key, int x, int y)
       factor = -1.0;
     }
     Math& math = Math::Get();
-    double piNumber = 3.14159;
+    double piNumber = Math::getPi();
     math.angle += 0.1 * factor * piNumber;
     if (math.angle > 4.0 * piNumber)
     {

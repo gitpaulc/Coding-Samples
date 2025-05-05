@@ -135,6 +135,22 @@ namespace // anonymous
     return y * y - ans;
   }
 
+  double equilateral(double x, double y)
+  {
+    Math& math = Math::Get();
+    rescale(x, y);
+    double mm = math.hasParam1 ? math.param1 : 1;
+    double nn = math.hasParam2 ? math.param2 : 1;
+    double halfSqrt3 = std::sqrt(3.0) * 0.5;
+    double piNum = Math::getPi();
+    double xx = x;
+    double yy = y - 0.5;
+    double uu = sin((2.0 * piNum * mm / halfSqrt3) * yy);
+    uu += sin((2.0 * piNum * nn / halfSqrt3) * (halfSqrt3 * xx - 0.5 * yy));
+    uu += sin((2.0 * piNum * nn / halfSqrt3) * (halfSqrt3 - halfSqrt3 * xx - 0.5 * yy));
+    return uu;
+  }
+
 }
 
 Math::Math()
@@ -187,6 +203,7 @@ void Math::SetType(const std::string& mathType)
   MathType::Add(types, "log", &natlog, 4);
   MathType::Add(types, "ellipse", &ellipse, 1.5);
   MathType::Add(types, "ellipticcurve", &ellipticcurve, 4);
+  MathType::Add(types, "equilateral", &equilateral);
   if (mathType.empty())
   {
     math_type = "line";
@@ -212,4 +229,9 @@ bool Math::canDivideByZero() const
 {
   if (math_type.compare("hyperbola") == 0) { return true; }
   return false;
+}
+
+double Math::getPi()
+{
+  return 3.1415926535;
 }

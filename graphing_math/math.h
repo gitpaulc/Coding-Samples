@@ -20,6 +20,7 @@ class Math
   double param1 = 0.0;
   double param2 = 0.0;
   bool canDivideByZero() const;
+  static double getPi();
 };
 
 #endif // def MATH_H

@@ -17,6 +17,7 @@ int main(int argc, char **argv)
   std::cout << "\n\t5. sine\t6. sinc\n\t7. exp OR exp b\t8. log OR log b (where b is the base)";
   std::cout << "\n\t9. 9 a b OR ellipse a b";
   std::cout << "\n\t10. 10 a b OR ellipticcurve a b";
+  std::cout << "\n\t11. 11 m n OR equilateral m n (graphs equilateral triangles when m = n, m = n = 1 by default).";
   std::cout << std::endl;
   std::string graphType = "";
   if (argc >= 2)
