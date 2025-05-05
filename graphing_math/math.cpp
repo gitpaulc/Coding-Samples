@@ -1,4 +1,6 @@
 #include "math.h"
+#include <stdexcept>
+#include <cmath>
 
 namespace // anonymous
 {
