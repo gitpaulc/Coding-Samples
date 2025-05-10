@@ -153,6 +153,39 @@ namespace // anonymous
     return uu;
   }
 
+  double regular(double x, double y)
+  {
+    Math& math = Math::Get();
+    rescale(x, y);
+    double mm0 = math.hasParam1 ? math.param1 : 3;
+    double kk = math.hasParam2 ? math.param2 : 1;
+    int mm = 3;
+    if (mm0 > 3.0) { mm = (int)mm0; }
+    mm0 = (double) mm;
+
+    double piNum = Math::getPi();
+    double xx = x;
+    double yy = y;
+    double zz = 0.0;
+    double coeff = kk;
+
+    double theta = 2.0 * piNum / mm0;
+    double cosTheta = cos(theta);
+    double sinTheta = sin(theta);
+    double cosAngle = 1.0;
+    double sinAngle = 0.0;
+    for (int ii = 0; ii < mm; ++ii)
+    {
+      double summand = cos(coeff * (cosAngle * xx - sinAngle * yy));
+      zz += summand;
+      double tempCos = cosAngle;
+      double tempSin = sinAngle;
+      cosAngle = tempCos * cosTheta - tempSin * sinTheta;
+      sinAngle = tempSin * cosTheta + tempCos * sinTheta;
+    }
+    return zz;
+  }
+
 }
 
 Math::Math()
@@ -206,6 +239,7 @@ void Math::SetType(const std::string& mathType)
   MathType::Add(types, "ellipse", &ellipse, 1.5);
   MathType::Add(types, "ellipticcurve", &ellipticcurve, 4);
   MathType::Add(types, "equilateral", &equilateral);
+  MathType::Add(types, "regular", &regular, 4);
   if (mathType.empty())
   {
     math_type = "line";
