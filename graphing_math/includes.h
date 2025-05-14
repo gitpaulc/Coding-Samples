@@ -22,8 +22,25 @@ All Rights Reserved.*/
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #else
+#ifdef _WIN64
+#include <windows.h>
 #include <GL/gl.h>
 #include <GL/glut.h>
+#else
+#ifdef _WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#else
+#ifdef __linux__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
+#include <GL/gl.h>
+#include <GL/glut.h>
+#endif // def __linux__
+#endif // def _WIN32
+#endif // def _WIN64
 #endif // working with __APPLE__
 
 #endif // INCLUDES_H
