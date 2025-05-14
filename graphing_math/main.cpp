@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   std::cout << "\n\t9. 9 a b OR ellipse a b";
   std::cout << "\n\t10. 10 a b OR ellipticcurve a b";
   std::cout << "\n\t11. 11 m n OR equilateral m n (graphs equilateral triangles when m = n, m = n = 1 by default).";
-  std::cout << "\n\t12. 12 m k OR regular m k (graphs regular polygon with m sides and k frequency where m = 3, k = 1 by default).";
+  std::cout << "\n\t12. 12 m k OR regular m k (graphs regular polygon with m sides and k frequency where m = 3, k = 8 * pi by default).";
   std::cout << std::endl;
   std::string graphType = "";
   if (argc >= 2)
