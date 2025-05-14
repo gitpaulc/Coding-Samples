@@ -2,6 +2,7 @@
 *.o
 computational_geometry/*.exe
 computational_geometry/ComputationalGeometry/.vs
+computational_geometry/latex
 
 computational_geometry/ComputationalGeometry/CMakeCache.txt
 computational_geometry/ComputationalGeometry/CMakeFiles/
@@ -59,6 +60,7 @@ graphing_math/GraphingMath/freeglut
 
 mesh_renderer/*.exe
 mesh_renderer/MeshRenderer/.vs
+mesh_renderer/latex/
 
 mesh_renderer/MeshRenderer/CMakeCache.txt
 mesh_renderer/MeshRenderer/CMakeFiles/
