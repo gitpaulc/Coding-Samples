@@ -2,6 +2,7 @@
 *.o
 computational_geometry/*.exe
 computational_geometry/ComputationalGeometry/.vs
+computational_geometry/latex
 
 computational_geometry/ComputationalGeometry/CMakeCache.txt
 computational_geometry/ComputationalGeometry/CMakeFiles/
@@ -44,13 +45,22 @@ video_output/*.avi
 
 graphing_math/*.exe
 graphing_math/GraphingMath/.vs
+graphing_math/GraphingMath/Debug
+graphing_math/GraphingMath/MinSizeRel
+graphing_math/GraphingMath/Release
+graphing_math/GraphingMath/RelWithDebInfo
+graphing_math/GraphingMath/GraphingMath.dir
+graphing_math/latex/
 
 graphing_math/GraphingMath/CMakeCache.txt
 graphing_math/GraphingMath/CMakeFiles/
 graphing_math/GraphingMath/cmake_install.cmake
 
+graphing_math/GraphingMath/freeglut
+
 mesh_renderer/*.exe
 mesh_renderer/MeshRenderer/.vs
+mesh_renderer/latex/
 
 mesh_renderer/MeshRenderer/CMakeCache.txt
 mesh_renderer/MeshRenderer/CMakeFiles/
