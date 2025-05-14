@@ -171,8 +171,8 @@ void Graphing::render()
 
   glPointSize(1.0f);
   glBegin(GL_POINTS);
-  float bounds_x = 1.0 / WindowWidth;
-  float bounds_y = 1.0 / WindowHeight;
+  float bounds_x = (float)1.0 / WindowWidth;
+  float bounds_y = (float)1.0 / WindowHeight;
   for (int i = -WindowWidth; i < WindowWidth; ++i)
   {
     glColor3f(0, 0, 0);
