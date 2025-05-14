@@ -44,6 +44,11 @@ video_output/*.avi
 
 graphing_math/*.exe
 graphing_math/GraphingMath/.vs
+graphing_math/GraphingMath/Debug
+graphing_math/GraphingMath/MinSizeRel
+graphing_math/GraphingMath/Release
+graphing_math/GraphingMath/RelWithDebInfo
+graphing_math/GraphingMath/GraphingMath.dir
 
 graphing_math/GraphingMath/CMakeCache.txt
 graphing_math/GraphingMath/CMakeFiles/
