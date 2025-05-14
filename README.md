@@ -1,4 +1,13 @@
-# **Coding Samples by Paul Cernea**
+# **Coding Samples by Paul Cernea.**
+
+---
+
+## **Table of Contents.**
+
+1. [Computational Geometry.](##computational-geometry)
+2. [Graphing Math.](##graphing-math)
+3. [Computational Biology.](##computational-biology)
+4. [Mesh Renderer.](##mesh-renderer)
 
 ---
 
@@ -44,6 +53,9 @@
 * Press **T** to turn naive triangulation on and off.
 * See the screenshots *seven_points.png*, *hundred_points_1.png*, *hundred_points_2.png* for examples.
 * Press **Q** or **ESC** to exit.
+* `ComputationalGeometry.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder. 
+
+[Back to Table of Contents.](##table-of-contents)
 
 ---
 
@@ -64,6 +76,10 @@
   * This `freeglut` folder should contain `include`, `lib`, and `bin` folders. The dependencies should now be in place.
   * Build and run the executable from `Coding-Samples\graphing_math\GraphingMath\GraphingMath.sln`
   * See the "Usage:" explanation output to the console for a guide on parameters. Some are already configured in the *Debug Properties*.
+
+* `GraphingMath.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder.
+ 
+[Back to Table of Contents.](##table-of-contents)
 
 ---
 
@@ -91,6 +107,8 @@
 * Besides the Django service, the `computational_biology` folder contains a CUDA computational biology implementation. See the CUDA and CMake instructions as listed above.
 * Although the typical longest common substring algorithm does not leave a lot of room for parallelization, nevertheless parallel preprocessing can be performed. The longest common substring of N strings is at most as long as the LCS of any two of the strings. So by computing the smallest LCS of all pairs in parallel, we can obtain a bound to speed up the algorithm.
 
+[Back to Table of Contents.](##table-of-contents)
+
 ---
 
 ## **Mesh Renderer.**
@@ -105,5 +123,8 @@
 * Press E to export the loaded mesh if desired, Q to exit the app.
 * Navigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.
 * Rotation: R = rotate clockwise, T = rotate counter-clockwise. W, A, S, and D to rotate the screen.
+* `MeshRenderer.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder.
+ 
+[Back to Table of Contents.](##table-of-contents)
 
 ---
