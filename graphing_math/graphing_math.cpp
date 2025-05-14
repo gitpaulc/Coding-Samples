@@ -11,7 +11,7 @@ void Graphing::initialize(int * argc_ptr, char **argv)
   glutInitWindowPosition(0, 0);
   glutInitWindowSize(Graphing::WindowWidth, Graphing::WindowHeight);
 
-  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y = zoom, I/J/K/L = pan, R/T = rotate, Q = quit. M = toggle 3d: Red > 0, Blue < 0.";
+  const std::string windowCaption = "Graphing Math by Paul Cernea. Z/Y = zoom, I/J/K/L = pan, R/T = rotate, H hide axes, Q = quit. M = toggle 3d: Red > 0, Blue < 0.";
 
   Graphing::window_id = glutCreateWindow(windowCaption.c_str());
 	
@@ -87,6 +87,10 @@ void Graphing::keyboard(unsigned char key, int x, int y)
   {
     Math& math = Math::Get();
     math.origin_x -= dPan;
+  }
+  else if ((key == 'h') || (key == 'H'))
+  {
+    Graphing::showingAxes = !Graphing::showingAxes;
   }
 	
   glutPostRedisplay();
@@ -175,11 +179,13 @@ void Graphing::render()
   float bounds_y = (float)1.0 / WindowHeight;
   for (int i = -WindowWidth; i < WindowWidth; ++i)
   {
+    if (!Graphing::showingAxes) { break; }
     glColor3f(0, 0, 0);
     glVertex2f(i * bounds_x, 0); // Draw x-axis.
   }
   for (int j = -WindowHeight; j < WindowHeight; ++j)
   {
+    if (!Graphing::showingAxes) { break; }
     glColor3f(0, 0, 0);
     glVertex2f(0, j * bounds_y); // Draw y-axis.
   }
