@@ -8,6 +8,7 @@ int main(int argc, char **argv)
   std::cout << "\n\tPress \"M\" to view the positive/negative sets of a function z = f(x, y). Red > 0, Blue < 0.";
   std::cout << "\n\tPress \"Z\" to zoom in, \"Y\" to zoom out, \"R\" to rotate clockwise, \"T\" to rotate counter-clockwise.";
   std::cout << "\n\tPress \"I\" to scroll up, \"K\" to scroll down, \"J\" to scroll left, \"L\" to scroll right.";
+  std::cout << "\n\tPress \"H\" to hide or show axes.";
   std::cout << "\n\tPress \"Q\" to or ESC to exit.";
   std::cout << "\n\tGraph a line by default or enter the number 0 or the word \"line\" to graph a line. Similarly...";
   std::cout << "\n\t1. parabola";
@@ -18,6 +19,7 @@ int main(int argc, char **argv)
   std::cout << "\n\t9. 9 a b OR ellipse a b";
   std::cout << "\n\t10. 10 a b OR ellipticcurve a b";
   std::cout << "\n\t11. 11 m n OR equilateral m n (graphs equilateral triangles when m = n, m = n = 1 by default).";
+  std::cout << "\n\t12. 12 m k OR regular m k (graphs rotation-invariant sinusoids with m sides and k frequency where m = 3, k = 8 * pi by default).";
   std::cout << std::endl;
   std::string graphType = "";
   if (argc >= 2)

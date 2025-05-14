@@ -16,6 +16,7 @@ namespace Graphing
    *    Red = Positive, Blue = Negative, z = f(x, y)
    */
   static int mode = 0;
+  static bool showingAxes = true;
 	
   void initialize(int * argc_ptr, char **argv);
   void keyboard(unsigned char key, int x, int y);
