@@ -49,6 +49,7 @@ graphing_math/GraphingMath/MinSizeRel
 graphing_math/GraphingMath/Release
 graphing_math/GraphingMath/RelWithDebInfo
 graphing_math/GraphingMath/GraphingMath.dir
+graphing_math/latex/
 
 graphing_math/GraphingMath/CMakeCache.txt
 graphing_math/GraphingMath/CMakeFiles/
