@@ -49,6 +49,8 @@ graphing_math/GraphingMath/CMakeCache.txt
 graphing_math/GraphingMath/CMakeFiles/
 graphing_math/GraphingMath/cmake_install.cmake
 
+graphing_math/GraphingMath/freeglut
+
 mesh_renderer/*.exe
 mesh_renderer/MeshRenderer/.vs
 
