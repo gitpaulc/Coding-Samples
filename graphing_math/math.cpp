@@ -167,13 +167,12 @@ namespace // anonymous
     double xx = x;
     double yy = y;
     double zz = 0.0;
-    double coeff = kk;
     double phase = piNum / 2.0;
-    if (mm == 3)
-    {
-      if (!math.hasParam2) { kk = 8.0 * piNum; }
-      phase = kk / 6.0;
-    }
+    if (mm == 3) { if (!math.hasParam2) { kk = 8.0; } }
+    if (mm == 4) { if (!math.hasParam2) { kk = 1.0; } }
+    kk *= piNum;
+    if (mm == 3) { phase = kk / 6.0; }
+    if (mm == 4) { phase = -kk / 2.0; }
 
     double theta = 2.0 * piNum / mm0;
     double cosTheta = cos(theta);
@@ -182,7 +181,7 @@ namespace // anonymous
     double sinAngle = 0.0;
     for (int ii = 0; ii < mm; ++ii)
     {
-      double summand = sin(coeff * (cosAngle * xx - sinAngle * yy) + phase);
+      double summand = sin((cosAngle * xx - sinAngle * yy) + phase);
       zz += summand;
       double tempCos = cosAngle;
       double tempSin = sinAngle;
