@@ -168,11 +168,9 @@ namespace // anonymous
     double yy = y;
     double zz = 0.0;
     double phase = piNum / 2.0;
-    if (mm == 3) { if (!math.hasParam2) { kk = 8.0; } }
-    if (mm == 4) { if (!math.hasParam2) { kk = 1.0; } }
+    if (!math.hasParam2) { kk = mm - 2.0; }
     kk *= piNum;
-    if (mm == 3) { phase = kk / 6.0; }
-    if (mm == 4) { phase = -kk / 2.0; }
+    phase = kk / mm;
 
     double theta = 2.0 * piNum / mm0;
     double cosTheta = cos(theta);
