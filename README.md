@@ -1,6 +1,25 @@
 
 # **Coding Samples by Paul Cernea.**
 
+<h1>
+  <a href="#"><img alt="ComputationalGeometry" src="computational_geometry/hundred_points_from_mac_2.png" width="100%"/></a>
+</h1>
+
+<p>
+  <button>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_geometry" alt="Computational Geometry">Geometry</a>
+  </button>
+  <button>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/graphing_math" alt="Graphing Math">Graphing</a>
+  </button>
+  <button>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_biology" alt="Computational Biology">Biology</a>
+  </button>
+  <button>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/mesh_renderer" alt="Mesh Renderer">Meshing</a>
+  </button>
+</p>
+
 ---
 
 ## **Table of Contents.**
