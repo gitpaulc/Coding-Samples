@@ -47,19 +47,19 @@
   * See the screenshots seven_points.png, hundred_points_1.png, hundred_points_2.png for examples.
   * Press **Q** or **ESC** to exit.
 
-* If you want to build the CUDA version on Windows, set the USE_CUDA CMake variable. Reconfigure and regenerate the project.
+* If you want to build the **CUDA** version on Windows, set the USE_CUDA CMake variable. Reconfigure and regenerate the project.
   * Install CUDA if you haven't already.
-  * When you build, if it gives an error about not finding cl.exe, add this (or a similar) folder path as an environment variable: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64\
+  * When you build, if it gives an error about not finding cl.exe, add this (or a similar) folder path as an environment variable: `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.41.34120\bin\Hostx64\x64\`
   * After adding the new PATH variable, close and open the command prompt to make sure it updates.
 * Generally for Windows, follow the steps below.
 
-  * Use CMake to generate the ComputationalGeometry project/solution. If you do not have CMake installed, a project/solution is already generated in `Coding-Samples\computational_geometry\ComputationalGeometry`
-  * Use Release or Debug mode x64 (64-bit) if possible.
-  * If you do not have FreeGlut installed, install FreeGlut as follows:
+  * Use [CMake](https://cmake.org) to generate the ComputationalGeometry project/solution. If you do not have CMake installed, a project/solution is already generated in `Coding-Samples\computational_geometry\ComputationalGeometry`
+  * Use **Release** or **Debug** mode x64 (64-bit) if possible.
+  * If you do not have [FreeGlut](https://freeglut.sourceforge.net) installed, install FreeGlut as follows:
   * Download FreeGlut and build it if necessary.
   * Copy the `freeglut` folder to `Coding-Samples\computational_geometry\ComputationalGeometry` or configure CMake to point to it.
   * This `freeglut` folder should contain `include`, `lib`, and `bin` folders. The dependencies should now be in place.
-  * For OpenCV support, enable it from CMake. Otherwise uncomment the line `//#define USE_OPEN_CV` in includes.h.
+  * For [OpenCV](https://opencv.org) support, enable it from CMake. Otherwise uncomment the line `//#define USE_OPEN_CV` in includes.h.
   * If using OpenCV, download OpenCV 4.9.0. Point CMake to the appropriate OpenCV folder, or create a folder called `opencv` in `Coding-Samples\computational_geometry\ComputationalGeometry` and copy the `build` folder in there.
   * Build and run the executable from `Coding-Samples\computational_geometry\ComputationalGeometry\ComputationalGeometry.sln`
   * By default 50 points are generated.
