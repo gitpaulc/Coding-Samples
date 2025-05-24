@@ -74,7 +74,7 @@
 * Press **T** to turn naive triangulation on and off.
 * See the screenshots *seven_points.png*, *hundred_points_1.png*, *hundred_points_2.png* for examples.
 * Press **Q** or **ESC** to exit.
-* `ComputationalGeometry.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder. The homepage is `index.html`.
+* `ComputationalGeometry.doxy` is a template for generating [Doxygen](https://www.doxygen.nl/index.html) documentation. Sample output is generated in the `html` folder. The homepage is `index.html`.
 
 [Back to Table of Contents.](##table-of-contents)
 
