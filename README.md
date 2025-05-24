@@ -7,16 +7,16 @@
 
 <p>
   <button>
-  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_geometry" alt="Computational Geometry">Geometry</a>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_geometry" alt="Computational Geometry"><img alt="Computational Geometry" src="ui/geometry.png"/></a>
   </button>
   <button>
-  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/graphing_math" alt="Graphing Math">Graphing</a>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/graphing_math" alt="Graphing Math"><img alt="Graphing Math" src="ui/graphing.png"/></a>
   </button>
   <button>
-  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_biology" alt="Computational Biology">Biology</a>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_biology" alt="Computational Biology"><img alt="ComputationalBiology" src="ui/biology.png"/></a>
   </button>
   <button>
-  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/mesh_renderer" alt="Mesh Renderer">Meshing</a>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/mesh_renderer" alt="Mesh Renderer"><img alt="MeshRenderer" src="ui/meshing.png"/></a>
   </button>
 </p>
 
