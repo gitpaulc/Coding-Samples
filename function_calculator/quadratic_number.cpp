@@ -53,4 +53,11 @@ namespace FunctionalCalculator
     strm << ")";
     return strm.str();
   }
+
+  QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
+  {
+    QuadraticNumber answer;
+    answer.content[radicand.numerator() * radicand.denominator()] = Rational(1, radicand.denominator());
+    return answer;
+  }
 }

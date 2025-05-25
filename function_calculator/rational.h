@@ -24,7 +24,9 @@ public:
   Rational& operator=(const Rational&);
   Rational& operator=(Rational&&) noexcept;
   ~Rational() = default;
-    
+
+  int denominator() const;
+  int numerator() const;
   static int gcd(int aa, int bb);
   Rational operator+() const;
   Rational operator-() const;

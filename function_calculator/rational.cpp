@@ -60,6 +60,9 @@ namespace FunctionalCalculator
     return *this;
   }
 
+  int Rational::denominator() const { return denom; }
+  int Rational::numerator() const { return num; }
+
   int Rational::gcd(int aa, int bb)
   {
     if ((aa == bb) || (bb == 0)) { return (aa > 0) ? aa : (-aa); }

@@ -25,6 +25,7 @@ class QuadraticNumber : public Number
 public:
   virtual double get() const override;
   virtual std::string print() const override;
+  static QuadraticNumber sqrt(const Rational& radicand);
 };
 }
 
