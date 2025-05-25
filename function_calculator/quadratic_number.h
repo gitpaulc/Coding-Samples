@@ -37,6 +37,7 @@ public:
   QuadraticNumber operator*(const QuadraticNumber& rhs) const;
   /** \brief Uses rationalization of the denominator. */
   QuadraticNumber operator/(const QuadraticNumber& rhs) const;
+  QuadraticNumber pow(int p) const; /**< Returns the p'th power of the rational number. */
 };
 }
 

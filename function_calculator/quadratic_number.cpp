@@ -196,4 +196,20 @@ namespace FunctionalCalculator
     if (!success) { throw std::exception("Division failed."); }
     return (*this) * quotientNumer * (Rational(1, 1) / rationalDenom);
   }
+
+  QuadraticNumber QuadraticNumber::pow(int p) const
+  {
+    bool isNeg = (p < 0);
+    if (isNeg) { p = -p; }
+    QuadraticNumber answer(Rational(1, 1));
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (*this);
+    }
+    if (isNeg)
+    {
+      return QuadraticNumber(Rational(1, 1)) / answer;
+    }
+    return answer;
+  }
 }

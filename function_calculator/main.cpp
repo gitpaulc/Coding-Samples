@@ -69,6 +69,7 @@ bool test_quadratic()
   auto reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  std::cout << "\nThe reciprocal of i is " << (QuadraticNumber::sqrt(-1).pow(-1)).print();
   return true;
 }
 

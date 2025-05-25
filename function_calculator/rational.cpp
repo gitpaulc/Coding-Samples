@@ -119,6 +119,7 @@ namespace FunctionalCalculator
   Rational Rational::pow(int p) const
   {
     bool isNeg = (p < 0);
+    if (isNeg) { p = -p; }
     Rational answer(1, 1);
     for (int i = 0; i < p; ++i)
     {
