@@ -56,6 +56,8 @@ bool test_quadratic()
   bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
   if (!twoThirdsIsRational) { return false; }
   std::cout << "\nSquare root of 2/3 = " << QuadraticNumber::sqrt(rationalOut).print();
+  auto goldenRatio = QuadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
+  std::cout << "\nThe golden ratio is " << goldenRatio.print();
   return true;
 }
 

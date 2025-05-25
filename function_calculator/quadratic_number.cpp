@@ -130,7 +130,7 @@ namespace FunctionalCalculator
     }
     for (const auto& iter : rhs.content)
     {
-      if (added.find(iter.first) == added.end()) { continue; }
+      if (added.find(iter.first) != added.end()) { continue; }
       sum.content[iter.first] = iter.second;
     }
     return sum;
