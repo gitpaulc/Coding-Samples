@@ -8,6 +8,15 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  QuadraticNumber::QuadraticNumber(const Rational& number)
+  {
+    if (number != 0)
+    {
+      *this = QuadraticNumber::sqrt(1);
+      content[1] = content[1] * number;
+    }
+  }
+
   double QuadraticNumber::get() const
   {
     double answer = 0.0;
@@ -22,11 +31,21 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  bool QuadraticNumber::getRational(Rational& self) const
+  {
+    if (content.size() == 0) { self = Rational(0, 1); return true; }
+    if (content.size() > 1) { return false; }
+    if (content.find(1) == content.end()) { return false; }
+    self = content.at(1);
+    return true;
+  }
+
   std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
     int count = -1;
     if (useParentheses) { strm << "("; }
+    if (content.size() == 0) { strm << "0"; }
     for (const auto& iter : content)
     {
       auto val = iter.second;
@@ -43,7 +62,8 @@ namespace FunctionalCalculator
       }
       bool coeffIsOne = (val == 1);
       int radicand = iter.first;
-      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(); }
+      bool printCoeffParents = (val.denominator() != 1) && (radicand != 1);
+      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
       if (radicand == 1) { continue; }
       bool complex = false;
       if (radicand < 0) { radicand = -radicand; complex = true; }
@@ -78,5 +98,66 @@ namespace FunctionalCalculator
     }
     answer.content[key] = coefficient;
     return answer;
+  }
+
+  QuadraticNumber QuadraticNumber::operator+() const
+  {
+    return *this;
+  }
+
+  QuadraticNumber QuadraticNumber::operator-() const
+  {
+    auto answer = *this;
+    for (auto& iter : answer.content) { iter.second = -iter.second; }
+    return answer;
+  }
+
+  QuadraticNumber QuadraticNumber::operator+(const QuadraticNumber& rhs) const
+  {
+    std::set<int> added;
+    QuadraticNumber sum;
+    for (const auto& iter : content)
+    {
+      if (rhs.content.find(iter.first) != rhs.content.end())
+      {
+        auto summand = rhs.content.at(iter.first);
+        if (summand != (- iter.second))
+        {
+          sum.content[iter.first] = summand + iter.second;
+        }
+      }
+      else { sum.content[iter.first] = iter.second; }
+      added.insert(iter.first);
+    }
+    for (const auto& iter : rhs.content)
+    {
+      if (added.find(iter.first) != added.end()) { continue; }
+      sum.content[iter.first] = iter.second;
+    }
+    return sum;
+  }
+
+  QuadraticNumber QuadraticNumber::operator-(const QuadraticNumber& rhs) const
+  {
+    return (*this) + (-rhs);
+  }
+
+  QuadraticNumber QuadraticNumber::operator*(const QuadraticNumber& rhs) const
+  {
+    QuadraticNumber product;
+    for (const auto& iter : content)
+    {
+      for (const auto& jter : rhs.content)
+      {
+        bool iterNegative = (iter.second < 0);
+        bool jterNegative = (jter.second < 0);
+        auto summand = sqrt(Rational(iter.first, 1) * Rational(jter.first, 1) *
+          iter.second * iter.second * jter.second * jter.second);
+        if (iterNegative && !jterNegative) { summand = -summand; }
+        else if (jterNegative && !iterNegative) { summand = -summand; }
+        product = product + summand;
+      }
+    }
+    return product;
   }
 }

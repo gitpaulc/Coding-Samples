@@ -22,10 +22,19 @@ class QuadraticNumber : public Number
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
   std::map<int, Rational> content;
+
 public:
+  QuadraticNumber(const Rational& number = Rational(0, 1));
   virtual double get() const override;
+  bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
+
+  QuadraticNumber operator+() const;
+  QuadraticNumber operator-() const;
+  QuadraticNumber operator+(const QuadraticNumber& rhs) const;
+  QuadraticNumber operator-(const QuadraticNumber& rhs) const;
+  QuadraticNumber operator*(const QuadraticNumber& rhs) const;
 };
 }
 
