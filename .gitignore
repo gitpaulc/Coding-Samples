@@ -43,6 +43,21 @@ computational_biology/Release
 image_output/*.png
 video_output/*.avi
 
+function_calculator/*.exe
+function_calculator/FunctionCalculator/.vs
+function_calculator/latex
+
+function_calculator/FunctionCalculator/CMakeCache.txt
+function_calculator/FunctionCalculator/CMakeFiles/
+function_calculator/FunctionCalculator/cmake_install.cmake
+function_calculator/FunctionCalculator/Function.*
+function_calculator/FunctionCalculator/FunctionCalculator.dir/
+function_calculator/FunctionCalculator/Debug
+function_calculator/FunctionCalculator/Release
+function_calculator/FunctionCalculator/RelWithDebInfo
+function_calculator/FunctionCalculator/RelWithDebugInfo
+function_calculator/FunctionCalculator/x64
+
 graphing_math/*.exe
 graphing_math/GraphingMath/.vs
 graphing_math/GraphingMath/Debug
