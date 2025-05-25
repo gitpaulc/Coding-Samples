@@ -197,6 +197,11 @@ namespace FunctionalCalculator
           answer[factor] = answer[factor] + 1;
           break;
         }
+        if (answer.find(factor) == answer.end())
+        {
+          answer[factor] = 1;
+        }
+        else { answer[factor] = answer[factor] + 1; }
         auto others = primeFactorization(input / factor);
         for (auto& iter : others)
         {
