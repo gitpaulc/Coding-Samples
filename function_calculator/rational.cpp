@@ -1,3 +1,5 @@
+/*  Copyright Paul Cernea, May 2025.
+All Rights Reserved.*/
 
 #include "rational.h"
 
