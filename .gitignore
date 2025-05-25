@@ -50,6 +50,8 @@ function_calculator/latex
 function_calculator/Function Calculator/CMakeCache.txt
 function_calculator/Function Calculator/CMakeFiles/
 function_calculator/Function Calculator/cmake_install.cmake
+function_calculator/Function Calculator/Function.*
+function_calculator/Function Calculator/x64
 
 graphing_math/*.exe
 graphing_math/GraphingMath/.vs

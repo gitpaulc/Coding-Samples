@@ -2,6 +2,7 @@
 #include "rational.h"
 
 #include <stdexcept>
+#include <sstream>
 
 namespace FunctionalCalculator
 {
@@ -152,5 +153,16 @@ namespace FunctionalCalculator
     double nn = (double)num;
     double dd = (double)denom;
     return nn / dd;
+  }
+
+  std::string Rational::print() const
+  {
+    std::stringstream strm;
+    strm << "(";
+    if (num == 0) { strm << num; }
+    else if (denom == 1) { strm << num; }
+    else { strm << num << " / " << denom; }
+    strm << ")";
+    return strm.str();
   }
 }

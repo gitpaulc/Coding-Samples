@@ -4,6 +4,8 @@ All Rights Reserved.*/
 #ifndef RATIONAL_H
 #define RATIONAL_H
 
+#include <string>
+
 namespace FunctionalCalculator
 {
 
@@ -34,6 +36,7 @@ public:
   bool operator<=(const Rational& rhs) const;
   bool operator>=(const Rational& rhs) const;
   double get() const;
+  std::string print() const;
 };
 }
 
