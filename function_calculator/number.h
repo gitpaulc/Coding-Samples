@@ -16,7 +16,7 @@ public:
   /** \brief Should implement this in order to derive from the Number class. */
   virtual double get() const;
   /** \brief Should implement this in order to derive from the Number class. */
-  virtual std::string print() const;
+  virtual std::string print(bool useParentheses = false) const;
 };
 }
 

@@ -175,14 +175,14 @@ namespace FunctionalCalculator
     return nn / dd;
   }
 
-  std::string Rational::print() const
+  std::string Rational::print(bool useParentheses) const
   {
     std::stringstream strm;
-    strm << "(";
+    if (useParentheses) { strm << "("; }
     if (num == 0) { strm << num; }
     else if (denom == 1) { strm << num; }
     else { strm << num << " / " << denom; }
-    strm << ")";
+    if (useParentheses) { strm << ")"; }
     return strm.str();
   }
 
@@ -276,10 +276,10 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  std::string Rational::printFactors() const
+  std::string Rational::printFactors(bool useParentheses) const
   {
     std::stringstream strm;
-    strm << "(";
+    if (useParentheses) { strm << "("; }
     auto factors = primeFactorization();
     int count = -1;
     for (auto& iter : factors)
@@ -292,7 +292,7 @@ namespace FunctionalCalculator
       if (iter.first < 0) { strm << ")"; }
       strm << "^" << iter.second;
     }
-    strm << ")";
+    if (useParentheses) { strm << ")"; }
     return strm.str();
   }
 }

@@ -46,10 +46,10 @@ public:
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
   std::map<int, int> primeFactorization() const;
   /** \brief Print the prime factorization of the rational number. */
-  std::string printFactors() const;
+  std::string printFactors(bool useParentheses = false) const;
 
   virtual double get() const override;
-  virtual std::string print() const override;
+  virtual std::string print(bool useParentheses = false) const override;
 };
 }
 

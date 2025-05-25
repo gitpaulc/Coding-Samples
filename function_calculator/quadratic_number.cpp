@@ -22,11 +22,11 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  std::string QuadraticNumber::print() const
+  std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
     int count = -1;
-    strm << "(";
+    if (useParentheses) { strm << "("; }
     for (const auto& iter : content)
     {
       auto val = iter.second;
@@ -41,16 +41,21 @@ namespace FunctionalCalculator
           strm << " - ";
         }
       }
-      strm << val.print();
-      if (val == 1) { continue; }
+      bool coeffIsOne = (val == 1);
       int radicand = iter.first;
+      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(); }
+      if (radicand == 1) { continue; }
       bool complex = false;
       if (radicand < 0) { radicand = -radicand; complex = true; }
-      strm << " * Sqrt(" << radicand;
-      strm << ")";
-      if (complex) { strm << " * i"; }
+      if (!coeffIsOne) { strm << " * "; }
+      if (!complex || (radicand != 1))
+      {
+        strm << "Sqrt(" << radicand << ")";
+        if (complex) { strm << " * "; }
+      }
+      if (complex) { strm << "i"; }
     }
-    strm << ")";
+    if (useParentheses) { strm << ")"; }
     return strm.str();
   }
 

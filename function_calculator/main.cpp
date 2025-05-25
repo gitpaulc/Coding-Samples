@@ -1,11 +1,12 @@
 
 #include <iostream>
 
+#include "quadratic_number.h"
 #include "rational.h"
 
 using namespace FunctionalCalculator;
 
-bool test_1()
+bool test_rational()
 {
   Rational zero;
   std::cout << "\nZero = " << zero.print();
@@ -31,7 +32,25 @@ bool test_1()
   return true;
 }
 
+bool test_quadratic()
+{
+  auto sqrt2 = QuadraticNumber::sqrt(2);
+  std::cout << "\nSquare root of 2 = " << sqrt2.print();
+  auto sqrt36 = QuadraticNumber::sqrt(36);
+  std::cout << "\nSquare root of 36 = " << sqrt36.print();
+  auto sqrtMinus36 = QuadraticNumber::sqrt(-36);
+  std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
+  return true;
+}
+
 int main()
 {
-  test_1();
+  std::string prompt;
+  std::cout << "\nTest rational:\n";
+  test_rational();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  std::cout << "\n\nTest quadratic:\n";
+  test_quadratic();
+  std::cout << "\nContinue... ";
 }

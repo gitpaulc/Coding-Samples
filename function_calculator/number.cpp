@@ -14,9 +14,9 @@ namespace FunctionalCalculator
     return 0.0;
   }
 
-  std::string Number::print() const
+  std::string Number::print(bool useParentheses) const
   {
     throw std::exception("\nNot implemented.");
-    return "";
+    return useParentheses ? "()" : "";
   }
 }

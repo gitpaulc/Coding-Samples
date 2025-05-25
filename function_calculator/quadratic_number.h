@@ -24,7 +24,7 @@ class QuadraticNumber : public Number
   std::map<int, Rational> content;
 public:
   virtual double get() const override;
-  virtual std::string print() const override;
+  virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
 };
 }
