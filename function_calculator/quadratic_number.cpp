@@ -81,6 +81,13 @@ namespace FunctionalCalculator
 
   void QuadraticNumber::factorSquares()
   {
+    auto contentOld = content;
+    content = std::map<int, Rational>();
+    for (auto& iter : contentOld)
+    {
+      auto summand = sqrt(Rational(iter.first, 1) * iter.second * iter.second);
+      *this = *this + summand;
+    }
   }
 
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
@@ -102,5 +109,30 @@ namespace FunctionalCalculator
     }
     answer.content[key] = coefficient;
     return answer;
+  }
+
+  QuadraticNumber QuadraticNumber::operator+(const QuadraticNumber& rhs) const
+  {
+    std::set<int> added;
+    QuadraticNumber sum;
+    for (const auto& iter : content)
+    {
+      if (rhs.content.find(iter.first) != rhs.content.end())
+      {
+        auto summand = rhs.content.at(iter.first);
+        if (summand != (- iter.second))
+        {
+          sum.content[iter.first] = summand + iter.second;
+        }
+      }
+      else { sum.content[iter.first] = iter.second; }
+      added.insert(iter.first);
+    }
+    for (const auto& iter : rhs.content)
+    {
+      if (added.find(iter.first) == added.end()) { continue; }
+      sum.content[iter.first] = iter.second;
+    }
+    return sum;
   }
 }
