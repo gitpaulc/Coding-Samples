@@ -18,6 +18,12 @@ bool test_1()
   std::cout << "\nOne half = " << half.print();
   Rational twelve = Rational(36, 3);
   std::cout << "\nPrime factorization of twelve = " << twelve.printFactors();
+  Rational minusTwelve = Rational(24, -2);
+  std::cout << "\nPrime factorization of negative twelve = " << minusTwelve.printFactors();
+  Rational oneOver2048 = Rational(2, 4096);
+  std::cout << "\nPrime factorization of 1 / 2048 = " << oneOver2048.printFactors();
+  Rational hundred = Rational(1000, 10);
+  std::cout << "\nPrime factorization of 100 = " << hundred.printFactors();
   return true;
 }
 

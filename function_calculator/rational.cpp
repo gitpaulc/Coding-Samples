@@ -245,6 +245,7 @@ namespace FunctionalCalculator
         power = (power % 2);
         if ((countFactors == 1) && (power == 0)) { base = 1; power = 1; }
       }
+      if ((base == 1) && (countFactors > 0)) { power = 0; }
       if (power == 0) { continue; }
       answer[base] = power;
     }
@@ -262,7 +263,10 @@ namespace FunctionalCalculator
       if (iter.second == 0) { continue; }
       ++count;
       if (count > 0) { strm << " * "; }
-      strm << iter.first << "^" << iter.second;
+      if (iter.first < 0) { strm << "("; }
+      strm << iter.first;
+      if (iter.first < 0) { strm << ")"; }
+      strm << "^" << iter.second;
     }
     strm << ")";
     return strm.str();
