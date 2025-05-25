@@ -246,7 +246,11 @@ namespace FunctionalCalculator
         if ((countFactors == 1) && (power == 0)) { base = 1; power = 1; }
       }
       if ((base == 1) && (countFactors > 0)) { power = 0; }
-      if (power == 0) { continue; }
+      if (power == 0)
+      {
+        if (countFactors == 1) { base = 1; power = 1; }
+        else { continue; }
+      }
       answer[base] = power;
     }
     return answer;
