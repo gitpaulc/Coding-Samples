@@ -50,6 +50,7 @@ bool test_quadratic()
   std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
   auto sqrt12 = QuadraticNumber::sqrt(12);
   std::cout << "\nSquare root of 12 = " << sqrt12.print();
+  std::cout << "\nTwelve is " << (sqrt12 * sqrt12).print();
   auto sqrtMinus12 = QuadraticNumber::sqrt(-12);
   std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
   Rational rationalOut;
@@ -58,6 +59,8 @@ bool test_quadratic()
   std::cout << "\nSquare root of 2/3 = " << QuadraticNumber::sqrt(rationalOut).print();
   auto goldenRatio = QuadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
   std::cout << "\nThe golden ratio is " << goldenRatio.print();
+  auto oneOverGolden = QuadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
+  std::cout << "\nOne = " << (goldenRatio * oneOverGolden).print();
   return true;
 }
 

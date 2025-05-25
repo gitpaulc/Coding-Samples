@@ -79,17 +79,6 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  void QuadraticNumber::factorSquares()
-  {
-    auto contentOld = content;
-    content = std::map<int, Rational>();
-    for (auto& iter : contentOld)
-    {
-      auto summand = sqrt(Rational(iter.first, 1) * iter.second * iter.second);
-      *this = *this + summand;
-    }
-  }
-
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
   {
     QuadraticNumber answer;
@@ -108,6 +97,18 @@ namespace FunctionalCalculator
       key /= (sqrtRational * sqrtRational).numerator();
     }
     answer.content[key] = coefficient;
+    return answer;
+  }
+
+  QuadraticNumber QuadraticNumber::operator+() const
+  {
+    return *this;
+  }
+
+  QuadraticNumber QuadraticNumber::operator-() const
+  {
+    auto answer = *this;
+    for (auto& iter : answer.content) { iter.second = -iter.second; }
     return answer;
   }
 
@@ -134,5 +135,25 @@ namespace FunctionalCalculator
       sum.content[iter.first] = iter.second;
     }
     return sum;
+  }
+
+  QuadraticNumber QuadraticNumber::operator-(const QuadraticNumber& rhs) const
+  {
+    return (*this) + (-rhs);
+  }
+
+  QuadraticNumber QuadraticNumber::operator*(const QuadraticNumber& rhs) const
+  {
+    QuadraticNumber product;
+    for (const auto& iter : content)
+    {
+      for (const auto& jter : rhs.content)
+      {
+        auto summand = sqrt(Rational(iter.first, 1) * Rational(jter.first, 1) *
+          iter.second * iter.second * jter.second * jter.second);
+        product = product + summand;
+      }
+    }
+    return product;
   }
 }
