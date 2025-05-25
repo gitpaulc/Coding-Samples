@@ -165,4 +165,52 @@ namespace FunctionalCalculator
     strm << ")";
     return strm.str();
   }
+
+  std::map<int, int> Rational::primeFactorization(int input)
+  {
+    if (input * input <= 1)
+    {
+        std::map<int, int> answer;
+        answer[input] = 1;
+        return answer;
+    }
+    std::map<int, int> answer;
+    if (input < 0) { answer[-1] = 1; input = -input; }
+    int lim = input + 1;
+    std::set<int> sieved;
+    bool foundFactor = false;
+    for (int init = 2; init < lim; ++init)
+    {
+      for (int factor = init; factor < lim; factor += init)
+      {
+        if (sieved.find(factor) != sieved.end()) { continue; }
+        sieved.insert(factor);
+        if (input % factor != 0) { continue; }
+        foundFactor = true;
+        if (factor == input)
+        {
+          if (answer.find(factor) == answer.end())
+          {
+            answer[factor] = 1;
+            break;
+          }
+          answer[factor] = answer[factor] + 1;
+          break;
+        }
+        auto others = primeFactorization(input / factor);
+        for (auto& iter : others)
+        {
+          if (answer.find(iter.first) == answer.end())
+          {
+            answer[iter.first] = iter.second;
+            continue;
+          }
+          answer[iter.first] += iter.second;
+        }
+        break;
+      }
+      if (foundFactor) { break; }
+    }
+    return answer;
+  }
 }

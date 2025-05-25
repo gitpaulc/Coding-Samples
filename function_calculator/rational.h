@@ -4,6 +4,8 @@ All Rights Reserved.*/
 #ifndef RATIONAL_H
 #define RATIONAL_H
 
+#include <map>
+#include <set>
 #include <string>
 
 namespace FunctionalCalculator
@@ -37,6 +39,8 @@ public:
   bool operator>=(const Rational& rhs) const;
   double get() const;
   std::string print() const;
+  /** \brief The keys are the prime factors, the values are the number of occurrences. */
+  static std::map<int, int> primeFactorization(int input);
 };
 }
 
