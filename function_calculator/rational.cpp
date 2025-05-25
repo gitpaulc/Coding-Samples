@@ -213,4 +213,53 @@ namespace FunctionalCalculator
     }
     return answer;
   }
+
+  std::map<int, int> Rational::primeFactorization() const
+  {
+    auto numFactors = primeFactorization(num);
+    auto denomFactors = primeFactorization(denom);
+    for (auto& iter : denomFactors)
+    {
+      if (iter.first == 1) { continue; }
+      if (numFactors.find(iter.first) == numFactors.end())
+      {
+        numFactors[iter.first] = -iter.second;
+        continue;
+      }
+      numFactors[iter.first] -= iter.second;
+    }
+    std::map<int, int> answer;
+    int countFactors = (int)numFactors.size();
+    for (auto& iter : numFactors)
+    {
+      int base = iter.first;
+      int power = iter.second;
+      if (base == -1)
+      {
+        if (power < 0) { power = -power; }
+        power = (power % 2);
+        if ((countFactors == 1) && (power == 0)) { base = 1; power = 1; }
+      }
+      if (power == 0) { continue; }
+      answer[base] = power;
+    }
+    return answer;
+  }
+
+  std::string Rational::printFactors() const
+  {
+    std::stringstream strm;
+    strm << "(";
+    auto factors = primeFactorization();
+    int count = -1;
+    for (auto& iter : factors)
+    {
+      if (iter.second == 0) { continue; }
+      ++count;
+      if (count > 0) { strm << " * "; }
+      strm << iter.first << "^" << iter.second;
+    }
+    strm << ")";
+    return strm.str();
+  }
 }

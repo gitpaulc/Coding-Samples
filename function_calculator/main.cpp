@@ -16,6 +16,8 @@ bool test_1()
   std::cout << "\nOne = " << one.print();
   Rational half = Rational(-1, 4) * Rational(4, -2);
   std::cout << "\nOne half = " << half.print();
+  Rational twelve = Rational(36, 3);
+  std::cout << "\nPrime factorization of twelve = " << twelve.printFactors();
   return true;
 }
 
