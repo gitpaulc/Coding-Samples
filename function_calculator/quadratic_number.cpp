@@ -8,6 +8,15 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  QuadraticNumber::QuadraticNumber(const Rational& number)
+  {
+    if (number != 0)
+    {
+      *this = QuadraticNumber::sqrt(1);
+      content[1] = content[1] * number;
+    }
+  }
+
   double QuadraticNumber::get() const
   {
     double answer = 0.0;
@@ -22,11 +31,21 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  bool QuadraticNumber::getRational(Rational& self) const
+  {
+    if (content.size() == 0) { self = Rational(0, 1); return true; }
+    if (content.size() > 1) { return false; }
+    if (content.find(1) == content.end()) { return false; }
+    self = content.at(1);
+    return true;
+  }
+
   std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
     int count = -1;
     if (useParentheses) { strm << "("; }
+    if (content.size() == 0) { strm << "0"; }
     for (const auto& iter : content)
     {
       auto val = iter.second;
@@ -43,7 +62,8 @@ namespace FunctionalCalculator
       }
       bool coeffIsOne = (val == 1);
       int radicand = iter.first;
-      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(); }
+      bool printCoeffParents = (val.denominator() != 1) && (radicand != 1);
+      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
       if (radicand == 1) { continue; }
       bool complex = false;
       if (radicand < 0) { radicand = -radicand; complex = true; }
@@ -57,6 +77,10 @@ namespace FunctionalCalculator
     }
     if (useParentheses) { strm << ")"; }
     return strm.str();
+  }
+
+  void QuadraticNumber::factorSquares()
+  {
   }
 
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)

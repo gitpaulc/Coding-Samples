@@ -34,6 +34,10 @@ bool test_rational()
 
 bool test_quadratic()
 {
+  auto zero = QuadraticNumber();
+  std::cout << "\nZero = " << zero.print();
+  auto twoThirds = QuadraticNumber(Rational(2, 3));
+  std::cout << "\nTwo-thirds = " << twoThirds.print();
   auto one = QuadraticNumber::sqrt(1);
   std::cout << "\nSquare root of 1 = " << one.print();
   auto ii = QuadraticNumber::sqrt(-1);
@@ -48,6 +52,10 @@ bool test_quadratic()
   std::cout << "\nSquare root of 12 = " << sqrt12.print();
   auto sqrtMinus12 = QuadraticNumber::sqrt(-12);
   std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
+  Rational rationalOut;
+  bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
+  if (!twoThirdsIsRational) { return false; }
+  std::cout << "\nSquare root of 2/3 = " << QuadraticNumber::sqrt(rationalOut).print();
   return true;
 }
 
