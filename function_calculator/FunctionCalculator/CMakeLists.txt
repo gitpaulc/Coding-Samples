@@ -21,6 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Header files.
 
 set(HEADER_FILES
+  ../number.h
   ../rational.h
 )
 
@@ -28,6 +29,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   ../main.cpp
+  ../number.cpp
   ../rational.cpp
 )
 
