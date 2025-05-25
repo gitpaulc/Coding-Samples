@@ -21,6 +21,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Header files.
 
 set(HEADER_FILES
+  ../constant.h
+  ../function.h
   ../number.h
   ../rational.h
 )
@@ -28,6 +30,8 @@ set(HEADER_FILES
 # Source files.
 
 set(SOURCE_FILES
+  ../constant.cpp
+  ../function.cpp
   ../main.cpp
   ../number.cpp
   ../rational.cpp

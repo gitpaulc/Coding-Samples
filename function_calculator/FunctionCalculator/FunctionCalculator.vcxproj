@@ -267,8 +267,12 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\constant.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\function.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\number.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.h" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\constant.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\function.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\main.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\number.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.cpp" />

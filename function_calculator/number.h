@@ -1,4 +1,4 @@
-/*  Copyright Paul Cernea, August 2024.
+/*  Copyright Paul Cernea, May 2025.
 All Rights Reserved.*/
 
 #ifndef NUMBER_H
@@ -9,13 +9,15 @@ All Rights Reserved.*/
 namespace FunctionalCalculator
 {
 
-/** \brief Base abstract class from which numbers should derive. */
+/** \brief Base class from which numbers should derive. */
 class Number
 {
 public:
-  /** \brief Implement this in order to derive from the Number class. */
-  virtual std::string print() const = 0;
+  /** \brief Should implement this in order to derive from the Number class. */
+  virtual double get() const;
+  /** \brief Should implement this in order to derive from the Number class. */
+  virtual std::string print() const;
 };
 }
 
-#endif //def NUMBER
+#endif //def NUMBER_H

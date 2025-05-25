@@ -38,15 +38,16 @@ public:
   bool operator>(const Rational& rhs) const;
   bool operator<=(const Rational& rhs) const;
   bool operator>=(const Rational& rhs) const;
-  double get() const;
-  virtual std::string print() const override;
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
   static std::map<int, int> primeFactorization(int input);
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
   std::map<int, int> primeFactorization() const;
   /** \brief Print the prime factorization of the rational number. */
   std::string printFactors() const;
+
+  virtual double get() const override;
+  virtual std::string print() const override;
 };
 }
 
-#endif //def RATIONAL
+#endif //def RATIONAL_H
