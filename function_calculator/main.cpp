@@ -36,6 +36,8 @@ bool test_quadratic()
 {
   auto zero = QuadraticNumber();
   std::cout << "\nZero = " << zero.print();
+  zero = QuadraticNumber::sqrt(9) - Rational(3);
+  std::cout << "\nZero = " << zero.print();
   auto twoThirds = QuadraticNumber(Rational(2, 3));
   std::cout << "\nTwo-thirds = " << twoThirds.print();
   auto one = QuadraticNumber::sqrt(1);
@@ -61,6 +63,12 @@ bool test_quadratic()
   std::cout << "\nThe golden ratio is " << goldenRatio.print();
   auto oneOverGolden = QuadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
   std::cout << "\nOne = " << (goldenRatio * oneOverGolden).print();
+  oneOverGolden = QuadraticNumber(1) / goldenRatio;
+  std::cout << "\nThe reciprocal golden ratio is " << oneOverGolden.print();
+  auto sumOfSquareRoots = QuadraticNumber::sqrt(2) + QuadraticNumber::sqrt(3) + Rational(1);
+  auto reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
   return true;
 }
 

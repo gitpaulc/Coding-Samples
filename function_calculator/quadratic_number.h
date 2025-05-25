@@ -35,6 +35,8 @@ public:
   QuadraticNumber operator+(const QuadraticNumber& rhs) const;
   QuadraticNumber operator-(const QuadraticNumber& rhs) const;
   QuadraticNumber operator*(const QuadraticNumber& rhs) const;
+  /** \brief Uses rationalization of the denominator. */
+  QuadraticNumber operator/(const QuadraticNumber& rhs) const;
 };
 }
 

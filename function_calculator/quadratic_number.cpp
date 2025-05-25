@@ -160,4 +160,40 @@ namespace FunctionalCalculator
     }
     return product;
   }
+
+  QuadraticNumber QuadraticNumber::operator/(const QuadraticNumber& rhs) const
+  {
+    if (content.empty()) { return *this; }
+    if (rhs.content.empty())
+    {
+      throw std::invalid_argument("Division by zero.");
+      return QuadraticNumber();
+    }
+    QuadraticNumber quotientNumer = 1;
+    QuadraticNumber quotientDenom = rhs;
+    while (quotientDenom.content.size() > 1)
+    {
+      int radicand = 1;
+      Rational coeff;
+      for (const auto& iter : quotientDenom.content)
+      {
+        if (iter.first == 1) { continue; }
+        radicand = iter.first;
+        coeff = iter.second;
+        break;
+      }
+      if (radicand == 1) { break; }
+      QuadraticNumber diff;
+      auto sqrtTerm = QuadraticNumber::sqrt(radicand) * (-coeff);
+      quotientNumer = quotientNumer * (quotientDenom + (sqrtTerm * Rational(2, 1)));
+      diff = quotientDenom + sqrtTerm;
+      quotientDenom = (diff * diff) - (coeff * coeff * radicand);
+    }
+    quotientNumer = quotientNumer * quotientDenom;
+    quotientDenom = quotientDenom * quotientDenom;
+    Rational rationalDenom;
+    bool success = quotientDenom.getRational(rationalDenom);
+    if (!success) { throw std::exception("Division failed."); }
+    return (*this) * quotientNumer * (Rational(1, 1) / rationalDenom);
+  }
 }
