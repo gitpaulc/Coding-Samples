@@ -34,12 +34,20 @@ bool test_rational()
 
 bool test_quadratic()
 {
+  auto one = QuadraticNumber::sqrt(1);
+  std::cout << "\nSquare root of 1 = " << one.print();
+  auto ii = QuadraticNumber::sqrt(-1);
+  std::cout << "\nSquare root of -1 = " << ii.print();
   auto sqrt2 = QuadraticNumber::sqrt(2);
   std::cout << "\nSquare root of 2 = " << sqrt2.print();
   auto sqrt36 = QuadraticNumber::sqrt(36);
   std::cout << "\nSquare root of 36 = " << sqrt36.print();
   auto sqrtMinus36 = QuadraticNumber::sqrt(-36);
   std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
+  auto sqrt12 = QuadraticNumber::sqrt(12);
+  std::cout << "\nSquare root of 12 = " << sqrt12.print();
+  auto sqrtMinus12 = QuadraticNumber::sqrt(-12);
+  std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
   return true;
 }
 
