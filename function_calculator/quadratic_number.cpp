@@ -149,8 +149,12 @@ namespace FunctionalCalculator
     {
       for (const auto& jter : rhs.content)
       {
+        bool iterNegative = (iter.second < 0);
+        bool jterNegative = (jter.second < 0);
         auto summand = sqrt(Rational(iter.first, 1) * Rational(jter.first, 1) *
           iter.second * iter.second * jter.second * jter.second);
+        if (iterNegative && !jterNegative) { summand = -summand; }
+        else if (jterNegative && !iterNegative) { summand = -summand; }
         product = product + summand;
       }
     }
