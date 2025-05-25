@@ -57,7 +57,21 @@ namespace FunctionalCalculator
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
   {
     QuadraticNumber answer;
-    answer.content[radicand.numerator() * radicand.denominator()] = Rational(1, radicand.denominator());
+    Rational coefficient(1, radicand.denominator());
+    int key = radicand.numerator() * radicand.denominator();
+    auto primes = Rational::primeFactorization(key);
+    for (const auto& iter : primes)
+    {
+      auto& factor = iter.first;
+      if (factor == -1) { continue; }
+      auto& power = iter.second;
+      if (power <= 1) { continue; }
+      int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+      Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+      coefficient = coefficient * sqrtRational;
+      key /= (sqrtRational * sqrtRational).numerator();
+    }
+    answer.content[key] = coefficient;
     return answer;
   }
 }

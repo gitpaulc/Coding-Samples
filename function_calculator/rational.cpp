@@ -116,6 +116,21 @@ namespace FunctionalCalculator
     return Rational(num * rhs.denom, denom * rhs.num);
   }
 
+  Rational Rational::pow(int p) const
+  {
+    bool isNeg = (p < 0);
+    Rational answer(1, 1);
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (*this);
+    }
+    if (isNeg)
+    {
+      return Rational(answer.denom, answer.num);
+    }
+    return answer;
+  }
+
   bool Rational::operator==(const Rational& rhs) const
   {
     if (rhs.num != num) { return false; }
