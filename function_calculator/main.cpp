@@ -26,8 +26,8 @@ bool test_1()
   std::cout << "\nPrime factorization of 1 / 2048 = " << oneOver2048.printFactors();
   Rational hundred = Rational(1000, 10);
   std::cout << "\nPrime factorization of 100 = " << hundred.printFactors();
-  Rational myNum = Rational(-24, 69);
-  std::cout << "\nPrime factorization of -24 / 69 = " << myNum.printFactors();
+  Rational myNum = Rational(-24, 138);
+  std::cout << "\nPrime factorization of -24 / 138 = " << myNum.printFactors();
   return true;
 }
 
