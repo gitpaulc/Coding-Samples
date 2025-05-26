@@ -10,13 +10,13 @@ namespace FunctionalCalculator
 {
   double Number::get() const
   {
-    throw std::exception("\nNot implemented.");
+    throw std::runtime_error("\nNot implemented.");
     return 0.0;
   }
 
   std::string Number::print(bool useParentheses) const
   {
-    throw std::exception("\nNot implemented.");
+    throw std::runtime_error("\nNot implemented.");
     return useParentheses ? "()" : "";
   }
 }

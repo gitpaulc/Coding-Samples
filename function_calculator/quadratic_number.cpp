@@ -25,7 +25,7 @@ namespace FunctionalCalculator
       double val = iter.second.get();
       if (val == 0) { continue; }
       double radicand = iter.first;
-      if (iter.first < 0) { throw std::exception("\nStill need to implement complex numbers."); radicand = -radicand; }
+      if (iter.first < 0) { throw std::runtime_error("\nStill need to implement complex numbers."); radicand = -radicand; }
       answer += val * std::sqrt(radicand);
     }
     return answer;
@@ -197,7 +197,7 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       return QuadraticNumber();
     }
-    QuadraticNumber quotientNumer = 1;
+    QuadraticNumber quotientNumer = Rational(1, 1);
     QuadraticNumber quotientDenom = rhs;
     while (quotientDenom.content.size() > 1)
     {
@@ -221,7 +221,7 @@ namespace FunctionalCalculator
     quotientDenom = quotientDenom * quotientDenom;
     Rational rationalDenom;
     bool success = quotientDenom.getRational(rationalDenom);
-    if (!success) { throw std::exception("Division failed."); }
+    if (!success) { throw std::logic_error("Division failed."); }
     return (*this) * quotientNumer * (Rational(1, 1) / rationalDenom);
   }
 
