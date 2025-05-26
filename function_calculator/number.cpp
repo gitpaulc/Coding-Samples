@@ -8,10 +8,10 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
-  double Number::get() const
+  std::pair<double, double> Number::get() const
   {
     throw std::runtime_error("\nNot implemented.");
-    return 0.0;
+    return { 0.0, 0.0 };
   }
 
   std::string Number::print(bool useParentheses) const

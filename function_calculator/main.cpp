@@ -1,8 +1,7 @@
 
 #include <iostream>
 
-#include "quadratic_number.h"
-#include "rational.h"
+#include "complex_quadratic.h"
 
 using namespace FunctionalCalculator;
 
@@ -42,19 +41,13 @@ bool test_quadratic()
   std::cout << "\nTwo-thirds = " << twoThirds.print();
   auto one = QuadraticNumber::sqrt(1);
   std::cout << "\nSquare root of 1 = " << one.print();
-  auto ii = QuadraticNumber::sqrt(-1);
-  std::cout << "\nSquare root of -1 = " << ii.print();
   auto sqrt2 = QuadraticNumber::sqrt(2);
   std::cout << "\nSquare root of 2 = " << sqrt2.print();
   auto sqrt36 = QuadraticNumber::sqrt(36);
   std::cout << "\nSquare root of 36 = " << sqrt36.print();
-  auto sqrtMinus36 = QuadraticNumber::sqrt(-36);
-  std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
   auto sqrt12 = QuadraticNumber::sqrt(12);
   std::cout << "\nSquare root of 12 = " << sqrt12.print();
   std::cout << "\nTwelve is " << (sqrt12 * sqrt12).print();
-  auto sqrtMinus12 = QuadraticNumber::sqrt(-12);
-  std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
   Rational rationalOut;
   bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
   if (!twoThirdsIsRational) { return false; }
@@ -73,8 +66,21 @@ bool test_quadratic()
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
-  // Need to implement complex numbers properly:
-  // std::cout << "\nThe reciprocal of i is " << (QuadraticNumber::sqrt(-1).pow(-1)).print();
+  return true;
+}
+
+bool test_complex()
+{
+  auto ii = ComplexQuadratic::sqrt(-1);
+  std::cout << "\nSquare root of -1 = " << ii.print();
+  auto sqrtMinus12 = ComplexQuadratic::sqrt(-12);
+  std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
+  auto sqrtMinus36 = ComplexQuadratic::sqrt(-36);
+  std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
+  std::cout << "\nThe reciprocal of i is " << (ComplexQuadratic::sqrt(-1).pow(-1)).print();
+  auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
+  std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
+  std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
   return true;
 }
 
@@ -87,5 +93,9 @@ int main()
   std::cin >> prompt;
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  std::cout << "\n\nTest complex:\n";
+  test_complex();
   std::cout << "\nContinue... ";
 }

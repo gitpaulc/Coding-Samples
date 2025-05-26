@@ -6,8 +6,8 @@
 
 namespace FunctionalCalculator
 {
-  double Constant::eval(double x, double y, double z) const
+  Number Constant::eval(const Number& x, const Number& y, const Number& z) const
   {
-    return value.get();
+    return value;
   }
 }

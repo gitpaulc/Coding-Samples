@@ -5,7 +5,6 @@ All Rights Reserved.*/
 #define CONSTANT_H
 
 #include "function.h"
-#include "number.h"
 
 #include <vector>
 
@@ -16,7 +15,7 @@ class Constant : public Function
 {
   Number value;
 public:
-  virtual double eval(double x, double y, double z) const override;
+  virtual Number eval(const Number& x, const Number& y, const Number& z) const override;
 };
 }
 

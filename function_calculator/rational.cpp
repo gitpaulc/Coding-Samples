@@ -169,11 +169,11 @@ namespace FunctionalCalculator
     return false;
   }
 
-  double Rational::get() const
+  std::pair<double, double> Rational::get() const
   {
     double nn = (double)num;
     double dd = (double)denom;
-    return nn / dd;
+    return { nn / dd, 0.0 };
   }
 
   std::string Rational::print(bool useParentheses) const

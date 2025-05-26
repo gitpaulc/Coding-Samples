@@ -25,7 +25,7 @@ class QuadraticNumber : public Number
 
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
-  virtual double get() const override;
+  virtual std::pair<double, double> get() const override;
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
@@ -37,7 +37,9 @@ public:
   QuadraticNumber operator*(const QuadraticNumber& rhs) const;
   /** \brief Uses rationalization of the denominator. */
   QuadraticNumber operator/(const QuadraticNumber& rhs) const;
-  QuadraticNumber pow(int p) const; /**< `return` The p'th power of the rational number. */
+  QuadraticNumber pow(int p) const; /**< `return` The p'th power of the number. */
+  bool operator==(const QuadraticNumber& rhs) const;
+  bool operator!=(const QuadraticNumber& rhs) const;
 };
 }
 
