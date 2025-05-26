@@ -16,6 +16,9 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\pi_polynomial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\quadratic_number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,6 +37,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\number.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\pi_polynomial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\quadratic_number.h">

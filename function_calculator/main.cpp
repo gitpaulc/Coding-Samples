@@ -84,6 +84,10 @@ bool test_complex()
   return true;
 }
 
+bool test_pi()
+{
+}
+
 int main()
 {
   std::string prompt;

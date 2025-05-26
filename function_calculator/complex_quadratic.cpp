@@ -38,6 +38,9 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
+  QuadraticNumber ComplexQuadratic::getRe() const { return re; }
+  QuadraticNumber ComplexQuadratic::getIm() const { return im; }
+
   ComplexQuadratic ComplexQuadratic::conjugate() const { return ComplexQuadratic(re, -im); }
 
   QuadraticNumber ComplexQuadratic::sqLength() const

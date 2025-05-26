@@ -9,7 +9,6 @@ All Rights Reserved.*/
 namespace FunctionalCalculator
 {
 
-/** \brief Base class from which numbers should derive. */
 class ComplexQuadratic : public Number
 {
   QuadraticNumber re; /**< The real part of the complex number. */
@@ -18,6 +17,8 @@ public:
   ComplexQuadratic(const QuadraticNumber& reIn = QuadraticNumber(), const QuadraticNumber& imIn = QuadraticNumber());
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
+  QuadraticNumber getRe() const;
+  QuadraticNumber getIm() const;
   ComplexQuadratic conjugate() const;
   QuadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
