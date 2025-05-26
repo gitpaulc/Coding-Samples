@@ -16,6 +16,8 @@ class PiPolynomial : public Number
   std::vector<ComplexQuadratic> self; // TODO: Change this to a map.
   void clean();
 public:
+  PiPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic(), int power = 0);
+  PiPolynomial(const std::vector<ComplexQuadratic>& coeffs);
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
 

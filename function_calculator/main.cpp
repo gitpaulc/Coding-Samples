@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "complex_quadratic.h"
+#include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
 
@@ -86,6 +87,21 @@ bool test_complex()
 
 bool test_pi()
 {
+  auto piPoly = PiPolynomial();
+  std::cout << "\n0 * pi^0 = " << piPoly.print();
+  piPoly = PiPolynomial(ComplexQuadratic::sqrt(-1), 2);
+  std::cout << "\ni * pi^2 = " << piPoly.print();
+  piPoly = PiPolynomial({ComplexQuadratic(Rational(1)), ComplexQuadratic(Rational(1))});
+  auto piPoly1 = PiPolynomial({ComplexQuadratic(Rational(1)), ComplexQuadratic(Rational(-1))});
+  auto piPoly2 = PiPolynomial({ComplexQuadratic(Rational(1)), ComplexQuadratic(Rational(0)), ComplexQuadratic(Rational(1))});
+  std::cout << "\n1 + pi = " << piPoly.print();
+  std::cout << "\n1 - pi = " << piPoly1.print();
+  std::cout << "\n1 + pi^2 = " << piPoly2.print();
+  std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
+  auto product = piPoly * piPoly1 * piPoly2;
+  std::cout << "\n1 - pi^4 = " << product.print();
+  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(Rational(1)), 4)).print();
+  return true;
 }
 
 int main()
@@ -101,5 +117,9 @@ int main()
   std::cin >> prompt;
   std::cout << "\n\nTest complex:\n";
   test_complex();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  std::cout << "\n\nTest pi polynomials:\n";
+  test_pi();
   std::cout << "\nContinue... ";
 }
