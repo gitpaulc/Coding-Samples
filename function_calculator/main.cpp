@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "complex_quadratic.h"
+#include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
 
@@ -86,6 +87,11 @@ bool test_complex()
 
 bool test_pi()
 {
+  auto piPoly = PiPolynomial();
+  std::cout << "\n0 * pi^0 = " << piPoly.print();
+  piPoly = PiPolynomial(ComplexQuadratic::sqrt(-1), 2);
+  std::cout << "\ni * pi^2 = " << piPoly.print();
+  return true;
 }
 
 int main()
@@ -101,5 +107,9 @@ int main()
   std::cin >> prompt;
   std::cout << "\n\nTest complex:\n";
   test_complex();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  std::cout << "\n\nTest pi polynomials:\n";
+  test_pi();
   std::cout << "\nContinue... ";
 }

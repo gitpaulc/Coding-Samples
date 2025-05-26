@@ -20,6 +20,17 @@ namespace FunctionalCalculator
     self.resize(lastNonzero + 1);
   }
 
+  PiPolynomial::PiPolynomial(const ComplexQuadratic& coeff, int power)
+  {
+    if (power < 0) { throw std::invalid_argument("Exponent must be nonnegative."); }
+    else
+    {
+      self.resize(power + 1);
+      self[power] = coeff;
+      clean();
+    }
+  }
+
   std::pair<double, double> PiPolynomial::get() const
   {
     double answerRe = 0.0;
@@ -45,8 +56,9 @@ namespace FunctionalCalculator
       ++count;
       if (count != 0) { strm << " + "; }
       strm << self[i].print(true);
-      if (count == 1) { strm << "(Pi)"; }
-      if (count > 1) { strm << "^" << i; }
+      if (i == 1) { strm << "Pi"; }
+      else { strm << "(Pi)"; }
+      if (i > 1) { strm << "^" << i; }
     }
     if (count < 0) { strm << "0"; }
     if (useParentheses) { strm << ")"; }

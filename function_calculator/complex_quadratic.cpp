@@ -24,15 +24,31 @@ namespace FunctionalCalculator
     if (useParentheses) { strm << "("; }
     bool reIsZero = (re == Rational(0));
     bool imIsZero = (im == Rational(0));
+    bool imIsOne = (im == Rational(1));
+    bool imIsNegOne = (im == Rational(-1));
     if (!reIsZero)
     {
       strm << re.print(true);
-      if (!imIsZero) { strm << " + "; }
+      if (!imIsZero)
+      {
+        if (imIsNegOne)
+        {
+          strm << " - ";
+          imIsNegOne = false;
+          imIsOne = true;
+        }
+        else { strm << " + "; }
+      }
     }
     if (!imIsZero)
     {
-      strm << im.print(true);
-      strm << " * i";
+      if (!imIsOne && !imIsNegOne)
+      {
+        strm << im.print(true);
+        strm << " * ";
+      }
+      else if (imIsNegOne) { strm << "-"; }
+      strm << "i";
     }
     if (useParentheses) { strm << ")"; }
     return strm.str();
