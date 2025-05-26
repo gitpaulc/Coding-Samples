@@ -31,6 +31,11 @@ namespace FunctionalCalculator
     }
   }
 
+  PiPolynomial::PiPolynomial(const std::vector<ComplexQuadratic>& coeffs)
+  {
+    self = coeffs;
+  }
+
   std::pair<double, double> PiPolynomial::get() const
   {
     double answerRe = 0.0;
@@ -57,7 +62,7 @@ namespace FunctionalCalculator
       if (count != 0) { strm << " + "; }
       strm << self[i].print(true);
       if (i == 1) { strm << "Pi"; }
-      else { strm << "(Pi)"; }
+      else if (i > 1) { strm << "(Pi)"; }
       if (i > 1) { strm << "^" << i; }
     }
     if (count < 0) { strm << "0"; }
@@ -104,14 +109,14 @@ namespace FunctionalCalculator
 
   PiPolynomial PiPolynomial::operator*(const PiPolynomial& rhs) const
   {
-    auto answer = *this;
+    PiPolynomial answer;
     answer.self.resize(self.size() + rhs.self.size());
 
     for (int i = 0; i < (int)self.size(); ++i)
     {
       for (int j = 0; j < (int)rhs.self.size(); ++j)
       {
-        answer.self[i + j] = answer.self[i + j] + self[i] + rhs.self[i];
+        answer.self[i + j] = answer.self[i + j] + self[i] * rhs.self[j];
       }
     }
     return answer;

@@ -17,6 +17,7 @@ class PiPolynomial : public Number
   void clean();
 public:
   PiPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic(), int power = 0);
+  PiPolynomial(const std::vector<ComplexQuadratic>& coeffs);
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
 
