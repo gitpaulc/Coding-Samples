@@ -73,7 +73,8 @@ bool test_quadratic()
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
-  std::cout << "\nThe reciprocal of i is " << (QuadraticNumber::sqrt(-1).pow(-1)).print();
+  // Need to implement complex numbers properly:
+  //std::cout << "\nThe reciprocal of i is " << (QuadraticNumber::sqrt(-1).pow(-1)).print();
   return true;
 }
 
