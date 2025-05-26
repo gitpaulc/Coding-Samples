@@ -8,9 +8,9 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
-  ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& self)
+  ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& reIn, const QuadraticNumber& imIn)
   {
-    re = self;
+    re = reIn; im = imIn;
   }
 
   std::pair<double, double> ComplexQuadratic::get() const
@@ -22,12 +22,20 @@ namespace FunctionalCalculator
   {
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
-    strm << re.print(true);
-    strm << " + ";
+    if (re != Rational(0))
+    {
+      strm << re.print(true);
+      strm << " + ";
+    }
     strm << im.print(true);
     strm << " * i";
     if (useParentheses) { strm << ")"; }
     return strm.str();
+  }
+
+  QuadraticNumber ComplexQuadratic::sqLength() const
+  {
+    return re * re + im * im;
   }
 
   ComplexQuadratic ComplexQuadratic::sqrt(const Rational& radicand)
@@ -36,5 +44,81 @@ namespace FunctionalCalculator
     if (radicand < 0) { answer.im = QuadraticNumber::sqrt(-radicand); }
     else { answer.re = QuadraticNumber::sqrt(radicand); }
     return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator+() const
+  {
+    return *this;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator-() const
+  {
+    auto answer = *this;
+    answer.re = -answer.re; answer.im = -answer.im;
+    return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator+(const ComplexQuadratic& rhs) const
+  {
+    auto answer = *this;
+    answer.re = answer.re + rhs.re;
+    answer.im = answer.im + rhs.im;
+    return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator-(const ComplexQuadratic& rhs) const
+  {
+    auto answer = *this;
+    answer.re = answer.re - rhs.re;
+    answer.im = answer.im - rhs.im;
+    return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator*(const ComplexQuadratic& rhs) const
+  {
+    auto answer = *this;
+    answer.re = re * rhs.re - im * rhs.im;
+    answer.im = re * rhs.im + im * rhs.re;
+    return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::operator/(const ComplexQuadratic& rhs) const
+  {
+    auto answer = *this;
+    auto conj = rhs;
+    conj.im = -conj.im;
+    answer = answer * conj;
+    auto sq_norm = sqLength();
+    answer.re = answer.re / sq_norm;
+    answer.im = answer.im / sq_norm;
+    return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::pow(int p) const
+  {
+    bool isNeg = (p < 0);
+    if (isNeg) { p = -p; }
+    ComplexQuadratic answer(Rational(1, 1));
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (*this);
+    }
+    if (isNeg)
+    {
+      return ComplexQuadratic(Rational(1, 1)) / answer;
+    }
+    return answer;
+  }
+
+  bool ComplexQuadratic::operator==(const ComplexQuadratic& rhs) const
+  {
+    if (re != rhs.re) { return false; }
+    if (im != rhs.im) { return false; }
+    return true;
+  }
+
+  bool ComplexQuadratic::operator!=(const ComplexQuadratic& rhs) const
+  {
+    return !((*this) == rhs);
   }
 }

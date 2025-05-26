@@ -15,10 +15,21 @@ class ComplexQuadratic : public Number
   QuadraticNumber re; /**< The real part of the complex number. */
   QuadraticNumber im; /**< The imaginary part of the complex number. */
 public:
-  ComplexQuadratic(const QuadraticNumber& self = QuadraticNumber());
+  ComplexQuadratic(const QuadraticNumber& reIn = QuadraticNumber(), const QuadraticNumber& imIn = QuadraticNumber());
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
+  QuadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
+
+  ComplexQuadratic operator+() const;
+  ComplexQuadratic operator-() const;
+  ComplexQuadratic operator+(const ComplexQuadratic& rhs) const;
+  ComplexQuadratic operator-(const ComplexQuadratic& rhs) const;
+  ComplexQuadratic operator*(const ComplexQuadratic& rhs) const;
+  ComplexQuadratic operator/(const ComplexQuadratic& rhs) const;
+  ComplexQuadratic pow(int p) const; /**< `return` The p'th power of the number. */
+  bool operator==(const ComplexQuadratic& rhs) const;
+  bool operator!=(const ComplexQuadratic& rhs) const;
 };
 }
 
