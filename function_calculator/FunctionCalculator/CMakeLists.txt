@@ -25,6 +25,7 @@ set(HEADER_FILES
   ../constant.h
   ../function.h
   ../number.h
+  ../pi_polynomial.h
   ../quadratic_number.h
   ../rational.h
 )
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   ../function.cpp
   ../main.cpp
   ../number.cpp
+  ../pi_polynomial.cpp
   ../quadratic_number.cpp
   ../rational.cpp
 )
