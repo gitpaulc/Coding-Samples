@@ -118,21 +118,49 @@ namespace FunctionalCalculator
     QuadraticNumber sum;
     for (const auto& iter : content)
     {
-      if (rhs.content.find(iter.first) != rhs.content.end())
+      int radicand = iter.first;
+      Rational coeff = iter.second;
+      auto primes = Rational::primeFactorization(radicand);
+      for (const auto& jter : primes)
       {
-        auto summand = rhs.content.at(iter.first);
-        if (summand != (- iter.second))
+          auto& factor = jter.first;
+          if (factor == -1) { continue; }
+          auto& power = jter.second;
+          if (power <= 1) { continue; }
+          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+          Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+          coeff = coeff * sqrtRational;
+          radicand /= (sqrtRational * sqrtRational).numerator();
+      }
+      if (rhs.content.find(radicand) != rhs.content.end())
+      {
+        auto summand = rhs.content.at(radicand);
+        if (summand != (-coeff))
         {
-          sum.content[iter.first] = summand + iter.second;
+          sum.content[radicand] = summand + coeff;
         }
       }
-      else { sum.content[iter.first] = iter.second; }
-      added.insert(iter.first);
+      else { sum.content[radicand] = coeff; }
+      added.insert(radicand);
     }
     for (const auto& iter : rhs.content)
     {
-      if (added.find(iter.first) != added.end()) { continue; }
-      sum.content[iter.first] = iter.second;
+      int radicand = iter.first;
+      Rational coeff = iter.second;
+      auto primes = Rational::primeFactorization(radicand);
+      for (const auto& jter : primes)
+      {
+        auto& factor = jter.first;
+        if (factor == -1) { continue; }
+        auto& power = jter.second;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand /= (sqrtRational * sqrtRational).numerator();
+      }
+      if (added.find(radicand) != added.end()) { continue; }
+      sum.content[radicand] = coeff;
     }
     return sum;
   }
@@ -159,5 +187,57 @@ namespace FunctionalCalculator
       }
     }
     return product;
+  }
+
+  QuadraticNumber QuadraticNumber::operator/(const QuadraticNumber& rhs) const
+  {
+    if (content.empty()) { return *this; }
+    if (rhs.content.empty())
+    {
+      throw std::invalid_argument("Division by zero.");
+      return QuadraticNumber();
+    }
+    QuadraticNumber quotientNumer = 1;
+    QuadraticNumber quotientDenom = rhs;
+    while (quotientDenom.content.size() > 1)
+    {
+      int radicand = 1;
+      Rational coeff;
+      for (const auto& iter : quotientDenom.content)
+      {
+        if (iter.first == 1) { continue; }
+        radicand = iter.first;
+        coeff = iter.second;
+        break;
+      }
+      if (radicand == 1) { break; }
+      QuadraticNumber diff;
+      auto sqrtTerm = QuadraticNumber::sqrt(radicand) * (-coeff);
+      quotientNumer = quotientNumer * (quotientDenom + (sqrtTerm * Rational(2, 1)));
+      diff = quotientDenom + sqrtTerm;
+      quotientDenom = (diff * diff) - (coeff * coeff * radicand);
+    }
+    quotientNumer = quotientNumer * quotientDenom;
+    quotientDenom = quotientDenom * quotientDenom;
+    Rational rationalDenom;
+    bool success = quotientDenom.getRational(rationalDenom);
+    if (!success) { throw std::exception("Division failed."); }
+    return (*this) * quotientNumer * (Rational(1, 1) / rationalDenom);
+  }
+
+  QuadraticNumber QuadraticNumber::pow(int p) const
+  {
+    bool isNeg = (p < 0);
+    if (isNeg) { p = -p; }
+    QuadraticNumber answer(Rational(1, 1));
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (*this);
+    }
+    if (isNeg)
+    {
+      return QuadraticNumber(Rational(1, 1)) / answer;
+    }
+    return answer;
   }
 }
