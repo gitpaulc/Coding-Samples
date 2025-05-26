@@ -118,21 +118,49 @@ namespace FunctionalCalculator
     QuadraticNumber sum;
     for (const auto& iter : content)
     {
-      if (rhs.content.find(iter.first) != rhs.content.end())
+      int radicand = iter.first;
+      Rational coeff = iter.second;
+      auto primes = Rational::primeFactorization(radicand);
+      for (const auto& jter : primes)
       {
-        auto summand = rhs.content.at(iter.first);
-        if (summand != (- iter.second))
+          auto& factor = jter.first;
+          if (factor == -1) { continue; }
+          auto& power = jter.second;
+          if (power <= 1) { continue; }
+          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+          Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+          coeff = coeff * sqrtRational;
+          radicand /= (sqrtRational * sqrtRational).numerator();
+      }
+      if (rhs.content.find(radicand) != rhs.content.end())
+      {
+        auto summand = rhs.content.at(radicand);
+        if (summand != (-coeff))
         {
-          sum.content[iter.first] = summand + iter.second;
+          sum.content[radicand] = summand + coeff;
         }
       }
-      else { sum.content[iter.first] = iter.second; }
-      added.insert(iter.first);
+      else { sum.content[radicand] = coeff; }
+      added.insert(radicand);
     }
     for (const auto& iter : rhs.content)
     {
-      if (added.find(iter.first) != added.end()) { continue; }
-      sum.content[iter.first] = iter.second;
+      int radicand = iter.first;
+      Rational coeff = iter.second;
+      auto primes = Rational::primeFactorization(radicand);
+      for (const auto& jter : primes)
+      {
+        auto& factor = jter.first;
+        if (factor == -1) { continue; }
+        auto& power = jter.second;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand /= (sqrtRational * sqrtRational).numerator();
+      }
+      if (added.find(radicand) != added.end()) { continue; }
+      sum.content[radicand] = coeff;
     }
     return sum;
   }
