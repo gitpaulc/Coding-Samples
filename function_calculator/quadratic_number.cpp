@@ -241,4 +241,24 @@ namespace FunctionalCalculator
     }
     return answer;
   }
+
+  bool QuadraticNumber::operator==(const QuadraticNumber& rhs) const
+  {
+    for (const auto& iter : content)
+    {
+      if (rhs.content.find(iter.first) == rhs.content.end()) { return false; }
+      if (rhs.content.at(iter.first) != iter.second) { return false; }
+    }
+    for (const auto& iter : rhs.content)
+    {
+      if (content.find(iter.first) == content.end()) { return false; }
+      if (content.at(iter.first) != iter.second) { return false; }
+    }
+    return true;
+  }
+
+  bool QuadraticNumber::operator!=(const QuadraticNumber& rhs) const
+  {
+    return !((*this) == rhs);
+  }
 }

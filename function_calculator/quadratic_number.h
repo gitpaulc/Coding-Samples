@@ -38,6 +38,8 @@ public:
   /** \brief Uses rationalization of the denominator. */
   QuadraticNumber operator/(const QuadraticNumber& rhs) const;
   QuadraticNumber pow(int p) const; /**< `return` The p'th power of the rational number. */
+  bool operator==(const QuadraticNumber& rhs) const;
+  bool operator!=(const QuadraticNumber& rhs) const;
 };
 }
 

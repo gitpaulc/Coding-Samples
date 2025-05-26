@@ -8,6 +8,11 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& self)
+  {
+    re = self;
+  }
+
   std::pair<double, double> ComplexQuadratic::get() const
   {
     return { re.get().first, im.get().first };
@@ -23,5 +28,13 @@ namespace FunctionalCalculator
     strm << " * i";
     if (useParentheses) { strm << ")"; }
     return strm.str();
+  }
+
+  ComplexQuadratic ComplexQuadratic::sqrt(const Rational& radicand)
+  {
+    ComplexQuadratic answer;
+    if (radicand < 0) { answer.im = QuadraticNumber::sqrt(-radicand); }
+    else { answer.re = QuadraticNumber::sqrt(radicand); }
+    return answer;
   }
 }
