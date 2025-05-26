@@ -22,16 +22,23 @@ namespace FunctionalCalculator
   {
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
-    if (re != Rational(0))
+    bool reIsZero = (re == Rational(0));
+    bool imIsZero = (im == Rational(0));
+    if (!reIsZero)
     {
       strm << re.print(true);
-      strm << " + ";
+      if (!imIsZero) { strm << " + "; }
     }
-    strm << im.print(true);
-    strm << " * i";
+    if (!imIsZero)
+    {
+      strm << im.print(true);
+      strm << " * i";
+    }
     if (useParentheses) { strm << ")"; }
     return strm.str();
   }
+
+  ComplexQuadratic ComplexQuadratic::conjugate() const { return ComplexQuadratic(re, -im); }
 
   QuadraticNumber ComplexQuadratic::sqLength() const
   {

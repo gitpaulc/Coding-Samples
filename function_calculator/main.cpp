@@ -78,6 +78,9 @@ bool test_complex()
   auto sqrtMinus36 = ComplexQuadratic::sqrt(-36);
   std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
   std::cout << "\nThe reciprocal of i is " << (ComplexQuadratic::sqrt(-1).pow(-1)).print();
+  auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
+  std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
+  std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
   return true;
 }
 

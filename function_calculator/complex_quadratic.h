@@ -18,6 +18,7 @@ public:
   ComplexQuadratic(const QuadraticNumber& reIn = QuadraticNumber(), const QuadraticNumber& imIn = QuadraticNumber());
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
+  ComplexQuadratic conjugate() const;
   QuadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
 
