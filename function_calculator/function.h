@@ -6,6 +6,8 @@ All Rights Reserved.*/
 
 #include <string>
 
+#include "number.h"
+
 namespace FunctionalCalculator
 {
 
@@ -14,7 +16,7 @@ class Function
 {
 public:
   /** \brief Implement this in order to derive from the Function class. */
-  virtual double eval(double x, double y, double z) const = 0;
+  virtual Number eval(const Number& x, const Number& y, const Number& z) const = 0;
 };
 }
 

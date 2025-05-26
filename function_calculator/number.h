@@ -13,8 +13,11 @@ namespace FunctionalCalculator
 class Number
 {
 public:
-  /** \brief Should implement this in order to derive from the Number class. */
-  virtual double get() const;
+  /** \brief Should implement this in order to derive from the Number class.
+   *
+   *  \return A complex number as a pair of double-precision real numbers a + bi;
+   */
+  virtual std::pair<double, double> get() const;
   /** \brief Should implement this in order to derive from the Number class. */
   virtual std::string print(bool useParentheses = false) const;
 };

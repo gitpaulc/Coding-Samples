@@ -48,7 +48,7 @@ public:
   /** \brief Print the prime factorization of the rational number. */
   std::string printFactors(bool useParentheses = false) const;
 
-  virtual double get() const override;
+  virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
 };
 }

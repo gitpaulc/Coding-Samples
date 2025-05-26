@@ -17,18 +17,18 @@ namespace FunctionalCalculator
     }
   }
 
-  double QuadraticNumber::get() const
+  std::pair<double, double> QuadraticNumber::get() const
   {
     double answer = 0.0;
     for (const auto& iter : content)
     {
-      double val = iter.second.get();
+      double val = iter.second.get().first;
       if (val == 0) { continue; }
       double radicand = iter.first;
-      if (iter.first < 0) { throw std::runtime_error("\nStill need to implement complex numbers."); radicand = -radicand; }
+      if (iter.first < 0) { throw std::invalid_argument("\nRadicands should be nonnegative."); radicand = -radicand; }
       answer += val * std::sqrt(radicand);
     }
-    return answer;
+    return { answer, 0.0 };
   }
 
   bool QuadraticNumber::getRational(Rational& self) const
@@ -82,6 +82,7 @@ namespace FunctionalCalculator
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
   {
     QuadraticNumber answer;
+    if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
     Rational coefficient(1, radicand.denominator());
     int key = radicand.numerator() * radicand.denominator();
     auto primes = Rational::primeFactorization(key);

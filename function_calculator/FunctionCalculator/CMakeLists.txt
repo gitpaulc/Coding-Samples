@@ -21,6 +21,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Header files.
 
 set(HEADER_FILES
+  ../complex_quadratic.h
   ../constant.h
   ../function.h
   ../number.h
@@ -31,6 +32,7 @@ set(HEADER_FILES
 # Source files.
 
 set(SOURCE_FILES
+  ../complex_quadratic.cpp
   ../constant.cpp
   ../function.cpp
   ../main.cpp
