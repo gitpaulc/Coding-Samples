@@ -123,7 +123,13 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiXInd = A;
+    auto zz = A;
+    auto two = QuadraticNumber(2);
+    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
+    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
+    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
+    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
+    term.ePiXInd = zz;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
@@ -131,14 +137,37 @@ namespace FunctionalCalculator
 
   FnPolynomial FnPolynomial::eToTheATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    Monomial term;
+    auto zz = A;
+    auto two = QuadraticNumber(2);
+    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
+    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
+    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
+    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
+    term.ePiYInd = zz;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    Monomial term;
+    auto zz = A;
+    auto two = QuadraticNumber(2);
+    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
+    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
+    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
+    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
+    term.ePiZInd = zz;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
   }
 
   FnPolynomial FnPolynomial::eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
+    return eToTheATimesPiX(coeff, A) * eToTheATimesPiX(1, B) * eToTheATimesPiX(1, C);
   }
 
   FnPolynomial FnPolynomial::sinATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
