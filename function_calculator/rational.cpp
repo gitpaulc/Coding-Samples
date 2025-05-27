@@ -14,17 +14,20 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Division by zero.");
     }
-    int gcd_ = gcd(nn, dd);
-    num = nn; denom = dd;
-    if (gcd_ != 0)
+    else
     {
-      num = num / gcd_;
-      denom = denom / gcd_;
-    }
-    if (denom < 0)
-    {
-      num *= -1;
-      denom *= -1;
+      int gcd_ = gcd(nn, dd);
+      num = nn; denom = dd;
+      if (gcd_ != 0)
+      {
+        num = num / gcd_;
+        denom = denom / gcd_;
+      }
+      if (denom < 0)
+      {
+        num *= -1;
+        denom *= -1;
+      }
     }
   }
 

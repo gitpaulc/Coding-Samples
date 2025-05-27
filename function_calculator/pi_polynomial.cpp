@@ -126,6 +126,57 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  int PiPolynomial::degree() const
+  {
+    int maxKey = 0;
+    for (const auto& iter : self) { if (iter.first > maxKey) { maxKey = iter.first; } }
+    return maxKey;
+  }
+
+  PiPolynomial PiPolynomial::division(const PiPolynomial& rhs, PiPolynomial& remainder) const
+  {
+    auto rhsDegree = rhs.degree();
+    if (rhsDegree == 0)
+    {
+      auto quotient = *this;
+      for (auto& iter : quotient.self) { iter.second = iter.second / rhs.self.at(0); }
+      remainder = PiPolynomial(0);
+      return quotient;
+    }
+    auto dividend = *this;
+    auto divDegree = dividend.degree();
+    PiPolynomial quotient = 0;
+    for (int prevDegree = divDegree; rhsDegree <= divDegree;)
+    {
+      auto monomial = PiPolynomial(dividend.self.at(divDegree) / rhs.self.at(rhsDegree), divDegree - rhsDegree);
+      quotient = quotient + monomial;
+      auto product = rhs * monomial;
+      if (product == dividend) { remainder = PiPolynomial(0); return quotient; }
+      dividend = dividend - product;
+      prevDegree = divDegree;
+      divDegree = dividend.degree();
+      if (prevDegree >= divDegree) { break; } // Should never happen.
+    }
+    remainder = dividend;
+    return quotient;
+  }
+
+  PiPolynomial PiPolynomial::gcd(const PiPolynomial& aa, const PiPolynomial& bb)
+  {
+    if ((aa == bb) || (bb == PiPolynomial(0))) { return aa; }
+    if (aa == PiPolynomial(0)) { return bb; }
+    auto aPoly = aa;
+    auto bPoly = bb;
+    while (bPoly != PiPolynomial(0))
+    {
+      auto aa_old = aPoly;
+      auto bb_old = bPoly;
+      aPoly = bb_old;
+      auto quotient = aa_old.division(bb_old, bPoly);
+    }
+    return aPoly;
+  }
+
   PiPolynomial PiPolynomial::pow(int p) const
   {
     bool isNeg = (p < 0);

@@ -29,6 +29,9 @@ public:
   PiPolynomial operator+(const PiPolynomial& rhs) const;
   PiPolynomial operator-(const PiPolynomial& rhs) const;
   PiPolynomial operator*(const PiPolynomial& rhs) const;
+  int degree() const;
+  PiPolynomial division(const PiPolynomial& rhs, PiPolynomial& remainder) const;
+  static PiPolynomial gcd(const PiPolynomial& aa, const PiPolynomial& bb);
   PiPolynomial pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const PiPolynomial& rhs) const;
   bool operator!=(const PiPolynomial& rhs) const;
