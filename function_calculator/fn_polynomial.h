@@ -43,6 +43,21 @@ public:
   FnPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic());
   virtual std::string print(bool useParentheses = false) const;
 
+  static FnPolynomial xToPower(int p);
+  static FnPolynomial yToPower(int p);
+  static FnPolynomial zToPower(int p);
+  static FnPolynomial eToTheATimesX(const ComplexQuadratic& A); /**< \return e^{A * x} */
+  static FnPolynomial eToTheATimesY(const ComplexQuadratic& A); /**< \return e^{A * y} */
+  static FnPolynomial eToTheATimesZ(const ComplexQuadratic& A); /**< \return e^{A * z} */
+  /** \brief \return e^{A * x + B * y + C * z} */
+  static FnPolynomial eToThe_AX_Plus_BY_CZ(const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+  static FnPolynomial sinATimesX(const ComplexQuadratic& A); /**< \return sin(A * x) */
+  static FnPolynomial sinATimesY(const ComplexQuadratic& A); /**< \return sin(A * y) */
+  static FnPolynomial sinATimesZ(const ComplexQuadratic& A); /**< \return sin(A * z) */
+  static FnPolynomial cosATimesX(const ComplexQuadratic& A); /**< \return cos(A * x) */
+  static FnPolynomial cosATimesY(const ComplexQuadratic& A); /**< \return cos(A * y) */
+  static FnPolynomial cosATimesZ(const ComplexQuadratic& A); /**< \return cos(A * z) */
+
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
   FnPolynomial operator+(const FnPolynomial& rhs) const;
