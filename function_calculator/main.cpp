@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include "complex_quadratic.h"
+#include "function.h"
 #include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
@@ -74,6 +74,9 @@ bool test_complex()
 {
   auto ii = ComplexQuadratic::sqrt(-1);
   std::cout << "\nSquare root of -1 = " << ii.print();
+  auto sqrtI = ComplexQuadratic::sqrtOfITimes(1);
+  std::cout << "\nSquare root of i = " << sqrtI.print();
+  std::cout << "\ni = " << (sqrtI * sqrtI).print();
   auto sqrtMinus12 = ComplexQuadratic::sqrt(-12);
   std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
   auto sqrtMinus36 = ComplexQuadratic::sqrt(-36);
@@ -100,26 +103,47 @@ bool test_pi()
   std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
   auto product = piPoly * piPoly1 * piPoly2;
   std::cout << "\n1 - pi^4 = " << product.print();
-  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(Rational(1)), 4)).print();
+  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(1), 4)).print();
+  return true;
+}
+
+bool test_fn_poly()
+{
+  {
+    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(ComplexQuadratic(1), 1);
+    std::cout << "\nsin(pi * x) = " << sineOfPiX.print();
+    FnPolynomial piCosPiX = sineOfPiX.partial_x();
+    std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
+  }
   return true;
 }
 
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTest function polynomials:\n";
+  test_fn_poly();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\nTest rational:\n";
   test_rational();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest complex:\n";
   test_complex();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest pi polynomials:\n";
   test_pi();
   std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
 }

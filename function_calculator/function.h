@@ -6,17 +6,27 @@ All Rights Reserved.*/
 
 #include <string>
 
-#include "number.h"
+#include "fn_polynomial.h"
 
 namespace FunctionalCalculator
 {
 
-/** \brief Base abstract class from which functions should derive. */
+/** \class Represents a rational function of x, y, z, and e^{pi * (a * x + b * y + c * z)}.
+ * 
+ *  Here a, b, and c are of the form A + B * sqrt(d) where d is an integer. The coefficients of
+ *  the rational function are polynomials in pi whose coefficients are rational functions of
+ *  A + B * sqrt(d) where d is an integer. Here d can be -1.
+ * 
+ *  \remark This illustrates a practical application of the fact that sqrt(d) is nonrational if d is an
+ *  integer that is not a perfect square, and that pi is transcendental: It means we can check for exact equality
+ *  by checking that a polynomial in one of these variables is equal to zero.
+ */
 class Function
 {
+  FnPolynomial num, den;
+
 public:
-  /** \brief Implement this in order to derive from the Function class. */
-  virtual Number eval(const Number& x, const Number& y, const Number& z) const = 0;
+  Function();
 };
 }
 

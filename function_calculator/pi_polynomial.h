@@ -6,6 +6,7 @@ All Rights Reserved.*/
 
 #include "complex_quadratic.h"
 
+#include <map>
 #include <vector>
 
 namespace FunctionalCalculator
@@ -13,7 +14,7 @@ namespace FunctionalCalculator
 
 class PiPolynomial : public Number
 {
-  std::vector<ComplexQuadratic> self; // TODO: Change this to a map.
+  std::map<int, ComplexQuadratic> self;
   void clean();
 public:
   PiPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic(), int power = 0);

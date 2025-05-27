@@ -8,6 +8,11 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  ComplexQuadratic::ComplexQuadratic(int reIn)
+  {
+    re = Rational(reIn, 1); im = Rational(0, 1);
+  }
+
   ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& reIn, const QuadraticNumber& imIn)
   {
     re = reIn; im = imIn;
@@ -70,6 +75,12 @@ namespace FunctionalCalculator
     if (radicand < 0) { answer.im = QuadraticNumber::sqrt(-radicand); }
     else { answer.re = QuadraticNumber::sqrt(radicand); }
     return answer;
+  }
+
+  ComplexQuadratic ComplexQuadratic::sqrtOfITimes(const Rational& radicand)
+  {
+    auto sqrtOfI = ComplexQuadratic(QuadraticNumber::sqrt(Rational(1, 2)), QuadraticNumber::sqrt(Rational(1, 2)));
+    return sqrtOfI * ComplexQuadratic::sqrt(radicand);
   }
 
   ComplexQuadratic ComplexQuadratic::operator+() const
@@ -146,5 +157,17 @@ namespace FunctionalCalculator
   bool ComplexQuadratic::operator!=(const ComplexQuadratic& rhs) const
   {
     return !((*this) == rhs);
+  }
+
+  bool ComplexQuadratic::operator<(const ComplexQuadratic& rhs) const
+  {
+    if (re < rhs.re) { return true; }
+    if (rhs.re < re) { return false; }
+    return im < rhs.im;
+  }
+
+  bool ComplexQuadratic::operator>(const ComplexQuadratic& rhs) const
+  {
+    return (rhs < (*this));
   }
 }

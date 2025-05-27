@@ -6,4 +6,7 @@
 
 namespace FunctionalCalculator
 {
+  Function::Function()
+  {
+  }
 }

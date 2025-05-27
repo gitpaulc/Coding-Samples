@@ -1,0 +1,392 @@
+/*  Copyright Paul Cernea, May 2025.
+All Rights Reserved.*/
+
+#include "fn_polynomial.h"
+
+#include <stdexcept>
+#include <sstream>
+
+namespace FunctionalCalculator
+{
+  bool FnPolynomial::Monomial::isConstTerm() const
+  {
+    if (xInd != 0) { return false; }
+    if (yInd != 0) { return false; }
+    if (zInd != 0) { return false; }
+    if (ePiXInd != 0) { return false; }
+    if (ePiYInd != 0) { return false; }
+    if (ePiZInd != 0) { return false; }
+    return true;
+  }
+
+  FnPolynomial::Monomial FnPolynomial::Monomial::operator+(const FnPolynomial::Monomial& rhs) const
+  {
+    Monomial answer;
+    answer.xInd = xInd + rhs.xInd;
+    answer.yInd = yInd + rhs.yInd;
+    answer.zInd = zInd + rhs.zInd;
+    answer.ePiXInd = ePiXInd + rhs.ePiXInd;
+    answer.ePiYInd = ePiYInd + rhs.ePiYInd;
+    answer.ePiZInd = ePiZInd + rhs.ePiZInd;
+    return answer;
+  }
+
+  bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
+  {
+    if (xInd < rhs.xInd) { return true; }
+    if (xInd > rhs.xInd) { return false; }
+    if (yInd < rhs.yInd) { return true; }
+    if (yInd > rhs.yInd) { return false; }
+    if (zInd < rhs.zInd) { return true; }
+    if (zInd > rhs.zInd) { return false; }
+    if (ePiXInd < rhs.ePiXInd) { return true; }
+    if (ePiXInd > rhs.ePiXInd) { return false; }
+    if (ePiYInd < rhs.ePiYInd) { return true; }
+    if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (ePiZInd < rhs.ePiZInd) { return true; }
+    if (ePiZInd > rhs.ePiZInd) { return false; }
+    return false; // They are equal.
+  }
+
+  void FnPolynomial::clean()
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      if (iter.second == PiPolynomial()) { continue; }
+      answer.self[iter.first] = iter.second;
+    }
+    self = answer.self;
+  }
+
+  FnPolynomial::FnPolynomial(const PiPolynomial& coeff)
+  {
+    if (coeff != PiPolynomial())
+    {
+      Monomial constTerm;
+      self[constTerm] = coeff;
+    }
+  }
+
+  std::string FnPolynomial::print(bool useParentheses) const
+  {
+    std::stringstream strm;
+    if (useParentheses) { strm << "("; }
+    int count = -1;
+    for (const auto& iter : self)
+    {
+      if (iter.second == ComplexQuadratic()) { continue; }
+      ++count;
+      if (count != 0) { strm << " + "; }
+      strm << iter.second.print(true);
+      if (iter.first.isConstTerm()) { continue; }
+      strm << " * ";
+      if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
+      if (iter.first.yInd != 0) { strm << "y^" << iter.first.yInd; }
+      if (iter.first.zInd != 0) { strm << "z^" << iter.first.zInd; }
+      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
+      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
+      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
+    }
+    if (count < 0) { strm << "0"; }
+    if (useParentheses) { strm << ")"; }
+    return strm.str();
+  }
+
+  FnPolynomial FnPolynomial::xToPower(const PiPolynomial& coeff, int p)
+  {
+    Monomial term;
+    term.xInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::yToPower(const PiPolynomial& coeff, int p)
+  {
+    Monomial term;
+    term.yInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::zToPower(const PiPolynomial& coeff, int p)
+  {
+    Monomial term;
+    term.zInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    Monomial term;
+    term.ePiXInd = A;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    Monomial term;
+    term.ePiYInd = A;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    Monomial term;
+    term.ePiZInd = A;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToThePi_AX_Plus_BY_CZ(const PiPolynomial& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiPolynomial one(ComplexQuadratic(1));
+    return eToTheATimesPiX(coeff, A) * eToTheATimesPiY(one, B) * eToTheATimesPiZ(one, C);
+  }
+
+  FnPolynomial FnPolynomial::sinATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiX(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiX(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::sinATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiY(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiY(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::sinATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::cosATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiX(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiX(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::cosATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiY(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiY(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::cosATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::operator+() const
+  {
+    return *this;
+  }
+
+  FnPolynomial FnPolynomial::operator-() const
+  {
+    auto answer = *this;
+    for (auto& iter : answer.self)
+    {
+      iter.second = -iter.second;
+    }
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::operator+(const FnPolynomial& rhs) const
+  {
+    FnPolynomial answer = *this;
+
+    for (auto& iter : rhs.self)
+    {
+      if (answer.self.find(iter.first) == answer.self.end())
+      {
+        answer.self[iter.first] = iter.second;
+        continue;
+      }
+      answer.self[iter.first] = answer.self[iter.first] + iter.second;
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::operator-(const FnPolynomial& rhs) const
+  {
+    return (*this) + (-rhs);
+  }
+
+  FnPolynomial FnPolynomial::operator*(const FnPolynomial& rhs) const
+  {
+    FnPolynomial answer;
+
+    for (const auto& iter : self)
+    {
+      for (const auto& jter : rhs.self)
+      {
+        auto summand = iter.second * jter.second;
+        auto kk = iter.first + jter.first;
+        if (answer.self.find(kk) == answer.self.end())
+        {
+          answer.self[kk] = summand;
+          continue;
+        }
+        answer.self[kk] = answer.self[kk] + summand;
+      }
+    }
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::pow(int p) const
+  {
+    bool isNeg = (p < 0);
+    if (isNeg) { throw std::invalid_argument("Exponent must be nonnegative."); }
+    FnPolynomial answer;
+    Monomial constTerm;
+    answer.self[constTerm] = ComplexQuadratic(1);
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (*this);
+    }
+    return answer;
+  }
+
+  bool FnPolynomial::operator==(const FnPolynomial& rhs) const
+  {
+    auto diff = (*this) - rhs;
+    for (const auto& iter : diff.self)
+    {
+      if (iter.second != ComplexQuadratic(0)) { return false; }
+    }
+    return true;
+  }
+
+  bool FnPolynomial::operator!=(const FnPolynomial& rhs) const
+  {
+    return !((*this) == rhs);
+  }
+
+
+  FnPolynomial FnPolynomial::partial_x() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, PiPolynomial> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.xInd);
+      --(newIndex.first.xInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiXInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::partial_y() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, PiPolynomial> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.yInd);
+      --(newIndex.first.yInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiYInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::partial_z() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, PiPolynomial> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.zInd);
+      --(newIndex.first.zInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiZInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::laplacian() const
+  {
+    FnPolynomial answer = (*this).partial_x().partial_x();
+    answer = answer + (*this).partial_y().partial_y();
+    answer = answer + (*this).partial_z().partial_z();
+    return answer;
+  }
+
+  bool FnPolynomial::isLaplaceEigenfunction(PiPolynomial& eigenvalueNum, PiPolynomial& eigenvalueDenom) const
+  {
+    if (isHarmonic()) { eigenvalueNum = PiPolynomial(0); eigenvalueDenom = PiPolynomial(1); return true; }
+    auto lap = laplacian();
+    PiPolynomial eigenNum, eigenDenom;
+    for (const auto& iter : self)
+    {
+      if (lap.self.find(iter.first) == lap.self.end()) { return false; }
+      eigenNum = lap.self[iter.first];
+      eigenDenom = self.at(iter.first);
+      break;
+    }
+    lap = lap * eigenDenom;
+    auto comparer = (*this) * eigenNum;
+    bool answer = (lap == comparer);
+    if (answer) { eigenvalueNum = eigenNum; eigenvalueDenom = eigenDenom; }
+    return answer;
+  }
+
+  bool FnPolynomial::isHarmonic() const
+  {
+    return (laplacian() == FnPolynomial());
+  }
+}
