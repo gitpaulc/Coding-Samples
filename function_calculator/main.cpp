@@ -100,7 +100,8 @@ bool test_pi()
   std::cout << "\n1 + pi = " << piPoly.print();
   std::cout << "\n1 - pi = " << piPoly1.print();
   std::cout << "\n1 + pi^2 = " << piPoly2.print();
-  std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
+  auto oneMinusPiSq = piPoly * piPoly1;
+  std::cout << "\n1 - pi^2 = " << oneMinusPiSq.print();
   auto product = piPoly * piPoly1 * piPoly2;
   std::cout << "\n1 - pi^4 = " << product.print();
   auto one = product + PiPolynomial(ComplexQuadratic(1), 4);
@@ -108,8 +109,22 @@ bool test_pi()
   PiPolynomial remainder;
   PiPolynomial divisor = one + PiPolynomial(2, 3);
   auto quotient = product.division(divisor, remainder);
-  std::cout << "\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
   std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  divisor = piPoly1;
+  quotient = product.division(divisor, remainder);
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  product = PiPolynomial(4) - PiPolynomial(9, 4);
+  divisor = PiPolynomial(ComplexQuadratic::sqrt(2)) - PiPolynomial(ComplexQuadratic::sqrt(3), 1);
+  quotient = product.division(divisor, remainder);
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  product = piPoly * piPoly2;
+  std::cout << "\nThe gcd of " << product.print() << " and " << oneMinusPiSq.print();
+  std::cout << " is " << PiPolynomial::gcd(product, oneMinusPiSq).print();
+  std::cout << "\nThe gcd of " << oneMinusPiSq.print() << " and " << product.print();
+  std::cout << " is " << PiPolynomial::gcd(oneMinusPiSq, product).print();
   return true;
 }
 

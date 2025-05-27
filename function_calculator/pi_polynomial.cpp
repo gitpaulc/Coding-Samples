@@ -151,6 +151,12 @@ namespace FunctionalCalculator
 
   PiPolynomial PiPolynomial::division(const PiPolynomial& rhs, PiPolynomial& remainder) const
   {
+    if (rhs == PiPolynomial(0))
+    {
+      if ((*this) == PiPolynomial(0)) { remainder = PiPolynomial(0);  return PiPolynomial(1); }
+      throw std::invalid_argument("Division by zero.");
+      remainder = PiPolynomial(0);  return PiPolynomial(1);
+    }
     auto rhsDegree = rhs.degree();
     if (rhsDegree == 0)
     {
@@ -164,14 +170,14 @@ namespace FunctionalCalculator
     PiPolynomial quotient = 0;
     for (int prevDegree = divDegree; rhsDegree <= divDegree;)
     {
-      auto monomial = PiPolynomial(dividend.self.at(divDegree) / rhs.self.at(rhsDegree), divDegree - rhsDegree);
+      auto monomial = PiPolynomial(rhs.self.at(rhsDegree) / dividend.self.at(divDegree), divDegree - rhsDegree);
       quotient = quotient + monomial;
       auto product = rhs * monomial;
       if (product == dividend) { remainder = PiPolynomial(0); return quotient; }
       dividend = dividend - product;
       prevDegree = divDegree;
       divDegree = dividend.degree();
-      if (prevDegree >= divDegree) { break; } // Should never happen.
+      if (prevDegree <= divDegree) { break; } // Should never happen.
     }
     remainder = dividend;
     return quotient;
