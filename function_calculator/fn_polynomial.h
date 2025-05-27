@@ -74,6 +74,9 @@ public:
   FnPolynomial partial_y() const;
   FnPolynomial partial_z() const;
   FnPolynomial laplacian() const;
+
+  bool isLaplaceEigenfunction(ComplexQuadratic& eigenvalue) const;
+  bool isHarmonic() const;
 };
 }
 

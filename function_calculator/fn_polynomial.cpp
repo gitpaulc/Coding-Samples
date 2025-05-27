@@ -361,4 +361,26 @@ namespace FunctionalCalculator
     answer = answer + (*this).partial_z().partial_z();
     return answer;
   }
+
+  bool FnPolynomial::isLaplaceEigenfunction(ComplexQuadratic& eigenvalue) const
+  {
+    if (isHarmonic()) { eigenvalue = 0; return true; }
+    auto lap = laplacian();
+    ComplexQuadratic eigen;
+    for (const auto& iter : self)
+    {
+      if (lap.self.find(iter.first) == lap.self.end()) { return false; }
+      eigen = lap.self[iter.first] / self.at(iter.first);
+      break;
+    }
+    lap = lap * (ComplexQuadratic(1) / eigen);
+    bool answer = (lap == (*this));
+    if (answer) { eigenvalue = eigen; }
+    return answer;
+  }
+
+  bool FnPolynomial::isHarmonic() const
+  {
+    return (laplacian() == FnPolynomial());
+  }
 }
