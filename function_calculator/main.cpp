@@ -107,22 +107,43 @@ bool test_pi()
   return true;
 }
 
+bool test_fn_poly()
+{
+  {
+    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(1, 1);
+    std::cout << "\nsin(pi * x) = " << sineOfPiX.print();
+    FnPolynomial piCosPiX = sineOfPiX.partial_x();
+    std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
+  }
+  return true;
+}
+
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTest function polynomials:\n";
+  test_fn_poly();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\nTest rational:\n";
   test_rational();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest complex:\n";
   test_complex();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest pi polynomials:\n";
   test_pi();
   std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
 }
