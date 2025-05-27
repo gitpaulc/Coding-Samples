@@ -28,6 +28,7 @@
 2. [Graphing Math.](##graphing-math)
 3. [Computational Biology.](##computational-biology)
 4. [Mesh Renderer.](##mesh-renderer)
+5. [Function Calculator.](##function-calculator)
 
 ---
 
@@ -149,6 +150,22 @@
 * Rotation: R = rotate clockwise, T = rotate counter-clockwise. W, A, S, and D to rotate the screen.
 * `MeshRenderer.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder. The homepage is `index.html`.
  
+[Back to Table of Contents.](##table-of-contents)
+
+---
+
+## **Function Calculator.**
+
+* This is a utility written in C++ for calculating with functions.
+* It is located in the `function_calculator` directory.
+* It can be built like the [graphing calculator](##graphing-math) and does not require extra libraries.
+* The **Function Calculator** is notable in that it mostly uses combinations of integers, square roots, and pi instead of floating-point arithmetic (doubles).
+* This allows for the manipulation of exact expressions which often come up in mathematical work, such as `cos(pi / 6) = sqrt(3) / 2`.
+* The calculator can be useful for checking long tedious calculations involving polynomials and exponentials.
+* Currently, for instance, it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`.
+* It computes that `(pi^2)(sin^2(pi * x)) + (pi^2)cos^2(pi * x)) = (pi^2)`.
+* It computes that `e^(ax)sin(ax)` is not a harmonic function but `e^(ax)sin(ay)` is a harmonic function.
+
 [Back to Table of Contents.](##table-of-contents)
 
 ---
