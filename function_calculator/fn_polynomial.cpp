@@ -293,6 +293,7 @@ namespace FunctionalCalculator
 
       newIndex = iter;
       newIndex.second = newIndex.second * newIndex.first.ePiXInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
@@ -319,6 +320,7 @@ namespace FunctionalCalculator
 
       newIndex = iter;
       newIndex.second = newIndex.second * newIndex.first.ePiYInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
@@ -345,6 +347,7 @@ namespace FunctionalCalculator
 
       newIndex = iter;
       newIndex.second = newIndex.second * newIndex.first.ePiZInd;
+      newIndex.second = newIndex.second * PiPolynomial(1, 1);
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
