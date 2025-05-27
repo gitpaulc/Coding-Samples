@@ -23,6 +23,7 @@ public:
   ComplexQuadratic conjugate() const;
   QuadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
+  static ComplexQuadratic sqrtOfITimes(const Rational& radicand);
 
   ComplexQuadratic operator+() const;
   ComplexQuadratic operator-() const;

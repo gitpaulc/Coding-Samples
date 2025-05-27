@@ -77,6 +77,12 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  ComplexQuadratic ComplexQuadratic::sqrtOfITimes(const Rational& radicand)
+  {
+    auto sqrtOfI = ComplexQuadratic(QuadraticNumber::sqrt(Rational(1, 2)), QuadraticNumber::sqrt(Rational(1, 2)));
+    return sqrtOfI * ComplexQuadratic::sqrt(radicand);
+  }
+
   ComplexQuadratic ComplexQuadratic::operator+() const
   {
     return *this;

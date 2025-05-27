@@ -74,6 +74,9 @@ bool test_complex()
 {
   auto ii = ComplexQuadratic::sqrt(-1);
   std::cout << "\nSquare root of -1 = " << ii.print();
+  auto sqrtI = ComplexQuadratic::sqrtOfITimes(1);
+  std::cout << "\nSquare root of i = " << sqrtI.print();
+  std::cout << "\ni = " << (sqrtI * sqrtI).print();
   auto sqrtMinus12 = ComplexQuadratic::sqrt(-12);
   std::cout << "\nSquare root of -12 = " << sqrtMinus12.print();
   auto sqrtMinus36 = ComplexQuadratic::sqrt(-36);
