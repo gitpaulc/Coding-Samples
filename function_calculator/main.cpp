@@ -121,7 +121,7 @@ bool test_pi()
   std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
   std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
   product = piPoly * piPoly2;
-  std::cout << "\nThe gcd of " << product.print() << " and " << oneMinusPiSq.print();
+  std::cout << "\n\nThe gcd of " << product.print() << " and " << oneMinusPiSq.print();
   std::cout << " is " << PiPolynomial::gcd(product, oneMinusPiSq).print();
   std::cout << "\nThe gcd of " << oneMinusPiSq.print() << " and " << product.print();
   std::cout << " is " << PiPolynomial::gcd(oneMinusPiSq, product).print();

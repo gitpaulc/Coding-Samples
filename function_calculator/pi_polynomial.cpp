@@ -196,6 +196,13 @@ namespace FunctionalCalculator
       aPoly = bb_old;
       auto quotient = aa_old.division(bb_old, bPoly);
     }
+    if (aPoly == PiPolynomial(0)) { return aPoly; }
+    auto aPolyDegree = aPoly.degree();
+    auto coeff = aPoly.self[aPolyDegree];
+    for (auto& iter : aPoly.self)
+    {
+      iter.second = iter.second / coeff;
+    }
     return aPoly;
   }
 
