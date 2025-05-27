@@ -123,13 +123,7 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    auto zz = A;
-    auto two = QuadraticNumber(2);
-    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
-    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
-    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
-    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
-    term.ePiXInd = zz;
+    term.ePiXInd = A;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
@@ -138,13 +132,7 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    auto zz = A;
-    auto two = QuadraticNumber(2);
-    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
-    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
-    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
-    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
-    term.ePiYInd = zz;
+    term.ePiYInd = A;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
@@ -153,13 +141,7 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    auto zz = A;
-    auto two = QuadraticNumber(2);
-    auto iTimesTwo = ComplexQuadratic::sqrt(-4);
-    if (two == zz.getIm()) { zz = zz - iTimesTwo; }
-    while (two < zz.getIm()) { zz = zz - iTimesTwo; }
-    while (zz.getIm() < QuadraticNumber(0)) { zz = zz + iTimesTwo; }
-    term.ePiZInd = zz;
+    term.ePiZInd = A;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
@@ -167,31 +149,43 @@ namespace FunctionalCalculator
 
   FnPolynomial FnPolynomial::eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
-    return eToTheATimesPiX(coeff, A) * eToTheATimesPiX(1, B) * eToTheATimesPiX(1, C);
+    return eToTheATimesPiX(coeff, A) * eToTheATimesPiY(1, B) * eToTheATimesPiZ(1, C);
   }
 
-  FnPolynomial FnPolynomial::sinATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::sinATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiX(coeffNew, A) - eToTheATimesPiX(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::sinATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::sinATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiY(coeffNew, A) - eToTheATimesPiY(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::sinATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::sinATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = -coeff * ComplexQuadratic::sqrt(Rational(-1, 4));
+    return eToTheATimesPiZ(coeffNew, A) - eToTheATimesPiZ(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::cosATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::cosATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiX(coeffNew, A) + eToTheATimesPiX(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::cosATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::cosATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiY(coeffNew, A) + eToTheATimesPiY(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::cosATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  FnPolynomial FnPolynomial::cosATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
   {
+    auto coeffNew = coeff * ComplexQuadratic(Rational(1, 2));
+    return eToTheATimesPiZ(coeffNew, A) + eToTheATimesPiZ(coeffNew, -A);
   }
 
   FnPolynomial FnPolynomial::operator+() const

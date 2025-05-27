@@ -54,12 +54,12 @@ public:
   /** \brief \return e^{Pi * (A * x + B * y + C * z)} */
   static FnPolynomial eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff,
     const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
-  static FnPolynomial sinATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
-  static FnPolynomial sinATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
-  static FnPolynomial sinATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
-  static FnPolynomial cosATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
-  static FnPolynomial cosATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
-  static FnPolynomial cosATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
+  static FnPolynomial sinATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
+  static FnPolynomial sinATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
+  static FnPolynomial sinATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
+  static FnPolynomial cosATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
+  static FnPolynomial cosATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
+  static FnPolynomial cosATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
