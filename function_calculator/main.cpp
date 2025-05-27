@@ -111,10 +111,20 @@ bool test_fn_poly()
 {
   {
     FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(ComplexQuadratic(1), 1);
-    std::cout << "\nsin(pi * x) = " << sineOfPiX.print();
+    std::cout << "\n\nsin(pi * x) = " << sineOfPiX.print();
     FnPolynomial piCosPiX = sineOfPiX.partial_x();
     std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
+    // The calculator deduces sin^2 + cos^2 = 1:
+    auto piSquared = sineOfPiX * sineOfPiX * PiPolynomial(1, 2) + piCosPiX * piCosPiX;
+    std::cout << "\npi^2 * (sin^2(pi * x) + cos^2(pi * x)) = " << piSquared.print();
   }
+  {
+    auto notHarmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiX(ComplexQuadratic(2), 3);
+    std::cout << "\n\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto harmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiY(ComplexQuadratic(2), 3);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
+  std::cout << "\n";
   return true;
 }
 
