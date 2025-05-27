@@ -131,18 +131,20 @@ bool test_pi()
 bool test_fn_poly()
 {
   {
-    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(ComplexQuadratic(1), 1);
+    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
     std::cout << "\n\nsin(pi * x) = " << sineOfPiX.print();
     FnPolynomial piCosPiX = sineOfPiX.partial_x();
     std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
     // The calculator deduces sin^2 + cos^2 = 1:
-    auto piSquared = sineOfPiX * sineOfPiX * PiPolynomial(1, 2) + piCosPiX * piCosPiX;
-    std::cout << "\npi^2 * (sin^2(pi * x) + cos^2(pi * x)) = " << piSquared.print();
+    auto one = sineOfPiX * sineOfPiX + (piCosPiX * piCosPiX) * (PiRational(ComplexQuadratic(1), PiPolynomial(1, 2)));
+    std::cout << "\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
-    auto notHarmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiX(ComplexQuadratic(2), 3);
+    auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3)
+        * FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3);
     std::cout << "\n\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
-    auto harmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiY(ComplexQuadratic(2), 3);
+    auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3)
+        * FnPolynomial::sinATimesPiY(PiPolynomial(ComplexQuadratic(2)), 3);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   std::cout << "\n";

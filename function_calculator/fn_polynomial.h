@@ -4,7 +4,7 @@ All Rights Reserved.*/
 #ifndef FN_POLYNOMIAL_H
 #define FN_POLYNOMIAL_H
 
-#include "pi_polynomial.h"
+#include "pi_rational.h"
 
 #include <map>
 #include <vector>
@@ -17,8 +17,7 @@ namespace FunctionalCalculator
  *  \remark In fact, the powers of x, y, and z are allowed to be negative.
  *
  *  Here a, b, and c are of the form A + B * sqrt(d) where d is an integer. The coefficients of
- *  the polynomial are themselves polynomials in pi whose coefficients are rational functions of
- *  A + B * sqrt(d) where d is an integer. Here d can be -1.
+ *  the polynomial are rational functions of pi and A + B * sqrt(d) where d is an integer. Here d can be -1.
  * 
  *  \remark This illustrates a practical application of the fact that sqrt(d) is nonrational if d is an
  *  integer that is not a perfect square, and that pi is transcendental: It means we can check for exact equality
@@ -39,27 +38,27 @@ class FnPolynomial
     bool operator<(const Monomial& rhs) const;
   };
 
-  std::map<Monomial, PiPolynomial> self;
+  std::map<Monomial, PiRational> self;
   void clean();
 public:
-  FnPolynomial(const PiPolynomial& coeff = ComplexQuadratic());
+  FnPolynomial(const PiRational& coeff = PiPolynomial(0));
   virtual std::string print(bool useParentheses = false) const;
 
-  static FnPolynomial xToPower(const PiPolynomial& coeff, int p); /**< \return coeff * x^p */
-  static FnPolynomial yToPower(const PiPolynomial& coeff, int p); /**< \return coeff * y^p */
-  static FnPolynomial zToPower(const PiPolynomial& coeff, int p); /**< \return coeff * z^p */
-  static FnPolynomial eToTheATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
-  static FnPolynomial eToTheATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
-  static FnPolynomial eToTheATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
+  static FnPolynomial xToPower(const PiRational& coeff, int p); /**< \return coeff * x^p */
+  static FnPolynomial yToPower(const PiRational& coeff, int p); /**< \return coeff * y^p */
+  static FnPolynomial zToPower(const PiRational& coeff, int p); /**< \return coeff * z^p */
+  static FnPolynomial eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
+  static FnPolynomial eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
+  static FnPolynomial eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
   /** \brief \return e^{Pi * (A * x + B * y + C * z)} */
-  static FnPolynomial eToThePi_AX_Plus_BY_CZ(const PiPolynomial& coeff,
+  static FnPolynomial eToThePi_AX_Plus_BY_CZ(const PiRational& coeff,
     const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
-  static FnPolynomial sinATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
-  static FnPolynomial sinATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
-  static FnPolynomial sinATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
-  static FnPolynomial cosATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
-  static FnPolynomial cosATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
-  static FnPolynomial cosATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
+  static FnPolynomial sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
+  static FnPolynomial sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
+  static FnPolynomial sinATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
+  static FnPolynomial cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
+  static FnPolynomial cosATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
+  static FnPolynomial cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
@@ -75,7 +74,7 @@ public:
   FnPolynomial partial_z() const;
   FnPolynomial laplacian() const;
 
-  bool isLaplaceEigenfunction(PiPolynomial& eigenvalueNum, PiPolynomial& eigenvalueDenom) const;
+  bool isLaplaceEigenfunction(PiRational& eigenvalue) const;
   bool isHarmonic() const;
 };
 }
