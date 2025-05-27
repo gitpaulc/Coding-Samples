@@ -4,7 +4,7 @@ All Rights Reserved.*/
 #ifndef FN_POLYNOMIAL_H
 #define FN_POLYNOMIAL_H
 
-#include "complex_quadratic.h"
+#include "pi_polynomial.h"
 
 #include <map>
 #include <vector>
@@ -39,27 +39,27 @@ class FnPolynomial
     bool operator<(const Monomial& rhs) const;
   };
 
-  std::map<Monomial, ComplexQuadratic> self;
+  std::map<Monomial, PiPolynomial> self;
   void clean();
 public:
-  FnPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic());
+  FnPolynomial(const PiPolynomial& coeff = ComplexQuadratic());
   virtual std::string print(bool useParentheses = false) const;
 
-  static FnPolynomial xToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * x^p */
-  static FnPolynomial yToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * y^p */
-  static FnPolynomial zToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * z^p */
-  static FnPolynomial eToTheATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
-  static FnPolynomial eToTheATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
-  static FnPolynomial eToTheATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
+  static FnPolynomial xToPower(const PiPolynomial& coeff, int p); /**< \return coeff * x^p */
+  static FnPolynomial yToPower(const PiPolynomial& coeff, int p); /**< \return coeff * y^p */
+  static FnPolynomial zToPower(const PiPolynomial& coeff, int p); /**< \return coeff * z^p */
+  static FnPolynomial eToTheATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
+  static FnPolynomial eToTheATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
+  static FnPolynomial eToTheATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
   /** \brief \return e^{Pi * (A * x + B * y + C * z)} */
-  static FnPolynomial eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff,
+  static FnPolynomial eToThePi_AX_Plus_BY_CZ(const PiPolynomial& coeff,
     const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
-  static FnPolynomial sinATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
-  static FnPolynomial sinATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
-  static FnPolynomial sinATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
-  static FnPolynomial cosATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
-  static FnPolynomial cosATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
-  static FnPolynomial cosATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
+  static FnPolynomial sinATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
+  static FnPolynomial sinATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
+  static FnPolynomial sinATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
+  static FnPolynomial cosATimesPiX(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
+  static FnPolynomial cosATimesPiY(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
+  static FnPolynomial cosATimesPiZ(const PiPolynomial& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
@@ -75,7 +75,7 @@ public:
   FnPolynomial partial_z() const;
   FnPolynomial laplacian() const;
 
-  bool isLaplaceEigenfunction(ComplexQuadratic& eigenvalue) const;
+  bool isLaplaceEigenfunction(PiPolynomial& eigenvalueNum, PiPolynomial& eigenvalueDenom) const;
   bool isHarmonic() const;
 };
 }

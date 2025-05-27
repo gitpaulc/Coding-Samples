@@ -103,14 +103,14 @@ bool test_pi()
   std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
   auto product = piPoly * piPoly1 * piPoly2;
   std::cout << "\n1 - pi^4 = " << product.print();
-  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(Rational(1)), 4)).print();
+  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(1), 4)).print();
   return true;
 }
 
 bool test_fn_poly()
 {
   {
-    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(1, 1);
+    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(ComplexQuadratic(1), 1);
     std::cout << "\nsin(pi * x) = " << sineOfPiX.print();
     FnPolynomial piCosPiX = sineOfPiX.partial_x();
     std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
