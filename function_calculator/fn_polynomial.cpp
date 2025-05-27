@@ -93,6 +93,78 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
+  FnPolynomial FnPolynomial::xToPower(const ComplexQuadratic& coeff, int p)
+  {
+    Monomial term;
+    term.xInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::yToPower(const ComplexQuadratic& coeff, int p)
+  {
+    Monomial term;
+    term.yInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::zToPower(const ComplexQuadratic& coeff, int p)
+  {
+    Monomial term;
+    term.zInd = p;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+    Monomial term;
+    term.ePiXInd = A;
+    FnPolynomial answer;
+    answer.self[term] = coeff;
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::eToTheATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+  }
+
+  FnPolynomial FnPolynomial::sinATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::sinATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::sinATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::cosATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::cosATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
+  FnPolynomial FnPolynomial::cosATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A)
+  {
+  }
+
   FnPolynomial FnPolynomial::operator+() const
   {
     return *this;

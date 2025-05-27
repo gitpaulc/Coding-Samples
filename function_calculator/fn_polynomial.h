@@ -13,7 +13,9 @@ namespace FunctionalCalculator
 {
 
 /** \class Represents a polynomial in x, y, z, and e^{pi * (a * x + b * y + c * z)}.
- * 
+ *
+ *  \remark In fact, the powers of x, y, and z are allowed to be negative.
+ *
  *  Here a, b, and c are of the form A + B * sqrt(d) where d is an integer. The coefficients of
  *  the polynomial are themselves polynomials in pi whose coefficients are rational functions of
  *  A + B * sqrt(d) where d is an integer. Here d can be -1.
@@ -43,20 +45,21 @@ public:
   FnPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic());
   virtual std::string print(bool useParentheses = false) const;
 
-  static FnPolynomial xToPower(int p);
-  static FnPolynomial yToPower(int p);
-  static FnPolynomial zToPower(int p);
-  static FnPolynomial eToTheATimesX(const ComplexQuadratic& A); /**< \return e^{A * x} */
-  static FnPolynomial eToTheATimesY(const ComplexQuadratic& A); /**< \return e^{A * y} */
-  static FnPolynomial eToTheATimesZ(const ComplexQuadratic& A); /**< \return e^{A * z} */
-  /** \brief \return e^{A * x + B * y + C * z} */
-  static FnPolynomial eToThe_AX_Plus_BY_CZ(const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
-  static FnPolynomial sinATimesX(const ComplexQuadratic& A); /**< \return sin(A * x) */
-  static FnPolynomial sinATimesY(const ComplexQuadratic& A); /**< \return sin(A * y) */
-  static FnPolynomial sinATimesZ(const ComplexQuadratic& A); /**< \return sin(A * z) */
-  static FnPolynomial cosATimesX(const ComplexQuadratic& A); /**< \return cos(A * x) */
-  static FnPolynomial cosATimesY(const ComplexQuadratic& A); /**< \return cos(A * y) */
-  static FnPolynomial cosATimesZ(const ComplexQuadratic& A); /**< \return cos(A * z) */
+  static FnPolynomial xToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * x^p */
+  static FnPolynomial yToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * y^p */
+  static FnPolynomial zToPower(const ComplexQuadratic& coeff, int p); /**< \return coeff * z^p */
+  static FnPolynomial eToTheATimesPiX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
+  static FnPolynomial eToTheATimesPiY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
+  static FnPolynomial eToTheATimesPiZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
+  /** \brief \return e^{Pi * (A * x + B * y + C * z)} */
+  static FnPolynomial eToThePi_AX_Plus_BY_CZ(const ComplexQuadratic& coeff,
+    const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+  static FnPolynomial sinATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
+  static FnPolynomial sinATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
+  static FnPolynomial sinATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
+  static FnPolynomial cosATimesX(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
+  static FnPolynomial cosATimesY(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
+  static FnPolynomial cosATimesZ(const ComplexQuadratic& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
