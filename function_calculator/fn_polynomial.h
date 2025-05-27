@@ -12,12 +12,11 @@ All Rights Reserved.*/
 namespace FunctionalCalculator
 {
 
-/** \class Represents a polynomial in x, y, z, e^{pi * x}, e^{pi * y}, e^{pi * z} where x, y, and z are rational complex numbers.
+/** \class Represents a polynomial in x, y, z, and e^{pi * (a * x + b * y + c * z)}.
  * 
- *  The transcendental functions e^{pi * x}, e^{pi * y}, e^{pi * z} can effectively be treated as separate
- *  variables in the polynomial, giving us a polynomial in 6 variables. The coefficients of
- *  the polynomial are polynomials in pi with coefficients that are complex rational functions of
- *  square roots of rational numbers.
+ *  Here a, b, and c are of the form A + B * sqrt(d) where d is an integer. The coefficients of
+ *  the polynomial are themselves polynomials in pi whose coefficients are rational functions of
+ *  A + B * sqrt(d) where d is an integer. Here d can be -1.
  * 
  *  \remark This illustrates a practical application of the fact that sqrt(d) is nonrational if d is an
  *  integer that is not a perfect square, and that pi is transcendental: It means we can check for exact equality
@@ -30,9 +29,9 @@ class FnPolynomial
     int xInd = 0;
     int yInd = 0;
     int zInd = 0;
-    int ePiXInd = 0;
-    int ePiYInd = 0;
-    int ePiZInd = 0;
+    ComplexQuadratic ePiXInd = 0;
+    ComplexQuadratic ePiYInd = 0;
+    ComplexQuadratic ePiZInd = 0;
     bool isConstTerm() const;
     Monomial operator+(const Monomial& rhs) const;
     bool operator<(const Monomial& rhs) const;

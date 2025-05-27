@@ -158,4 +158,16 @@ namespace FunctionalCalculator
   {
     return !((*this) == rhs);
   }
+
+  bool ComplexQuadratic::operator<(const ComplexQuadratic& rhs) const
+  {
+    if (re < rhs.re) { return true; }
+    if (rhs.re < re) { return false; }
+    return im < rhs.im;
+  }
+
+  bool ComplexQuadratic::operator>(const ComplexQuadratic& rhs) const
+  {
+    return (rhs < (*this));
+  }
 }

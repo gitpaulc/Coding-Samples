@@ -84,9 +84,9 @@ namespace FunctionalCalculator
       if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
       if (iter.first.yInd != 0) { strm << "y^" << iter.first.yInd; }
       if (iter.first.zInd != 0) { strm << "z^" << iter.first.zInd; }
-      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd << " * x}"; }
-      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd << " * y}"; }
-      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd << " * z}"; }
+      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
+      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
+      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
     }
     if (count < 0) { strm << "0"; }
     if (useParentheses) { strm << ")"; }

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "function.h"
+#include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
 

@@ -11,12 +11,11 @@ All Rights Reserved.*/
 namespace FunctionalCalculator
 {
 
-/** \class Represents a rational function of x, y, z, e^{pi * x}, e^{pi * y}, e^{pi * z} where x, y, and z are rational complex numbers.
+/** \class Represents a rational function of x, y, z, and e^{pi * (a * x + b * y + c * z)}.
  * 
- *  The transcendental functions e^{pi * x}, e^{pi * y}, e^{pi * z} can effectively be treated as separate
- *  variables in the rational function, giving us a rational function in 6 variables. The coefficients of
- *  the rational function are polynomials in pi with coefficients that are complex rational functions of
- *  square roots of rational numbers.
+ *  Here a, b, and c are of the form A + B * sqrt(d) where d is an integer. The coefficients of
+ *  the rational function are polynomials in pi whose coefficients are rational functions of
+ *  A + B * sqrt(d) where d is an integer. Here d can be -1.
  * 
  *  \remark This illustrates a practical application of the fact that sqrt(d) is nonrational if d is an
  *  integer that is not a perfect square, and that pi is transcendental: It means we can check for exact equality

@@ -40,6 +40,8 @@ public:
   QuadraticNumber pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const QuadraticNumber& rhs) const;
   bool operator!=(const QuadraticNumber& rhs) const;
+  /** \remark Does not use algebra to determine < since it would be very inefficient. */
+  bool operator<(const QuadraticNumber& rhs) const;
 };
 }
 

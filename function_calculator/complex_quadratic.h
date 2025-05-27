@@ -34,6 +34,10 @@ public:
   ComplexQuadratic pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const ComplexQuadratic& rhs) const;
   bool operator!=(const ComplexQuadratic& rhs) const;
+  /** \brief Uses lexicographical comparison since there is no canonical ordering on complex numbers. */
+  bool operator<(const ComplexQuadratic& rhs) const;
+  /** \brief Uses lexicographical comparison since there is no canonical ordering on complex numbers. */
+  bool operator>(const ComplexQuadratic& rhs) const;
 };
 }
 

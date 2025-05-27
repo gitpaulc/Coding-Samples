@@ -261,4 +261,9 @@ namespace FunctionalCalculator
   {
     return !((*this) == rhs);
   }
+
+  bool QuadraticNumber::operator<(const QuadraticNumber& rhs) const
+  {
+    return get() < rhs.get();
+  }
 }
