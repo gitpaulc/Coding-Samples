@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(HEADER_FILES
   ../complex_quadratic.h
-  ../constant.h
+  ../fn_polynomial.h
   ../function.h
   ../number.h
   ../pi_polynomial.h
@@ -34,7 +34,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   ../complex_quadratic.cpp
-  ../constant.cpp
+  ../fn_polynomial.cpp
   ../function.cpp
   ../main.cpp
   ../number.cpp

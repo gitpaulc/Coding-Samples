@@ -1,8 +1,7 @@
 
 #include <iostream>
 
-#include "complex_quadratic.h"
-#include "pi_polynomial.h"
+#include "function.h"
 
 using namespace FunctionalCalculator;
 
