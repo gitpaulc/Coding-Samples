@@ -205,6 +205,16 @@ namespace FunctionalCalculator
     return !((*this) == rhs);
   }
 
+  bool PiPolynomial::operator<(const PiPolynomial& rhs) const
+  {
+    auto diff = (*this) - rhs;
+    if (diff.re() == PiPolynomial(0))
+    {
+      return (diff.get().second < 0);
+    }
+    return (diff.get().first < 0);
+  }
+
   PiPolynomial PiPolynomial::conjugate() const
   {
     auto conj = (*this);
@@ -213,4 +223,17 @@ namespace FunctionalCalculator
   }
 
   bool PiPolynomial::isReal() const { return ((*this) == conjugate()); }
+  PiPolynomial PiPolynomial::re() const
+  {
+    auto answer = (*this) + conjugate();
+    answer = answer * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return answer;
+  }
+
+  PiPolynomial PiPolynomial::im() const
+  {
+    auto answer = (*this) - conjugate();
+    answer = answer * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return answer;
+  }
 }

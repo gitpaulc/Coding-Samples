@@ -35,9 +35,12 @@ public:
   PiPolynomial pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const PiPolynomial& rhs) const;
   bool operator!=(const PiPolynomial& rhs) const;
+  bool operator<(const PiPolynomial& rhs) const;
 
   PiPolynomial conjugate() const;
   bool isReal() const;
+  PiPolynomial re() const;
+  PiPolynomial im() const;
 };
 }
 

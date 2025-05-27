@@ -19,8 +19,8 @@ public:
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
 
-  PiRational denominator() const;
-  PiRational numerator() const;
+  PiPolynomial denominator() const;
+  PiPolynomial numerator() const;
   PiRational operator+() const;
   PiRational operator-() const;
   PiRational operator+(const PiRational& rhs) const;
