@@ -55,8 +55,24 @@ namespace FunctionalCalculator
     {
       if (iter.second == ComplexQuadratic()) { continue; }
       ++count;
-      if (count != 0) { strm << " + "; }
-      strm << iter.second.print(true);
+      bool contentIsOne = (iter.second == 1);
+      bool contentIsMinusOne = (iter.second == -1);
+      auto content = iter.second;
+      std::string sumSign = "";
+      if (count != 0) { sumSign = " + "; }
+      if (contentIsMinusOne)
+      {
+        sumSign = ((count == 0) ? "-" : " - ");
+        content = -content;
+      }
+      strm << sumSign;
+      bool useParentheses = (!contentIsOne && !contentIsMinusOne);
+      if (!contentIsOne && !contentIsMinusOne)
+      {
+        strm << content.print(useParentheses);
+        if (iter.first > 0) { strm << " * "; }
+      }
+      else if (iter.first == 0) { strm << content.print(useParentheses); }
       if (iter.first == 1) { strm << "Pi"; }
       else if (iter.first > 1) { strm << "(Pi)"; }
       if (iter.first > 1) { strm << "^" << iter.first; }

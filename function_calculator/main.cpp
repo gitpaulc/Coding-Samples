@@ -103,7 +103,13 @@ bool test_pi()
   std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
   auto product = piPoly * piPoly1 * piPoly2;
   std::cout << "\n1 - pi^4 = " << product.print();
-  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(1), 4)).print();
+  auto one = product + PiPolynomial(ComplexQuadratic(1), 4);
+  std::cout << "\n1 = " << one.print();
+  PiPolynomial remainder;
+  PiPolynomial divisor = one + PiPolynomial(2, 3);
+  auto quotient = product.division(divisor, remainder);
+  std::cout << "\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
   return true;
 }
 
