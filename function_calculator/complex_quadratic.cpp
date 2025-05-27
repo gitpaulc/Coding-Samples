@@ -8,6 +8,11 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  ComplexQuadratic::ComplexQuadratic(int reIn)
+  {
+    re = Rational(reIn, 1); im = Rational(0, 1);
+  }
+
   ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& reIn, const QuadraticNumber& imIn)
   {
     re = reIn; im = imIn;

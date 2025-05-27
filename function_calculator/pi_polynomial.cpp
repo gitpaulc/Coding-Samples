@@ -10,42 +10,38 @@ namespace FunctionalCalculator
 {
   void PiPolynomial::clean()
   {
-    int lastNonzero = -1;
-    for (int i = (int)self.size() - 1; i >= 0; i--)
+    PiPolynomial answer;
+    for (const auto& iter : self)
     {
-      if (self[i] == ComplexQuadratic()) { continue; }
-      lastNonzero = i;
-      break;
+      if (iter.second == 0) { continue; }
+      answer.self[iter.first] = iter.second;
     }
-    self.resize(lastNonzero + 1);
+    self = answer.self;
   }
 
   PiPolynomial::PiPolynomial(const ComplexQuadratic& coeff, int power)
   {
     if (power < 0) { throw std::invalid_argument("Exponent must be nonnegative."); }
-    else
+    else if (coeff != 0)
     {
-      self.resize(power + 1);
       self[power] = coeff;
-      clean();
     }
   }
 
   PiPolynomial::PiPolynomial(const std::vector<ComplexQuadratic>& coeffs)
   {
-    self = coeffs;
+    for (int ii = 0; ii < (int)(coeffs.size()); ++ii) { if (coeffs[ii] != 0) { self[ii] = coeffs[ii]; } }
   }
 
   std::pair<double, double> PiPolynomial::get() const
   {
     double answerRe = 0.0;
     double answerIm = 0.0;
-    for (int i = 0; i < (int)self.size(); ++i)
+    for (const auto& iter : self)
     {
-      answerRe *= piValue();
-      answerIm *= piValue();
-      answerRe += self[i].getRe().get().first;
-      answerIm += self[i].getIm().get().first;
+      auto monomial = std::pow(piValue(), iter.first);
+      answerRe += iter.second.getRe().get().first * monomial;
+      answerIm += iter.second.getIm().get().first * monomial;
     }
     return { answerRe, answerIm };
   }
@@ -55,15 +51,15 @@ namespace FunctionalCalculator
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
     int count = -1;
-    for (int i = 0; i < (int)self.size(); ++i)
+    for (const auto& iter : self)
     {
-      if (self[i] == ComplexQuadratic()) { continue; }
+      if (iter.second == ComplexQuadratic()) { continue; }
       ++count;
       if (count != 0) { strm << " + "; }
-      strm << self[i].print(true);
-      if (i == 1) { strm << "Pi"; }
-      else if (i > 1) { strm << "(Pi)"; }
-      if (i > 1) { strm << "^" << i; }
+      strm << iter.second.print(true);
+      if (iter.first == 1) { strm << "Pi"; }
+      else if (iter.first > 1) { strm << "(Pi)"; }
+      if (iter.first > 1) { strm << "^" << iter.first; }
     }
     if (count < 0) { strm << "0"; }
     if (useParentheses) { strm << ")"; }
@@ -80,23 +76,25 @@ namespace FunctionalCalculator
   PiPolynomial PiPolynomial::operator-() const
   {
     auto answer = *this;
-    for (int i = 0; i < (int)self.size(); ++i)
+    for (auto& iter : answer.self)
     {
-      answer.self[i] = -answer.self[i];
+      iter.second = -iter.second;
     }
     return answer;
   }
 
   PiPolynomial PiPolynomial::operator+(const PiPolynomial& rhs) const
   {
-    if (rhs.self.size() > self.size()) { return rhs + (*this); }
+    PiPolynomial answer = *this;
 
-    auto answer = *this;
-    for (int i = 0; i < (int)self.size(); ++i)
+    for (auto& iter : rhs.self)
     {
-      ComplexQuadratic summand;
-      if (i < (int)rhs.self.size()) { summand = rhs.self[i]; }
-      answer.self[i] = answer.self[i] + summand;
+      if (answer.self.find(iter.first) == answer.self.end())
+      {
+        answer.self[iter.first] = iter.second;
+        continue;
+      }
+      answer.self[iter.first] = answer.self[iter.first] + iter.second;
     }
     answer.clean();
     return answer;
@@ -110,13 +108,19 @@ namespace FunctionalCalculator
   PiPolynomial PiPolynomial::operator*(const PiPolynomial& rhs) const
   {
     PiPolynomial answer;
-    answer.self.resize(self.size() + rhs.self.size());
 
-    for (int i = 0; i < (int)self.size(); ++i)
+    for (const auto& iter : self)
     {
-      for (int j = 0; j < (int)rhs.self.size(); ++j)
+      for (const auto& jter : rhs.self)
       {
-        answer.self[i + j] = answer.self[i + j] + self[i] * rhs.self[j];
+        auto summand = iter.second * jter.second;
+        auto kk = iter.first + jter.first;
+        if (answer.self.find(kk) == answer.self.end())
+        {
+          answer.self[kk] = summand;
+          continue;
+        }
+        answer.self[kk] = answer.self[kk] + summand;
       }
     }
     return answer;
@@ -127,8 +131,7 @@ namespace FunctionalCalculator
     bool isNeg = (p < 0);
     if (isNeg) { throw std::invalid_argument("Exponent must be nonnegative."); }
     PiPolynomial answer;
-    answer.self.resize(1);
-    answer.self[0] = ComplexQuadratic(QuadraticNumber(Rational(1, 1)));
+    answer.self[0] = 1;
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
@@ -138,9 +141,10 @@ namespace FunctionalCalculator
 
   bool PiPolynomial::operator==(const PiPolynomial& rhs) const
   {
-    for (int i = 0; i < (int)self.size(); ++i)
+    auto diff = (*this) - rhs;
+    for (const auto& iter : diff.self)
     {
-      if (self[i] != rhs.self[i]) { return false; }
+      if (iter.second != 0) { return false; }
     }
     return true;
   }

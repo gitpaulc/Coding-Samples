@@ -14,6 +14,7 @@ class ComplexQuadratic : public Number
   QuadraticNumber re; /**< The real part of the complex number. */
   QuadraticNumber im; /**< The imaginary part of the complex number. */
 public:
+  ComplexQuadratic(int);
   ComplexQuadratic(const QuadraticNumber& reIn = QuadraticNumber(), const QuadraticNumber& imIn = QuadraticNumber());
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
