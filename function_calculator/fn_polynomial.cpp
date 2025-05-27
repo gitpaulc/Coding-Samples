@@ -8,6 +8,46 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool FnPolynomial::Monomial::isConstTerm() const
+  {
+    if (xInd != 0) { return false; }
+    if (yInd != 0) { return false; }
+    if (zInd != 0) { return false; }
+    if (ePiXInd != 0) { return false; }
+    if (ePiYInd != 0) { return false; }
+    if (ePiZInd != 0) { return false; }
+    return true;
+  }
+
+  FnPolynomial::Monomial FnPolynomial::Monomial::operator+(const FnPolynomial::Monomial& rhs) const
+  {
+    Monomial answer;
+    answer.xInd = xInd + rhs.xInd;
+    answer.yInd = yInd + rhs.yInd;
+    answer.zInd = zInd + rhs.zInd;
+    answer.ePiXInd = ePiXInd + rhs.ePiXInd;
+    answer.ePiYInd = ePiYInd + rhs.ePiYInd;
+    answer.ePiZInd = ePiZInd + rhs.ePiZInd;
+    return answer;
+  }
+
+  bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
+  {
+    if (xInd < rhs.xInd) { return true; }
+    if (xInd > rhs.xInd) { return false; }
+    if (yInd < rhs.yInd) { return true; }
+    if (yInd > rhs.yInd) { return false; }
+    if (zInd < rhs.zInd) { return true; }
+    if (zInd > rhs.zInd) { return false; }
+    if (ePiXInd < rhs.ePiXInd) { return true; }
+    if (ePiXInd > rhs.ePiXInd) { return false; }
+    if (ePiYInd < rhs.ePiYInd) { return true; }
+    if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (ePiZInd < rhs.ePiZInd) { return true; }
+    if (ePiZInd > rhs.ePiZInd) { return false; }
+    return false; // They are equal.
+  }
+
   void FnPolynomial::clean()
   {
     FnPolynomial answer;
@@ -19,31 +59,13 @@ namespace FunctionalCalculator
     self = answer.self;
   }
 
-  FnPolynomial::FnPolynomial(const ComplexQuadratic& coeff, int power)
+  FnPolynomial::FnPolynomial(const ComplexQuadratic& coeff)
   {
-    if (power < 0) { throw std::invalid_argument("Exponent must be nonnegative."); }
-    else if (coeff != 0)
+    if (coeff != 0)
     {
-      self[power] = coeff;
+      Monomial constTerm;
+      self[constTerm] = coeff;
     }
-  }
-
-  FnPolynomial::FnPolynomial(const std::vector<ComplexQuadratic>& coeffs)
-  {
-    for (int ii = 0; ii < (int)(coeffs.size()); ++ii) { if (coeffs[ii] != 0) { self[ii] = coeffs[ii]; } }
-  }
-
-  std::pair<double, double> FnPolynomial::get() const
-  {
-    double answerRe = 0.0;
-    double answerIm = 0.0;
-    for (const auto& iter : self)
-    {
-      auto monomial = std::pow(piValue(), iter.first);
-      answerRe += iter.second.getRe().get().first * monomial;
-      answerIm += iter.second.getIm().get().first * monomial;
-    }
-    return { answerRe, answerIm };
   }
 
   std::string FnPolynomial::print(bool useParentheses) const
@@ -57,16 +79,19 @@ namespace FunctionalCalculator
       ++count;
       if (count != 0) { strm << " + "; }
       strm << iter.second.print(true);
-      if (iter.first == 1) { strm << "Pi"; }
-      else if (iter.first > 1) { strm << "(Pi)"; }
-      if (iter.first > 1) { strm << "^" << iter.first; }
+      if (iter.first.isConstTerm()) { continue; }
+      strm << " * ";
+      if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
+      if (iter.first.yInd != 0) { strm << "y^" << iter.first.yInd; }
+      if (iter.first.zInd != 0) { strm << "z^" << iter.first.zInd; }
+      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd << " * x}"; }
+      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd << " * y}"; }
+      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd << " * z}"; }
     }
     if (count < 0) { strm << "0"; }
     if (useParentheses) { strm << ")"; }
     return strm.str();
   }
-
-  double FnPolynomial::piValue() { return 3.14159265359; }
 
   FnPolynomial FnPolynomial::operator+() const
   {
@@ -131,7 +156,8 @@ namespace FunctionalCalculator
     bool isNeg = (p < 0);
     if (isNeg) { throw std::invalid_argument("Exponent must be nonnegative."); }
     FnPolynomial answer;
-    answer.self[0] = 1;
+    Monomial constTerm;
+    answer.self[constTerm] = 1;
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);

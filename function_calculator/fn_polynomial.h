@@ -23,7 +23,7 @@ namespace FunctionalCalculator
  *  integer that is not a perfect square, and that pi is transcendental: It means we can check for exact equality
  *  by checking that a polynomial in one of these variables is equal to zero.
  */
-class FnPolynomial : public Number
+class FnPolynomial
 {
   struct Monomial
   {
@@ -33,24 +33,23 @@ class FnPolynomial : public Number
     int ePiXInd = 0;
     int ePiYInd = 0;
     int ePiZInd = 0;
+    bool isConstTerm() const;
+    Monomial operator+(const Monomial& rhs) const;
+    bool operator<(const Monomial& rhs) const;
   };
 
   std::map<Monomial, ComplexQuadratic> self;
   void clean();
 public:
-  FnPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic(), int power = 0);
-  FnPolynomial(const std::vector<ComplexQuadratic>& coeffs);
-  virtual std::pair<double, double> get() const override;
-  virtual std::string print(bool useParentheses = false) const override;
-
-  static double piValue();
+  FnPolynomial(const ComplexQuadratic& coeff = ComplexQuadratic());
+  virtual std::string print(bool useParentheses = false) const;
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;
   FnPolynomial operator+(const FnPolynomial& rhs) const;
   FnPolynomial operator-(const FnPolynomial& rhs) const;
   FnPolynomial operator*(const FnPolynomial& rhs) const;
-  FnPolynomial pow(int p) const; /**< `return` The p'th power of the number. */
+  FnPolynomial pow(int p) const; /**< `return` The p'th power of the polynomial. */
   bool operator==(const FnPolynomial& rhs) const;
   bool operator!=(const FnPolynomial& rhs) const;
 };
