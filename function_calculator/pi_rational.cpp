@@ -8,7 +8,6 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
-
   PiRational::PiRational(const PiPolynomial& nn, const PiPolynomial& dd)
   {
     if (dd == PiPolynomial(0))
@@ -27,4 +26,27 @@ namespace FunctionalCalculator
       }
     }
   }
+
+  std::pair<double, double> PiRational::get() const
+  {
+    if (denom.isReal())
+    {
+      auto numerGet = num.get();
+      auto toDivide = denom.get().first;
+      numerGet.first /= toDivide;
+      numerGet.second /= toDivide;
+      return numerGet;
+    }
+    auto denomConj = denom.conjugate();
+    auto numer = (num * denomConj).get();
+    auto toDivide = (denom * denomConj).get().first;
+    numer.first /= toDivide;
+    numer.second /= toDivide;
+    return numer;
+  }
+
+  std::string PiRational::print(bool useParentheses) const
+  {
+  }
+
 }

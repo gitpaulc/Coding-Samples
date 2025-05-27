@@ -21,6 +21,7 @@ public:
   QuadraticNumber getRe() const;
   QuadraticNumber getIm() const;
   ComplexQuadratic conjugate() const;
+  bool isReal() const;
   QuadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
   static ComplexQuadratic sqrtOfITimes(const Rational& radicand);

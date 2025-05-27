@@ -63,6 +63,7 @@ namespace FunctionalCalculator
   QuadraticNumber ComplexQuadratic::getIm() const { return im; }
 
   ComplexQuadratic ComplexQuadratic::conjugate() const { return ComplexQuadratic(re, -im); }
+  bool ComplexQuadratic::isReal() const { return (*this) == conjugate(); }
 
   QuadraticNumber ComplexQuadratic::sqLength() const
   {

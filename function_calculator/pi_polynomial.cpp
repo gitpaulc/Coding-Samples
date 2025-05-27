@@ -204,4 +204,13 @@ namespace FunctionalCalculator
   {
     return !((*this) == rhs);
   }
+
+  PiPolynomial PiPolynomial::conjugate() const
+  {
+    auto conj = (*this);
+    for (auto& iter : conj.self) { iter.second = iter.second.conjugate(); }
+    return conj;
+  }
+
+  bool PiPolynomial::isReal() const { return ((*this) == conjugate()); }
 }
