@@ -161,6 +161,7 @@
 * It can be built like the [graphing calculator](##graphing-math) and does not require extra libraries.
 * The **Function Calculator** is notable in that it mostly uses combinations of integers, square roots, and pi instead of floating-point arithmetic (doubles).
 * This allows for the manipulation of exact expressions which often come up in mathematical work, such as `cos(pi / 6) = sqrt(3) / 2`.
+* It demonstrates practical applications for the facts that `sqrt(2), sqrt(3)`, etc. are irrational and `pi` is transcendental: This allows us to check that expressions involving those are equal to `0` if all coefficients of a polynomial, say, in `pi` are equal to `0`.
 * The calculator can be useful for checking long tedious calculations involving polynomials and exponentials.
 * Currently, for instance, it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`.
 * It computes that `(pi^2)(sin^2(pi * x)) + (pi^2)cos^2(pi * x)) = (pi^2)`.
