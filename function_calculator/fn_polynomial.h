@@ -69,6 +69,11 @@ public:
   FnPolynomial pow(int p) const; /**< `return` The p'th power of the polynomial. */
   bool operator==(const FnPolynomial& rhs) const;
   bool operator!=(const FnPolynomial& rhs) const;
+
+  FnPolynomial partial_x() const;
+  FnPolynomial partial_y() const;
+  FnPolynomial partial_z() const;
+  FnPolynomial laplacian() const;
 };
 }
 

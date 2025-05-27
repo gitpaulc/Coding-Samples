@@ -274,4 +274,91 @@ namespace FunctionalCalculator
   {
     return !((*this) == rhs);
   }
+
+
+  FnPolynomial FnPolynomial::partial_x() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, ComplexQuadratic> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.xInd);
+      --(newIndex.first.xInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiXInd;
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::partial_y() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, ComplexQuadratic> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.yInd);
+      --(newIndex.first.yInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiYInd;
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::partial_z() const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      std::pair<Monomial, ComplexQuadratic> newIndex = iter;
+      newIndex.second = newIndex.second * ComplexQuadratic(iter.first.zInd);
+      --(newIndex.first.zInd);
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+
+      newIndex = iter;
+      newIndex.second = newIndex.second * newIndex.first.ePiZInd;
+      if (answer.self.find(newIndex.first) != answer.self.end())
+      {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+      }
+      else { answer.self[newIndex.first] = newIndex.second; }
+    }
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::laplacian() const
+  {
+    FnPolynomial answer = (*this).partial_x().partial_x();
+    answer = answer + (*this).partial_y().partial_y();
+    answer = answer + (*this).partial_z().partial_z();
+    return answer;
+  }
 }
