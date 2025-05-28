@@ -44,9 +44,14 @@ public:
   FnPolynomial(const PiRational& coeff = PiPolynomial(0));
   virtual std::string print(bool useParentheses = false) const;
 
+  // POLYNOMIALS:
+
   static FnPolynomial xToPower(const PiRational& coeff, int p); /**< \return coeff * x^p */
   static FnPolynomial yToPower(const PiRational& coeff, int p); /**< \return coeff * y^p */
   static FnPolynomial zToPower(const PiRational& coeff, int p); /**< \return coeff * z^p */
+
+  // EXPONENTIALS:
+
   static FnPolynomial eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * x} */
   static FnPolynomial eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * y} */
   static FnPolynomial eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * e^{A * Pi * z} */
@@ -54,18 +59,7 @@ public:
   static FnPolynomial eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff,
     const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
 
-  static FnPolynomial sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * x) */
-  static FnPolynomial sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * y) */
-  static FnPolynomial sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * z) */
-  /** \brief \return sinh(Pi * (A * x + B * y + C * z)) */
-  static FnPolynomial sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
-        const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
-  static FnPolynomial coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * x) */
-  static FnPolynomial coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * y) */
-  static FnPolynomial coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * z) */
-  /** \brief \return cosh(Pi * (A * x + B * y + C * z)) */
-  static FnPolynomial coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
-      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+  // TRIG FUNCTIONS:
 
   static FnPolynomial sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
   static FnPolynomial sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
@@ -78,6 +72,21 @@ public:
   static FnPolynomial cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
   /** \brief \return cos(Pi * (A * x + B * y + C * z)) */
   static FnPolynomial cosPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+
+  // HYPERBOLIC FUNCTIONS:
+
+  static FnPolynomial sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * x) */
+  static FnPolynomial sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * y) */
+  static FnPolynomial sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * z) */
+  /** \brief \return sinh(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+  static FnPolynomial coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * x) */
+  static FnPolynomial coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * y) */
+  static FnPolynomial coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * z) */
+  /** \brief \return cosh(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
       const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
 
   FnPolynomial operator+() const;
