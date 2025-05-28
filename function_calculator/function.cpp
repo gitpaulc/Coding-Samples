@@ -140,10 +140,10 @@ namespace FunctionalCalculator
 
   Function Function::laplacian() const
   {
-    Function answer = (*this).partial_x().partial_x();
-    answer = answer + (*this).partial_y().partial_y();
-    answer = answer + (*this).partial_z().partial_z();
-    return answer;
+    auto xPortion = (*this).partial_x().partial_x();
+    auto yPortion = (*this).partial_y().partial_y();
+    auto zPortion = (*this).partial_z().partial_z();
+    return xPortion + yPortion + zPortion;
   }
 
   bool Function::isLaplaceEigenfunction(PiRational& eigenvalue) const
@@ -170,7 +170,6 @@ namespace FunctionalCalculator
 
   bool Function::isHarmonic() const
   {
-    auto zero = Function();
-    return (laplacian() == zero);
+    return (laplacian().num == FnPolynomial(PiPolynomial(0)));
   }
 }
