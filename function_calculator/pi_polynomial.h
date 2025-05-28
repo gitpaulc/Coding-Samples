@@ -29,6 +29,7 @@ public:
   PiPolynomial operator+(const PiPolynomial& rhs) const;
   PiPolynomial operator-(const PiPolynomial& rhs) const;
   PiPolynomial operator*(const PiPolynomial& rhs) const;
+  PiPolynomial operator*(const Rational& rhs) const;
   int degree() const;
   PiPolynomial division(const PiPolynomial& rhs, PiPolynomial& remainder) const;
   static PiPolynomial gcd(const PiPolynomial& aa, const PiPolynomial& bb);

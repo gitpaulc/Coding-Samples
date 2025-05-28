@@ -71,6 +71,7 @@ public:
   FnPolynomial operator+(const FnPolynomial& rhs) const;
   FnPolynomial operator-(const FnPolynomial& rhs) const;
   FnPolynomial operator*(const FnPolynomial& rhs) const;
+  FnPolynomial operator*(const PiPolynomial& rhs) const;
   FnPolynomial pow(int p) const; /**< `return` The p'th power of the polynomial. */
   bool operator==(const FnPolynomial& rhs) const;
   bool operator!=(const FnPolynomial& rhs) const;

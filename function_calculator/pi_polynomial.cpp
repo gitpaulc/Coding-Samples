@@ -142,6 +142,13 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  PiPolynomial PiPolynomial::operator*(const Rational& rhs) const
+  {
+    PiPolynomial answer;
+    for (const auto& iter : self) { answer.self[iter.first] = iter.second * ComplexQuadratic(rhs); }
+    return answer;
+  }
+
   int PiPolynomial::degree() const
   {
     int maxKey = 0;

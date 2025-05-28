@@ -141,6 +141,17 @@ bool test_fn_poly()
     std::cout << "\n\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
+    std::cout << "\n\nTrig identities:";
+    FnPolynomial sinPi2X = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 2);
+    FnPolynomial cosPi2X = FnPolynomial::cosATimesPiX(PiPolynomial(ComplexQuadratic(1)), 2);
+    FnPolynomial sinPiX = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
+    FnPolynomial cosPiX = FnPolynomial::cosATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
+    auto identity1 = sinPi2X * (PiPolynomial(1) * Rational(1, 2)) - sinPiX * cosPiX;
+    auto identity2 = cosPi2X - cosPiX * cosPiX + sinPiX * sinPiX;
+    std::cout << "\nsin(2 * pi * x) / 2 - sin(pi * x) * cos(pi * x) = " << identity1.print();
+    std::cout << "\ncos(2 * pi * x) - cos^2(pi * x) + sin^2(pi * x) = " << identity2.print();
+  }
+  {
     auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
     std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);

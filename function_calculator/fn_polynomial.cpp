@@ -274,6 +274,13 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  FnPolynomial FnPolynomial::operator*(const PiPolynomial& rhs) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self) { answer.self[iter.first] = iter.second * PiRational(PiPolynomial(rhs)); }
+    return answer;
+  }
+
   FnPolynomial FnPolynomial::pow(int p) const
   {
     bool isNeg = (p < 0);
