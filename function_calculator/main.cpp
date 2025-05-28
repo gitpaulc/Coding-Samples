@@ -100,37 +100,92 @@ bool test_pi()
   std::cout << "\n1 + pi = " << piPoly.print();
   std::cout << "\n1 - pi = " << piPoly1.print();
   std::cout << "\n1 + pi^2 = " << piPoly2.print();
-  std::cout << "\n1 - pi^2 = " << (piPoly * piPoly1).print();
+  auto oneMinusPiSq = piPoly * piPoly1;
+  std::cout << "\n1 - pi^2 = " << oneMinusPiSq.print();
   auto product = piPoly * piPoly1 * piPoly2;
   std::cout << "\n1 - pi^4 = " << product.print();
-  std::cout << "\n1 = " << (product + PiPolynomial(ComplexQuadratic(1), 4)).print();
+  auto one = product + PiPolynomial(ComplexQuadratic(1), 4);
+  std::cout << "\n1 = " << one.print();
+  PiPolynomial remainder;
+  PiPolynomial divisor = one + PiPolynomial(2, 3);
+  auto quotient = product.division(divisor, remainder);
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  divisor = piPoly1;
+  quotient = product.division(divisor, remainder);
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  product = PiPolynomial(4) - PiPolynomial(9, 4);
+  divisor = PiPolynomial(ComplexQuadratic::sqrt(2)) - PiPolynomial(ComplexQuadratic::sqrt(3), 1);
+  quotient = product.division(divisor, remainder);
+  std::cout << "\n\nDivision: [" << product.print() << "] / [" << divisor.print() << "] = " << quotient.print();
+  std::cout << "\nThe remainder of [" << product.print() << "] / [" << divisor.print() << "] is " << remainder.print();
+  product = piPoly * piPoly2;
+  std::cout << "\n\nThe gcd of " << product.print() << " and " << oneMinusPiSq.print();
+  std::cout << " is " << PiPolynomial::gcd(product, oneMinusPiSq).print();
+  std::cout << "\nThe gcd of " << oneMinusPiSq.print() << " and " << product.print();
+  std::cout << " is " << PiPolynomial::gcd(oneMinusPiSq, product).print();
   return true;
 }
 
 bool test_fn_poly()
 {
   {
-    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(ComplexQuadratic(1), 1);
+    FnPolynomial sineOfPiX = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
     std::cout << "\n\nsin(pi * x) = " << sineOfPiX.print();
     FnPolynomial piCosPiX = sineOfPiX.partial_x();
     std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
+
     // The calculator deduces sin^2 + cos^2 = 1:
-    auto piSquared = sineOfPiX * sineOfPiX * PiPolynomial(1, 2) + piCosPiX * piCosPiX;
-    std::cout << "\npi^2 * (sin^2(pi * x) + cos^2(pi * x)) = " << piSquared.print();
+    auto one = sineOfPiX * sineOfPiX + (piCosPiX * piCosPiX) * (PiRational(ComplexQuadratic(1), PiPolynomial(1, 2)));
+    std::cout << "\n\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
-    auto notHarmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiX(ComplexQuadratic(2), 3);
-    std::cout << "\n\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
-    auto harmonic = FnPolynomial::eToTheATimesPiX(ComplexQuadratic(2), 3) * FnPolynomial::sinATimesPiY(ComplexQuadratic(2), 3);
-    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
+    std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
+    std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
+  {
+    auto efunc = FnPolynomial::sinATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
+    PiRational lambda;
+    bool isEigen = efunc.isLaplaceEigenfunction(lambda);
+    if (isEigen)
+    {
+      std::cout << "\n\nThe function " << efunc.print() << " is a Laplace eigenfunction with eigenvalue " << lambda.print() << ".";
+    }
+    auto notEfunc = efunc + FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
+    isEigen = notEfunc.isLaplaceEigenfunction(PiRational());
+    if (!isEigen) { std::cout << "\n\nThe function " << notEfunc.print() << " is not a Laplace eigenfunction."; }
   }
   std::cout << "\n";
+  return true;
+}
+
+bool test_function()
+{
+  auto xx = FnPolynomial::xToPower(PiPolynomial(1), 1);
+  auto yy = FnPolynomial::yToPower(PiPolynomial(1), 1);
+  std::cout << "\n";
+  {
+    auto harmonic = Function(xx * xx - yy * yy);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    harmonic = Function(xx, xx * xx + yy * yy);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto notHarmonic = Function(xx, xx * xx - yy * yy);
+    std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
   return true;
 }
 
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting functions:\n";
+  test_function();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
   std::cout << "\nContinue... ";
