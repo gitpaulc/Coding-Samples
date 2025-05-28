@@ -180,6 +180,12 @@ bool test_function()
   auto yy = FnPolynomial::yToPower(PiPolynomial(1), 1);
   std::cout << "\n";
   {
+    auto tan = Function::tanATimesPiX(PiPolynomial(1), 1);
+    auto sec = Function(FnPolynomial(PiPolynomial(1)), FnPolynomial::cosATimesPiX(PiPolynomial(1), 1));
+    auto sec2_times_pi = sec * sec * Function::constant(PiPolynomial(1, 1));
+    std::cout << "\npi * sec^2(pi * x) - (d/dx)tan(pi * x) = " << (sec2_times_pi - tan.partial_x()).print();
+  }
+  {
     auto harmonic = Function(xx * xx - yy * yy);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     harmonic = Function(xx, xx * xx + yy * yy);

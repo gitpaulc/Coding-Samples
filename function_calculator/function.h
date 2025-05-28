@@ -46,6 +46,19 @@ public:
   // Moreover the complex components should be compared lexicographically.
   // bool operator<(const Function& rhs) const;
 
+  static Function constant(const PiRational& coeff);
+
+  // TRIG FUNCTIONS:
+
+  static Function tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * tan(A * Pi * x) */
+  static Function tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * tan(A * Pi * y) */
+  static Function tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * tan(A * Pi * z) */
+  /** \brief \return tan(Pi * (A * x + B * y + C * z)) */
+  static Function tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+
+  // DIFFERENTIATION:
+
   Function partial_x() const;
   Function partial_y() const;
   Function partial_z() const;

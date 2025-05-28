@@ -108,6 +108,34 @@ namespace FunctionalCalculator
     return true;
   }
 
+  Function Function::constant(const PiRational& coeff)
+  {
+    FnPolynomial one(PiRational(PiPolynomial(ComplexQuadratic(1))));
+    return Function(FnPolynomial(coeff), one);
+  }
+
+  Function Function::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::cosATimesPiX(PiPolynomial(1), A));
+  }
+
+  Function Function::tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiY(coeff, A), FnPolynomial::cosATimesPiY(PiPolynomial(1), A));
+  }
+
+  Function Function::tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiZ(coeff, A), FnPolynomial::cosATimesPiZ(PiPolynomial(1), A));
+  }
+
+  Function Function::tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    return Function(FnPolynomial::sinPi_AX_plus_BY_plus_CZ(coeff, A, B, C),
+      FnPolynomial::cosPi_AX_plus_BY_plus_CZ(PiPolynomial(1), A, B, C));
+  }
+
   Function Function::partial_x() const
   {
     Function answer;
