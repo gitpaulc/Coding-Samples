@@ -53,12 +53,26 @@ public:
   /** \brief \return e^{Pi * (A * x + B * y + C * z)} */
   static FnPolynomial eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff,
     const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+
+  static FnPolynomial sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * x) */
+  static FnPolynomial sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * y) */
+  static FnPolynomial sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sinh(A * Pi * z) */
+  /** \brief \return sinh(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+        const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+  static FnPolynomial coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * x) */
+  static FnPolynomial coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * y) */
+  static FnPolynomial coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cosh(A * Pi * z) */
+  /** \brief \return cosh(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+
   static FnPolynomial sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
   static FnPolynomial sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
   static FnPolynomial sinATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
   /** \brief \return sin(Pi * (A * x + B * y + C * z)) */
   static FnPolynomial sinPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
-        const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
   static FnPolynomial cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
   static FnPolynomial cosATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
   static FnPolynomial cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */

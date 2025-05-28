@@ -216,6 +216,64 @@ namespace FunctionalCalculator
     - sinATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
   }
 
+  FnPolynomial FnPolynomial::sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiX(coeffNew, A) - eToTheATimesPiX(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiY(coeffNew, A) - eToTheATimesPiY(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiZ(coeffNew, A) - eToTheATimesPiZ(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // sinh(A)cosh(B)cosh(C) + sinh(A)sinh(B)sinh(C)
+    // + cosh(A)sinh(B)cosh(C) + cosh(A)cosh(B)sinh(C)
+    return sinhATimesPiX(coeff, A) * coshATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * sinhATimesPiY(one, B) * sinhATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * sinhATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiX(coeffNew, A) + eToTheATimesPiX(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiY(coeffNew, A) + eToTheATimesPiY(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiZ(coeffNew, A) + eToTheATimesPiZ(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // cosh(A)cosh(B)cosh(C) + cosh(A)sinh(B)sinh(C)
+    // + sinh(A)sinh(B)cosh(C) + sinh(A)cosh(B)sinh(C)
+    return coshATimesPiX(coeff, A) * coshATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * sinhATimesPiY(one, B) * sinhATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * sinhATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
+  }
+
   FnPolynomial FnPolynomial::operator+() const
   {
     return *this;
