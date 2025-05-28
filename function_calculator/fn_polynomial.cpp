@@ -82,10 +82,24 @@ namespace FunctionalCalculator
     {
       if (iter.second == PiPolynomial()) { continue; }
       ++count;
-      if (count != 0) { strm << " + "; }
-      strm << iter.second.print(useBrackets);
+      auto coeff = iter.second;
+      std::string plusString = " + ";
+      if ((count != 0) && (coeff == PiRational(PiPolynomial(-1))))
+      {
+        plusString = " - "; coeff = -coeff;
+      }
+      if (count == 0) { plusString = ""; }
+      strm << plusString;
+      bool isConstantTerm = iter.first.isConstTerm();
+      if (isConstantTerm || (coeff != PiRational(PiPolynomial(1))))
+      {
+        strm << coeff.print(useBrackets);   
+      }
       if (iter.first.isConstTerm()) { continue; }
-      strm << " * ";
+      if (coeff != PiRational(PiPolynomial(1)))
+      {
+        strm << " * ";
+      }
       if (iter.first.xInd != 0)
       {
         strm << "x";

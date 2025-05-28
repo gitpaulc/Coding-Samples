@@ -187,7 +187,7 @@ bool test_function()
   }
   {
     auto harmonic = Function(xx * xx - yy * yy);
-    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     harmonic = Function(xx, xx * xx + yy * yy);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     auto notHarmonic = Function(xx, xx * xx - yy * yy);
