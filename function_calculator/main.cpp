@@ -135,9 +135,10 @@ bool test_fn_poly()
     std::cout << "\n\nsin(pi * x) = " << sineOfPiX.print();
     FnPolynomial piCosPiX = sineOfPiX.partial_x();
     std::cout << "\npi * cos(pi * x) = " << piCosPiX.print();
+
     // The calculator deduces sin^2 + cos^2 = 1:
     auto one = sineOfPiX * sineOfPiX + (piCosPiX * piCosPiX) * (PiRational(ComplexQuadratic(1), PiPolynomial(1, 2)));
-    std::cout << "\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
+    std::cout << "\n\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
     auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3)

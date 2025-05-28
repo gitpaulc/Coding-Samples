@@ -161,7 +161,8 @@ namespace FunctionalCalculator
     if (rhsDegree == 0)
     {
       auto quotient = *this;
-      for (auto& iter : quotient.self) { iter.second = iter.second / rhs.self.at(0); }
+      ComplexQuadratic coeff = ComplexQuadratic(1) / rhs.self.at(0);
+      for (auto& iter : quotient.self) { iter.second = iter.second * coeff; }
       remainder = PiPolynomial(0);
       return quotient;
     }
@@ -185,8 +186,8 @@ namespace FunctionalCalculator
 
   PiPolynomial PiPolynomial::gcd(const PiPolynomial& aa, const PiPolynomial& bb)
   {
-    if ((aa == bb) || (bb == PiPolynomial(0))) { return aa; }
-    if (aa == PiPolynomial(0)) { return bb; }
+    if ((aa == bb) || (aa == PiPolynomial(0))) { return bb; }
+    if (bb == PiPolynomial(0)) { return aa; }
     auto aPoly = aa;
     auto bPoly = bb;
     while (bPoly != PiPolynomial(0))
