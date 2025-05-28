@@ -59,7 +59,12 @@ namespace FunctionalCalculator
 
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
-    strm << num_.print(true) << " / " << den_.print(true);
+    strm << num_.print(true);
+    if (den_ != PiPolynomial(1))
+    {
+      strm << " / ";
+      strm << den_.print(true);
+    }
     if (useParentheses) { strm << ")"; }
     return strm.str();
   }

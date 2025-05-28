@@ -66,13 +66,13 @@ namespace FunctionalCalculator
         content = -content;
       }
       strm << sumSign;
-      bool useParentheses = (!contentIsOne && !contentIsMinusOne);
+      bool useBrackets = (!contentIsOne && !contentIsMinusOne);
       if (!contentIsOne && !contentIsMinusOne)
       {
-        strm << content.print(useParentheses);
+        strm << content.print(useBrackets);
         if (iter.first > 0) { strm << " * "; }
       }
-      else if (iter.first == 0) { strm << content.print(useParentheses); }
+      else if (iter.first == 0) { strm << content.print(useBrackets); }
       if (iter.first == 1) { strm << "Pi"; }
       else if (iter.first > 1) { strm << "(Pi)"; }
       if (iter.first > 1) { strm << "^" << iter.first; }

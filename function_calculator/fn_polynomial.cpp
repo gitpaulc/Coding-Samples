@@ -72,13 +72,18 @@ namespace FunctionalCalculator
   {
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
+    bool useBrackets = true;
+    if (self.size() == 1)
+    {
+      useBrackets = !(self.begin()->first.isConstTerm());
+    }
     int count = -1;
     for (const auto& iter : self)
     {
       if (iter.second == PiPolynomial()) { continue; }
       ++count;
       if (count != 0) { strm << " + "; }
-      strm << iter.second.print(true);
+      strm << iter.second.print(useBrackets);
       if (iter.first.isConstTerm()) { continue; }
       strm << " * ";
       if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
