@@ -86,9 +86,21 @@ namespace FunctionalCalculator
       strm << iter.second.print(useBrackets);
       if (iter.first.isConstTerm()) { continue; }
       strm << " * ";
-      if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
-      if (iter.first.yInd != 0) { strm << "y^" << iter.first.yInd; }
-      if (iter.first.zInd != 0) { strm << "z^" << iter.first.zInd; }
+      if (iter.first.xInd != 0)
+      {
+        strm << "x";
+        if (iter.first.xInd != 1) { strm << "^" << iter.first.xInd; }
+      }
+      if (iter.first.yInd != 0)
+      {
+        strm << "y";
+        if (iter.first.yInd != 1) { strm << "^" << iter.first.yInd; }
+      }
+      if (iter.first.zInd != 0)
+      {
+        strm << "z";
+        if (iter.first.zInd != 1) { strm << "^" << iter.first.zInd; }
+      }
       if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
       if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
       if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
