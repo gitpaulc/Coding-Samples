@@ -11,8 +11,8 @@ namespace FunctionalCalculator
 
 class PiRational : public Number
 {
-  PiPolynomial num = 0;
-  PiPolynomial denom = 1;
+  PiPolynomial num = PiPolynomial(0);
+  PiPolynomial denom = PiPolynomial(1);
 public:
   PiRational(const PiPolynomial& nn = PiPolynomial(0), const PiPolynomial& dd = PiPolynomial(1));
 

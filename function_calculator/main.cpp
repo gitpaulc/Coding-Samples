@@ -155,7 +155,8 @@ bool test_fn_poly()
       std::cout << "\n\nThe function " << efunc.print() << " is a Laplace eigenfunction with eigenvalue " << lambda.print() << ".";
     }
     auto notEfunc = efunc + FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
-    isEigen = notEfunc.isLaplaceEigenfunction(PiRational());
+    PiRational shouldNotChange;
+    isEigen = notEfunc.isLaplaceEigenfunction(shouldNotChange);
     if (!isEigen) { std::cout << "\n\nThe function " << notEfunc.print() << " is not a Laplace eigenfunction."; }
   }
   std::cout << "\n";

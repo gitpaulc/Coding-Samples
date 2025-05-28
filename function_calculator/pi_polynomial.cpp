@@ -168,7 +168,7 @@ namespace FunctionalCalculator
     }
     auto dividend = *this;
     auto divDegree = dividend.degree();
-    PiPolynomial quotient = 0;
+    PiPolynomial quotient = PiPolynomial(0);
     for (int prevDegree = divDegree; rhsDegree <= divDegree;)
     {
       auto monomial = PiPolynomial(rhs.self.at(rhsDegree) / dividend.self.at(divDegree), divDegree - rhsDegree);
