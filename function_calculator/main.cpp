@@ -141,13 +141,31 @@ bool test_fn_poly()
     std::cout << "\n\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
-    auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3)
-        * FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3);
-    std::cout << "\n\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
-    auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(ComplexQuadratic(2)), 3)
-        * FnPolynomial::sinATimesPiY(PiPolynomial(ComplexQuadratic(2)), 3);
-    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
+    std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
+    std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
+  {
+    auto efunc = FnPolynomial::sinATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
+    PiRational lambda;
+    bool isEigen = efunc.isLaplaceEigenfunction(lambda);
+    if (isEigen)
+    {
+      std::cout << "\n\nThe function " << efunc.print() << " is a Laplace eigenfunction with eigenvalue " << lambda.print() << ".";
+    }
+    auto notEfunc = efunc + FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
+    isEigen = notEfunc.isLaplaceEigenfunction(PiRational());
+    if (!isEigen) { std::cout << "\n\nThe function " << notEfunc.print() << " is not a Laplace eigenfunction."; }
+  }
+  std::cout << "\n";
+  return true;
+}
+
+bool test_function()
+{
+  auto xx = FnPolynomial::xToPower(PiPolynomial(1), 1);
+  auto yy = FnPolynomial::yToPower(PiPolynomial(1), 1);
   std::cout << "\n";
   return true;
 }
@@ -155,6 +173,11 @@ bool test_fn_poly()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting functions:\n";
+  test_function();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
   std::cout << "\nContinue... ";
