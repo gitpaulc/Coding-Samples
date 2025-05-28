@@ -45,6 +45,14 @@ public:
   // TODO: This should be implemented lexicographically since it is intractable to compute in general.
   // Moreover the complex components should be compared lexicographically.
   // bool operator<(const Function& rhs) const;
+
+  Function partial_x() const;
+  Function partial_y() const;
+  Function partial_z() const;
+  Function laplacian() const;
+
+  bool isLaplaceEigenfunction(PiRational& eigenvalue) const;
+  bool isHarmonic() const;
 };
 }
 

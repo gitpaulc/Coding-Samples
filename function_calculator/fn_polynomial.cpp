@@ -373,7 +373,7 @@ namespace FunctionalCalculator
 
   bool FnPolynomial::isLaplaceEigenfunction(PiRational& eigenvalue) const
   {
-    if (isHarmonic()) { eigenvalue = PiPolynomial(0); return true; }
+    if (isHarmonic()) { eigenvalue = PiRational(PiPolynomial(0), PiPolynomial(1)); return true; }
     auto lap = laplacian();
     PiRational eigen;
     for (const auto& iter : self)
@@ -381,7 +381,7 @@ namespace FunctionalCalculator
       if (lap.self.find(iter.first) == lap.self.end()) { return false; }
       auto nn = lap.self.at(iter.first);
       auto dd = self.at(iter.first);
-      if (dd == PiRational()) { return false; } // We would have already detected harmonic.
+      if (dd == PiRational(PiPolynomial(0), PiPolynomial(1))) { return false; } // We would have already detected harmonic.
       eigen = -nn / dd;
       break;
     }
@@ -393,6 +393,6 @@ namespace FunctionalCalculator
 
   bool FnPolynomial::isHarmonic() const
   {
-    return (laplacian() == FnPolynomial());
+    return (laplacian() == FnPolynomial(PiPolynomial(0)));
   }
 }

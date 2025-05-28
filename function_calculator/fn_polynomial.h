@@ -76,6 +76,8 @@ public:
 
   bool isLaplaceEigenfunction(PiRational& eigenvalue) const;
   bool isHarmonic() const;
+
+  friend class Function;
 };
 }
 

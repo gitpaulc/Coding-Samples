@@ -108,4 +108,70 @@ namespace FunctionalCalculator
     if (*this == rhs) { return false; }
     return true;
   }
+
+  Function Function::partial_x() const
+  {
+    Function answer;
+    auto numPrime = num.partial_x();
+    auto denPrime = denom.partial_x();
+    answer.num = numPrime * denom - num * denPrime;
+    answer.denom = denom * denom;
+    return answer;
+  }
+
+  Function Function::partial_y() const
+  {
+    Function answer;
+    auto numPrime = num.partial_y();
+    auto denPrime = denom.partial_y();
+    answer.num = numPrime * denom - num * denPrime;
+    answer.denom = denom * denom;
+    return answer;
+  }
+
+  Function Function::partial_z() const
+  {
+    Function answer;
+    auto numPrime = num.partial_z();
+    auto denPrime = denom.partial_z();
+    answer.num = numPrime * denom - num * denPrime;
+    answer.denom = denom * denom;
+    return answer;
+  }
+
+  Function Function::laplacian() const
+  {
+    Function answer = (*this).partial_x().partial_x();
+    answer = answer + (*this).partial_y().partial_y();
+    answer = answer + (*this).partial_z().partial_z();
+    return answer;
+  }
+
+  bool Function::isLaplaceEigenfunction(PiRational& eigenvalue) const
+  {
+    if (isHarmonic()) { eigenvalue = PiRational(PiPolynomial(0), PiPolynomial(1)); return true; }
+    auto lap0 = laplacian();
+    auto lap = lap0.num * (*this).denom;
+    auto original = lap0.denom * (*this).num;
+    PiRational eigen;
+    for (const auto& iter : original.self)
+    {
+      if (lap.self.find(iter.first) == lap.self.end()) { return false; }
+      auto nn = lap.self.at(iter.first);
+      auto dd = original.self.at(iter.first);
+      if (dd == PiRational(PiPolynomial(0), PiPolynomial(1))) { return false; } // We would have already detected harmonic.
+      eigen = -nn / dd;
+      break;
+    }
+    auto comparer = original * (-eigen);
+    bool answer = (lap == comparer);
+    if (answer) { eigenvalue = eigen; }
+    return answer;
+  }
+
+  bool Function::isHarmonic() const
+  {
+    auto zero = Function();
+    return (laplacian() == zero);
+  }
 }
