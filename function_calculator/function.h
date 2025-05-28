@@ -42,10 +42,9 @@ public:
   Function pow(int p) const; /**< Returns the p'th power of the rational number. */
   bool operator==(const Function& rhs) const;
   bool operator!=(const Function& rhs) const;
-  bool operator<(const Function& rhs) const;
-  bool operator>(const Function& rhs) const;
-  bool operator<=(const Function& rhs) const;
-  bool operator>=(const Function& rhs) const;
+  // TODO: This should be implemented lexicographically since it is intractable to compute in general.
+  // Moreover the complex components should be compared lexicographically.
+  // bool operator<(const Function& rhs) const;
 };
 }
 

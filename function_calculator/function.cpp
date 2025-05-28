@@ -12,8 +12,9 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Division by zero.");
     }
-    else
+    else // TODO: Implement simplifying rational functions later.
     {
+        /*
       auto gcd_ = FnPolynomial::gcd(nn, dd);
       num = nn; denom = dd;
       if (gcd_ != FnPolynomial(PiPolynomial(0)))
@@ -21,26 +22,8 @@ namespace FunctionalCalculator
         FnPolynomial remainder;
         num = num.division(gcd_, remainder);
         denom = denom.division(gcd_, remainder);
-      }
+      }*/
     }
-  }
-
-  std::pair<double, double> Function::get() const
-  {
-    if (denom.isReal())
-    {
-      auto numerGet = num.get();
-      auto toDivide = denom.get().first;
-      numerGet.first /= toDivide;
-      numerGet.second /= toDivide;
-      return numerGet;
-    }
-    auto denomConj = denom.conjugate();
-    auto numer = (num * denomConj).get();
-    auto toDivide = (denom * denomConj).get().first;
-    numer.first /= toDivide;
-    numer.second /= toDivide;
-    return numer;
   }
 
   std::string Function::print(bool useParentheses) const
@@ -48,17 +31,10 @@ namespace FunctionalCalculator
     auto num_ = num;
     auto den_ = denom;
 
-    if (!denom.isReal())
-    {
-      auto denomConj = denom.conjugate();
-      num_ = num_ * denomConj;
-      den_ = den_ * denomConj;
-    }
-
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
     strm << num_.print(true);
-    if (den_ != FnPolynomial(1))
+    if (den_ != FnPolynomial(PiPolynomial(1)))
     {
       strm << " / ";
       strm << den_.print(true);
@@ -97,7 +73,7 @@ namespace FunctionalCalculator
 
   Function Function::operator/(const Function& rhs) const
   {
-    if (rhs.num == FnPolynomial(0))
+    if (rhs.num == FnPolynomial(PiPolynomial(0)))
     {
       throw std::invalid_argument("Operator division by zero.");
     }
@@ -108,7 +84,7 @@ namespace FunctionalCalculator
   {
     bool isNeg = (p < 0);
     if (isNeg) { p = -p; }
-    Function answer(FnPolynomial(1), FnPolynomial(1));
+    Function answer(FnPolynomial(PiPolynomial(1)), FnPolynomial(PiPolynomial(1)));
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
@@ -131,31 +107,5 @@ namespace FunctionalCalculator
   {
     if (*this == rhs) { return false; }
     return true;
-  }
-
-  bool Function::operator<(const Function& rhs) const
-  {
-    if (num * rhs.denom < denom * rhs.num) { return true; }
-    return false;
-  }
-
-  bool Function::operator>(const Function& rhs) const
-  {
-    if (denom * rhs.num < num * rhs.denom) { return true; }
-    return false;
-  }
-
-  bool Function::operator<=(const Function& rhs) const
-  {
-    if ((*this) == rhs) { return true; }
-    if ((*this) < rhs) { return true; }
-    return false;
-  }
-
-  bool Function::operator>=(const Function& rhs) const
-  {
-    if ((*this) == rhs) { return true; }
-    if ((*this) > rhs) { return true; }
-    return false;
   }
 }
