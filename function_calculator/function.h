@@ -23,10 +23,29 @@ namespace FunctionalCalculator
  */
 class Function
 {
-  FnPolynomial num, den;
+  FnPolynomial num, denom;
 
 public:
-  Function();
+
+  Function(const FnPolynomial& nn = PiRational(ComplexQuadratic(0)), const FnPolynomial& dd = PiRational(ComplexQuadratic(1)));
+
+  virtual std::string print(bool useParentheses = false) const;
+
+  FnPolynomial denominator() const;
+  FnPolynomial numerator() const;
+  Function operator+() const;
+  Function operator-() const;
+  Function operator+(const Function& rhs) const;
+  Function operator-(const Function& rhs) const;
+  Function operator*(const Function& rhs) const;
+  Function operator/(const Function& rhs) const;
+  Function pow(int p) const; /**< Returns the p'th power of the rational number. */
+  bool operator==(const Function& rhs) const;
+  bool operator!=(const Function& rhs) const;
+  bool operator<(const Function& rhs) const;
+  bool operator>(const Function& rhs) const;
+  bool operator<=(const Function& rhs) const;
+  bool operator>=(const Function& rhs) const;
 };
 }
 
