@@ -167,6 +167,12 @@ bool test_function()
   auto xx = FnPolynomial::xToPower(PiPolynomial(1), 1);
   auto yy = FnPolynomial::yToPower(PiPolynomial(1), 1);
   std::cout << "\n";
+  {
+    auto harmonic = Function(xx * xx - yy * yy);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    harmonic = Function(xx, xx * xx + yy * yy);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
   return true;
 }
 

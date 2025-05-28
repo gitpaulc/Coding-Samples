@@ -14,10 +14,9 @@ namespace FunctionalCalculator
     }
     else // TODO: Implement simplifying rational functions later.
     {
-        /*
-      auto gcd_ = FnPolynomial::gcd(nn, dd);
+      //auto gcd_ = FnPolynomial::gcd(nn, dd);
       num = nn; denom = dd;
-      if (gcd_ != FnPolynomial(PiPolynomial(0)))
+      /*if (gcd_ != FnPolynomial(PiPolynomial(0)))
       {
         FnPolynomial remainder;
         num = num.division(gcd_, remainder);
