@@ -56,9 +56,15 @@ public:
   static FnPolynomial sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * x) */
   static FnPolynomial sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * y) */
   static FnPolynomial sinATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * sin(A * Pi * z) */
+  /** \brief \return sin(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial sinPi_AX_Plus_BY_CZ(const PiRational& coeff,
+        const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
   static FnPolynomial cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * x) */
   static FnPolynomial cosATimesPiY(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * y) */
   static FnPolynomial cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * cos(A * Pi * z) */
+  /** \brief \return cos(Pi * (A * x + B * y + C * z)) */
+  static FnPolynomial cosPi_AX_Plus_BY_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C);
 
   FnPolynomial operator+() const;
   FnPolynomial operator-() const;

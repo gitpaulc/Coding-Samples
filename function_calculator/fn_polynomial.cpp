@@ -176,6 +176,17 @@ namespace FunctionalCalculator
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
+  FnPolynomial FnPolynomial::sinPi_AX_Plus_BY_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // sin(A)cos(B)cos(C) - sin(A)sin(B)sin(C)
+    // + cos(A)sin(B)cos(C) + cos(A)cos(B)sin(C)
+    return sinATimesPiX(coeff, A) * cosATimesPiY(one, B) * cosATimesPiZ(one, C)
+    - sinATimesPiX(coeff, A) * sinATimesPiY(one, B) * sinATimesPiZ(one, C)
+    + cosATimesPiX(coeff, A) * sinATimesPiY(one, B) * cosATimesPiZ(one, C)
+    + cosATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
+  }
+
   FnPolynomial FnPolynomial::cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
@@ -192,6 +203,17 @@ namespace FunctionalCalculator
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
+  }
+
+  FnPolynomial FnPolynomial::cosPi_AX_Plus_BY_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // cos(A)cos(B)cos(C) - cos(A)sin(B)sin(C)
+    // - sin(A)sin(B)cos(C) - sin(A)cos(B)sin(C)
+    return cosATimesPiX(coeff, A) * cosATimesPiY(one, B) * cosATimesPiZ(one, C)
+    - cosATimesPiX(coeff, A) * sinATimesPiY(one, B) * sinATimesPiZ(one, C)
+    - sinATimesPiX(coeff, A) * sinATimesPiY(one, B) * cosATimesPiZ(one, C)
+    - sinATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
   }
 
   FnPolynomial FnPolynomial::operator+() const
