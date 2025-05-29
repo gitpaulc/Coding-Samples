@@ -82,13 +82,39 @@ namespace FunctionalCalculator
     {
       if (iter.second == PiPolynomial()) { continue; }
       ++count;
-      if (count != 0) { strm << " + "; }
-      strm << iter.second.print(useBrackets);
+      auto coeff = iter.second;
+      std::string plusString = " + ";
+      if ((count != 0) && (coeff == PiRational(PiPolynomial(-1))))
+      {
+        plusString = " - "; coeff = -coeff;
+      }
+      if (count == 0) { plusString = ""; }
+      strm << plusString;
+      bool isConstantTerm = iter.first.isConstTerm();
+      if (isConstantTerm || (coeff != PiRational(PiPolynomial(1))))
+      {
+        strm << coeff.print(useBrackets);   
+      }
       if (iter.first.isConstTerm()) { continue; }
-      strm << " * ";
-      if (iter.first.xInd != 0) { strm << "x^" << iter.first.xInd; }
-      if (iter.first.yInd != 0) { strm << "y^" << iter.first.yInd; }
-      if (iter.first.zInd != 0) { strm << "z^" << iter.first.zInd; }
+      if (coeff != PiRational(PiPolynomial(1)))
+      {
+        strm << " * ";
+      }
+      if (iter.first.xInd != 0)
+      {
+        strm << "x";
+        if (iter.first.xInd != 1) { strm << "^" << iter.first.xInd; }
+      }
+      if (iter.first.yInd != 0)
+      {
+        strm << "y";
+        if (iter.first.yInd != 1) { strm << "^" << iter.first.yInd; }
+      }
+      if (iter.first.zInd != 0)
+      {
+        strm << "z";
+        if (iter.first.zInd != 1) { strm << "^" << iter.first.zInd; }
+      }
       if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
       if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
       if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
@@ -152,7 +178,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::eToThePi_AX_Plus_BY_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  FnPolynomial FnPolynomial::eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(ComplexQuadratic(1));
     return eToTheATimesPiX(coeff, A) * eToTheATimesPiY(one, B) * eToTheATimesPiZ(one, C);
@@ -176,7 +202,7 @@ namespace FunctionalCalculator
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::sinPi_AX_Plus_BY_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  FnPolynomial FnPolynomial::sinPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // sin(A)cos(B)cos(C) - sin(A)sin(B)sin(C)
@@ -205,7 +231,7 @@ namespace FunctionalCalculator
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::cosPi_AX_Plus_BY_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  FnPolynomial FnPolynomial::cosPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // cos(A)cos(B)cos(C) - cos(A)sin(B)sin(C)
@@ -214,6 +240,64 @@ namespace FunctionalCalculator
     - cosATimesPiX(coeff, A) * sinATimesPiY(one, B) * sinATimesPiZ(one, C)
     - sinATimesPiX(coeff, A) * sinATimesPiY(one, B) * cosATimesPiZ(one, C)
     - sinATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
+  }
+
+  FnPolynomial FnPolynomial::sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiX(coeffNew, A) - eToTheATimesPiX(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiY(coeffNew, A) - eToTheATimesPiY(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
+    return eToTheATimesPiZ(coeffNew, A) - eToTheATimesPiZ(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // sinh(A)cosh(B)cosh(C) + sinh(A)sinh(B)sinh(C)
+    // + cosh(A)sinh(B)cosh(C) + cosh(A)cosh(B)sinh(C)
+    return sinhATimesPiX(coeff, A) * coshATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * sinhATimesPiY(one, B) * sinhATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * sinhATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiX(coeffNew, A) + eToTheATimesPiX(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiY(coeffNew, A) + eToTheATimesPiY(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
+    return eToTheATimesPiZ(coeffNew, A) + eToTheATimesPiZ(coeffNew, -A);
+  }
+
+  FnPolynomial FnPolynomial::coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    PiRational one(PiPolynomial(1), PiPolynomial(1));
+    // cosh(A)cosh(B)cosh(C) + cosh(A)sinh(B)sinh(C)
+    // + sinh(A)sinh(B)cosh(C) + sinh(A)cosh(B)sinh(C)
+    return coshATimesPiX(coeff, A) * coshATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + coshATimesPiX(coeff, A) * sinhATimesPiY(one, B) * sinhATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * sinhATimesPiY(one, B) * coshATimesPiZ(one, C)
+    + sinhATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
   }
 
   FnPolynomial FnPolynomial::operator+() const
@@ -271,6 +355,13 @@ namespace FunctionalCalculator
         answer.self[kk] = answer.self[kk] + summand;
       }
     }
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::operator*(const PiPolynomial& rhs) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self) { answer.self[iter.first] = iter.second * PiRational(PiPolynomial(rhs)); }
     return answer;
   }
 

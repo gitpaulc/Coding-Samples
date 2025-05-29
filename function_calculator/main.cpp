@@ -19,6 +19,13 @@ bool test_rational()
   std::cout << "\nPrime factorization of -1 = " << (-one).printFactors();
   Rational half = Rational(-1, 4) * Rational(4, -2);
   std::cout << "\nOne half = " << half.print();
+  /*Rational thePower = half; // Need to avoid maxing out integers.
+  for (int i = 0; i < 6; ++i)
+  {
+    auto newPower = thePower * thePower;
+    std::cout << "\n" << thePower.print() << "^2 = " << newPower.print();
+    thePower = newPower;
+  }*/
   Rational twelve = Rational(36, 3);
   std::cout << "\nPrime factorization of twelve = " << twelve.printFactors();
   Rational minusTwelve = Rational(24, -2);
@@ -141,6 +148,17 @@ bool test_fn_poly()
     std::cout << "\n\nsin^2(pi * x) + cos^2(pi * x) = " << one.print();
   }
   {
+    std::cout << "\n\nTrig identities:";
+    FnPolynomial sinPi2X = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 2);
+    FnPolynomial cosPi2X = FnPolynomial::cosATimesPiX(PiPolynomial(ComplexQuadratic(1)), 2);
+    FnPolynomial sinPiX = FnPolynomial::sinATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
+    FnPolynomial cosPiX = FnPolynomial::cosATimesPiX(PiPolynomial(ComplexQuadratic(1)), 1);
+    auto identity1 = sinPi2X * (PiPolynomial(1) * Rational(1, 2)) - sinPiX * cosPiX;
+    auto identity2 = cosPi2X - cosPiX * cosPiX + sinPiX * sinPiX;
+    std::cout << "\nsin(2 * pi * x) / 2 - sin(pi * x) * cos(pi * x) = " << identity1.print();
+    std::cout << "\ncos(2 * pi * x) - cos^2(pi * x) + sin^2(pi * x) = " << identity2.print();
+  }
+  {
     auto harmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiY(PiPolynomial(2), 3);
     std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     auto notHarmonic = FnPolynomial::eToTheATimesPiX(PiPolynomial(2), 3) * FnPolynomial::sinATimesPiX(PiPolynomial(2), 3);
@@ -169,12 +187,26 @@ bool test_function()
   auto yy = FnPolynomial::yToPower(PiPolynomial(1), 1);
   std::cout << "\n";
   {
+    auto tan = Function::tanATimesPiX(PiPolynomial(1), 1);
+    auto sec = Function(FnPolynomial(PiPolynomial(1)), FnPolynomial::cosATimesPiX(PiPolynomial(1), 1));
+    auto sec2_times_pi = sec * sec * Function::constant(PiPolynomial(1, 1));
+    std::cout << "\npi * sec^2(pi * x) - (d/dx)tan(pi * x) = " << (sec2_times_pi - tan.partial_x()).print();
+  }
+  {
     auto harmonic = Function(xx * xx - yy * yy);
-    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+    std::cout << "\n\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     harmonic = Function(xx, xx * xx + yy * yy);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     auto notHarmonic = Function(xx, xx * xx - yy * yy);
     std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
+  {
+    auto numerator = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
+    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1) * FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
+    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
+    auto denominator = coshTerm - sinTerm;
+    auto harmonic = Function(numerator, denominator);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   return true;
 }

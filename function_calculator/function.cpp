@@ -32,11 +32,15 @@ namespace FunctionalCalculator
 
     std::stringstream strm;
     if (useParentheses) { strm << "("; }
-    strm << num_.print(true);
-    if (den_ != FnPolynomial(PiPolynomial(1)))
+    strm << "[";
+    strm << num_.print(false);
+    strm << "]";
+    if ((den_ != FnPolynomial(PiPolynomial(1))) && (num_ != FnPolynomial(PiPolynomial(0))))
     {
       strm << " / ";
-      strm << den_.print(true);
+      strm << "[";
+      strm << den_.print(false);
+      strm << "]";
     }
     if (useParentheses) { strm << ")"; }
     return strm.str();
@@ -108,6 +112,34 @@ namespace FunctionalCalculator
     return true;
   }
 
+  Function Function::constant(const PiRational& coeff)
+  {
+    FnPolynomial one(PiRational(PiPolynomial(ComplexQuadratic(1))));
+    return Function(FnPolynomial(coeff), one);
+  }
+
+  Function Function::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::cosATimesPiX(PiPolynomial(1), A));
+  }
+
+  Function Function::tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiY(coeff, A), FnPolynomial::cosATimesPiY(PiPolynomial(1), A));
+  }
+
+  Function Function::tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  {
+    return Function(FnPolynomial::sinATimesPiZ(coeff, A), FnPolynomial::cosATimesPiZ(PiPolynomial(1), A));
+  }
+
+  Function Function::tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  {
+    return Function(FnPolynomial::sinPi_AX_plus_BY_plus_CZ(coeff, A, B, C),
+      FnPolynomial::cosPi_AX_plus_BY_plus_CZ(PiPolynomial(1), A, B, C));
+  }
+
   Function Function::partial_x() const
   {
     Function answer;
@@ -140,10 +172,22 @@ namespace FunctionalCalculator
 
   Function Function::laplacian() const
   {
-    auto xPortion = (*this).partial_x().partial_x();
-    auto yPortion = (*this).partial_y().partial_y();
-    auto zPortion = (*this).partial_z().partial_z();
-    return xPortion + yPortion + zPortion;
+    auto u_x = num.partial_x(); auto u_y = num.partial_y(); auto u_z = num.partial_z();
+    auto v_x = denom.partial_x(); auto v_y = denom.partial_y(); auto v_z = denom.partial_z();
+    auto u_xx = u_x.partial_x(); auto u_yy = u_y.partial_y(); auto u_zz = u_z.partial_z();
+    auto v_xx = v_x.partial_x(); auto v_yy = v_y.partial_y(); auto v_zz = v_z.partial_z();
+
+    auto u_twice = num * FnPolynomial(PiPolynomial(2));
+    auto v_twice = denom * FnPolynomial(PiPolynomial(2));
+    auto v2 = denom * denom;
+    auto v3 = denom * v2;
+    auto uv = num * denom;
+
+    auto xPortion = u_xx * v2 - v_xx * uv - u_x * v_x * v_twice + v_x * v_x * u_twice;
+    auto yPortion = u_yy * v2 - v_yy * uv - u_y * v_y * v_twice + v_y * v_y * u_twice;
+    auto zPortion = u_zz * v2 - v_zz * uv - u_z * v_z * v_twice + v_z * v_z * u_twice;
+
+    return Function(xPortion + yPortion + zPortion, v3);
   }
 
   bool Function::isLaplaceEigenfunction(PiRational& eigenvalue) const
