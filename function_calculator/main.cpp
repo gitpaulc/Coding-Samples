@@ -19,6 +19,13 @@ bool test_rational()
   std::cout << "\nPrime factorization of -1 = " << (-one).printFactors();
   Rational half = Rational(-1, 4) * Rational(4, -2);
   std::cout << "\nOne half = " << half.print();
+  /*Rational thePower = half; // Need to avoid maxing out integers.
+  for (int i = 0; i < 6; ++i)
+  {
+    auto newPower = thePower * thePower;
+    std::cout << "\n" << thePower.print() << "^2 = " << newPower.print();
+    thePower = newPower;
+  }*/
   Rational twelve = Rational(36, 3);
   std::cout << "\nPrime factorization of twelve = " << twelve.printFactors();
   Rational minusTwelve = Rational(24, -2);
@@ -192,6 +199,14 @@ bool test_function()
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
     auto notHarmonic = Function(xx, xx * xx - yy * yy);
     std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
+  }
+  {
+    auto numerator = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
+    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1) * FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
+    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
+    auto denominator = coshTerm - sinTerm;
+    auto harmonic = Function(numerator, denominator);
+    std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   return true;
 }

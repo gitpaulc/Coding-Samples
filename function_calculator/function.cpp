@@ -177,16 +177,17 @@ namespace FunctionalCalculator
     auto u_xx = u_x.partial_x(); auto u_yy = u_y.partial_y(); auto u_zz = u_z.partial_z();
     auto v_xx = v_x.partial_x(); auto v_yy = v_y.partial_y(); auto v_zz = v_z.partial_z();
 
-    auto uv_twice = num * denom * FnPolynomial(PiPolynomial(2));
-    auto v2 = denom * denom; auto v2_twice = v2 + v2;
+    auto u_twice = num * FnPolynomial(PiPolynomial(2));
+    auto v_twice = denom * FnPolynomial(PiPolynomial(2));
+    auto v2 = denom * denom;
     auto v3 = denom * v2;
-    auto uv2 = num * v2;
+    auto uv = num * denom;
 
-    auto xPortion = u_xx * v3 - v_xx * uv2 - u_x * v_x * v2_twice + v_x * v_x * uv_twice;
-    auto yPortion = u_yy * v3 - v_yy * uv2 - u_y * v_y * v2_twice + v_y * v_y * uv_twice;
-    auto zPortion = u_zz * v3 - v_zz * uv2 - u_z * v_z * v2_twice + v_z * v_z * uv_twice;
+    auto xPortion = u_xx * v2 - v_xx * uv - u_x * v_x * v_twice + v_x * v_x * u_twice;
+    auto yPortion = u_yy * v2 - v_yy * uv - u_y * v_y * v_twice + v_y * v_y * u_twice;
+    auto zPortion = u_zz * v2 - v_zz * uv - u_z * v_z * v_twice + v_z * v_z * u_twice;
 
-    return Function(xPortion + yPortion + zPortion, v2 * v2);
+    return Function(xPortion + yPortion + zPortion, v3);
   }
 
   bool Function::isLaplaceEigenfunction(PiRational& eigenvalue) const
