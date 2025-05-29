@@ -171,6 +171,11 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       remainder = mp(0);  return mp(1);
     }
+    if ((*this) == mp(0)) { remainder = mp(0);  return mp(0); }
+    if (negative && rhs.negative) { return (-(*this)).division(-rhs, remainder); }
+    if (negative) { return -((-(*this)).division(rhs, remainder)); }
+    if (rhs.negative) { return -(division(-rhs, remainder)); }
+
     auto rhsDegree = rhs.degree();
     if (rhsDegree == 0)
     {
