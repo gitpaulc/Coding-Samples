@@ -24,6 +24,7 @@ set(HEADER_FILES
   ../complex_quadratic.h
   ../fn_polynomial.h
   ../function.h
+  ../mp_integer.h
   ../number.h
   ../pi_polynomial.h
   ../pi_rational.h
@@ -38,6 +39,7 @@ set(SOURCE_FILES
   ../fn_polynomial.cpp
   ../function.cpp
   ../main.cpp
+  ../mp_integer.cpp
   ../number.cpp
   ../pi_polynomial.cpp
   ../pi_rational.cpp
