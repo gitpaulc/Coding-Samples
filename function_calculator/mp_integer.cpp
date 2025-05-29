@@ -177,25 +177,36 @@ namespace FunctionalCalculator
     if (rhs.negative) { return -(division(-rhs, remainder)); }
 
     auto rhsDegree = rhs.degree();
-    if (rhsDegree == 0)
+    //if (rhsDegree == 0)
     {
-        mp quotient(self /rhs.self[0]);
-      remainder = mp(0);
-      return quotient;
+      //mp quotient(self /rhs.self[0]);
+      //remainder = mp(0);
+      //return quotient;
     }
     auto dividend = *this;
-    auto divDegree = dividend.degree();
     mp quotient = mp(0);
-    for (int prevDegree = divDegree; rhsDegree <= divDegree;)
+    auto prevDividend = dividend;
+    while (rhs >= dividend)
     {
-      auto monomial = mp(rhs.self.at(rhsDegree) / dividend.self.at(divDegree), divDegree - rhsDegree);
-      quotient = quotient + monomial;
-      auto product = rhs * monomial;
-      if (product == dividend) { remainder = mp(0); return quotient; }
-      dividend = dividend - product;
-      prevDegree = divDegree;
-      divDegree = dividend.degree();
-      if (prevDegree <= divDegree) { break; } // Should never happen.
+      auto divDegree = dividend.degree();
+      auto degreeDiff = divDegree - rhsDegree;
+      int multiplier = (dividend.self[divDegree] / rhs.self[rhsDegree]) + 1;
+      auto factor = mp(multiplier) * mp(limit).pow(degreeDiff);
+      auto product = factor * rhs;
+      while (product > dividend)
+      {
+        if (multiplier == 0)
+        {
+          multiplier = limit - 1;
+          degreeDiff--;
+        }
+        factor = mp(multiplier) * mp(limit).pow(degreeDiff);
+        product = factor * rhs;
+      }
+      quotient = quotient + factor;
+      dividend = dividend - factor * rhs;
+      if (dividend >= prevDividend) { break; } // Should never happen.
+      prevDividend = dividend;
     }
     remainder = dividend;
     return quotient;
@@ -256,5 +267,21 @@ namespace FunctionalCalculator
   {
     auto diff = (*this) - rhs;
     return diff.negative;
+  }
+
+  bool mp::operator>(const mp& rhs) const
+  {
+    return (rhs < (*this));
+  }
+
+  bool mp::operator<=(const mp& rhs) const
+  {
+    if ((*this) == rhs) { return true; }
+    return ((*this) < rhs);
+  }
+
+  bool mp::operator>=(const mp& rhs) const
+  {
+    return (rhs <= (*this));
   }
 }

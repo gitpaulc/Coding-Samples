@@ -15,6 +15,7 @@ namespace FunctionalCalculator
  */
 class mp
 {
+  /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   std::vector<int> self;
   bool negative = false;
   void clean();
