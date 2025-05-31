@@ -158,20 +158,32 @@ namespace FunctionalCalculator
     if (self.empty()) { return answer; }
     if (rhs.self.empty()) { return answer; }
     answer.negative = (negative || rhs.negative) && !(negative && rhs.negative);
-    answer.self.resize((degree() + 1) * (rhs.degree() + 1), 0);
 
-    int ii = -1;
-    for (const auto& iter : self)
+    int carry = 0;
+    int sizA = (int)self.size();
+    int sizB = (int)rhs.self.size();
+    answer.self = std::vector<int>(std::max(sizA, sizB) * std::max(sizA, sizB) + 1, 0);
+    long long lim = (long long)limit;
+
+    for (int ii = 0; ii < sizA; ++ii)
     {
-      ++ii;
-      int jj = -1;
-      for (const auto& jter : rhs.self)
+      int carry = 0;
+      for (int jj = 0; jj < sizB; ++jj)
       {
-        ++jj;
         auto kk = ii + jj;
-        answer.self[kk] = answer.self[kk] + iter * jter;
+        if (kk >= answer.self.size()) { answer.self.resize(kk + 1); answer.self[kk] = 0; }
+        long long product = (long long)(self[ii]) * (long long)(rhs.self[jj]) + carry;
+        carry = product / lim;
+        answer.self[kk] = answer.self[kk] + ((int)(product % lim));
+      }
+      if (carry > 0)
+      {
+        auto kk = ii + sizB;
+        if (kk >= answer.self.size()) { answer.self.resize(kk + 1); answer.self[kk] = 0; }
+        answer.self[kk] = answer.self[kk] + carry;
       }
     }
+    answer.clean();
     return answer;
   }
 

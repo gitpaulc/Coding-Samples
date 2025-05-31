@@ -22,8 +22,8 @@ bool test_mp()
   std::cout << "\n1 million = " << million;
   million = thousand * thousand;
   std::cout << "\n1 million = " << million;
-  //std::cout << "\n1,000,001 = " << (million + one);
-  //std::cout << "\n1 trillion = " << million * million;
+  std::cout << "\n1,000,001 = " << (million + one);
+  std::cout << "\n1 trillion = " << million * million;
   return true;
 }
 
