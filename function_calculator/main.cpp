@@ -24,6 +24,9 @@ bool test_mp()
   std::cout << "\n1 million = " << million;
   std::cout << "\n1,000,001 = " << (million + one);
   std::cout << "\n1 trillion = " << million * million;
+  auto squareOf_65536 = (twoToThe16 * twoToThe16);
+  std::cout << "\n65,536^2 = " << squareOf_65536;
+  std::cout << "\n8192^2 = " << (mp(8192) * mp(8192));
   return true;
 }
 
