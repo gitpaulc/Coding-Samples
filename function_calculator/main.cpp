@@ -2,9 +2,30 @@
 #include <iostream>
 
 #include "function.h"
+#include "mp_integer.h"
 #include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
+
+bool test_mp()
+{
+  mp zero = 0;
+  std::cout << "\n0 = " << zero;
+  mp one = 1;
+  mp two = one + one;
+  std::cout << "\n1 = " << one << "\n2 = " << two;
+  mp twoToThe16 = two.pow(16);
+  std::cout << "\n65,536 = " << twoToThe16;
+  mp thousand = 1000;
+  std::cout << "\n1000 = " << thousand;
+  auto million = mp(500000) + mp(500000);
+  std::cout << "\n1 million = " << million;
+  million = thousand * thousand;
+  std::cout << "\n1 million = " << million;
+  //std::cout << "\n1,000,001 = " << (million + one);
+  //std::cout << "\n1 trillion = " << million * million;
+  return true;
+}
 
 bool test_rational()
 {
@@ -214,6 +235,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting multiprecision integers:\n";
+  test_mp();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting functions:\n";
   test_function();
   std::cout << "\nContinue... ";

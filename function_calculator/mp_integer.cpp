@@ -4,29 +4,30 @@ All Rights Reserved.*/
 #include "mp_integer.h"
 
 #include <stdexcept>
+#include <sstream>
 
 namespace FunctionalCalculator
 {
-  int mp::limit = 65536;
+  const int mp::digPow = 6;
+  int intPow(const int base, const int p)
+  {
+    if (p < 0) { throw std::invalid_argument("Exponent must be nonnegative."); }
+    int answer = 1;
+    for (int ii = 0; ii < p; ++ii) { answer *= base; }
+    return answer;
+  }
+  const int mp::limit = intPow(10, digPow);
 
   void mp::clean()
   {
-    mp answer;
-    bool nonzero = false;
     int siz = (int)self.size();
-    int firstNonzero = -1;
-    for (int i = 0; i < siz; ++i)
+    int newSiz = siz;
+    for (int i = siz - 1; i >= 0; --i)
     {
-      if (!nonzero)
-      {
-        if (self[i] == 0) { continue; }
-        firstNonzero = i;
-        answer.self.resize(siz - firstNonzero);
-      }
-      nonzero = true;
-      answer.self[i - firstNonzero] = self[i];
+      if (self[i] != 0) { break; }
+      newSiz--;
     }
-    self = answer.self;
+    self.resize(newSiz);
     if (self.empty()) { negative = false; }
   }
 
@@ -83,11 +84,28 @@ namespace FunctionalCalculator
     const auto rhsDeg = rhs.degree();
 
     int ii = -1;
+    int carry = 0;
+    long long summandA = 0;
+    long long summandB = 0;
+    long long lim = limit;
     for (auto& iter : rhs.self)
     {
       ++ii;
       if (ii > rhsDeg) { continue; }
-      answer.self[ii] = answer.self[ii] + iter;
+      summandA = answer.self[ii];
+      summandB = iter;
+      auto sum = summandA + summandB + carry;
+      carry = 0;
+      if (sum >= (long long)lim)
+      {
+        carry = 1;
+        sum = sum % lim;
+      }
+      answer.self[ii] = sum;
+    }
+    if (carry > 0)
+    {
+      answer.self.push_back(carry);
     }
     answer.clean();
     return answer;
@@ -157,6 +175,20 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  mp mp::operator/(const mp& rhs) const
+  {
+    mp remainder;
+    auto quotient = division(rhs, remainder);
+    return quotient;
+  }
+
+  mp mp::operator%(const mp& rhs) const
+  {
+    mp remainder;
+    auto quotient = division(rhs, remainder);
+    return remainder;
+  }
+
   int mp::degree() const
   {
     if (self.empty()) { return 0; }
@@ -177,12 +209,6 @@ namespace FunctionalCalculator
     if (rhs.negative) { return -(division(-rhs, remainder)); }
 
     auto rhsDegree = rhs.degree();
-    //if (rhsDegree == 0)
-    {
-      //mp quotient(self /rhs.self[0]);
-      //remainder = mp(0);
-      //return quotient;
-    }
     auto dividend = *this;
     mp quotient = mp(0);
     auto prevDividend = dividend;
@@ -239,8 +265,7 @@ namespace FunctionalCalculator
   {
     bool isNeg = (p < 0);
     if (isNeg) { throw std::invalid_argument("Exponent must be nonnegative."); }
-    mp answer;
-    answer.self[0] = 1;
+    mp answer = 1;
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
@@ -283,5 +308,33 @@ namespace FunctionalCalculator
   bool mp::operator>=(const mp& rhs) const
   {
     return (rhs <= (*this));
+  }
+
+  std::ostream& operator<<(std::ostream& strm, const mp& mpIn)
+  {
+    if (mpIn == 0) { return strm << "0"; }
+    if (mpIn.negative) { return strm << "-" << (-mpIn); }
+    std::stringstream reversed;
+    int digitCount = 0;
+    int nn = (int)(mpIn.self.size());
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      auto element = mpIn.self[ii];
+      for (int jj = 0; jj < mp::digPow; ++jj)
+      {
+        reversed << (element % 10);
+        ++digitCount;
+        element = element / 10;
+        if ((element == 0) && (ii == nn - 1)) { break; }
+        if ((digitCount % 3) == 0) { reversed << ","; }
+      }
+    }
+    auto rev = reversed.str();
+    nn = (int)rev.size();
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      strm << rev[nn - ii - 1];
+    }
+    return strm;
   }
 }

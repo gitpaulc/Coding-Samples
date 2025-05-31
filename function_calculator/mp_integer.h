@@ -19,7 +19,8 @@ class mp
   std::vector<int> self;
   bool negative = false;
   void clean();
-  static int limit;
+  const static int digPow;
+  const static int limit;
 
   int degree() const;
   mp division(const mp& rhs, mp& remainder) const;
