@@ -22,7 +22,6 @@ class mp
   const static int digPow;
   const static int limit;
 
-  int degree() const;
   mp division(const mp& rhs, mp& remainder) const;
 public:
   mp(int value = 0);

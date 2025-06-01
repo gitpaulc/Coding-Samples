@@ -129,9 +129,9 @@ namespace FunctionalCalculator
     if (negative && rhs.negative) { return -(rhs + (*this)); }
     if (rhs.negative) { return ((*this) - (-rhs)); }
     if (negative) { return (rhs - (-(*this))); }
-    if (rhs.degree() > degree()) { return (rhs + (*this)); }
+    if (rhs.self.size() > self.size()) { return (rhs + (*this)); }
     mp answer = *this;
-    const auto rhsDeg = rhs.degree();
+    const auto rhsSize = rhs.self.size();
 
     int ii = -1;
     int carry = 0;
@@ -141,7 +141,7 @@ namespace FunctionalCalculator
     for (auto& iter : rhs.self)
     {
       ++ii;
-      if (ii > rhsDeg) { continue; }
+      if (ii >= rhsSize) { continue; }
       summandA = answer.self[ii];
       summandB = iter;
       auto sum = summandA + summandB + carry;
@@ -151,7 +151,7 @@ namespace FunctionalCalculator
         carry = 1;
         sum = sum % lim;
       }
-      answer.self[ii] = sum;
+      answer.self[ii] = (int)sum;
     }
     if (carry > 0)
     {
@@ -169,21 +169,21 @@ namespace FunctionalCalculator
     if (rhs.negative && negative) { return ((-rhs) - (-(*this))); }
     // rhs is nonnegative:
     if (negative) { return -((-(*this)) + rhs); }
-    // both are nonnegative:
-    auto deg = degree();
-    auto rhsDeg = rhs.degree();
+    // Both are nonnegative...
+ 
     // Negative number:
-    if (rhsDeg > deg) { return -(rhs - (*this)); }
-    if (rhsDeg == deg)
+    if (rhs.self.size() > self.size()) { return -(rhs - (*this)); }
+    if (rhs.self.size() == self.size())
     {
-      if (rhs.self[rhsDeg] > self[deg]) { return -(rhs - (*this)); }
+      int ind = (int)self.size() - 1;
+      if (rhs.self[ind] > self[ind]) { return -(rhs - (*this)); }
     }
     //Nonnegative number:
     mp answer;
-    answer.self.resize(deg + 1);
+    answer.self.resize(self.size());
     answer.negative = false;
     auto from = *this;
-    for (int ii = deg; ii >= 0; --ii)
+    for (int ii = ((int)self.size() - 1); ii >= 0; --ii)
     {
       int digit = rhs.self[ii];
       int subFrom = from.self[ii];
@@ -223,7 +223,7 @@ namespace FunctionalCalculator
         auto kk = ii + jj;
         if (kk >= answer.self.size()) { answer.self.resize(kk + 1); answer.self[kk] = 0; }
         long long product = (long long)(self[ii]) * (long long)(rhs.self[jj]) + carry;
-        carry = product / lim;
+        carry = (int)(product / lim);
         answer.self[kk] = answer.self[kk] + ((int)(product % lim));
       }
       if (carry > 0)
@@ -251,12 +251,6 @@ namespace FunctionalCalculator
     return remainder;
   }
 
-  int mp::degree() const
-  {
-    if (self.empty()) { return 0; }
-    return (int)(self.size() - 1);
-  }
-
   mp mp::division(const mp& rhs, mp& remainder) const
   {
     if (rhs == mp(0))
@@ -270,7 +264,6 @@ namespace FunctionalCalculator
     if (negative) { return -((-(*this)).division(rhs, remainder)); }
     if (rhs.negative) { return -(division(-rhs, remainder)); }
 
-    auto rhsDegree = rhs.degree();
     auto dividend = *this;
     mp quotient = mp(0);
     auto prevDividend = dividend;
@@ -316,8 +309,7 @@ namespace FunctionalCalculator
       auto quotient = aa_old.division(bb_old, bPoly);
     }
     if (aPoly == mp(0)) { return aPoly; }
-    auto aPolyDegree = aPoly.degree();
-    auto coeff = aPoly.self[aPolyDegree];
+    auto coeff = aPoly.self[(int)(aPoly.self.size()) - 1];
     for (auto& iter : aPoly.self)
     {
       iter = iter / coeff;
