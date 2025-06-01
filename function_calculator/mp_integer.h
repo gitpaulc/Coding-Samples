@@ -28,6 +28,9 @@ public:
   mp(int value = 0);
   mp(const long long& value);
 
+  int getDigit(int i) const;
+  void setDigit(int i, int val);
+
   mp operator+() const;
   mp operator-() const;
   mp operator+(const mp& rhs) const;

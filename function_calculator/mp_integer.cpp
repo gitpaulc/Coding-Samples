@@ -61,6 +61,29 @@ namespace FunctionalCalculator
     }
   }
 
+  int mp::getDigit(int i) const
+  {
+    if (i < 0) { throw std::invalid_argument("Index must be nonnegative."); }
+    int j = i % digPow;
+    int current = self[i / digPow];
+    current = current / intPow(10, j);
+    return current % 10;
+  }
+
+  void mp::setDigit(int i, int val)
+  {
+    if (i < 0) { throw std::invalid_argument("Index must be nonnegative."); }
+    if (val < 0) { throw std::invalid_argument("Digit must be between 0 and 9 inclusive."); }
+    if (val >= 10) { throw std::invalid_argument("Digit must be between 0 and 9 inclusive."); }
+    int j = i % digPow;
+    int& current = self[i / digPow];
+    auto powJ = intPow(10, j); auto powJ1 = 10 * powJ;
+    auto right = current % powJ;
+    int summand = val * powJ + right;
+    auto left = (j + 1 == digPow) ? 0 : (current / powJ1) * powJ1;
+    current = left + summand;
+  }
+
   mp mp::operator+() const
   {
     return *this;
@@ -223,30 +246,23 @@ namespace FunctionalCalculator
     auto rhsDegree = rhs.degree();
     auto dividend = *this;
     mp quotient = mp(0);
-    auto prevDividend = dividend;
+    /*auto prevDividend = dividend;
     while (rhs >= dividend)
     {
-      auto divDegree = dividend.degree();
-      auto degreeDiff = divDegree - rhsDegree;
-      int multiplier = (dividend.self[divDegree] / rhs.self[rhsDegree]) + 1;
-      auto factor = mp(multiplier) * mp(limit).pow(degreeDiff);
-      auto product = factor * rhs;
-      while (product > dividend)
+      mp currentDigit = dividend; currentDigit.self.resize(1);
+      int remainingDigits = dividend.self.size() - 1;
+      for (int digLim = 2; (currentDigit < rhs) && (digLim <= dividend.self.size()); digLim++)
       {
-        if (multiplier == 0)
-        {
-          multiplier = limit - 1;
-          degreeDiff--;
-        }
-        factor = mp(multiplier) * mp(limit).pow(degreeDiff);
-        product = factor * rhs;
+        currentDigit = dividend; currentDigit.self.resize(digLim);
+        remainingDigits--;
       }
-      quotient = quotient + factor;
-      dividend = dividend - factor * rhs;
+      mp factor = currentDigit
+      //quotient = quotient + factor;
+      //dividend = dividend - factor * rhs;
       if (dividend >= prevDividend) { break; } // Should never happen.
       prevDividend = dividend;
     }
-    remainder = dividend;
+    remainder = dividend;*/
     return quotient;
   }
 

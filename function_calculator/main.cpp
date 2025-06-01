@@ -26,7 +26,15 @@ bool test_mp()
   std::cout << "\n1 trillion = " << million * million;
   auto squareOf_65536 = (twoToThe16 * twoToThe16);
   std::cout << "\n65,536^2 = " << squareOf_65536;
-  std::cout << "\n8192^2 = " << (mp(8192) * mp(8192));
+  auto squareOf_8192 = mp(8192) * mp(8192);
+  std::cout << "\n8192^2 = " << (squareOf_8192);
+  std::cout << "\n6th digit of 8192^2 = " << squareOf_8192.getDigit(6);
+  auto replaced = squareOf_8192;
+  replaced.setDigit(6, 5);
+  std::cout << "\nReplace 6th digit to 5 in 8192^2 = " << replaced;
+  replaced = squareOf_8192;
+  replaced.setDigit(7, 5);
+  std::cout << "\nReplace 7th digit to 5 in 8192^2 = " << replaced;
   return true;
 }
 
