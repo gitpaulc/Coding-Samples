@@ -23,6 +23,7 @@ class mp
   const static int limit;
 
   mp division(const mp& rhs, mp& remainder) const;
+
 public:
   mp(int value = 0);
   mp(const long long& value);

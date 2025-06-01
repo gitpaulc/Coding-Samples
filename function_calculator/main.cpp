@@ -35,6 +35,17 @@ bool test_mp()
   replaced = squareOf_8192;
   replaced.setDigit(7, 5);
   std::cout << "\nReplace 7th digit to 5 in 8192^2 = " << replaced;
+  std::cout << "\nNumber of digits in " << squareOf_65536 << " = " << squareOf_65536.numDigits();
+  std::cout << "\n10^6 - 500,000 = " << million - mp(500000);
+  {
+    mp divisor(2);
+    for (int ii = 31; ii >= 0; --ii)
+    {
+      std::cout << "\n2^" << ii << " = " << squareOf_65536 / divisor;
+      std::cout << " with a remainder of " << squareOf_65536 % divisor;
+      divisor = divisor * mp(2);
+    }
+  }
   return true;
 }
 

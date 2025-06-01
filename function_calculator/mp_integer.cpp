@@ -108,7 +108,7 @@ namespace FunctionalCalculator
       if ((current % 10) != 0) { best = i + 1; }
       current = current / 10;
     }
-    return best + digPow * (int)(self.size());
+    return best + digPow * (int)(self.size() - 1);
   }
 
   mp mp::operator+() const
@@ -170,33 +170,48 @@ namespace FunctionalCalculator
     // rhs is nonnegative:
     if (negative) { return -((-(*this)) + rhs); }
     // Both are nonnegative...
- 
-    // Negative number:
-    if (rhs.self.size() > self.size()) { return -(rhs - (*this)); }
-    if (rhs.self.size() == self.size())
+
+    const int numOfDigits = numDigits();
+    const int numRhsDigits = rhs.numDigits();
+
+    // Negative answer:
+    if (numRhsDigits > numOfDigits) { return -(rhs - (*this)); }
+    if (numRhsDigits == numOfDigits)
     {
-      int ind = (int)self.size() - 1;
-      if (rhs.self[ind] > self[ind]) { return -(rhs - (*this)); }
+      for (int ind = (int)self.size() - 1; ind >= 0; --ind)
+      {
+        if (rhs.self[ind] > self[ind]) { return -(rhs - (*this)); }
+        if (rhs.self[ind] < self[ind]) { break; }
+      }
     }
+
     //Nonnegative number:
     mp answer;
     answer.self.resize(self.size());
     answer.negative = false;
     auto from = *this;
-    for (int ii = ((int)self.size() - 1); ii >= 0; --ii)
+    for (int ii = 0; ii < numOfDigits; ++ii)
     {
-      int digit = rhs.self[ii];
-      int subFrom = from.self[ii];
+      int digit = rhs.getDigit(ii);
+      int subFrom = from.getDigit(ii);
       if (digit > subFrom)
       {
-        if (ii == 0) { throw std::logic_error("Bad subtraction."); }
+        if (ii == (numOfDigits - 1)) { throw std::logic_error("Bad subtraction."); }
         else
         {
-          from.self[ii - 1] = from.self[ii - 1] - 1;
-          subFrom += limit;
+          int jj = ii + 1;
+          int current = from.getDigit(jj);
+          while (current == 0)
+          {
+            from.setDigit(jj, 9);
+            ++jj;
+            current = from.getDigit(jj);
+          }
+          from.setDigit(jj, current - 1);
+          subFrom += 10;
         }
       }
-      answer.self[ii] = subFrom - digit;
+      answer.setDigit(ii, subFrom - digit);
     }
     answer.clean();
     return answer;
@@ -267,7 +282,7 @@ namespace FunctionalCalculator
     auto dividend = *this;
     mp quotient = mp(0);
     auto prevDividend = dividend;
-    while (rhs >= dividend)
+    while (rhs <= dividend)
     {
       const int numOfDigits = dividend.numDigits();
       int remainingDigits = numOfDigits - 1;
