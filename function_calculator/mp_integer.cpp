@@ -111,6 +111,12 @@ namespace FunctionalCalculator
     return best + digPow * (int)(self.size() - 1);
   }
 
+  int mp::toInt() const
+  {
+    if (self.empty()) { return 0; }
+    return self[0];
+  }
+
   mp mp::operator+() const
   {
     return *this;

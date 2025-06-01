@@ -10,13 +10,18 @@ namespace FunctionalCalculator
 {
   Rational::Rational(int nn, int dd)
   {
-    if (dd == 0)
+    *this = Rational(mp(nn), mp(dd));
+  }
+
+  Rational::Rational(const mp& nn, const mp& dd)
+  {
+    if (dd == mp(0))
     {
       throw std::invalid_argument("Division by zero.");
     }
     else
     {
-      int gcd_ = gcd(nn, dd);
+      mp gcd_ = gcd(nn, dd);
       num = nn; denom = dd;
       if (gcd_ != 0)
       {
@@ -25,8 +30,8 @@ namespace FunctionalCalculator
       }
       if (denom < 0)
       {
-        num *= -1;
-        denom *= -1;
+        num = num * mp(-1);
+        denom = denom * mp(-1);
       }
     }
   }
@@ -63,21 +68,21 @@ namespace FunctionalCalculator
     return *this;
   }
 
-  int Rational::denominator() const { return denom; }
-  int Rational::numerator() const { return num; }
+  mp Rational::denominator() const { return denom; }
+  mp Rational::numerator() const { return num; }
 
-  int Rational::gcd(int aa, int bb)
+  mp Rational::gcd(mp aa, mp bb)
   {
     if ((aa == bb) || (bb == 0)) { return (aa > 0) ? aa : (-aa); }
     if (aa == 0) { return (bb > 0) ? bb : (-bb); }
-    int abs_a = (aa > 0) ? aa : -aa;
-    int abs_b = (bb > 0) ? bb : -bb;
+    mp abs_a = (aa > mp(0)) ? aa : -aa;
+    mp abs_b = (bb > mp(0)) ? bb : -bb;
     //if (bb != 0) { return gcd(bb, aa % bb); }
-    for (int safety_counter = 2 * abs_a + 2 * abs_b; bb != 0; --safety_counter)
+    for (mp safety_counter = mp(2) * abs_a + mp(2) * abs_b; bb != 0; safety_counter = safety_counter - mp(1))
     {
       if (safety_counter <= 0) { break; }
-      int aa_old = aa;
-      int bb_old = bb;
+      mp aa_old = aa;
+      mp bb_old = bb;
       aa = bb_old;
       bb = aa_old % bb_old;
     }
@@ -174,8 +179,8 @@ namespace FunctionalCalculator
 
   std::pair<double, double> Rational::get() const
   {
-    double nn = (double)num;
-    double dd = (double)denom;
+    double nn = (double)(num.toInt());
+    double dd = (double)(denom.toInt());
     return { nn / dd, 0.0 };
   }
 
@@ -190,22 +195,22 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  std::map<int, int> Rational::primeFactorization(int input)
+  std::map<mp, int> Rational::primeFactorization(mp input)
   {
     if (input * input <= 1)
     {
-        std::map<int, int> answer;
+        std::map<mp, int> answer;
         answer[input] = 1;
         return answer;
     }
-    std::map<int, int> answer;
+    std::map<mp, int> answer;
     if (input < 0) { answer[-1] = 1; input = -input; }
-    int lim = input + 1;
-    std::set<int> sieved;
+    mp lim = input + 1;
+    std::set<mp> sieved;
     bool foundFactor = false;
-    for (int init = 2; init < lim; ++init)
+    for (mp init = 2; init < lim; init = init + 1)
     {
-      for (int factor = init; factor < lim; factor += init)
+      for (mp factor = init; factor < lim; factor = factor + init)
       {
         if (sieved.find(factor) != sieved.end()) { continue; }
         sieved.insert(factor);
@@ -243,7 +248,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  std::map<int, int> Rational::primeFactorization() const
+  std::map<mp, int> Rational::primeFactorization() const
   {
     auto numFactors = primeFactorization(num);
     auto denomFactors = primeFactorization(denom);
@@ -257,11 +262,11 @@ namespace FunctionalCalculator
       }
       numFactors[iter.first] -= iter.second;
     }
-    std::map<int, int> answer;
+    std::map<mp, int> answer;
     int countFactors = (int)numFactors.size();
     for (auto& iter : numFactors)
     {
-      int base = iter.first;
+      mp base = iter.first;
       int power = iter.second;
       if (base == -1)
       {

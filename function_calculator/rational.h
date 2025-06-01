@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #ifndef RATIONAL_H
 #define RATIONAL_H
 
+#include "mp_integer.h"
 #include "number.h"
 
 #include <map>
@@ -14,10 +15,11 @@ namespace FunctionalCalculator
 
 class Rational : public Number
 {
-  int num = 0;
-  int denom = 1;
+  mp num = 0;
+  mp denom = 1;
 public:
   Rational(int nn = 0, int dd = 1);
+  Rational(const mp& nn, const mp& dd);
 
   Rational(const Rational&);
   Rational(Rational&&) noexcept;
@@ -25,9 +27,9 @@ public:
   Rational& operator=(Rational&&) noexcept;
   ~Rational() = default;
 
-  int denominator() const;
-  int numerator() const;
-  static int gcd(int aa, int bb);
+  mp denominator() const;
+  mp numerator() const;
+  static mp gcd(mp aa, mp bb);
   Rational operator+() const;
   Rational operator-() const;
   Rational operator+(const Rational& rhs) const;
@@ -42,9 +44,9 @@ public:
   bool operator<=(const Rational& rhs) const;
   bool operator>=(const Rational& rhs) const;
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  static std::map<int, int> primeFactorization(int input);
+  static std::map<mp, int> primeFactorization(mp input);
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  std::map<int, int> primeFactorization() const;
+  std::map<mp, int> primeFactorization() const;
   /** \brief Print the prime factorization of the rational number. */
   std::string printFactors(bool useParentheses = false) const;
 
