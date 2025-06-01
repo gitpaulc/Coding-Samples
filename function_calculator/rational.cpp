@@ -120,11 +120,6 @@ namespace FunctionalCalculator
     return Rational(num * rhs.num, denom * rhs.denom);
   }
 
-  Rational Rational::operator*(const mp& rhs) const
-  {
-      return Rational(num * rhs, denom);
-  }
-
   Rational Rational::operator/(const Rational& rhs) const
   {
     if (rhs.num == 0)

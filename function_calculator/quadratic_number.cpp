@@ -176,12 +176,13 @@ namespace FunctionalCalculator
     QuadraticNumber product;
     for (const auto& iter : content)
     {
+      auto iterSq = iter.second * iter.second;
       for (const auto& jter : rhs.content)
       {
         bool iterNegative = (iter.second < 0);
         bool jterNegative = (jter.second < 0);
-        auto summand = sqrt(Rational(iter.first, 1) * Rational(jter.first, 1) *
-          iter.second * iter.second * jter.second * jter.second);
+        auto summand = sqrt(Rational(iter.first, mp(1)) * Rational(jter.first, mp(1)) *
+          iterSq * jter.second * jter.second);
         if (iterNegative && !jterNegative) { summand = -summand; }
         else if (jterNegative && !iterNegative) { summand = -summand; }
         product = product + summand;
@@ -216,7 +217,7 @@ namespace FunctionalCalculator
       auto sqrtTerm = QuadraticNumber::sqrt(Rational(radicand, mp(1))) * (-coeff);
       quotientNumer = quotientNumer * (quotientDenom + (sqrtTerm * Rational(2, 1)));
       diff = quotientDenom + sqrtTerm;
-      quotientDenom = (diff * diff) - (coeff * coeff * radicand);
+      quotientDenom = (diff * diff) - (coeff * coeff * Rational(radicand, 1));
     }
     quotientNumer = quotientNumer * quotientDenom;
     quotientDenom = quotientDenom * quotientDenom;
