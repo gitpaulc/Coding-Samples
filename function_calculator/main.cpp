@@ -37,6 +37,7 @@ bool test_mp()
   std::cout << "\nReplace 7th digit to 5 in 8192^2 = " << replaced;
   std::cout << "\nNumber of digits in " << squareOf_65536 << " = " << squareOf_65536.numDigits();
   std::cout << "\n10^6 - 500,000 = " << million - mp(500000);
+  std::cout << "\n500,000 - 10^6 = " << mp(500000) - million;
   {
     mp divisor(2);
     for (int ii = 31; ii >= 0; --ii)
@@ -46,6 +47,7 @@ bool test_mp()
       divisor = divisor * mp(2);
     }
   }
+  std::cout << "\n" << squareOf_8192 << " / " << mp(11) << " = " << (squareOf_8192 / mp(11)) << " with a remainder of " << (squareOf_8192 % mp(11));
   return true;
 }
 
@@ -257,11 +259,6 @@ bool test_function()
 int main()
 {
   std::string prompt;
-  std::cout << "\n\nTesting multiprecision integers:\n";
-  test_mp();
-  std::cout << "\nContinue... ";
-  std::cin >> prompt;
-  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting functions:\n";
   test_function();
   std::cout << "\nContinue... ";
@@ -289,6 +286,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest pi polynomials:\n";
   test_pi();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTesting multiprecision integers:\n";
+  test_mp();
   std::cout << "\nContinue... ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
