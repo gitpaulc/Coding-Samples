@@ -66,6 +66,15 @@ public:
 
   bool isLaplaceEigenfunction(PiRational& eigenvalue) const;
   bool isHarmonic() const;
+
+  // BESSEL FUNCTIONS:
+
+  /** \brief Solves x^2 * F''(x) + 2x * F'(x) + (x^2 - n(n+1)) * F(x) = 0 after change of variables. */
+  static Function sphericalBesselATimesPiX(const ComplexQuadratic& A, int n);
+
+  /** \brief Solves x^2 * F''(x) + 2x * F'(x) + (x^2 - n(n+1)) * F(x) = 0 after change of variables. */
+  static Function sphericalNeumannATimesPiX(const ComplexQuadratic& A, int n);
+
 };
 }
 
