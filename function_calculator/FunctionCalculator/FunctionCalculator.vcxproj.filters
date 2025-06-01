@@ -13,6 +13,9 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,6 +40,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\function.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\number.h">
