@@ -132,7 +132,7 @@ namespace FunctionalCalculator
 
   mp mp::operator+(const mp& rhs) const
   {
-    if (negative && rhs.negative) { return ((-rhs) + (-(*this))); }
+    if (negative && rhs.negative) { return -((-rhs) + (-(*this))); }
     if (rhs.negative) { return ((*this) - (-rhs)); }
     if (negative) { return (rhs - (-(*this))); }
     if (rhs.self.size() > self.size()) { return (rhs + (*this)); }
