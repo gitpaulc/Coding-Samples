@@ -30,6 +30,7 @@ public:
 
   int getDigit(int i) const;
   void setDigit(int i, int val);
+  int numDigits() const;
 
   mp operator+() const;
   mp operator-() const;

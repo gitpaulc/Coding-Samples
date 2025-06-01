@@ -65,7 +65,9 @@ namespace FunctionalCalculator
   {
     if (i < 0) { throw std::invalid_argument("Index must be nonnegative."); }
     int j = i % digPow;
-    int current = self[i / digPow];
+    int ind = i / digPow;
+    if (ind >= self.size()) { return 0; }
+    int current = self[ind];
     current = current / intPow(10, j);
     return current % 10;
   }
@@ -76,12 +78,37 @@ namespace FunctionalCalculator
     if (val < 0) { throw std::invalid_argument("Digit must be between 0 and 9 inclusive."); }
     if (val >= 10) { throw std::invalid_argument("Digit must be between 0 and 9 inclusive."); }
     int j = i % digPow;
-    int& current = self[i / digPow];
-    auto powJ = intPow(10, j); auto powJ1 = 10 * powJ;
+    int ind = i / digPow;
+    bool shouldClean = (val == 0);
+    if (ind >= self.size())
+    {
+      int oldSize = (int)self.size();
+      self.resize(ind + 1);
+      shouldClean = true;
+      for (int k = oldSize; k < (ind + 1); ++k) { self[k] = 0; }
+    }
+    int& current = self[ind];
+    auto powJ = intPow(10, j);
+    auto powJ1 = 10 * powJ;
     auto right = current % powJ;
     int summand = val * powJ + right;
-    auto left = (j + 1 == digPow) ? 0 : (current / powJ1) * powJ1;
+    auto left = ((j + 1) == digPow) ? 0 : (current / powJ1) * powJ1;
     current = left + summand;
+    if (shouldClean) { clean(); }
+  }
+
+  int mp::numDigits() const
+  {
+    if (self.empty()) { return 0; }
+    int ind = (int)(self.size()) - 1;
+    int current = self[ind];
+    int best = 0;
+    for (int i = 0; i < digPow; ++i)
+    {
+      if ((current % 10) != 0) { best = i + 1; }
+      current = current / 10;
+    }
+    return best + digPow * (int)(self.size());
   }
 
   mp mp::operator+() const
@@ -246,23 +273,32 @@ namespace FunctionalCalculator
     auto rhsDegree = rhs.degree();
     auto dividend = *this;
     mp quotient = mp(0);
-    /*auto prevDividend = dividend;
+    auto prevDividend = dividend;
     while (rhs >= dividend)
     {
-      mp currentDigit = dividend; currentDigit.self.resize(1);
-      int remainingDigits = dividend.self.size() - 1;
-      for (int digLim = 2; (currentDigit < rhs) && (digLim <= dividend.self.size()); digLim++)
+      const int numOfDigits = dividend.numDigits();
+      int remainingDigits = numOfDigits - 1;
+      mp miniDividend = dividend.getDigit(remainingDigits);
+      for (int ii = 2; rhs > miniDividend; --ii)
       {
-        currentDigit = dividend; currentDigit.self.resize(digLim);
-        remainingDigits--;
+        --remainingDigits;
+        miniDividend = miniDividend * mp(10);
+        miniDividend = miniDividend + mp(dividend.getDigit(remainingDigits));
+        if (remainingDigits == 0) { break; }
       }
-      mp factor = currentDigit
-      //quotient = quotient + factor;
-      //dividend = dividend - factor * rhs;
+      int bestDigit = 1;
+      while (rhs * (bestDigit + 1) < miniDividend)
+      {
+        if (bestDigit == 9) { break; }
+        ++bestDigit;
+      }
+      mp factor = mp(bestDigit) * mp(10).pow(remainingDigits);
+      quotient = quotient + factor;
+      dividend = dividend - factor * rhs;
       if (dividend >= prevDividend) { break; } // Should never happen.
       prevDividend = dividend;
     }
-    remainder = dividend;*/
+    remainder = dividend;
     return quotient;
   }
 
