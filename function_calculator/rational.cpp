@@ -19,6 +19,11 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Division by zero.");
     }
+    else if (nn == mp(0))
+    {
+      num = nn;
+      denom = mp(1);
+    }
     else
     {
       mp gcd_ = gcd(nn, dd);
