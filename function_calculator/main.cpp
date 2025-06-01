@@ -64,13 +64,13 @@ bool test_rational()
   std::cout << "\nPrime factorization of -1 = " << (-one).printFactors();
   Rational half = Rational(-1, 4) * Rational(4, -2);
   std::cout << "\nOne half = " << half.print();
-  /*Rational thePower = half; // Need to avoid maxing out integers.
+  Rational thePower = half;
   for (int i = 0; i < 6; ++i)
   {
     auto newPower = thePower * thePower;
     std::cout << "\n" << thePower.print() << "^2 = " << newPower.print();
     thePower = newPower;
-  }*/
+  }
   Rational twelve = Rational(36, 3);
   std::cout << "\nPrime factorization of twelve = " << twelve.printFactors();
   Rational minusTwelve = Rational(24, -2);
