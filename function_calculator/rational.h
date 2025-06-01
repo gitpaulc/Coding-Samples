@@ -35,6 +35,7 @@ public:
   Rational operator+(const Rational& rhs) const;
   Rational operator-(const Rational& rhs) const;
   Rational operator*(const Rational& rhs) const;
+  Rational operator*(const mp& rhs) const;
   Rational operator/(const Rational& rhs) const;
   Rational pow(int p) const; /**< Returns the p'th power of the rational number. */
   bool operator==(const Rational& rhs) const;

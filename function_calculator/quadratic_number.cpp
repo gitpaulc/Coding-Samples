@@ -24,7 +24,7 @@ namespace FunctionalCalculator
     {
       double val = iter.second.get().first;
       if (val == 0) { continue; }
-      double radicand = iter.first;
+      double radicand = iter.first.toInt();
       if (iter.first < 0) { throw std::invalid_argument("\nRadicands should be nonnegative."); radicand = -radicand; }
       answer += val * std::sqrt(radicand);
     }
@@ -61,7 +61,7 @@ namespace FunctionalCalculator
         }
       }
       bool coeffIsOne = (val == 1);
-      int radicand = iter.first;
+      auto radicand = iter.first;
       bool printCoeffParents = (val.denominator() != 1) && (radicand != 1);
       if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
       if (radicand == 1) { continue; }
@@ -84,7 +84,7 @@ namespace FunctionalCalculator
     QuadraticNumber answer;
     if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
     Rational coefficient(1, radicand.denominator());
-    int key = radicand.numerator() * radicand.denominator();
+    mp key = radicand.numerator() * radicand.denominator();
     auto primes = Rational::primeFactorization(key);
     for (const auto& iter : primes)
     {
@@ -95,7 +95,7 @@ namespace FunctionalCalculator
       int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
       Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
       coefficient = coefficient * sqrtRational;
-      key /= (sqrtRational * sqrtRational).numerator();
+      key = key / (sqrtRational * sqrtRational).numerator();
     }
     answer.content[key] = coefficient;
     return answer;
@@ -115,11 +115,11 @@ namespace FunctionalCalculator
 
   QuadraticNumber QuadraticNumber::operator+(const QuadraticNumber& rhs) const
   {
-    std::set<int> added;
+    std::set<mp> added;
     QuadraticNumber sum;
     for (const auto& iter : content)
     {
-      int radicand = iter.first;
+      auto radicand = iter.first;
       Rational coeff = iter.second;
       auto primes = Rational::primeFactorization(radicand);
       for (const auto& jter : primes)
@@ -131,7 +131,7 @@ namespace FunctionalCalculator
           int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
           Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
           coeff = coeff * sqrtRational;
-          radicand /= (sqrtRational * sqrtRational).numerator();
+          radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
       if (rhs.content.find(radicand) != rhs.content.end())
       {
@@ -146,7 +146,7 @@ namespace FunctionalCalculator
     }
     for (const auto& iter : rhs.content)
     {
-      int radicand = iter.first;
+      auto radicand = iter.first;
       Rational coeff = iter.second;
       auto primes = Rational::primeFactorization(radicand);
       for (const auto& jter : primes)
@@ -158,7 +158,7 @@ namespace FunctionalCalculator
         int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
         Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
         coeff = coeff * sqrtRational;
-        radicand /= (sqrtRational * sqrtRational).numerator();
+        radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
       if (added.find(radicand) != added.end()) { continue; }
       sum.content[radicand] = coeff;
@@ -202,7 +202,7 @@ namespace FunctionalCalculator
     QuadraticNumber quotientDenom = rhs;
     while (quotientDenom.content.size() > 1)
     {
-      int radicand = 1;
+      mp radicand = 1;
       Rational coeff;
       for (const auto& iter : quotientDenom.content)
       {
@@ -213,7 +213,7 @@ namespace FunctionalCalculator
       }
       if (radicand == 1) { break; }
       QuadraticNumber diff;
-      auto sqrtTerm = QuadraticNumber::sqrt(radicand) * (-coeff);
+      auto sqrtTerm = QuadraticNumber::sqrt(Rational(radicand, mp(1))) * (-coeff);
       quotientNumer = quotientNumer * (quotientDenom + (sqrtTerm * Rational(2, 1)));
       diff = quotientDenom + sqrtTerm;
       quotientDenom = (diff * diff) - (coeff * coeff * radicand);

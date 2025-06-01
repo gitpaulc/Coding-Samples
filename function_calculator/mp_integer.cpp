@@ -114,7 +114,7 @@ namespace FunctionalCalculator
   int mp::toInt() const
   {
     if (self.empty()) { return 0; }
-    return self[0];
+    return negative ? (-self[0]) : self[0];
   }
 
   mp mp::operator+() const

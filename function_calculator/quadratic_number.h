@@ -21,7 +21,7 @@ class QuadraticNumber : public Number
    * would be represented as:
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
-  std::map<int, Rational> content;
+  std::map<mp, Rational> content;
 
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
