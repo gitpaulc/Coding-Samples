@@ -216,4 +216,42 @@ namespace FunctionalCalculator
   {
     return (laplacian().num == FnPolynomial(PiPolynomial(0)));
   }
+
+  Function Function::sphericalBesselATimesPiX(const ComplexQuadratic& A, int n)
+  {
+    if (n < 0)
+    {
+      ComplexQuadratic qq = Rational(1, 1);
+      if ((n % 2) == 1) { qq = -qq; }
+      return sphericalNeumannATimesPiX(A, -n - 1) * FnPolynomial(PiPolynomial(qq));
+    }
+    if (n == 0)
+    {
+      PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
+      PiRational piRatio = PiPolynomial(A, 1);
+      return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::xToPower(piRatio, 1));
+    }
+    ComplexQuadratic qq = Rational(-1, 1);
+    qq = qq / A;
+    return sphericalBesselATimesPiX(A, n - 1).partial_x() * FnPolynomial(PiPolynomial(qq));
+  }
+
+  Function Function::sphericalNeumannATimesPiX(const ComplexQuadratic& A, int n)
+  {
+    if (n < 0)
+    {
+      ComplexQuadratic qq = Rational(1, 1);
+      if ((n % 2) == 0) { qq = -qq; }
+      return sphericalBesselATimesPiX(A, -n - 1) * FnPolynomial(PiPolynomial(qq));
+    }
+    if (n == 0)
+    {
+      PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
+      PiRational piRatio = PiPolynomial(-A, 1);
+      return Function(FnPolynomial::cosATimesPiX(coeff, A), FnPolynomial::xToPower(piRatio, 1));
+    }
+    ComplexQuadratic qq = Rational(-1, 1);
+    qq = qq / A;
+    return sphericalNeumannATimesPiX(A, n - 1).partial_x() * FnPolynomial(PiPolynomial(qq));
+  }
 }
