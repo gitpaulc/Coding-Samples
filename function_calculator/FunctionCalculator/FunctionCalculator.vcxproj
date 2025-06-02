@@ -268,6 +268,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\dynamic_matrix.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\function.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.h" />
@@ -277,6 +278,7 @@
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\quadratic_number.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.h" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\dynamic_matrix.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\function.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\main.cpp" />

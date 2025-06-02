@@ -4,6 +4,9 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\dynamic_matrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -34,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\dynamic_matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.h">

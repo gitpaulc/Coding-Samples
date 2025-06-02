@@ -22,6 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(HEADER_FILES
   ../complex_quadratic.h
+  ../dynamic_matrix.h
   ../fn_polynomial.h
   ../function.h
   ../mp_integer.h
@@ -36,6 +37,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   ../complex_quadratic.cpp
+  ../dynamic_matrix.cpp
   ../fn_polynomial.cpp
   ../function.cpp
   ../main.cpp
