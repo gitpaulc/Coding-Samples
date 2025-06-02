@@ -8,6 +8,12 @@ using namespace FunctionalCalculator;
 
 bool test_matrix()
 {
+  {
+    Matrix<QuadraticNumber> rotPiOver3;
+    rotPiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
+    rotPiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+    std::cout << "\nRotation by angle pi / 3:" << rotPiOver3.print(true);
+  }
   Matrix<QuadraticNumber> rotPiOver3;
   rotPiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
   rotPiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
