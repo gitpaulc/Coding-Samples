@@ -30,21 +30,37 @@ public:
     if (rows.empty()) { return (useParentheses ? "(0)" : "0"); }
     std::stringstream strm;
     int numRows = (int)rows.size();
-    for (const auto& row : rows)
+    int numCols = (int)rows[0].size();
+    std::vector<std::vector<std::string> > buffer(numRows);
+    for (int ii = 0; ii < numRows; ++ii) { buffer[ii].resize(numCols); }
+    std::vector<int> longestRows(numCols, 0);
+    for (int ii = 0; ii < numRows; ++ii)
+    {
+      for (int jj = 0; jj < numCols; ++jj)
+      {
+        std::stringstream strm0;
+        strm0 << rows[ii][jj].print(false);
+        auto current = strm0.str();
+        buffer[ii][jj] = current;
+        if ((int)(current.length()) > longestRows[jj]) { longestRows[jj] = (int)(current.length()); }
+      }
+    }
+    for (int ii = 0; ii < numRows; ++ii)
     {
       if (useParentheses)
       {
         if (numRows == 1) { strm << "("; } else { strm << "\n|| "; }
       }
-      int ii = -1;
-      for (const auto& item : row)
+      for (int jj = 0; jj < numCols; ++jj)
       {
-        ++ii;
-        if (ii > 0)
+        if (jj > 0)
         {
           if (numRows == 1) { strm << ", "; } else { strm << " | "; }
         }
-        strm << item.print(false); // TODO: Deal with situation where entries themselves have multiple rows.
+        const auto& current = buffer[ii][jj];
+        int currentLength = (int)current.length();
+        strm << current; // TODO: Deal with situation where entries themselves have multiple rows.
+        for (int kk = 0; kk < (longestRows[jj] - currentLength); ++kk) { strm << " "; }
       }
       if (numRows == 1) { strm << ")"; } else { strm << " ||"; }
     }
