@@ -19,6 +19,12 @@ bool test_matrix()
   rotPiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
   rotPiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
   std::cout << "\nRotation by angle pi / 3:" << rotPiOver3.print(true);
+
+  Matrix<QuadraticNumber> otherRotPiOver3;
+  otherRotPiOver3.addRow({ Rational(-1, 3), QuadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
+  otherRotPiOver3.addRow({ QuadraticNumber::sqrt(Rational(2, 3)), Rational(-1, 2) , QuadraticNumber::sqrt(Rational(1, 3)) * Rational(1, 2) });
+  otherRotPiOver3.addRow({ QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3), QuadraticNumber::sqrt(Rational(1, 3)) * Rational(-1, 2), Rational(5, 6)});
+  std::cout << "\nRotation by angle pi / 3:" << otherRotPiOver3.print(true);
   return true;
 }
 
