@@ -1,11 +1,20 @@
 
 #include <iostream>
 
+#include "dynamic_matrix.h"
 #include "function.h"
-#include "mp_integer.h"
-#include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
+
+bool test_matrix()
+{
+  Matrix<QuadraticNumber> rotPiOver3;
+  rotPiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
+  rotPiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
+  rotPiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+  std::cout << "\nRotation by angle pi / 3:" << rotPiOver3.print(true);
+  return true;
+}
 
 bool test_mp()
 {
@@ -259,6 +268,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting matrices:\n";
+  test_matrix();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting functions:\n";
   test_function();
   std::cout << "\nContinue... ";
