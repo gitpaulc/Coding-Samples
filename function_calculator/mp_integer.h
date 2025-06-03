@@ -49,6 +49,9 @@ public:
   bool operator<=(const mp& rhs) const;
   bool operator>=(const mp& rhs) const;
 
+  /** \return n! / ((n - k)! * k!) */
+  static mp binomialCoeff(int n, int k);
+
   friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 };
 
