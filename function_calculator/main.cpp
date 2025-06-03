@@ -124,7 +124,7 @@ bool test_matrix()
   tetrahedralSymmetries.insert(pTimesRTimesP);
   tetrahedralSymmetries.insert(pTimesR2);
   tetrahedralSymmetries.insert(r2TimesP);
-  std::cout << "\nNumber of tetrahedral symmetries: " << tetrahedralSymmetries.size();
+  std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << tetrahedralSymmetries.size();
   bool passedClosedness = true;
   for (const auto& sym0 : tetrahedralSymmetries)
   {
@@ -133,10 +133,10 @@ bool test_matrix()
     {
       newSymmetries.insert(sym0 * sym);
     }
-    if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nSet of tetrahedral symmetries closed under multiplication by " << sym0.print(true); }
+    if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nThe set of tetrahedral symmetries is closed under multiplication by " << sym0.print(true); }
     else { passedClosedness = false; }
   }
-  if (passedClosedness) { std::cout << "\nSet of tetrahedral symmetries truly forms a group."; }
+  if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
 
   std::cout << "\n";
   return true;
