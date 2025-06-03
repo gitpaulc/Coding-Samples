@@ -124,7 +124,7 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.xInd = p;
@@ -133,7 +133,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::yToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::yToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.yInd = p;
@@ -142,13 +142,35 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::zToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::zToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.zInd = p;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
+  }
+
+  FnPolynomial FnPolynomial::multinomial(const PiRational& coeff,
+      const PiRational& A, const PiRational& B, const PiRational& C, const PiRational& D, unsigned int p)
+  {
+    FnPolynomial answer;
+    PiRational one = PiPolynomial(ComplexQuadratic(Rational(mp(1), mp(1))));
+    for (unsigned int aa = 0; aa <= p; ++aa)
+    {
+      for (unsigned int bb = 0; bb <= (p - aa); ++bb)
+      {
+        for (unsigned int cc = 0; cc <= (p - aa - bb); ++cc)
+        {
+          PiRational termCoeff = A.pow(aa) * B.pow(bb) * C.pow(cc) * D.pow(p - aa - bb - cc);
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)p, (int)aa), mp(1))));
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa), (int)bb), mp(1))));
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa - bb), (int)cc), mp(1))));
+          answer = answer + FnPolynomial::xToPower(termCoeff, aa) * FnPolynomial::yToPower(one, bb) * FnPolynomial::zToPower(one, cc);
+        }
+      }
+    }
+    return answer * coeff;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)

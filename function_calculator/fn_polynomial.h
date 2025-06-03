@@ -27,9 +27,9 @@ class FnPolynomial
 {
   struct Monomial
   {
-    int xInd = 0;
-    int yInd = 0;
-    int zInd = 0;
+    unsigned int xInd = 0;
+    unsigned int yInd = 0;
+    unsigned int zInd = 0;
     ComplexQuadratic ePiXInd = 0;
     ComplexQuadratic ePiYInd = 0;
     ComplexQuadratic ePiZInd = 0;
@@ -46,9 +46,12 @@ public:
 
   // POLYNOMIALS:
 
-  static FnPolynomial xToPower(const PiRational& coeff, int p); /**< \return coeff * x^p */
-  static FnPolynomial yToPower(const PiRational& coeff, int p); /**< \return coeff * y^p */
-  static FnPolynomial zToPower(const PiRational& coeff, int p); /**< \return coeff * z^p */
+  static FnPolynomial xToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * x^p */
+  static FnPolynomial yToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * y^p */
+  static FnPolynomial zToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * z^p */
+  /** \brief \return (A * x + B * y + C * z + D)^p */
+  static FnPolynomial multinomial(const PiRational& coeff,
+      const PiRational& A, const PiRational& B, const PiRational& C, const PiRational& D, unsigned int p);
 
   // EXPONENTIALS:
 
