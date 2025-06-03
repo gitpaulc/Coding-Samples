@@ -111,7 +111,7 @@ public:
     int mm = (int)rows.size();
     if (mm == 0) { return answer; }
     int nn = (int)rows[0].size();
-    if (nn != (int)rhs.rows.size()) { throw std::invalid_argument("Matrix mult A * B: numCols(A) must == numRows(B)"); return answer; }
+    if (nn != (int)rhs.rows.size()) { throw std::invalid_argument("Matrix mult A * B: numCols(A) must equal numRows(B)"); return answer; }
     int pp = (int)rhs.rows[0].size();
 
     answer.rows.resize(mm);
@@ -128,6 +128,21 @@ public:
         }
       }
     }
+    return answer;
+  }
+
+  Matrix transpose() const
+  {
+    Matrix answer;
+    if (rows.empty()) { return answer; }
+
+    int numRows = (int)rows.size();
+    int numCols = (int)rows[0].size();
+
+    answer.rows.resize(numCols);
+    for (int ii = 0; ii < numCols; ++ii) { answer.rows[ii].resize(numRows); }
+
+    for (int ii = 0; ii < numCols; ++ii) { for (int jj = 0; jj < numRows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
     return answer;
   }
 };
