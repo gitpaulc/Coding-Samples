@@ -14,6 +14,11 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Division by zero.");
     }
+    else if (nn == PiPolynomial(0))
+    {
+      num = nn;
+      denom = PiPolynomial(1);
+    }
     else
     {
       auto gcd_ = PiPolynomial::gcd(nn, dd);

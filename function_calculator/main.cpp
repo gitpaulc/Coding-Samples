@@ -5,6 +5,32 @@
 
 using namespace FunctionalCalculator;
 
+bool test_composition()
+{
+  PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+  auto zero = one - one;
+  {
+    auto two = one + one;
+    FnPolynomial fn = FnPolynomial::multinomial(one, two, two + one, two + two, one, 2);
+    std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fn.print();
+    auto fnOther = FnPolynomial::multinomial(one, one, zero, zero, one, 2);
+    std::cout << "\n\n(1 + x)^2 = " << fnOther.print();
+    Matrix<ComplexQuadratic> transform;
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(4, 1)), ComplexQuadratic::sqrt(Rational(9, 1)), ComplexQuadratic::sqrt(Rational(16, 1)) });
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
+    fnOther = fnOther.composeWith(transform);
+    std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fnOther.print();
+    std::cout << "\n0 = " << (fn - fnOther).print();
+  }
+  auto cosine = FnPolynomial::cosATimesPiX(one, ComplexQuadratic(Rational(1, 1)));
+  auto cosineLap = cosine.laplacian();
+  PiRational eigen;
+  bool isEigen = cosine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  return true;
+}
+
 bool test_matrix()
 {
   {
@@ -419,6 +445,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting function composition:\n";
+  test_composition();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting matrices:\n";
   test_matrix();
   std::cout << "\nContinue, or 'Q' to exit? ";
