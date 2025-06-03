@@ -156,6 +156,8 @@
 
 ## **Function Calculator.**
 
+<a href="#"><img alt="ComputationalGeometry" src="function_calculator/matrixRotations.png" width="100%"/></a>
+
 * This is a utility written in C++ for calculating with functions.
 * It is located in the `function_calculator` directory.
 * It can be built like the [graphing calculator](##graphing-math) and does not require extra libraries.
