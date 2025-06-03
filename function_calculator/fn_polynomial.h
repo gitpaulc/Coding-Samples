@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #ifndef FN_POLYNOMIAL_H
 #define FN_POLYNOMIAL_H
 
+#include "dynamic_matrix.h"
 #include "pi_rational.h"
 
 #include <map>
@@ -43,6 +44,11 @@ class FnPolynomial
 public:
   FnPolynomial(const PiRational& coeff = PiPolynomial(0));
   virtual std::string print(bool useParentheses = false) const;
+
+  // MATRIX COMPOSITION:
+
+  /** \brief If the function is F(u), returns F(M * u) where M is the matrix and u is a 3d vector (x, y, z). */
+  FnPolynomial composeWith(const Matrix<ComplexQuadratic>& transform) const;
 
   // POLYNOMIALS:
 

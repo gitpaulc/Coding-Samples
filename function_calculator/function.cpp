@@ -118,6 +118,14 @@ namespace FunctionalCalculator
     return Function(FnPolynomial(coeff), one);
   }
 
+  Function Function::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  {
+    Function answer;
+    answer.num = num.composeWith(transform);
+    answer.denom = denom.composeWith(transform);
+    return answer;
+  }
+
   Function Function::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::cosATimesPiX(PiPolynomial(1), A));

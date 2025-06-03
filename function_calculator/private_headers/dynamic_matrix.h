@@ -29,14 +29,14 @@ public:
   {
     if (rows.empty()) { return (useParentheses ? "(0)" : "0"); }
     std::stringstream strm;
-    int numRows = (int)rows.size();
-    int numCols = (int)rows[0].size();
-    std::vector<std::vector<std::string> > buffer(numRows);
-    for (int ii = 0; ii < numRows; ++ii) { buffer[ii].resize(numCols); }
-    std::vector<int> longestRows(numCols, 0);
-    for (int ii = 0; ii < numRows; ++ii)
+    int num_Rows = (int)rows.size();
+    int num_Cols = (int)rows[0].size();
+    std::vector<std::vector<std::string> > buffer(num_Rows);
+    for (int ii = 0; ii < num_Rows; ++ii) { buffer[ii].resize(num_Cols); }
+    std::vector<int> longestRows(num_Cols, 0);
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < numCols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         std::stringstream strm0;
         strm0 << rows[ii][jj].print(false);
@@ -45,27 +45,43 @@ public:
         if ((int)(current.length()) > longestRows[jj]) { longestRows[jj] = (int)(current.length()); }
       }
     }
-    for (int ii = 0; ii < numRows; ++ii)
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       strm << "\n";
       if (useParentheses)
       {
-        if (numRows == 1) { strm << "("; } else { strm << "|| "; }
+        if (num_Rows == 1) { strm << "("; } else { strm << "|| "; }
       }
-      for (int jj = 0; jj < numCols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         if (jj > 0)
         {
-          if (numRows == 1) { strm << ", "; } else { strm << " | "; }
+          if (num_Rows == 1) { strm << ", "; } else { strm << " | "; }
         }
         const auto& current = buffer[ii][jj];
         int currentLength = (int)current.length();
         strm << current; // TODO: Deal with situation where entries themselves have multiple rows.
         for (int kk = 0; kk < (longestRows[jj] - currentLength); ++kk) { strm << " "; }
       }
-      if (numRows == 1) { strm << ")"; } else { strm << " ||"; }
+      if (num_Rows == 1) { strm << ")"; } else { strm << " ||"; }
     }
     return strm.str();
+  }
+
+  int numRows() const { return (int)(rows.size()); }
+  int numCols() const
+  {
+    if (rows.empty()) { return 0; }
+    return (int)(rows[0].size());
+  }
+
+  Num at(int i, int j) const
+  {
+    if (i < 0) { throw std::invalid_argument("Row index cannot be negative."); return Num(); }
+    if (j < 0) { throw std::invalid_argument("Columns index cannot be negative."); return Num(); }
+    if (i >= numRows()) { throw std::invalid_argument("Row index must be less than matrix dimension."); return Num(); }
+    if (j >= numCols()) { throw std::invalid_argument("Columns index must be less than matrix dimension."); return Num(); }
+    return rows[i][j];
   }
 
   void addRow(const std::vector<Num>& rowIn)
@@ -91,11 +107,11 @@ public:
     if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
-    int numRows = (int)rows.size(); int numCols = (int)rows[0].size();
+    int num_Rows = (int)rows.size(); int num_Cols = (int)rows[0].size();
     answer.rows = rows;
-    for (int ii = 0; ii < numRows; ++ii)
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < numCols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer.rows[ii][jj] = answer.rows[ii][jj] + rhs.rows[ii][jj];
       }
@@ -137,22 +153,22 @@ public:
     Matrix answer;
     if (rows.empty()) { return answer; }
 
-    int numRows = (int)rows.size();
-    int numCols = (int)rows[0].size();
+    int num_Rows = (int)rows.size();
+    int num_Cols = (int)rows[0].size();
 
-    answer.rows.resize(numCols);
-    for (int ii = 0; ii < numCols; ++ii) { answer.rows[ii].resize(numRows); }
+    answer.rows.resize(num_Cols);
+    for (int ii = 0; ii < num_Cols; ++ii) { answer.rows[ii].resize(num_Rows); }
 
-    for (int ii = 0; ii < numCols; ++ii) { for (int jj = 0; jj < numRows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
+    for (int ii = 0; ii < num_Cols; ++ii) { for (int jj = 0; jj < num_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
     return answer;
   }
 
   bool operator==(const Matrix& rhs) const
   {
     if (rows.size() != rhs.rows.size()) { return false; }
-    int numRows = (int)rows.size();
-    int numCols = 0;
-    for (int ii = 0; ii < numRows; ++ii)
+    int num_Rows = (int)rows.size();
+    int num_Cols = 0;
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       if (rows[ii].size() != rhs.rows[ii].size()) { return false; }
       if (ii > 0)
@@ -161,8 +177,8 @@ public:
         if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
       }
       else
-      { numCols = (int)rows[0].size(); }
-      for (int jj = 0; jj < numCols; ++jj)
+      { num_Cols = (int)rows[0].size(); }
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         if (rows[ii][jj] == rhs.rows[ii][jj]) { continue; }
         return false;
@@ -180,9 +196,9 @@ public:
   {
     if (rows.size() < rhs.rows.size()) { return true; }
     if (rows.size() > rhs.rows.size()) { return false; }
-    int numRows = (int)rows.size();
-    int numCols = 0;
-    for (int ii = 0; ii < numRows; ++ii)
+    int num_Rows = (int)rows.size();
+    int num_Cols = 0;
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       if (ii > 0)
       {
@@ -193,9 +209,9 @@ public:
       {
         if (rows[0].size() < rhs.rows[0].size()) { return true; }
         if (rows[0].size() > rhs.rows[0].size()) { return false; }
-        numCols = (int)rows[0].size();
+        num_Cols = (int)rows[0].size();
       }
-      for (int jj = 0; jj < numCols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         auto& aa = rows[ii][jj];
         auto& bb = rhs.rows[ii][jj];
@@ -234,11 +250,11 @@ public:
     if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
-    int numRows = (int)rows.size(); int numCols = (int)rows[0].size();
-    if ((numRows == 0) || (numCols == 0)) { return answer; }
-    for (int ii = 0; ii < numRows; ++ii)
+    int num_Rows = (int)rows.size(); int num_Cols = (int)rows[0].size();
+    if ((num_Rows == 0) || (num_Cols == 0)) { return answer; }
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < numCols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer = answer + rows[ii][jj] * rhs.rows[ii][jj];
       }

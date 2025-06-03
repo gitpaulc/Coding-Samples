@@ -124,6 +124,42 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
+  FnPolynomial FnPolynomial::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  {
+    FnPolynomial answer;
+
+    if (transform.numRows() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
+    if (transform.numCols() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
+
+    const auto& AA = transform.at(0, 0);
+    const auto& BB = transform.at(0, 1);
+    const auto& CC = transform.at(0, 2);
+    const auto& DD = transform.at(1, 0);
+    const auto& EE = transform.at(1, 1);
+    const auto& FF = transform.at(1, 2);
+    const auto& GG = transform.at(2, 0);
+    const auto& HH = transform.at(2, 1);
+    const auto& II = transform.at(2, 2);
+
+    PiRational zero = PiPolynomial(ComplexQuadratic(Rational(mp(0), mp(1))));
+    PiRational one = PiPolynomial(ComplexQuadratic(Rational(mp(1), mp(1))));
+    for (const auto& iter : self)
+    {
+      if (iter.second == PiRational()) { continue; }
+      FnPolynomial term(iter.second);
+      term = term * multinomial(one, PiPolynomial(AA), PiPolynomial(BB), PiPolynomial(CC), zero, iter.first.xInd);
+      term = term * multinomial(one, PiPolynomial(DD), PiPolynomial(EE), PiPolynomial(FF), zero, iter.first.yInd);
+      term = term * multinomial(one, PiPolynomial(GG), PiPolynomial(HH), PiPolynomial(II), zero, iter.first.zInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, AA * iter.first.ePiXInd, BB * iter.first.ePiXInd, CC * iter.first.ePiXInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, DD * iter.first.ePiYInd, EE * iter.first.ePiYInd, FF * iter.first.ePiYInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, GG * iter.first.ePiZInd, HH * iter.first.ePiZInd, II * iter.first.ePiZInd);
+      answer = answer + term;
+    }
+
+    answer.clean();
+    return answer;
+  }
+
   FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;

@@ -1,7 +1,6 @@
 
 #include <iostream>
 
-#include "dynamic_matrix.h"
 #include "function.h"
 
 using namespace FunctionalCalculator;
