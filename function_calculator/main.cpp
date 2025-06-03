@@ -13,23 +13,130 @@ bool test_matrix()
     rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
     rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
     std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+
+    Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
+    std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
+    Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
+    std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
   }
+
+  std::string prompt = "";
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
   Matrix<QuadraticNumber> rot2PiOver3;
   rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
   rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
   rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
-  std::cout << "\n\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+  std::cout << "\n\nRotation (R) by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
 
   Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
-  std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
+  std::cout << "\n\nRotation (R^2) by angle 4 * pi / 3:\n" << rot2.print(true);
+  std::cout << "\n\nR^2 == R^T:\n" << rot2PiOver3.transpose().print(true);
   Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
-  std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
+  std::cout << "\n\nRotation (R^3) by angle 6 * pi / 3:\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
   Matrix<QuadraticNumber> otherRot2PiOver3;
   otherRot2PiOver3.addRow({ Rational(-1, 3), QuadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
   otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2, 3)), Rational(-1, 2) , QuadraticNumber::sqrt(Rational(1, 3)) * Rational(1, 2) });
   otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3), QuadraticNumber::sqrt(Rational(1, 3)) * Rational(-1, 2), Rational(5, 6)});
-  std::cout << "\n\nRotation by angle 2 * pi / 3:\n" << otherRot2PiOver3.print(true);
+  std::cout << "\n\nRotation (P) by angle 2 * pi / 3:\n" << otherRot2PiOver3.print(true);
+
+  Matrix<QuadraticNumber> other2 = otherRot2PiOver3 * otherRot2PiOver3;
+  std::cout << "\n\nRotation (P^2) by angle 4 * pi / 3:\n" << other2.print(true);
+  id = otherRot2PiOver3 * otherRot2PiOver3 * otherRot2PiOver3;
+  std::cout << "\n\nRotation (P^3) by angle 6 * pi / 3:\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto rTimesP = rot2PiOver3 * otherRot2PiOver3;
+  std::cout << "\n\nRotation (R * P) by angle 2 * pi / 3:\n" << rTimesP.print(true);
+  Matrix<QuadraticNumber> rTimesP_2 = rTimesP * rTimesP;
+  std::cout << "\n\nRotation ((R * P)^2) by angle 4 * pi / 3:\n" << rTimesP_2.print(true);
+  id = rTimesP * rTimesP * rTimesP;
+  std::cout << "\n\nRotation ((R * P)^3) by angle 6 * pi / 3:\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto pTimesR = otherRot2PiOver3 * rot2PiOver3;
+  std::cout << "\n\nRotation (P * R) by angle 2 * pi / 3:\n" << pTimesR.print(true);
+  Matrix<QuadraticNumber> pTimesR_2 = pTimesR * pTimesR;
+  std::cout << "\n\nRotation ((P * R)^2) by angle 4 * pi / 3:\n" << pTimesR_2.print(true);
+  id = pTimesR * pTimesR * pTimesR;
+  std::cout << "\n\nRotation ((P * R)^3) by angle 6 * pi / 3:\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto pTimesRTimesP = otherRot2PiOver3 * rot2PiOver3 * otherRot2PiOver3;
+  std::cout << "\n\n(P * R * P) =\n" << pTimesRTimesP.print(true);
+  pTimesRTimesP = rot2PiOver3 * otherRot2PiOver3 * rot2PiOver3;
+  std::cout << "\n\n(R * P * R) =\n" << pTimesRTimesP.print(true);
+  id = pTimesRTimesP * pTimesRTimesP;
+  std::cout << "\n\n(P * R * P) * (P * R * P) =\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto pTimesR2 = otherRot2PiOver3 * rot2;
+  std::cout << "\n\n(P * R^2) =\n" << pTimesR2.print(true);
+  pTimesR2 = rot2PiOver3 * otherRot2PiOver3 * otherRot2PiOver3;
+  std::cout << "\n\n(R * P^2) =\n" << pTimesR2.print(true);
+  id = pTimesR2 * pTimesR2;
+  std::cout << "\n\n(P * R^2) * (P * R^2) =\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto r2TimesP = rot2 * otherRot2PiOver3;
+  std::cout << "\n\n(R^2 * P) =\n" << r2TimesP.print(true);
+  r2TimesP = otherRot2PiOver3 * otherRot2PiOver3 * rot2PiOver3;
+  std::cout << "\n\n(P^2 * R) =\n" << r2TimesP.print(true);
+  id = r2TimesP * r2TimesP;
+  std::cout << "\n\n(R^2 * P) * (R^2 * P) =\n" << id.print(true);
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  std::set<Matrix<QuadraticNumber> > tetrahedralSymmetries;
+  tetrahedralSymmetries.insert(id);
+  tetrahedralSymmetries.insert(rot2PiOver3);
+  tetrahedralSymmetries.insert(rot2);
+  tetrahedralSymmetries.insert(otherRot2PiOver3);
+  tetrahedralSymmetries.insert(other2);
+  tetrahedralSymmetries.insert(rTimesP);
+  tetrahedralSymmetries.insert(rTimesP_2);
+  tetrahedralSymmetries.insert(pTimesR);
+  tetrahedralSymmetries.insert(pTimesR_2);
+  tetrahedralSymmetries.insert(pTimesRTimesP);
+  tetrahedralSymmetries.insert(pTimesR2);
+  tetrahedralSymmetries.insert(r2TimesP);
+  std::cout << "\nNumber of tetrahedral symmetries: " << tetrahedralSymmetries.size();
+  bool passedClosedness = true;
+  for (const auto& sym0 : tetrahedralSymmetries)
+  {
+    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    for (const auto& sym : tetrahedralSymmetries)
+    {
+      newSymmetries.insert(sym0 * sym);
+    }
+    if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nSet of tetrahedral symmetries closed under multiplication by " << sym0.print(true); }
+    else { passedClosedness = false; }
+  }
+  if (passedClosedness) { std::cout << "\nSet of tetrahedral symmetries truly forms a group."; }
 
   std::cout << "\n";
   return true;
@@ -289,42 +396,42 @@ int main()
   std::string prompt;
   std::cout << "\n\nTesting matrices:\n";
   test_matrix();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting functions:\n";
   test_function();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\nTest rational:\n";
   test_rational();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest complex:\n";
   test_complex();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest pi polynomials:\n";
   test_pi();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting multiprecision integers:\n";
   test_mp();
-  std::cout << "\nContinue... ";
+  std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
 }
