@@ -107,6 +107,37 @@ bool test_matrix()
   id = r2TimesP * r2TimesP;
   std::cout << "\n\n(R^2 * P) * (R^2 * P) =\n" << id.print(true);
 
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  std::set<Matrix<QuadraticNumber> > tetrahedralSymmetries;
+  tetrahedralSymmetries.insert(id);
+  tetrahedralSymmetries.insert(rot2PiOver3);
+  tetrahedralSymmetries.insert(rot2);
+  tetrahedralSymmetries.insert(otherRot2PiOver3);
+  tetrahedralSymmetries.insert(other2);
+  tetrahedralSymmetries.insert(rTimesP);
+  tetrahedralSymmetries.insert(rTimesP_2);
+  tetrahedralSymmetries.insert(pTimesR);
+  tetrahedralSymmetries.insert(pTimesR_2);
+  tetrahedralSymmetries.insert(pTimesRTimesP);
+  tetrahedralSymmetries.insert(pTimesR2);
+  tetrahedralSymmetries.insert(r2TimesP);
+  std::cout << "\nNumber of tetrahedral symmetries: " << tetrahedralSymmetries.size();
+  bool passedClosedness = true;
+  for (const auto& sym0 : tetrahedralSymmetries)
+  {
+    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    for (const auto& sym : tetrahedralSymmetries)
+    {
+      newSymmetries.insert(sym0 * sym);
+    }
+    if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nSet of tetrahedral symmetries closed under multiplication by " << sym0.print(true); }
+    else { passedClosedness = false; }
+  }
+  if (passedClosedness) { std::cout << "\nSet of tetrahedral symmetries truly forms a group."; }
+
   std::cout << "\n";
   return true;
 }

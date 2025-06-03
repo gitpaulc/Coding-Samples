@@ -47,9 +47,10 @@ public:
     }
     for (int ii = 0; ii < numRows; ++ii)
     {
+      strm << "\n";
       if (useParentheses)
       {
-        if (numRows == 1) { strm << "("; } else { strm << "\n|| "; }
+        if (numRows == 1) { strm << "("; } else { strm << "|| "; }
       }
       for (int jj = 0; jj < numCols; ++jj)
       {
@@ -149,6 +150,8 @@ public:
   bool operator==(const Matrix& rhs) const
   {
     if (rows.size() != rhs.rows.size()) { return false; }
+    int numRows = (int)rows.size();
+    int numCols = 0;
     for (int ii = 0; ii < numRows; ++ii)
     {
       if (rows[ii].size() != rhs.rows[ii].size()) { return false; }
@@ -157,6 +160,8 @@ public:
         if (rows[0].size() != rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
         if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
       }
+      else
+      { numCols = (int)rows[0].size(); }
       for (int jj = 0; jj < numCols; ++jj)
       {
         if (rows[ii][jj] == rhs.rows[ii][jj]) { continue; }
@@ -175,6 +180,8 @@ public:
   {
     if (rows.size() < rhs.rows.size()) { return true; }
     if (rows.size() > rhs.rows.size()) { return false; }
+    int numRows = (int)rows.size();
+    int numCols = 0;
     for (int ii = 0; ii < numRows; ++ii)
     {
       if (ii > 0)
@@ -186,6 +193,7 @@ public:
       {
         if (rows[0].size() < rhs.rows[0].size()) { return true; }
         if (rows[0].size() > rhs.rows[0].size()) { return false; }
+        numCols = (int)rows[0].size();
       }
       for (int jj = 0; jj < numCols; ++jj)
       {
