@@ -73,6 +73,63 @@ public:
     if (rowIn.size() != rows[0].size()) { throw std::invalid_argument("Rows must have equal length."); return; }
     rows.push_back(rowIn);
   }
+
+  Matrix operator+() const { return *this; }
+  Matrix operator-() const
+  {
+    Matrix answer;
+    answer.rows = rows;
+    for (auto& row : rows) { for (auto& item : row) { item = -item; } }
+    return answer;
+  }
+
+  Matrix operator+(const Matrix& rhs)
+  {
+    Matrix answer;
+    if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    int numRows = (int)rows.size(); int numCols = (int)rows[0].size();
+    answer.rows = rows;
+    for (int ii = 0; ii < numRows; ++ii)
+    {
+      for (int jj = 0; jj < numCols; ++jj)
+      {
+        answer.rows[ii][jj] = answer.rows[ii][jj] + rhs.rows[ii][jj];
+      }
+    }
+    return answer;
+  }
+
+  Matrix operator-(const Matrix& rhs) const { return ((*this) + (-rhs)); }
+
+  Matrix operator*(const Matrix& rhs) const
+  {
+    Matrix answer;
+
+    int mm = (int)rows.size();
+    if (mm == 0) { return answer; }
+    int nn = (int)rows[0].size();
+    if (nn != (int)rhs.rows.size()) { throw std::invalid_argument("Matrix mult A * B: numCols(A) must == numRows(B)"); return answer; }
+    int pp = (int)rhs.rows[0].size();
+
+    answer.rows.resize(mm);
+    for (int ii = 0; ii < mm; ++ii) { answer.rows[ii].resize(pp); }
+
+    for (int ii = 0; ii < mm; ++ii)
+    {
+      for (int jj = 0; jj < pp; ++jj)
+      {
+        auto& current = answer.rows[ii][jj];
+        for (int kk = 0; kk < nn; ++kk)
+        {
+          current = current + rows[ii][kk] * rhs.rows[kk][jj];
+        }
+      }
+    }
+    return answer;
+  }
 };
 }
 
