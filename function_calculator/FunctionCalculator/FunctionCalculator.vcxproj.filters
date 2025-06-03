@@ -33,6 +33,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\private_headers\dynamic_matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.h">
       <Filter>Header Files</Filter>
     </ClInclude>

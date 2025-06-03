@@ -20,6 +20,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Header files.
 
+set(PRIVATE_HEADERS
+  ../private_headers/dynamic_matrix.h
+)
+
 set(HEADER_FILES
   ../complex_quadratic.h
   ../fn_polynomial.h
@@ -49,10 +53,12 @@ set(SOURCE_FILES
 
 # Binary output.
 
-add_executable("${PROJ_NAME}" ${HEADER_FILES} ${SOURCE_FILES})
+add_executable("${PROJ_NAME}" ${PRIVATE_HEADERS} ${HEADER_FILES} ${SOURCE_FILES})
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "${PROJ_NAME}")
 
 # Includes.
+
+target_include_directories("${PROJ_NAME}" PRIVATE ../private_headers)
 
 # Compiler flags.
 

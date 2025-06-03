@@ -1,11 +1,39 @@
 
 #include <iostream>
 
+#include "dynamic_matrix.h"
 #include "function.h"
-#include "mp_integer.h"
-#include "pi_polynomial.h"
 
 using namespace FunctionalCalculator;
+
+bool test_matrix()
+{
+  {
+    Matrix<QuadraticNumber> rot2PiOver3;
+    rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
+    rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+    std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+  }
+  Matrix<QuadraticNumber> rot2PiOver3;
+  rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
+  rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
+  rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+  std::cout << "\n\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+
+  Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
+  std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
+  Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
+  std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
+
+  Matrix<QuadraticNumber> otherRot2PiOver3;
+  otherRot2PiOver3.addRow({ Rational(-1, 3), QuadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
+  otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2, 3)), Rational(-1, 2) , QuadraticNumber::sqrt(Rational(1, 3)) * Rational(1, 2) });
+  otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3), QuadraticNumber::sqrt(Rational(1, 3)) * Rational(-1, 2), Rational(5, 6)});
+  std::cout << "\n\nRotation by angle 2 * pi / 3:\n" << otherRot2PiOver3.print(true);
+
+  std::cout << "\n";
+  return true;
+}
 
 bool test_mp()
 {
@@ -259,6 +287,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting matrices:\n";
+  test_matrix();
+  std::cout << "\nContinue... ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting functions:\n";
   test_function();
   std::cout << "\nContinue... ";
