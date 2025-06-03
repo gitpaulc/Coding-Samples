@@ -145,6 +145,78 @@ public:
     for (int ii = 0; ii < numCols; ++ii) { for (int jj = 0; jj < numRows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
     return answer;
   }
+
+  bool operator==(const Matrix& rhs) const
+  {
+    if (rows.size() != rhs.rows.size()) { return false; }
+    for (int ii = 0; ii < numRows; ++ii)
+    {
+      if (rows[ii].size() != rhs.rows[ii].size()) { return false; }
+      if (ii > 0)
+      {
+        if (rows[0].size() != rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+        if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+      }
+      for (int jj = 0; jj < numCols; ++jj)
+      {
+        if (rows[ii][jj] == rhs.rows[ii][jj]) { continue; }
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool operator!=(const Matrix& rhs) const
+  {
+    return !((*this) == rhs);
+  }
+
+  bool operator<(const Matrix& rhs) const
+  {
+    if (rows.size() < rhs.rows.size()) { return true; }
+    if (rows.size() > rhs.rows.size()) { return false; }
+    for (int ii = 0; ii < numRows; ++ii)
+    {
+      if (ii > 0)
+      {
+        if (rows[0].size() != rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+        if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+      }
+      else
+      {
+        if (rows[0].size() < rhs.rows[0].size()) { return true; }
+        if (rows[0].size() > rhs.rows[0].size()) { return false; }
+      }
+      for (int jj = 0; jj < numCols; ++jj)
+      {
+        auto& aa = rows[ii][jj];
+        auto& bb = rhs.rows[ii][jj];
+        if (aa < bb) { return true; }
+        if (aa == bb) { continue; }
+        return false;
+      }
+    }
+    return false;
+  }
+
+  bool operator>(const Matrix& rhs) const
+  {
+    return (rhs < (*this));
+  }
+
+  bool operator<=(const Matrix& rhs) const
+  {
+    if ((*this) < rhs) { return true; }
+    if ((*this) == rhs) { return true; }
+    return false;
+  }
+
+  bool operator>=(const Matrix& rhs) const
+  {
+    if (rhs < (*this)) { return true; }
+    if (rhs == (*this)) { return true; }
+    return false;
+  }
 };
 }
 
