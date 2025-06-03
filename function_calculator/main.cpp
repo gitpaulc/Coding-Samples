@@ -138,6 +138,32 @@ bool test_matrix()
   }
   if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
 
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    Matrix<QuadraticNumber> vec0;
+    vec0.addRow({ QuadraticNumber::sqrt(6) * Rational(1, 4), Rational(0), Rational(0) });
+    vec0 = vec0.transpose();
+    std::set<Matrix<QuadraticNumber> > tetrahedron;
+    for (const auto& sym : tetrahedralSymmetries) { tetrahedron.insert((sym * vec0).transpose()); }
+    std::cout << "\nNumber of vertices in a tetrahedron = " << tetrahedron.size() << "\nWe can choose them to be:";
+    for (const auto& vertex : tetrahedron)
+    {
+      std::cout << "\n" << vertex.print(true);
+    }
+    for (const auto& vertexA : tetrahedron)
+    {
+      std::cout << "\n\nSquared length of " << vertexA.print(true) << " = " << vertexA.matrixSqNorm().print();
+      for (const auto& vertexB : tetrahedron)
+      {
+        if (vertexA == vertexB) { continue; }
+        std::cout << "\n  Distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
+      }
+    }
+  }
+
   std::cout << "\n";
   return true;
 }

@@ -84,7 +84,7 @@ public:
     return answer;
   }
 
-  Matrix operator+(const Matrix& rhs)
+  Matrix operator+(const Matrix& rhs) const
   {
     Matrix answer;
     if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
@@ -225,6 +225,28 @@ public:
     if (rhs == (*this)) { return true; }
     return false;
   }
+
+  Num matrixDot(const Matrix& rhs) const
+  {
+    Num answer;
+    answer = answer - answer;
+    if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    int numRows = (int)rows.size(); int numCols = (int)rows[0].size();
+    if ((numRows == 0) || (numCols == 0)) { return answer; }
+    for (int ii = 0; ii < numRows; ++ii)
+    {
+      for (int jj = 0; jj < numCols; ++jj)
+      {
+        answer = answer + rows[ii][jj] * rhs.rows[ii][jj];
+      }
+    }
+    return answer;
+  }
+
+  Num matrixSqNorm() const { return matrixDot(*this); }
 };
 }
 
