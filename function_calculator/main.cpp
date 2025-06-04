@@ -31,6 +31,32 @@ bool test_composition()
   if (isEigen) { std::cout << "\n\n" << sine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  std::set<Matrix<ComplexQuadratic> > cubeVertices;
+  {
+    ComplexQuadratic unit(Rational(1, 1));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, -unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, -unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, -unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, -unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, unit }));
+  }
+  FnPolynomial cubeSine, cubeCosine;
+  for (const auto& vertex : cubeVertices)
+  {
+    ComplexQuadratic zero(Rational(0, 1));
+    auto transform = vertex;
+    transform.addRow({ zero, zero, zero });
+    transform.addRow({ zero, zero, zero });
+    cubeSine = cubeSine + sine.composeWith(transform);
+    cubeCosine = cubeCosine + cosine.composeWith(transform);
+  }
+  isEigen = cubeSine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cubeSine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  isEigen = cubeCosine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   return true;
 }
 

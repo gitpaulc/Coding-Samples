@@ -84,6 +84,11 @@ public:
     return rows[i][j];
   }
 
+  Matrix(const std::vector<Num>& rowIn = {})
+  {
+    rows.resize(0); if (!rowIn.empty()) { rows.push_back(rowIn); }
+  }
+
   void addRow(const std::vector<Num>& rowIn)
   {
     if (rows.empty()) { rows.push_back(rowIn); return; }
