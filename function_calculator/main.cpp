@@ -83,7 +83,13 @@ bool test_matrix()
   rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
   rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
   rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+
+  // Elementary row operations test. These should ultimately leave the matrix unchanged:
   rot2PiOver3.swapRows(0, 1); rot2PiOver3.swapRows(1, 0);
+  rot2PiOver3.scaleRow(1, Rational(2, 1)); rot2PiOver3.scaleRow(1, Rational(1, 2));
+  rot2PiOver3.addScaledRowJ_toI(0, 1, Rational(2, 1));
+  rot2PiOver3.addScaledRowJ_toI(0, 1, Rational(-2, 1));
+
   std::cout << "\n\nRotation (R) by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
 
   Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
@@ -479,11 +485,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
-  std::cout << "\n\nTesting function composition:\n";
+  /*std::cout << "\n\nTesting function composition:\n";
   test_composition();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
-  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }*/
   std::cout << "\n\nTesting matrices:\n";
   test_matrix();
   std::cout << "\nContinue, or 'Q' to exit? ";
