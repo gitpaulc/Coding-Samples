@@ -40,6 +40,7 @@ public:
   mp operator*(const mp& rhs) const;
   mp operator/(const mp& rhs) const;
   mp operator%(const mp& rhs) const;
+  mp abs() const;
   static mp gcd(const mp& aa, const mp& bb);
   mp pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const mp& rhs) const;

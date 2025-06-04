@@ -108,7 +108,15 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Operator division by zero.");
     }
-    return PiRational(num * rhs.denom, denom * rhs.num);
+    auto num_ = num * rhs.denom;
+    auto den_ = denom * rhs.num;
+    if (den_.degree() == 0)
+    {
+      auto one = ComplexQuadratic((Rational(1, 1)));
+      auto factor = one / den_.conversion();
+      return PiRational(num_ * factor, one);
+    }
+    return PiRational(num_, den_);
   }
 
   PiRational PiRational::pow(int p) const

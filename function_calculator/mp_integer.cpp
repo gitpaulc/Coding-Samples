@@ -317,6 +317,13 @@ namespace FunctionalCalculator
     return quotient;
   }
 
+  mp mp::abs() const
+  {
+    mp answer = *this;
+    answer.negative = false;
+    return answer;
+  }
+
   mp mp::gcd(const mp& aa, const mp& bb)
   {
     if ((aa == bb) || (aa == mp(0))) { return bb; }
