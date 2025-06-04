@@ -178,14 +178,14 @@ namespace FunctionalCalculator
     PiPolynomial quotient = PiPolynomial(0);
     for (int prevDegree = divDegree; rhsDegree <= divDegree;)
     {
-      auto monomial = PiPolynomial(rhs.self.at(rhsDegree) / dividend.self.at(divDegree), divDegree - rhsDegree);
+      auto monomial = PiPolynomial(dividend.self.at(divDegree) / rhs.self.at(rhsDegree), divDegree - rhsDegree);
       quotient = quotient + monomial;
       auto product = rhs * monomial;
       if (product == dividend) { remainder = PiPolynomial(0); return quotient; }
       dividend = dividend - product;
       prevDegree = divDegree;
       divDegree = dividend.degree();
-      if (prevDegree <= divDegree) { break; } // Should never happen.
+      if (prevDegree <= divDegree) { throw std::logic_error("Failure in long division."); break; } // Should never happen.
     }
     remainder = dividend;
     return quotient;

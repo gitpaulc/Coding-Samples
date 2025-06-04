@@ -236,7 +236,9 @@ namespace FunctionalCalculator
           answer[factor] = 1;
         }
         else { answer[factor] = answer[factor] + 1; }
-        auto others = primeFactorization(input / factor);
+        auto quotient = input / factor;
+        if (quotient.abs() >= input.abs()) { break; } // Should never happen.
+        auto others = primeFactorization(quotient);
         for (auto& iter : others)
         {
           if (answer.find(iter.first) == answer.end())
