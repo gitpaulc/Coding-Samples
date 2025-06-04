@@ -96,7 +96,37 @@ public:
     rows.push_back(rowIn);
   }
 
+  /** \brief Elementary row operation. Changes sign of the determinant if i != j. */
   void swapRows(int i, int j)
+  {
+    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
+    if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (j >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (i == j) { return; }
+    int nn = (int)(rows[0].size());
+    for (int kk = 0; kk < nn; ++kk)
+    {
+      auto temp = rows[i][kk];
+      rows[i][kk] = rows[j][kk];
+      rows[j][kk] = temp;
+    }
+  }
+
+  /** \brief Elementary row operation. Multiplies the determinant by scal. */
+  void scaleRow(int i, const Num& scal)
+  {
+    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
+    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    int nn = (int)(rows[0].size());
+    for (int kk = 0; kk < nn; ++kk)
+    {
+      rows[i][kk] = scal * rows[i][kk];
+    }
+  }
+
+  /** \brief Elementary row operation. Leaves determinant unchanged if i != j, otherwise acts as scaleRow method by (1 + scal). */
+  void addScaledRowJ_toI(int i, int j, const Num& scal)
   {
     if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
     if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
@@ -105,9 +135,7 @@ public:
     int nn = (int)(rows[0].size());
     for (int kk = 0; kk < nn; ++kk)
     {
-      auto temp = rows[i][kk];
-      rows[i][kk] = rows[j][kk];
-      rows[j][kk] = temp;
+      rows[i][kk] = rows[i][kk] + scal * rows[j][kk];
     }
   }
 
