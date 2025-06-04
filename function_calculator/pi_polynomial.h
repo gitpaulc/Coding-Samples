@@ -42,6 +42,12 @@ public:
   bool isReal() const;
   PiPolynomial re() const;
   PiPolynomial im() const;
+
+  /** \return The number as ComplexQuadratic if it has zero degree.
+   *
+   *  \exception Throws an invalid argument exception if the pi polynomial has degree > 0.
+   */
+  ComplexQuadratic conversion() const;
 };
 }
 

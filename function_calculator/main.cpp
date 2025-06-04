@@ -23,10 +23,13 @@ bool test_composition()
     std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fnOther.print();
     std::cout << "\n0 = " << (fn - fnOther).print();
   }
-  auto cosine = FnPolynomial::cosATimesPiX(one, ComplexQuadratic(Rational(1, 1)));
-  auto cosineLap = cosine.laplacian();
+  mp frequency(1);
+  auto sine = FnPolynomial::sinATimesPiX(one, ComplexQuadratic(Rational(frequency, 1)));
+  auto cosine = FnPolynomial::cosATimesPiX(one, ComplexQuadratic(Rational(frequency, 1)));
   PiRational eigen;
-  bool isEigen = cosine.isLaplaceEigenfunction(eigen);
+  bool isEigen = sine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << sine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   return true;
 }
@@ -323,6 +326,10 @@ bool test_complex()
   auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
   std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
   std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
+  auto minusTwoI = ComplexQuadratic(Rational(1, 1)) / ComplexQuadratic::sqrt(Rational(-1, 4));
+  std::cout << "\n\n-2 * i = " << minusTwoI.print();
+  minusTwoI = -ComplexQuadratic::sqrt(Rational(-4, 1));
+  std::cout << "\n\n-2 * i = " << minusTwoI.print();
   return true;
 }
 

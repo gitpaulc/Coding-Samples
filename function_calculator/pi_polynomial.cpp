@@ -273,4 +273,11 @@ namespace FunctionalCalculator
     answer = answer * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return answer;
   }
+
+  ComplexQuadratic PiPolynomial::conversion() const
+  {
+    if (self.empty()) { return ComplexQuadratic(Rational(0)); }
+    if (degree() != 0) { throw std::invalid_argument("No valid conversion available."); return ComplexQuadratic(Rational(0)); }
+    return self.at(degree());
+  }
 }
