@@ -485,11 +485,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
-  /*std::cout << "\n\nTesting function composition:\n";
+  std::cout << "\n\nTesting function composition:\n";
   test_composition();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
-  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }*/
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting matrices:\n";
   test_matrix();
   std::cout << "\nContinue, or 'Q' to exit? ";
