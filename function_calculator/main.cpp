@@ -83,6 +83,7 @@ bool test_matrix()
   rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
   rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
   rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+  rot2PiOver3.swapRows(0, 1); rot2PiOver3.swapRows(1, 0);
   std::cout << "\n\nRotation (R) by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
 
   Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;

@@ -96,6 +96,21 @@ public:
     rows.push_back(rowIn);
   }
 
+  void swapRows(int i, int j)
+  {
+    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
+    if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (j >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    int nn = (int)(rows[0].size());
+    for (int kk = 0; kk < nn; ++kk)
+    {
+      auto temp = rows[i][kk];
+      rows[i][kk] = rows[j][kk];
+      rows[j][kk] = temp;
+    }
+  }
+
   Matrix operator+() const { return *this; }
   Matrix operator-() const
   {
