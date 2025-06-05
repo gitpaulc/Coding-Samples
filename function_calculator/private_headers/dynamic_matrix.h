@@ -176,7 +176,7 @@ public:
     if (!ignoreDeterminant) { determinant = Num(); }
     linIndep = true;
     if (rows.empty()) { return *this; }
-    Num unit(Rational(1, 1));
+    Num unit(1);
     Num det = unit;
     int num_Rows = (int)rows.size();
     int num_Cols = (int)rows[0].size();
@@ -268,8 +268,8 @@ public:
     if (!isSquare()) { throw std::invalid_argument("Matrix must be square."); success = false; return answer; }
     const int dim = numRows();
     if (dim == 0) { success = false; return answer; }
-    Num zero(Rational(0, 1));
-    Num unit(Rational(1, 1));
+    Num zero;
+    Num unit(1);
     Matrix rREFed;
     for (int ii = 0; ii < dim; ++ii)
     {
