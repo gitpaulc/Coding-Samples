@@ -22,9 +22,9 @@ class Matrix : public Number
   static int getLeadingOneIndex(const std::vector<Num>& row)
   {
     Num zero_;
-    int numCols = (int)row.size();
+    int num_Cols = (int)row.size();
     int ii = 0;
-    for (; ii < numCols; ++ii)
+    for (; ii < num_Cols; ++ii)
     {
       if (row[ii] != zero_) { return ii; }
     }
@@ -168,15 +168,18 @@ public:
   /** \return Reduced row echelon form.
    * 
    *  \param `determinant` Output reference is set to the determinant of the matrix, or 0 if matrix is not square.
+   *  \param `linInd` Output reference is set to true if rows of the matrix are linearly independent
    *  \param `ignoreDeterminant` Speeds up algorithm by ignoring determinant (use O(n * log(n)) sort rather than bubble sort)
    */
-  Matrix rref(Num& determinant, bool ignoreDeterminant = false) const
+  Matrix rref(Num& determinant, bool& linIndep, bool ignoreDeterminant = false) const
   {
-    if (rows.empty()) { determinant = Num(); return *this; }
+    if (!ignoreDeterminant) { determinant = Num(); }
+    linIndep = true;
+    if (rows.empty()) { return *this; }
     Num unit(Rational(1, 1));
     Num det = unit;
-    int numRows = (int)rows.size();
-    int numCols = (int)rows[0].size();
+    int num_Rows = (int)rows.size();
+    int num_Cols = (int)rows[0].size();
     Matrix answer;
     answer.rows = rows;
     bool gotToRowEchelon = false;
@@ -187,12 +190,12 @@ public:
         std::sort(answer.rows.begin(), answer.rows.end(), compareLessThan);
       }
       // else ... Bubble sort while computing determinant.
-      for (int ii = 0; ii < numRows; ++ii)
+      for (int ii = 0; ii < num_Rows; ++ii)
       {
         if (ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
-        for (int jj = ii + 1; jj < numRows; ++jj)
+        for (int jj = ii + 1; jj < num_Rows; ++jj)
         {
           int leadJ = getLeadingOneIndex(answer.rows[jj]);
           if (leadI <= leadJ) { continue; }
@@ -205,11 +208,11 @@ public:
       }
       if (!performingRref) { continue; }
       bool adjusting = false;
-      for (int ii = 0; ii < numRows; ++ii) // Divide by leading coefficient.
+      for (int ii = 0; ii < num_Rows; ++ii) // Divide by leading coefficient.
       {
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
-        if (jj == numCols) { break; }
+        if (jj >= num_Cols) { linIndep = false; break; }
         if (answer.rows[ii][jj] == unit) { continue; }
         auto factor = unit / answer.rows[ii][jj];
         answer.scaleRow(ii, factor);
@@ -220,11 +223,11 @@ public:
       {
         int prevInd = -1;
         if (!gotToRowEchelon) { prevInd = getLeadingOneIndex(answer.rows[0]); }
-        for (int ii = 1; ii < numRows; ++ii)
+        for (int ii = 1; ii < num_Rows; ++ii)
         {
           if (gotToRowEchelon) { break; }
           int jj = getLeadingOneIndex(answer.rows[ii]);
-          if (jj >= numCols) { break; }
+          if (jj >= num_Cols) { linIndep = false; break; }
           if (jj > prevInd) { prevInd = jj; continue; }
           answer.addScaledRowJ_toI(ii, prevInd, -unit); // det unchanged.
           adjusting = true;
@@ -233,10 +236,10 @@ public:
       if (adjusting) { performingRref = false; continue; }
       gotToRowEchelon = true;
       // Now from row echelon form, modify to reduced row echelon form.
-      for (int ii = numCols - 1; ii >= 0; --ii)
+      for (int ii = num_Cols - 1; ii >= 0; --ii)
       {
         int ind = getLeadingOneIndex(answer.rows[ii]);
-        if (ind >= numCols) { continue; }
+        if (ind >= num_Cols) { linIndep = false; continue; }
         for (int jj = ii - 1; jj >= 0; --jj)
         {
           if (answer.rows[jj][ind] == Num()) { continue; }
@@ -246,6 +249,49 @@ public:
       // Now the answer is in rref.
     }
     if (isSquare()) { determinant = det; }
+    return answer;
+  }
+
+  Num determinant() const
+  {
+    Num det; bool success = false;
+    rref(det, success);
+    return det;
+  }
+
+  /** \param `success` is true if and only matrix is invertible.
+   *  \return Inverse matrix if the matrix is invertible, zero otherwise.
+   */
+  Matrix inverse(bool& success) const
+  {
+    Matrix answer;
+    if (!isSquare()) { throw std::invalid_argument("Matrix must be square."); success = false; return answer; }
+    const int dim = numRows();
+    if (dim == 0) { success = false; return answer; }
+    Num zero(Rational(0, 1));
+    Num unit(Rational(1, 1));
+    Matrix rREFed;
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      auto newRow = rows[ii];
+      newRow.resize(2 * dim);
+      for (int jj = 0; jj < dim; ++jj) { newRow[dim + jj] = ((ii == jj) ? unit : zero); }
+      rREFed.addRow(newRow);
+    }
+    Num det;
+    rREFed = rREFed.rref(det, success);
+    if (!success) { return answer; }
+    auto dimTwice = 2 * dim;
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      std::vector<Num> newRow(dim);
+      auto& current = rREFed.rows[ii];
+      for (int jj = 0; jj < dim; ++jj)
+      {
+        newRow[jj] = current[dim + jj];
+      }
+      answer.addRow(newRow);
+    }
     return answer;
   }
 
@@ -283,10 +329,11 @@ public:
   {
     Matrix answer;
     answer.rows = rows;
-    int numRows = (int)rows.size();
+    const int num_Rows = numRows();
+    if (num_Rows == Num()) { return answer; }
+    const int num_Cols = numCols();
     for (int ii = 0; ii < num_Rows; ++ii)
     {
-      int numCols = (int)rows[ii].size();
       for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer.rows[ii][jj] = answer.rows[ii][jj] * rhs;

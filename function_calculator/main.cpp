@@ -66,8 +66,8 @@ bool test_matrix()
     Matrix<QuadraticNumber> rot2PiOver3;
     rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
     rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
-    QuadraticNumber det;
-    auto rref = rot2PiOver3.rref(det);
+    QuadraticNumber det; bool linInd = true;
+    auto rref = rot2PiOver3.rref(det, linInd);
     std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
     std::cout << "\nIts determinant = " << det.print();
 
@@ -114,6 +114,10 @@ bool test_matrix()
 
   Matrix<QuadraticNumber> other2 = otherRot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (P^2) by angle 4 * pi / 3:\n" << other2.print(true);
+  {
+    bool success = false;
+    std::cout << "\n\nP^2 == P^{-1}:\n" << otherRot2PiOver3.inverse(success).print(true);
+  }
   id = otherRot2PiOver3 * otherRot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (P^3) by angle 6 * pi / 3:\n" << id.print(true);
 
@@ -202,6 +206,16 @@ bool test_matrix()
     else { passedClosedness = false; }
   }
   if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  for (const auto& sym : tetrahedralSymmetries)
+  {
+    auto det = sym.determinant();
+    std::cout << "\nIts determinant is " << det.print() << " since it's a rotation.";
+  }
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
