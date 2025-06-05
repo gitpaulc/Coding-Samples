@@ -210,6 +210,7 @@ public:
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
         if (jj == numCols) { break; }
+        if (answer.rows[ii][jj] == unit) { continue; }
         auto factor = unit / answer.rows[ii][jj];
         answer.scaleRow(ii, factor);
         det = det * factor;
