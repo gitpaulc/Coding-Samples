@@ -66,12 +66,16 @@ bool test_matrix()
     Matrix<QuadraticNumber> rot2PiOver3;
     rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
     rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+    QuadraticNumber det;
+    auto rref = rot2PiOver3.rref(det);
     std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+    std::cout << "\nIts determinant = " << det.print();
 
     Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
     Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
+    std::cout << "\n\nIdentity matrix = \n" << rref.print(true);
   }
 
   std::string prompt = "";

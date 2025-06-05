@@ -6,6 +6,7 @@ All Rights Reserved.*/
 
 #include "number.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <sstream>
 #include <vector>
@@ -17,6 +18,25 @@ template <typename Num>
 class Matrix : public Number
 {
   std::vector<std::vector<Num> > rows;
+
+  static int getLeadingOneIndex(const std::vector<Num>& row)
+  {
+    Num zero_;
+    int numCols = (int)row.size();
+    int ii = 0;
+    for (; ii < numCols; ++ii)
+    {
+      if (row[ii] != zero_) { return ii; }
+    }
+    return ii;
+  }
+
+  /** \brief Useful for resorting rows in matrix. */
+  static bool compareLessThan(const std::vector<Num>& P, const std::vector<Num>& Q)
+  {
+    return getLeadingOneIndex(P) < getLeadingOneIndex(Q);
+  }
+
 public:
 
   virtual std::pair<double, double> get() const override
@@ -139,6 +159,95 @@ public:
     }
   }
 
+  bool isSquare() const
+  {
+    if (rows.empty()) { return true; }
+    return (rows.size() == (rows[0].size()));
+  }
+
+  /** \return Reduced row echelon form.
+   * 
+   *  \param `determinant` Output reference is set to the determinant of the matrix, or 0 if matrix is not square.
+   *  \param `ignoreDeterminant` Speeds up algorithm by ignoring determinant (use O(n * log(n)) sort rather than bubble sort)
+   */
+  Matrix rref(Num& determinant, bool ignoreDeterminant = false) const
+  {
+    if (rows.empty()) { determinant = Num(); return *this; }
+    Num unit(Rational(1, 1));
+    Num det = unit;
+    int numRows = (int)rows.size();
+    int numCols = (int)rows[0].size();
+    Matrix answer;
+    answer.rows = rows;
+    bool gotToRowEchelon = false;
+    for (bool performingRref = true; performingRref; performingRref = !performingRref)
+    {
+      if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+      {
+        std::sort(answer.rows.begin(), answer.rows.end(), compareLessThan);
+      }
+      // else ... Bubble sort while computing determinant.
+      for (int ii = 0; ii < numRows; ++ii)
+      {
+        if (ignoreDeterminant) { break; }
+        if (gotToRowEchelon) { break; }
+        int leadI = getLeadingOneIndex(answer.rows[ii]);
+        for (int jj = ii + 1; jj < numRows; ++jj)
+        {
+          int leadJ = getLeadingOneIndex(answer.rows[jj]);
+          if (leadI <= leadJ) { continue; }
+          answer.swapRows(ii, jj);
+          det = -det;
+          performingRref = false;
+          break;
+        }
+        if (!performingRref) { break; }
+      }
+      if (!performingRref) { continue; }
+      bool adjusting = false;
+      for (int ii = 0; ii < numRows; ++ii) // Divide by leading coefficient.
+      {
+        if (gotToRowEchelon) { break; }
+        int jj = getLeadingOneIndex(answer.rows[ii]);
+        if (jj == numCols) { break; }
+        auto factor = unit / answer.rows[ii][jj];
+        answer.scaleRow(ii, factor);
+        det = det * factor;
+        adjusting = true;
+      }
+      // Subtract rows where applicable.
+      {
+        int prevInd = -1;
+        if (!gotToRowEchelon) { prevInd = getLeadingOneIndex(answer.rows[0]); }
+        for (int ii = 1; ii < numRows; ++ii)
+        {
+          if (gotToRowEchelon) { break; }
+          int jj = getLeadingOneIndex(answer.rows[ii]);
+          if (jj >= numCols) { break; }
+          if (jj > prevInd) { prevInd = jj; continue; }
+          answer.addScaledRowJ_toI(ii, prevInd, -unit); // det unchanged.
+          adjusting = true;
+        }
+      }
+      if (adjusting) { performingRref = false; continue; }
+      gotToRowEchelon = true;
+      // Now from row echelon form, modify to reduced row echelon form.
+      for (int ii = numCols - 1; ii >= 0; --ii)
+      {
+        int ind = getLeadingOneIndex(answer.rows[ii]);
+        if (ind >= numCols) { continue; }
+        for (int jj = ii - 1; jj >= 0; --jj)
+        {
+          if (answer.rows[jj][ind] == Num()) { continue; }
+          answer.addScaledRowJ_toI(jj, ii, -(answer.rows[jj][ind])); // det unchanged.
+        }
+      }
+      // Now the answer is in rref.
+    }
+    if (isSquare()) { determinant = det; }
+    return answer;
+  }
+
   Matrix operator+() const { return *this; }
   Matrix operator-() const
   {
@@ -168,6 +277,22 @@ public:
   }
 
   Matrix operator-(const Matrix& rhs) const { return ((*this) + (-rhs)); }
+
+  Matrix operator*(const Num& rhs) const
+  {
+    Matrix answer;
+    answer.rows = rows;
+    int numRows = (int)rows.size();
+    for (int ii = 0; ii < num_Rows; ++ii)
+    {
+      int numCols = (int)rows[ii].size();
+      for (int jj = 0; jj < num_Cols; ++jj)
+      {
+        answer.rows[ii][jj] = answer.rows[ii][jj] * rhs;
+      }
+    }
+    return answer;
+  }
 
   Matrix operator*(const Matrix& rhs) const
   {
