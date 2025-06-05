@@ -83,7 +83,10 @@ public:
         strm << current; // TODO: Deal with situation where entries themselves have multiple rows.
         for (int kk = 0; kk < (longestRows[jj] - currentLength); ++kk) { strm << " "; }
       }
-      if (num_Rows == 1) { strm << ")"; } else { strm << " ||"; }
+      if (useParentheses)
+      {
+        if (num_Rows == 1) { strm << ")"; } else { strm << " ||"; }
+      }
     }
     return strm.str();
   }
@@ -93,6 +96,31 @@ public:
   {
     if (rows.empty()) { return 0; }
     return (int)(rows[0].size());
+  }
+
+  static Matrix zeroMatrix(int rowDim, int colDim)
+  {
+    Matrix answer;
+    std::vector<Num> row(colDim);
+    for (int ii = 0; ii < rowDim; ++ii) { answer.addRow(row); }
+    return answer;
+  }
+
+  static Matrix zeroMatrix(int dim)
+  {
+    return zeroMatrix(dim, dim);
+  }
+
+  static Matrix identity(int dim)
+  {
+    Matrix answer;
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      std::vector<Num> row(dim);
+      dim[ii] = Num(1);
+      answer.addRow(row);
+    }
+    return answer;
   }
 
   Num at(int i, int j) const
