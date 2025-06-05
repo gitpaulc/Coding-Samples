@@ -211,10 +211,18 @@ bool test_matrix()
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-  for (const auto& sym : tetrahedralSymmetries)
   {
-    auto det = sym.determinant();
-    std::cout << "\nIts determinant is " << det.print() << " since it's a rotation.";
+    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    for (const auto& sym : tetrahedralSymmetries)
+    {
+      bool success = false;
+      auto symInv = sym.inverse(success);
+      if (!success) { std::cout << "\nInverse failed!"; continue; }
+      auto det = symInv.determinant();
+      std::cout << "\n" << symInv.print(true) << "\nIts determinant is " << det.print() << " since it's a rotation.";
+      newSymmetries.insert(sym);
+    }
+    std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << newSymmetries.size();
   }
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";

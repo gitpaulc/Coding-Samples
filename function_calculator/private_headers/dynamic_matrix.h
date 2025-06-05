@@ -236,7 +236,7 @@ public:
       if (adjusting) { performingRref = false; continue; }
       gotToRowEchelon = true;
       // Now from row echelon form, modify to reduced row echelon form.
-      for (int ii = num_Cols - 1; ii >= 0; --ii)
+      for (int ii = num_Rows - 1; ii >= 0; --ii)
       {
         int ind = getLeadingOneIndex(answer.rows[ii]);
         if (ind >= num_Cols) { linIndep = false; continue; }
@@ -279,7 +279,7 @@ public:
       rREFed.addRow(newRow);
     }
     Num det;
-    rREFed = rREFed.rref(det, success);
+    rREFed = rREFed.rref(det, success, true);
     if (!success) { return answer; }
     auto dimTwice = 2 * dim;
     for (int ii = 0; ii < dim; ++ii)
