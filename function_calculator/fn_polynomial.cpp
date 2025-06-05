@@ -33,18 +33,18 @@ namespace FunctionalCalculator
 
   bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
   {
-    if (xInd < rhs.xInd) { return true; }
-    if (xInd > rhs.xInd) { return false; }
-    if (yInd < rhs.yInd) { return true; }
-    if (yInd > rhs.yInd) { return false; }
     if (zInd < rhs.zInd) { return true; }
     if (zInd > rhs.zInd) { return false; }
-    if (ePiXInd < rhs.ePiXInd) { return true; }
-    if (ePiXInd > rhs.ePiXInd) { return false; }
-    if (ePiYInd < rhs.ePiYInd) { return true; }
-    if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (yInd < rhs.yInd) { return true; }
+    if (yInd > rhs.yInd) { return false; }
+    if (xInd < rhs.xInd) { return true; }
+    if (xInd > rhs.xInd) { return false; }
     if (ePiZInd < rhs.ePiZInd) { return true; }
     if (ePiZInd > rhs.ePiZInd) { return false; }
+    if (ePiYInd < rhs.ePiYInd) { return true; }
+    if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (ePiXInd < rhs.ePiXInd) { return true; }
+    if (ePiXInd > rhs.ePiXInd) { return false; }
     return false; // They are equal.
   }
 
@@ -124,7 +124,43 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  {
+    FnPolynomial answer;
+
+    if (transform.numRows() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
+    if (transform.numCols() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
+
+    const auto& AA = transform.at(0, 0);
+    const auto& BB = transform.at(0, 1);
+    const auto& CC = transform.at(0, 2);
+    const auto& DD = transform.at(1, 0);
+    const auto& EE = transform.at(1, 1);
+    const auto& FF = transform.at(1, 2);
+    const auto& GG = transform.at(2, 0);
+    const auto& HH = transform.at(2, 1);
+    const auto& II = transform.at(2, 2);
+
+    PiRational zero = PiPolynomial(ComplexQuadratic(Rational(mp(0), mp(1))));
+    PiRational one = PiPolynomial(ComplexQuadratic(Rational(mp(1), mp(1))));
+    for (const auto& iter : self)
+    {
+      if (iter.second == PiRational()) { continue; }
+      FnPolynomial term(iter.second);
+      term = term * multinomial(one, PiPolynomial(AA), PiPolynomial(BB), PiPolynomial(CC), zero, iter.first.xInd);
+      term = term * multinomial(one, PiPolynomial(DD), PiPolynomial(EE), PiPolynomial(FF), zero, iter.first.yInd);
+      term = term * multinomial(one, PiPolynomial(GG), PiPolynomial(HH), PiPolynomial(II), zero, iter.first.zInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, AA * iter.first.ePiXInd, BB * iter.first.ePiXInd, CC * iter.first.ePiXInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, DD * iter.first.ePiYInd, EE * iter.first.ePiYInd, FF * iter.first.ePiYInd);
+      term = term * eToThePi_AX_plus_BY_plus_CZ(one, GG * iter.first.ePiZInd, HH * iter.first.ePiZInd, II * iter.first.ePiZInd);
+      answer = answer + term;
+    }
+
+    answer.clean();
+    return answer;
+  }
+
+  FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.xInd = p;
@@ -133,7 +169,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::yToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::yToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.yInd = p;
@@ -142,13 +178,35 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::zToPower(const PiRational& coeff, int p)
+  FnPolynomial FnPolynomial::zToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.zInd = p;
     FnPolynomial answer;
     answer.self[term] = coeff;
     return answer;
+  }
+
+  FnPolynomial FnPolynomial::multinomial(const PiRational& coeff,
+      const PiRational& A, const PiRational& B, const PiRational& C, const PiRational& D, unsigned int p)
+  {
+    FnPolynomial answer;
+    PiRational one = PiPolynomial(ComplexQuadratic(Rational(mp(1), mp(1))));
+    for (unsigned int aa = 0; aa <= p; ++aa)
+    {
+      for (unsigned int bb = 0; bb <= (p - aa); ++bb)
+      {
+        for (unsigned int cc = 0; cc <= (p - aa - bb); ++cc)
+        {
+          PiRational termCoeff = A.pow(aa) * B.pow(bb) * C.pow(cc) * D.pow(p - aa - bb - cc);
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)p, (int)aa), mp(1))));
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa), (int)bb), mp(1))));
+          termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa - bb), (int)cc), mp(1))));
+          answer = answer + FnPolynomial::xToPower(termCoeff, aa) * FnPolynomial::yToPower(one, bb) * FnPolynomial::zToPower(one, cc);
+        }
+      }
+    }
+    return answer * coeff;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)

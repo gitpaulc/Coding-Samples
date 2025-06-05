@@ -3,6 +3,7 @@ All Rights Reserved.*/
 
 #include "mp_integer.h"
 
+#include <map>
 #include <stdexcept>
 #include <sstream>
 
@@ -316,6 +317,13 @@ namespace FunctionalCalculator
     return quotient;
   }
 
+  mp mp::abs() const
+  {
+    mp answer = *this;
+    answer.negative = false;
+    return answer;
+  }
+
   mp mp::gcd(const mp& aa, const mp& bb)
   {
     if ((aa == bb) || (aa == mp(0))) { return bb; }
@@ -385,6 +393,20 @@ namespace FunctionalCalculator
   bool mp::operator>=(const mp& rhs) const
   {
     return (rhs <= (*this));
+  }
+
+  mp mp::binomialCoeff(int n, int k)
+  {
+    if (n < 0) { return 0; }
+    if (k < 0) { return 0; }
+    if (k > n) { return 0; }
+    static std::map<std::pair<int, int>, mp> binoms;
+    if (binoms.empty()) { binoms[{0, 0}] = mp(1); }
+    auto iter = binoms.find({ n, k });
+    if (iter != binoms.end()) { return iter->second; }
+    auto answer = binomialCoeff(n - 1, k) + binomialCoeff(n - 1, k - 1);
+    binoms[{n, k}] = answer;
+    return answer;
   }
 
   std::ostream& operator<<(std::ostream& strm, const mp& mpIn)

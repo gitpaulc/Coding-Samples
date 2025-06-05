@@ -126,7 +126,7 @@ namespace FunctionalCalculator
     auto conj = rhs;
     conj.im = -conj.im;
     answer = answer * conj;
-    auto sq_norm = sqLength();
+    auto sq_norm = rhs.sqLength();
     answer.re = answer.re / sq_norm;
     answer.im = answer.im / sq_norm;
     return answer;

@@ -48,6 +48,11 @@ public:
 
   static Function constant(const PiRational& coeff);
 
+  // MATRIX COMPOSITION:
+
+  /** \brief If the function is F(u), returns F(M * u) where M is the matrix and u is a 3d vector (x, y, z). */
+  Function composeWith(const Matrix<ComplexQuadratic>& transform) const;
+
   // TRIG FUNCTIONS:
 
   static Function tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A); /**< \return coeff * tan(A * Pi * x) */

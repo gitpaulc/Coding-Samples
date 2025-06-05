@@ -1,10 +1,64 @@
 
 #include <iostream>
 
-#include "dynamic_matrix.h"
 #include "function.h"
 
 using namespace FunctionalCalculator;
+
+bool test_composition()
+{
+  PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+  auto zero = one - one;
+  {
+    auto two = one + one;
+    FnPolynomial fn = FnPolynomial::multinomial(one, two, two + one, two + two, one, 2);
+    std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fn.print();
+    auto fnOther = FnPolynomial::multinomial(one, one, zero, zero, one, 2);
+    std::cout << "\n\n(1 + x)^2 = " << fnOther.print();
+    Matrix<ComplexQuadratic> transform;
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(4, 1)), ComplexQuadratic::sqrt(Rational(9, 1)), ComplexQuadratic::sqrt(Rational(16, 1)) });
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
+    transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
+    fnOther = fnOther.composeWith(transform);
+    std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fnOther.print();
+    std::cout << "\n0 = " << (fn - fnOther).print();
+  }
+  mp frequency(1);
+  auto sine = FnPolynomial::sinATimesPiX(one, ComplexQuadratic(Rational(frequency, 1)));
+  auto cosine = FnPolynomial::cosATimesPiX(one, ComplexQuadratic(Rational(frequency, 1)));
+  PiRational eigen;
+  bool isEigen = sine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << sine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  isEigen = cosine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  std::set<Matrix<ComplexQuadratic> > cubeVertices;
+  {
+    ComplexQuadratic unit(Rational(1, 1));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, -unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, -unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ -unit, unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, -unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, -unit, unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, -unit }));
+    cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, unit }));
+  }
+  FnPolynomial cubeSine, cubeCosine;
+  for (const auto& vertex : cubeVertices)
+  {
+    ComplexQuadratic zero(Rational(0, 1));
+    auto transform = vertex;
+    transform.addRow({ zero, zero, zero });
+    transform.addRow({ zero, zero, zero });
+    cubeSine = cubeSine + sine.composeWith(transform);
+    cubeCosine = cubeCosine + cosine.composeWith(transform);
+  }
+  isEigen = cubeSine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cubeSine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  isEigen = cubeCosine.isLaplaceEigenfunction(eigen);
+  if (isEigen) { std::cout << "\n\n" << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  return true;
+}
 
 bool test_matrix()
 {
@@ -12,12 +66,16 @@ bool test_matrix()
     Matrix<QuadraticNumber> rot2PiOver3;
     rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
     rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+    QuadraticNumber det; bool linInd = true;
+    auto rref = rot2PiOver3.rref(det, linInd);
     std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
+    std::cout << "\nIts determinant = " << det.print();
 
     Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
     Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
+    std::cout << "\n\nIdentity matrix = \n" << rref.print(true);
   }
 
   std::string prompt = "";
@@ -29,6 +87,13 @@ bool test_matrix()
   rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
   rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
   rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+
+  // Elementary row operations test. These should ultimately leave the matrix unchanged:
+  rot2PiOver3.swapRows(0, 1); rot2PiOver3.swapRows(1, 0);
+  rot2PiOver3.scaleRow(1, Rational(2, 1)); rot2PiOver3.scaleRow(1, Rational(1, 2));
+  rot2PiOver3.addScaledRowJ_toI(0, 1, Rational(2, 1));
+  rot2PiOver3.addScaledRowJ_toI(0, 1, Rational(-2, 1));
+
   std::cout << "\n\nRotation (R) by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
 
   Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
@@ -49,6 +114,10 @@ bool test_matrix()
 
   Matrix<QuadraticNumber> other2 = otherRot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (P^2) by angle 4 * pi / 3:\n" << other2.print(true);
+  {
+    bool success = false;
+    std::cout << "\n\nP^2 == P^{-1}:\n" << otherRot2PiOver3.inverse(success).print(true);
+  }
   id = otherRot2PiOver3 * otherRot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (P^3) by angle 6 * pi / 3:\n" << id.print(true);
 
@@ -137,6 +206,24 @@ bool test_matrix()
     else { passedClosedness = false; }
   }
   if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    for (const auto& sym : tetrahedralSymmetries)
+    {
+      bool success = false;
+      auto symInv = sym.inverse(success);
+      if (!success) { std::cout << "\nInverse failed!"; continue; }
+      auto det = symInv.determinant();
+      std::cout << "\n" << symInv.print(true) << "\nIts determinant is " << det.print() << " since it's a rotation.";
+      newSymmetries.insert(sym);
+    }
+    std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << newSymmetries.size();
+  }
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
@@ -298,6 +385,10 @@ bool test_complex()
   auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
   std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
   std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
+  auto minusTwoI = ComplexQuadratic(Rational(1, 1)) / ComplexQuadratic::sqrt(Rational(-1, 4));
+  std::cout << "\n\n-2 * i = " << minusTwoI.print();
+  minusTwoI = -ComplexQuadratic::sqrt(Rational(-4, 1));
+  std::cout << "\n\n-2 * i = " << minusTwoI.print();
   return true;
 }
 
@@ -420,6 +511,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting function composition:\n";
+  test_composition();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting matrices:\n";
   test_matrix();
   std::cout << "\nContinue, or 'Q' to exit? ";

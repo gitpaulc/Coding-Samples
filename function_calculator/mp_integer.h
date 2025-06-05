@@ -40,6 +40,7 @@ public:
   mp operator*(const mp& rhs) const;
   mp operator/(const mp& rhs) const;
   mp operator%(const mp& rhs) const;
+  mp abs() const;
   static mp gcd(const mp& aa, const mp& bb);
   mp pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const mp& rhs) const;
@@ -48,6 +49,9 @@ public:
   bool operator>(const mp& rhs) const;
   bool operator<=(const mp& rhs) const;
   bool operator>=(const mp& rhs) const;
+
+  /** \return n! / ((n - k)! * k!) */
+  static mp binomialCoeff(int n, int k);
 
   friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 };

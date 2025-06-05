@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #ifndef FN_POLYNOMIAL_H
 #define FN_POLYNOMIAL_H
 
+#include "dynamic_matrix.h"
 #include "pi_rational.h"
 
 #include <map>
@@ -27,9 +28,9 @@ class FnPolynomial
 {
   struct Monomial
   {
-    int xInd = 0;
-    int yInd = 0;
-    int zInd = 0;
+    unsigned int xInd = 0;
+    unsigned int yInd = 0;
+    unsigned int zInd = 0;
     ComplexQuadratic ePiXInd = 0;
     ComplexQuadratic ePiYInd = 0;
     ComplexQuadratic ePiZInd = 0;
@@ -44,11 +45,19 @@ public:
   FnPolynomial(const PiRational& coeff = PiPolynomial(0));
   virtual std::string print(bool useParentheses = false) const;
 
+  // MATRIX COMPOSITION:
+
+  /** \brief If the function is F(u), returns F(M * u) where M is the matrix and u is a 3d vector (x, y, z). */
+  FnPolynomial composeWith(const Matrix<ComplexQuadratic>& transform) const;
+
   // POLYNOMIALS:
 
-  static FnPolynomial xToPower(const PiRational& coeff, int p); /**< \return coeff * x^p */
-  static FnPolynomial yToPower(const PiRational& coeff, int p); /**< \return coeff * y^p */
-  static FnPolynomial zToPower(const PiRational& coeff, int p); /**< \return coeff * z^p */
+  static FnPolynomial xToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * x^p */
+  static FnPolynomial yToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * y^p */
+  static FnPolynomial zToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * z^p */
+  /** \brief \return (A * x + B * y + C * z + D)^p */
+  static FnPolynomial multinomial(const PiRational& coeff,
+      const PiRational& A, const PiRational& B, const PiRational& C, const PiRational& D, unsigned int p);
 
   // EXPONENTIALS:
 
