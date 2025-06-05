@@ -40,6 +40,51 @@ namespace FunctionalCalculator
     return true;
   }
 
+  Matrix<Rational> QuadraticNumber::getMultiplicationMatrix() const
+  {
+    std::map<mp, int> root2Index;
+    std::map<int, mp> index2Root;
+    {
+      int i = 0;
+      std::set<mp> rootsSoFar;
+      root2Index[mp(1)] = i; index2Root[i] = mp(1); rootsSoFar.insert(mp(1));
+      for (const auto& iter : content)
+      {
+        if (iter.first == mp(1)) { continue; }
+        ++i; root2Index[iter.first] = i; index2Root[i] = iter.first; rootsSoFar.insert(iter.first);
+      }
+      for (const auto& iter : content)
+      {
+        for (const auto& jter : content)
+        {
+          if (iter.first == jter.first) { continue; }
+          auto computed = QuadraticNumber::sqrt(Rational(iter.first * jter.first, 1));
+          if (computed.content.empty()) { continue; }
+          auto radicand = computed.content.begin()->first;
+          if (rootsSoFar.find(radicand) != rootsSoFar.end()) { continue; }
+          ++i; root2Index[radicand] = i; index2Root[i] = radicand; rootsSoFar.insert(radicand);
+        }
+      }
+    }
+    const int dimMatrix = (int)root2Index.size();
+    Matrix<Rational> answer;
+    for (const auto& iter : content)
+    {
+      Matrix<Rational> summand;
+      const auto& radA = iter.first;
+      for (int ii = 0; ii < dimMatrix; ++ii)
+      {
+        std::vector<Rational> row(dimMatrix, 0);
+        const auto& radB = index2Root[ii];
+        if (radB % radA == mp(0)) { row[root2Index[radB / radA]] = Rational(radA, 1); }
+        else { row[root2Index[radA * radB]] = Rational(1, 1); }
+        summand.addRow(row);
+      }
+      answer = answer + summand * iter.second;
+    }
+    return answer;
+  }
+
   std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;

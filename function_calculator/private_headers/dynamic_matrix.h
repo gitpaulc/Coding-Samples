@@ -330,7 +330,7 @@ public:
     Matrix answer;
     answer.rows = rows;
     const int num_Rows = numRows();
-    if (num_Rows == Num()) { return answer; }
+    if (num_Rows == 0) { return answer; }
     const int num_Cols = numCols();
     for (int ii = 0; ii < num_Rows; ++ii)
     {

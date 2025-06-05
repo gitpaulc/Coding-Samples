@@ -6,6 +6,8 @@ All Rights Reserved.*/
 
 #include "rational.h"
 
+#include "dynamic_matrix.h"
+
 #include <string>
 #include <map>
 
@@ -22,6 +24,8 @@ class QuadraticNumber : public Number
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
   std::map<mp, Rational> content;
+  /** \brief From Galois Theory, multiplication acts as a linear transformation upon vector space where the square roots are basis elements. */
+  Matrix<Rational> getMultiplicationMatrix() const;
 
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
