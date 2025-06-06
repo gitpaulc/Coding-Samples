@@ -50,6 +50,7 @@ class FnPolynomial
     TrigIndex trigPiYInd;
     TrigIndex trigPiZInd;
     bool isConstTerm() const;
+    std::map<Monomial, QuadraticNumber> trigSum(const Monomial& rhs) const;
     bool operator<(const Monomial& rhs) const;
   };
 

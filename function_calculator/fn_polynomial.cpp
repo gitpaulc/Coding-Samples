@@ -53,6 +53,42 @@ namespace FunctionalCalculator
     return true;
   }
 
+  std::map<FnPolynomial::Monomial, QuadraticNumber> FnPolynomial::Monomial::trigSum(const Monomial& rhs) const
+  {
+    std::map<Monomial, QuadraticNumber> answers;
+    for (int i = 0; i < 8; ++i)
+    {
+      Monomial answer;
+      answer.xInd = xInd + rhs.xInd;
+      answer.yInd = yInd + rhs.yInd;
+      answer.zInd = zInd + rhs.zInd;
+      answer.ePiXInd = ePiXInd + rhs.ePiXInd;
+      answer.ePiYInd = ePiYInd + rhs.ePiYInd;
+      answer.ePiZInd = ePiZInd + rhs.ePiZInd;
+      bool xRight = (((i / 4) % 2) == 1) ? true : false;
+      bool yRight = (((i / 2) % 2) == 1) ? true : false;
+      bool zRight = ((i % 2) == 1) ? true : false;
+      /*
+      cos(ax)cos(Ax) = (1/2)cos((a + A)x) + (1/2)cos((a - A)x)
+      cos(ax)sin(Ax) = (1/2)sin((a + A)x) - (1/2)sin((a - A)x)
+      sin(ax)cos(Ax) = (1/2)sin((a + A)x) + (1/2)sin((a - A)x)
+      sin(ax)sin(Ax) = (1/2)cos((a - A)x) - (1/2)cos((a + A)x)
+      */
+      QuadraticNumber coeff(Rational(1, 1));
+      if (trigPiXInd.isCos() == rhs.trigPiXInd.isCos())
+      {
+        if (trigPiXInd.isCos()) // cos(ax)cos(Ax)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiXInd.isCosine = true;
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+        }
+      }
+      answers[answer] = coeff;
+    }
+    return answers;
+  }
+
   FnPolynomial::Monomial FnPolynomial::Monomial::operator+(const FnPolynomial::Monomial& rhs) const
   {
     Monomial answer;
@@ -520,6 +556,7 @@ namespace FunctionalCalculator
         answer.self[kk] = answer.self[kk] + summand;
       }
     }
+    answer.clean();
     return answer;
   }
 
