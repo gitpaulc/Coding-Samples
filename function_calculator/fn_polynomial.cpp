@@ -31,6 +31,8 @@ namespace FunctionalCalculator
     return (isCosine == false);
   }
 
+  bool FnPolynomial::TrigIndex::operator>(const FnPolynomial::TrigIndex& rhs) const { return (rhs < (*this)); }
+
   bool FnPolynomial::Monomial::isConstTerm() const
   {
     if (xInd != 0) { return false; }
@@ -61,16 +63,22 @@ namespace FunctionalCalculator
   {
     if (zInd < rhs.zInd) { return true; }
     if (zInd > rhs.zInd) { return false; }
-    if (yInd < rhs.yInd) { return true; }
-    if (yInd > rhs.yInd) { return false; }
-    if (xInd < rhs.xInd) { return true; }
-    if (xInd > rhs.xInd) { return false; }
     if (ePiZInd < rhs.ePiZInd) { return true; }
     if (ePiZInd > rhs.ePiZInd) { return false; }
+    if (trigPiZInd < rhs.trigPiZInd) { return true; }
+    if (trigPiZInd > rhs.trigPiZInd) { return false; }
+    if (yInd < rhs.yInd) { return true; }
+    if (yInd > rhs.yInd) { return false; }
     if (ePiYInd < rhs.ePiYInd) { return true; }
     if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (trigPiYInd < rhs.trigPiYInd) { return true; }
+    if (trigPiYInd > rhs.trigPiYInd) { return false; }
+    if (xInd < rhs.xInd) { return true; }
+    if (xInd > rhs.xInd) { return false; }
     if (ePiXInd < rhs.ePiXInd) { return true; }
     if (ePiXInd > rhs.ePiXInd) { return false; }
+    if (trigPiXInd < rhs.trigPiXInd) { return true; }
+    if (trigPiXInd > rhs.trigPiXInd) { return false; }
     return false; // They are equal.
   }
 

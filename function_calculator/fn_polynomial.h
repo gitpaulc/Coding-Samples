@@ -34,6 +34,7 @@ class FnPolynomial
     bool operator==(const TrigIndex& rhs) const;
     bool operator!=(const TrigIndex& rhs) const;
     bool operator<(const TrigIndex& rhs) const;
+    bool operator>(const TrigIndex& rhs) const;
   };
 
   struct Monomial
@@ -48,7 +49,6 @@ class FnPolynomial
     TrigIndex trigPiYInd;
     TrigIndex trigPiZInd;
     bool isConstTerm() const;
-    Monomial operator+(const Monomial& rhs) const;
     bool operator<(const Monomial& rhs) const;
   };
 
