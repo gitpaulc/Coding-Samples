@@ -77,28 +77,21 @@ namespace FunctionalCalculator
       QuadraticNumber coeff(Rational(1, 1));
       if (trigPiXInd.isCos() == rhs.trigPiXInd.isCos())
       {
+        answer.trigPiXInd.isCosine = true;
         if (trigPiXInd.isCos()) // cos(ax)cos(Ax)
         {
           coeff = coeff * Rational(1, 2);
-          answer.trigPiXInd.isCosine = true;
           answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+        }
+        else // sin(ax)sin(Ax)
+        {
+          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self + rhs.trigPiXInd.self) : (trigPiXInd.self - rhs.trigPiXInd.self);
         }
       }
       answers[answer] = coeff;
     }
     return answers;
-  }
-
-  FnPolynomial::Monomial FnPolynomial::Monomial::operator+(const FnPolynomial::Monomial& rhs) const
-  {
-    Monomial answer;
-    answer.xInd = xInd + rhs.xInd;
-    answer.yInd = yInd + rhs.yInd;
-    answer.zInd = zInd + rhs.zInd;
-    answer.ePiXInd = ePiXInd + rhs.ePiXInd;
-    answer.ePiYInd = ePiYInd + rhs.ePiYInd;
-    answer.ePiZInd = ePiZInd + rhs.ePiZInd;
-    return answer;
   }
 
   bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
