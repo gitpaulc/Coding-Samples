@@ -26,14 +26,27 @@ namespace FunctionalCalculator
  */
 class FnPolynomial
 {
+  /** \param `self` represents A in sin(pi * A * x) where A != 0 OR A in cos(pi * A * x) where A might be 0. */
+  struct TrigIndex
+  {
+    QuadraticNumber self = 0;
+    bool isCosine = true; /**< Is cosine if and only if: isCosine == true OR self == 0. Otherwise is sine. */
+    bool operator==(const TrigIndex& rhs) const;
+    bool operator!=(const TrigIndex& rhs) const;
+    bool operator<(const TrigIndex& rhs) const;
+  };
+
   struct Monomial
   {
     unsigned int xInd = 0;
     unsigned int yInd = 0;
     unsigned int zInd = 0;
-    ComplexQuadratic ePiXInd = 0;
-    ComplexQuadratic ePiYInd = 0;
-    ComplexQuadratic ePiZInd = 0;
+    QuadraticNumber ePiXInd = 0;
+    QuadraticNumber ePiYInd = 0;
+    QuadraticNumber ePiZInd = 0;
+    TrigIndex trigPiXInd;
+    TrigIndex trigPiYInd;
+    TrigIndex trigPiZInd;
     bool isConstTerm() const;
     Monomial operator+(const Monomial& rhs) const;
     bool operator<(const Monomial& rhs) const;

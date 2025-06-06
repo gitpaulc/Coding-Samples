@@ -8,6 +8,29 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool FnPolynomial::TrigIndex::operator==(const FnPolynomial::TrigIndex& rhs) const
+  {
+    if (self == QuadraticNumber(0)) { return (self == rhs.self); }
+    if (rhs.self == QuadraticNumber(0)) { return (self == rhs.self); }
+    if (self != rhs.self) { return false; }
+    return (isCosine == rhs.isCosine);
+  }
+
+  bool FnPolynomial::TrigIndex::operator!=(const FnPolynomial::TrigIndex& rhs) const
+  {
+    return !((*this) == rhs);
+  }
+
+  bool FnPolynomial::TrigIndex::operator<(const FnPolynomial::TrigIndex& rhs) const
+  {
+    if (self < rhs.self) { return true; }
+    if (rhs.self < self) { return false; }
+    if (self == QuadraticNumber(0)) { return false; } // They are both treated as cosine.
+    if (isCosine == rhs.isCosine) { return false; }
+    // One must be true, one must be false. false < true:
+    return (isCosine == false);
+  }
+
   bool FnPolynomial::Monomial::isConstTerm() const
   {
     if (xInd != 0) { return false; }
@@ -16,6 +39,9 @@ namespace FunctionalCalculator
     if (ePiXInd != 0) { return false; }
     if (ePiYInd != 0) { return false; }
     if (ePiZInd != 0) { return false; }
+    if (trigPiXInd != TrigIndex()) { return false; }
+    if (trigPiYInd != TrigIndex()) { return false; }
+    if (trigPiZInd != TrigIndex()) { return false; }
     return true;
   }
 
