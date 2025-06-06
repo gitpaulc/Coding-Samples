@@ -40,6 +40,51 @@ namespace FunctionalCalculator
     return true;
   }
 
+  Matrix<Rational> QuadraticNumber::getMultiplicationMatrix(std::map<mp, int>& root2Index, std::map<int, mp>& index2Root) const
+  {
+    root2Index = std::map<mp, int>();
+    index2Root = std::map<int, mp>();
+    {
+      int i = 0;
+      std::set<mp> rootsSoFar;
+      root2Index[mp(1)] = i; index2Root[i] = mp(1); rootsSoFar.insert(mp(1));
+      for (const auto& iter : content)
+      {
+        if (iter.first == mp(1)) { continue; }
+        ++i; root2Index[iter.first] = i; index2Root[i] = iter.first; rootsSoFar.insert(iter.first);
+      }
+      for (const auto& iter : content)
+      {
+        for (const auto& jter : content)
+        {
+          if (iter.first == jter.first) { continue; }
+          auto computed = QuadraticNumber::sqrt(Rational(iter.first * jter.first, 1));
+          if (computed.content.empty()) { continue; }
+          auto radicand = computed.content.begin()->first;
+          if (rootsSoFar.find(radicand) != rootsSoFar.end()) { continue; }
+          ++i; root2Index[radicand] = i; index2Root[i] = radicand; rootsSoFar.insert(radicand);
+        }
+      }
+    }
+    const int dimMatrix = (int)root2Index.size();
+    auto answer = Matrix<Rational>::zeroMatrix(dimMatrix);
+    for (const auto& iter : content)
+    {
+      Matrix<Rational> summand;
+      const auto& radA = iter.first;
+      for (int ii = 0; ii < dimMatrix; ++ii)
+      {
+        std::vector<Rational> row(dimMatrix, 0);
+        const auto& radB = index2Root[ii];
+        if (radB % radA == mp(0)) { row[root2Index[radB / radA]] = Rational(radA, 1); }
+        else { row[root2Index[radA * radB]] = Rational(1, 1); }
+        summand.addRow(row);
+      }
+      answer = answer + summand.transpose() * iter.second;
+    }
+    return answer;
+  }
+
   std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
@@ -199,32 +244,30 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       return QuadraticNumber();
     }
-    QuadraticNumber quotientNumer = Rational(1, 1);
-    QuadraticNumber quotientDenom = rhs;
-    while (quotientDenom.content.size() > 1)
+    std::map<int, mp> index2Root;
+    std::map<mp, int> root2Index;
+    auto multMatrix = rhs.getMultiplicationMatrix(root2Index, index2Root);
+    bool success = false;
+    auto multInverse = multMatrix.inverse(success);
+    if (!success) { throw std::logic_error("Division failed."); return QuadraticNumber(); }
+    auto dim = multMatrix.numRows();
+    Matrix<Rational> multVector;
     {
-      mp radicand = 1;
-      Rational coeff;
-      for (const auto& iter : quotientDenom.content)
-      {
-        if (iter.first == 1) { continue; }
-        radicand = iter.first;
-        coeff = iter.second;
-        break;
-      }
-      if (radicand == 1) { break; }
-      QuadraticNumber diff;
-      auto sqrtTerm = QuadraticNumber::sqrt(Rational(radicand, mp(1))) * (-coeff);
-      quotientNumer = quotientNumer * (quotientDenom + (sqrtTerm * Rational(2, 1)));
-      diff = quotientDenom + sqrtTerm;
-      quotientDenom = (diff * diff) - (coeff * coeff * Rational(radicand, 1));
+      std::vector<Rational> row(dim, 0);
+      row[root2Index[1]] = 1; // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
+      multVector.addRow(row);
+      multVector = multVector.transpose();
     }
-    quotientNumer = quotientNumer * quotientDenom;
-    quotientDenom = quotientDenom * quotientDenom;
-    Rational rationalDenom;
-    bool success = quotientDenom.getRational(rationalDenom);
-    if (!success) { throw std::logic_error("Division failed."); }
-    return (*this) * quotientNumer * (Rational(1, 1) / rationalDenom);
+    multVector = multInverse * multVector;
+    QuadraticNumber reciprocal;
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      auto coeff = multVector.at(ii, 0);
+      if (coeff == Rational(0, 1)) { continue; }
+      reciprocal.content[index2Root[ii]] = coeff;
+      //reciprocal = reciprocal + QuadraticNumber::sqrt(Rational(index2Root[ii], 1)) * multVector.at(ii, 0);
+    }
+    return (*this) * reciprocal;
   }
 
   QuadraticNumber QuadraticNumber::pow(int p) const

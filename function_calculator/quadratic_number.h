@@ -6,6 +6,8 @@ All Rights Reserved.*/
 
 #include "rational.h"
 
+#include "dynamic_matrix.h"
+
 #include <string>
 #include <map>
 
@@ -22,6 +24,11 @@ class QuadraticNumber : public Number
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
   std::map<mp, Rational> content;
+  /** \brief From Galois Theory, multiplication acts as a linear transformation upon vector space where the square roots are basis elements.
+   *  \param root2Index is an output parameter that assigns a row index to its corresponding square root.
+   *  \param index2Root is an output parameter that assigns to each row index its corresponding square root.
+   */
+  Matrix<Rational> getMultiplicationMatrix(std::map<mp, int>& root2Index, std::map<int, mp>& index2Root) const;
 
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
@@ -35,7 +42,7 @@ public:
   QuadraticNumber operator+(const QuadraticNumber& rhs) const;
   QuadraticNumber operator-(const QuadraticNumber& rhs) const;
   QuadraticNumber operator*(const QuadraticNumber& rhs) const;
-  /** \brief Uses rationalization of the denominator. */
+  /** \brief Uses inversion of the multiplication operator. */
   QuadraticNumber operator/(const QuadraticNumber& rhs) const;
   QuadraticNumber pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const QuadraticNumber& rhs) const;
