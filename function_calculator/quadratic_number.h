@@ -36,6 +36,7 @@ public:
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
+  QuadraticNumber abs() const;
 
   QuadraticNumber operator+() const;
   QuadraticNumber operator-() const;

@@ -146,6 +146,11 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  QuadraticNumber QuadraticNumber::abs() const
+  {
+    return ((*this) < QuadraticNumber(0)) ? (-(*this)) : (*this);
+  }
+
   QuadraticNumber QuadraticNumber::operator+() const
   {
     return *this;

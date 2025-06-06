@@ -31,6 +31,7 @@ class FnPolynomial
   {
     QuadraticNumber self = 0;
     bool isCosine = true; /**< Is cosine if and only if: isCosine == true OR self == 0. Otherwise is sine. */
+    bool isCos() const;
     bool operator==(const TrigIndex& rhs) const;
     bool operator!=(const TrigIndex& rhs) const;
     bool operator<(const TrigIndex& rhs) const;
@@ -51,6 +52,12 @@ class FnPolynomial
     bool isConstTerm() const;
     bool operator<(const Monomial& rhs) const;
   };
+
+  /** \brief Seeks duplicated Monomial index since sin(-ax) == -sin(ax) and cos(-ax) == cos(ax).
+   *  \remark Note that sin(ax) == sin(Ax) implies a == A, and cos(ax) == cos(Ax) implies |a| = |A|.
+   *  \return self.end() if not found.
+   */
+  std::map<Monomial, PiRational>::iterator trigFind(const Monomial& ind, bool& xNegative, bool& yNegative, bool& zNegative);
 
   std::map<Monomial, PiRational> self;
   void clean();

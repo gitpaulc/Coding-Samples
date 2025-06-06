@@ -8,6 +8,12 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool FnPolynomial::TrigIndex::isCos() const
+  {
+    if (self == QuadraticNumber(0)) { return true; }
+    return isCosine;
+  }
+
   bool FnPolynomial::TrigIndex::operator==(const FnPolynomial::TrigIndex& rhs) const
   {
     if (self == QuadraticNumber(0)) { return (self == rhs.self); }
@@ -82,12 +88,52 @@ namespace FunctionalCalculator
     return false; // They are equal.
   }
 
+  std::map<FnPolynomial::Monomial, PiRational>::iterator FnPolynomial::trigFind(const FnPolynomial::Monomial& ind,
+    bool& xNegative, bool& yNegative, bool& zNegative)
+  {
+    xNegative = false;
+    yNegative = false;
+    zNegative = false;
+    for (int i = 0; i < 8; ++i)
+    {
+      bool xNeg = (((i / 4) % 2) == 1) ? true : false;
+      bool yNeg = (((i / 2) % 2) == 1) ? true : false;
+      bool zNeg = ((i % 2) == 1) ? true : false;
+      auto indB = ind;
+      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; xNegative = true; }
+      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; yNegative = true; }
+      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; zNegative = true; }
+      auto iter = self.find(indB);
+      if (iter != self.end()) { return iter; }
+    }
+    return self.end();
+  }
+
   void FnPolynomial::clean()
   {
     FnPolynomial answer;
     for (const auto& iter : self)
     {
       if (iter.second == PiRational()) { continue; }
+      {
+        bool xNegative = false;
+        bool yNegative = false;
+        bool zNegative = false;
+        auto jter = answer.trigFind(iter.first, xNegative, yNegative, zNegative);
+        if (jter != answer.self.end())
+        {
+          if (jter->first.trigPiXInd.isCos()) { xNegative = false; }
+          if (jter->first.trigPiYInd.isCos()) { yNegative = false; }
+          if (jter->first.trigPiZInd.isCos()) { zNegative = false; }
+          bool isNegative = false;
+          if (xNegative) { isNegative = !isNegative; }
+          if (yNegative) { isNegative = !isNegative; }
+          if (zNegative) { isNegative = !isNegative; }
+          if (isNegative) { jter->second = jter->second - iter.second; }
+          else { jter->second = jter->second + iter.second; }
+          continue;
+        }
+      }
       answer.self[iter.first] = iter.second;
     }
     self = answer.self;
