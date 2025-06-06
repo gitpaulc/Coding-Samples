@@ -678,7 +678,7 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.xInd));
-      --(newIndex.first.xInd);
+      if (newIndex.first.xInd > 0) { --(newIndex.first.xInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
@@ -704,7 +704,7 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.yInd));
-      --(newIndex.first.yInd);
+      if (newIndex.first.yInd > 0) { --(newIndex.first.yInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
@@ -730,7 +730,7 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.zInd));
-      --(newIndex.first.zInd);
+      if (newIndex.first.zInd > 0) { --(newIndex.first.zInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
