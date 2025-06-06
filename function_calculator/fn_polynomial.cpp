@@ -105,6 +105,36 @@ namespace FunctionalCalculator
           if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
         }
       }
+      if (trigPiYInd.isCos() == rhs.trigPiYInd.isCos())
+      {
+        answer.trigPiYInd.isCosine = true;
+        if (trigPiYInd.isCos()) // cos(ay)cos(Ay)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+        }
+        else // sin(ay)sin(Ay)
+        {
+          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self + rhs.trigPiYInd.self) : (trigPiYInd.self - rhs.trigPiYInd.self);
+        }
+      }
+      else
+      {
+        answer.trigPiYInd.isCosine = false;
+        if (trigPiYInd.isCos()) // cos(ay)sin(Ay)
+        {
+          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+        }
+        else // sin(ay)cos(Ay)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+        }
+      }
       answers[answer] = coeff;
     }
     return answers;
