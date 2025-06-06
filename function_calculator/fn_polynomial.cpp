@@ -89,6 +89,22 @@ namespace FunctionalCalculator
           answer.trigPiXInd.self = xRight ? (trigPiXInd.self + rhs.trigPiXInd.self) : (trigPiXInd.self - rhs.trigPiXInd.self);
         }
       }
+      else
+      {
+        answer.trigPiXInd.isCosine = false;
+        if (trigPiXInd.isCos()) // cos(ax)sin(Ax)
+        {
+          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+        }
+        else // sin(ax)cos(Ax)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+        }
+      }
       answers[answer] = coeff;
     }
     return answers;
