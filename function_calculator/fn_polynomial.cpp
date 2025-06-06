@@ -165,7 +165,9 @@ namespace FunctionalCalculator
           if (answer.trigPiZInd.self == QuadraticNumber(0)) { continue; }
         }
       }
-      answers[answer] = coeff;
+      auto answerIter = answers.find(answer);
+      if (answerIter == answers.end()) { answers[answer] = coeff; }
+      else { answerIter->second = answerIter->second + coeff; }
     }
     return answers;
   }
