@@ -692,6 +692,19 @@ namespace FunctionalCalculator
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiXInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiXInd.isCosine = !iter.first.trigPiXInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiXInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiXInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;
@@ -718,6 +731,19 @@ namespace FunctionalCalculator
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiYInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiYInd.isCosine = !iter.first.trigPiYInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiYInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiYInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;
@@ -744,6 +770,19 @@ namespace FunctionalCalculator
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiZInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiZInd.isCosine = !iter.first.trigPiZInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiZInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiZInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;
