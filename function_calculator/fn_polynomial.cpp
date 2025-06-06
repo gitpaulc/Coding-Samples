@@ -616,13 +616,18 @@ namespace FunctionalCalculator
       for (const auto& jter : rhs.self)
       {
         auto summand = iter.second * jter.second;
-        auto kk = iter.first + jter.first;
-        if (answer.self.find(kk) == answer.self.end())
+        auto monomials = iter.first.trigSum(jter.first);
+        for (const auto& kter : monomials)
         {
-          answer.self[kk] = summand;
-          continue;
+          auto currentSummand = summand * PiPolynomial(kter.second);
+          auto kk = iter.first;
+          if (answer.self.find(kk) == answer.self.end())
+          { 
+            answer.self[kk] = currentSummand;
+            continue;
+          }
+          answer.self[kk] = answer.self[kk] + currentSummand;
         }
-        answer.self[kk] = answer.self[kk] + summand;
       }
     }
     answer.clean();
