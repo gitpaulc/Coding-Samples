@@ -272,19 +272,29 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiYInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiYInd = A.getRe();
+    term.trigPiYInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiYInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiZInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiZInd = A.getRe();
+    term.trigPiZInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiZInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
