@@ -258,10 +258,15 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiXInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiXInd = A.getRe();
+    term.trigPiXInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiXInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
