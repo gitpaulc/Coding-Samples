@@ -305,17 +305,17 @@ namespace FunctionalCalculator
       if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
       if (iter.first.trigPiXInd != TrigIndex())
       {
-        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(" << iter.first.trigPiXInd.self.print(true) << " * x)";
+        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiXInd.self.print(true) << " * x)";
       }
       if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
       if (iter.first.trigPiYInd != TrigIndex())
       {
-        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(" << iter.first.trigPiYInd.self.print(true) << " * y)";
+        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiYInd.self.print(true) << " * y)";
       }
       if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
       if (iter.first.trigPiZInd != TrigIndex())
       {
-        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(" << iter.first.trigPiZInd.self.print(true) << " * z)";
+        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiZInd.self.print(true) << " * z)";
       }
     }
     if (count < 0) { strm << "0"; }
