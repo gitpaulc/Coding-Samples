@@ -622,7 +622,7 @@ namespace FunctionalCalculator
         for (const auto& kter : monomials)
         {
           auto currentSummand = summand * PiPolynomial(kter.second);
-          auto kk = iter.first;
+          auto kk = kter.first;
           if (answer.self.find(kk) == answer.self.end())
           { 
             answer.self[kk] = currentSummand;
