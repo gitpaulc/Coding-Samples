@@ -685,13 +685,16 @@ namespace FunctionalCalculator
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiXInd) * PiPolynomial(1, 1));
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiXInd != 0)
       {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiXInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
 
       if (iter.first.trigPiXInd != TrigIndex())
       {
@@ -724,13 +727,16 @@ namespace FunctionalCalculator
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiYInd) * PiPolynomial(1, 1));
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiYInd != 0)
       {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiYInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
 
       if (iter.first.trigPiYInd != TrigIndex())
       {
@@ -763,13 +769,16 @@ namespace FunctionalCalculator
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiZInd) * PiPolynomial(1, 1));
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiZInd != 0)
       {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiZInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
 
       if (iter.first.trigPiZInd != TrigIndex())
       {
