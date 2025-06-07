@@ -382,6 +382,30 @@ namespace FunctionalCalculator
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, AA * iter.first.ePiXInd, BB * iter.first.ePiXInd, CC * iter.first.ePiXInd);
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, DD * iter.first.ePiYInd, EE * iter.first.ePiYInd, FF * iter.first.ePiYInd);
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, GG * iter.first.ePiZInd, HH * iter.first.ePiZInd, II * iter.first.ePiZInd);
+      if (iter.first.trigPiXInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, AA * iter.first.trigPiXInd.self, BB * iter.first.trigPiXInd.self, CC * iter.first.trigPiXInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, AA * iter.first.trigPiXInd.self, BB * iter.first.trigPiXInd.self, CC * iter.first.trigPiXInd.self);
+      }
+      if (iter.first.trigPiYInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, DD * iter.first.trigPiYInd.self, EE * iter.first.trigPiYInd.self, FF * iter.first.trigPiYInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, DD * iter.first.trigPiYInd.self, EE * iter.first.trigPiYInd.self, FF * iter.first.trigPiYInd.self);
+      }
+      if (iter.first.trigPiZInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, GG * iter.first.trigPiZInd.self, HH * iter.first.trigPiZInd.self, II * iter.first.trigPiZInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, GG * iter.first.trigPiZInd.self, HH * iter.first.trigPiZInd.self, II * iter.first.trigPiZInd.self);
+      }
       answer = answer + term;
     }
 
