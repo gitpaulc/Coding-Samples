@@ -29,7 +29,7 @@ class FnPolynomial
   /** \param `self` represents A in sin(pi * A * x) where A != 0 OR A in cos(pi * A * x) where A might be 0. */
   struct TrigIndex
   {
-    QuadraticNumber self = 0;
+    QuadraticNumber self;
     bool isCosine = true; /**< Is cosine if and only if: isCosine == true OR self == 0. Otherwise is sine. */
     bool isCos() const;
     bool operator==(const TrigIndex& rhs) const;
@@ -43,9 +43,9 @@ class FnPolynomial
     unsigned int xInd = 0;
     unsigned int yInd = 0;
     unsigned int zInd = 0;
-    QuadraticNumber ePiXInd = 0;
-    QuadraticNumber ePiYInd = 0;
-    QuadraticNumber ePiZInd = 0;
+    QuadraticNumber ePiXInd;
+    QuadraticNumber ePiYInd;
+    QuadraticNumber ePiZInd;
     TrigIndex trigPiXInd;
     TrigIndex trigPiYInd;
     TrigIndex trigPiZInd;
