@@ -8,6 +8,37 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool FnPolynomial::TrigIndex::isCos() const
+  {
+    if (self == QuadraticNumber(0)) { return true; }
+    return isCosine;
+  }
+
+  bool FnPolynomial::TrigIndex::operator==(const FnPolynomial::TrigIndex& rhs) const
+  {
+    if (self == QuadraticNumber(0)) { return (self == rhs.self); }
+    if (rhs.self == QuadraticNumber(0)) { return (self == rhs.self); }
+    if (self != rhs.self) { return false; }
+    return (isCosine == rhs.isCosine);
+  }
+
+  bool FnPolynomial::TrigIndex::operator!=(const FnPolynomial::TrigIndex& rhs) const
+  {
+    return !((*this) == rhs);
+  }
+
+  bool FnPolynomial::TrigIndex::operator<(const FnPolynomial::TrigIndex& rhs) const
+  {
+    if (self < rhs.self) { return true; }
+    if (rhs.self < self) { return false; }
+    if (self == QuadraticNumber(0)) { return false; } // They are both treated as cosine.
+    if (isCosine == rhs.isCosine) { return false; }
+    // One must be true, one must be false. false < true:
+    return (isCosine == false);
+  }
+
+  bool FnPolynomial::TrigIndex::operator>(const FnPolynomial::TrigIndex& rhs) const { return (rhs < (*this)); }
+
   bool FnPolynomial::Monomial::isConstTerm() const
   {
     if (xInd != 0) { return false; }
@@ -16,36 +47,173 @@ namespace FunctionalCalculator
     if (ePiXInd != 0) { return false; }
     if (ePiYInd != 0) { return false; }
     if (ePiZInd != 0) { return false; }
+    if (trigPiXInd != TrigIndex()) { return false; }
+    if (trigPiYInd != TrigIndex()) { return false; }
+    if (trigPiZInd != TrigIndex()) { return false; }
     return true;
   }
 
-  FnPolynomial::Monomial FnPolynomial::Monomial::operator+(const FnPolynomial::Monomial& rhs) const
+  std::map<FnPolynomial::Monomial, QuadraticNumber> FnPolynomial::Monomial::trigSum(const Monomial& rhs) const
   {
-    Monomial answer;
-    answer.xInd = xInd + rhs.xInd;
-    answer.yInd = yInd + rhs.yInd;
-    answer.zInd = zInd + rhs.zInd;
-    answer.ePiXInd = ePiXInd + rhs.ePiXInd;
-    answer.ePiYInd = ePiYInd + rhs.ePiYInd;
-    answer.ePiZInd = ePiZInd + rhs.ePiZInd;
-    return answer;
+    std::map<Monomial, QuadraticNumber> answers;
+    for (int i = 0; i < 8; ++i)
+    {
+      Monomial answer;
+      answer.xInd = xInd + rhs.xInd;
+      answer.yInd = yInd + rhs.yInd;
+      answer.zInd = zInd + rhs.zInd;
+      answer.ePiXInd = ePiXInd + rhs.ePiXInd;
+      answer.ePiYInd = ePiYInd + rhs.ePiYInd;
+      answer.ePiZInd = ePiZInd + rhs.ePiZInd;
+      bool xRight = (((i / 4) % 2) == 1) ? true : false;
+      bool yRight = (((i / 2) % 2) == 1) ? true : false;
+      bool zRight = ((i % 2) == 1) ? true : false;
+      /*
+      cos(ax)cos(Ax) = (1/2)cos((a + A)x) + (1/2)cos((a - A)x)
+      cos(ax)sin(Ax) = (1/2)sin((a + A)x) - (1/2)sin((a - A)x)
+      sin(ax)cos(Ax) = (1/2)sin((a + A)x) + (1/2)sin((a - A)x)
+      sin(ax)sin(Ax) = (1/2)cos((a - A)x) - (1/2)cos((a + A)x)
+      */
+      QuadraticNumber coeff(Rational(1, 1));
+      if (trigPiXInd.isCos() == rhs.trigPiXInd.isCos())
+      {
+        answer.trigPiXInd.isCosine = true;
+        if (trigPiXInd.isCos()) // cos(ax)cos(Ax)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+        }
+        else // sin(ax)sin(Ax)
+        {
+          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self + rhs.trigPiXInd.self) : (trigPiXInd.self - rhs.trigPiXInd.self);
+        }
+      }
+      else
+      {
+        answer.trigPiXInd.isCosine = false;
+        if (trigPiXInd.isCos()) // cos(ax)sin(Ax)
+        {
+          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+        }
+        else // sin(ax)cos(Ax)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
+          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+        }
+      }
+      if (trigPiYInd.isCos() == rhs.trigPiYInd.isCos())
+      {
+        answer.trigPiYInd.isCosine = true;
+        if (trigPiYInd.isCos()) // cos(ay)cos(Ay)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+        }
+        else // sin(ay)sin(Ay)
+        {
+          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self + rhs.trigPiYInd.self) : (trigPiYInd.self - rhs.trigPiYInd.self);
+        }
+      }
+      else
+      {
+        answer.trigPiYInd.isCosine = false;
+        if (trigPiYInd.isCos()) // cos(ay)sin(Ay)
+        {
+          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+        }
+        else // sin(ay)cos(Ay)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
+          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+        }
+      }
+      if (trigPiZInd.isCos() == rhs.trigPiZInd.isCos())
+      {
+        answer.trigPiZInd.isCosine = true;
+        if (trigPiZInd.isCos()) // cos(az)cos(Az)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
+        }
+        else // sin(az)sin(Az)
+        {
+          coeff = coeff * Rational(1, 2); if (zRight) { coeff = -coeff; }
+          answer.trigPiZInd.self = zRight ? (trigPiZInd.self + rhs.trigPiZInd.self) : (trigPiZInd.self - rhs.trigPiZInd.self);
+        }
+      }
+      else
+      {
+        answer.trigPiZInd.isCosine = false;
+        if (trigPiZInd.isCos()) // cos(az)sin(Az)
+        {
+          coeff = coeff * Rational(1, 2); if (zRight) { coeff = -coeff; }
+          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
+          if (answer.trigPiZInd.self == QuadraticNumber(0)) { continue; }
+        }
+        else // sin(az)cos(Az)
+        {
+          coeff = coeff * Rational(1, 2);
+          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
+          if (answer.trigPiZInd.self == QuadraticNumber(0)) { continue; }
+        }
+      }
+      auto answerIter = answers.find(answer);
+      if (answerIter == answers.end()) { answers[answer] = coeff; }
+      else { answerIter->second = answerIter->second + coeff; }
+    }
+    return answers;
   }
 
   bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
   {
     if (zInd < rhs.zInd) { return true; }
     if (zInd > rhs.zInd) { return false; }
-    if (yInd < rhs.yInd) { return true; }
-    if (yInd > rhs.yInd) { return false; }
-    if (xInd < rhs.xInd) { return true; }
-    if (xInd > rhs.xInd) { return false; }
     if (ePiZInd < rhs.ePiZInd) { return true; }
     if (ePiZInd > rhs.ePiZInd) { return false; }
+    if (trigPiZInd < rhs.trigPiZInd) { return true; }
+    if (trigPiZInd > rhs.trigPiZInd) { return false; }
+    if (yInd < rhs.yInd) { return true; }
+    if (yInd > rhs.yInd) { return false; }
     if (ePiYInd < rhs.ePiYInd) { return true; }
     if (ePiYInd > rhs.ePiYInd) { return false; }
+    if (trigPiYInd < rhs.trigPiYInd) { return true; }
+    if (trigPiYInd > rhs.trigPiYInd) { return false; }
+    if (xInd < rhs.xInd) { return true; }
+    if (xInd > rhs.xInd) { return false; }
     if (ePiXInd < rhs.ePiXInd) { return true; }
     if (ePiXInd > rhs.ePiXInd) { return false; }
+    if (trigPiXInd < rhs.trigPiXInd) { return true; }
+    if (trigPiXInd > rhs.trigPiXInd) { return false; }
     return false; // They are equal.
+  }
+
+  std::map<FnPolynomial::Monomial, PiRational>::iterator FnPolynomial::trigFind(const FnPolynomial::Monomial& ind,
+    bool& xNegative, bool& yNegative, bool& zNegative)
+  {
+    xNegative = false;
+    yNegative = false;
+    zNegative = false;
+    for (int i = 0; i < 8; ++i)
+    {
+      bool xNeg = (((i / 4) % 2) == 1) ? true : false;
+      bool yNeg = (((i / 2) % 2) == 1) ? true : false;
+      bool zNeg = ((i % 2) == 1) ? true : false;
+      auto indB = ind;
+      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; xNegative = true; }
+      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; yNegative = true; }
+      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; zNegative = true; }
+      auto iter = self.find(indB);
+      if (iter != self.end()) { return iter; }
+    }
+    return self.end();
   }
 
   void FnPolynomial::clean()
@@ -54,9 +222,58 @@ namespace FunctionalCalculator
     for (const auto& iter : self)
     {
       if (iter.second == PiRational()) { continue; }
+      {
+        bool xNegative = false;
+        bool yNegative = false;
+        bool zNegative = false;
+        auto jter = answer.trigFind(iter.first, xNegative, yNegative, zNegative);
+        if (jter != answer.self.end())
+        {
+          if (jter->first.trigPiXInd.isCos()) { xNegative = false; }
+          if (jter->first.trigPiYInd.isCos()) { yNegative = false; }
+          if (jter->first.trigPiZInd.isCos()) { zNegative = false; }
+          bool isNegative = false;
+          if (xNegative) { isNegative = !isNegative; }
+          if (yNegative) { isNegative = !isNegative; }
+          if (zNegative) { isNegative = !isNegative; }
+          if (isNegative) { jter->second = jter->second - iter.second; }
+          else { jter->second = jter->second + iter.second; }
+          continue;
+        }
+      }
       answer.self[iter.first] = iter.second;
     }
-    self = answer.self;
+    self = std::map<Monomial, PiRational>();
+    for (auto& iter : answer.self)
+    {
+      auto coeff = iter.second;
+      auto newIndex = iter.first;
+      if (iter.first.trigPiXInd != TrigIndex())
+      {
+        if (iter.first.trigPiXInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiXInd.self = -iter.first.trigPiXInd.self;
+          if (!iter.first.trigPiXInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      if (iter.first.trigPiYInd != TrigIndex())
+      {
+        if (iter.first.trigPiYInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiYInd.self = -iter.first.trigPiYInd.self;
+          if (!iter.first.trigPiYInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      if (iter.first.trigPiZInd != TrigIndex())
+      {
+        if (iter.first.trigPiZInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiZInd.self = -iter.first.trigPiZInd.self;
+          if (!iter.first.trigPiZInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      self[newIndex] = coeff;
+    }
   }
 
   FnPolynomial::FnPolynomial(const PiRational& coeff)
@@ -116,8 +333,20 @@ namespace FunctionalCalculator
         if (iter.first.zInd != 1) { strm << "^" << iter.first.zInd; }
       }
       if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
+      if (iter.first.trigPiXInd != TrigIndex())
+      {
+        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiXInd.self.print(true) << " * x)";
+      }
       if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
+      if (iter.first.trigPiYInd != TrigIndex())
+      {
+        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiYInd.self.print(true) << " * y)";
+      }
       if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
+      if (iter.first.trigPiZInd != TrigIndex())
+      {
+        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiZInd.self.print(true) << " * z)";
+      }
     }
     if (count < 0) { strm << "0"; }
     if (useParentheses) { strm << ")"; }
@@ -153,6 +382,30 @@ namespace FunctionalCalculator
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, AA * iter.first.ePiXInd, BB * iter.first.ePiXInd, CC * iter.first.ePiXInd);
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, DD * iter.first.ePiYInd, EE * iter.first.ePiYInd, FF * iter.first.ePiYInd);
       term = term * eToThePi_AX_plus_BY_plus_CZ(one, GG * iter.first.ePiZInd, HH * iter.first.ePiZInd, II * iter.first.ePiZInd);
+      if (iter.first.trigPiXInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, AA * iter.first.trigPiXInd.self, BB * iter.first.trigPiXInd.self, CC * iter.first.trigPiXInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, AA * iter.first.trigPiXInd.self, BB * iter.first.trigPiXInd.self, CC * iter.first.trigPiXInd.self);
+      }
+      if (iter.first.trigPiYInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, DD * iter.first.trigPiYInd.self, EE * iter.first.trigPiYInd.self, FF * iter.first.trigPiYInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, DD * iter.first.trigPiYInd.self, EE * iter.first.trigPiYInd.self, FF * iter.first.trigPiYInd.self);
+      }
+      if (iter.first.trigPiZInd.isCos())
+      {
+        term = term * cosPi_AX_plus_BY_plus_CZ(one, GG * iter.first.trigPiZInd.self, HH * iter.first.trigPiZInd.self, II * iter.first.trigPiZInd.self);
+      }
+      else
+      {
+        term = term * sinPi_AX_plus_BY_plus_CZ(one, GG * iter.first.trigPiZInd.self, HH * iter.first.trigPiZInd.self, II * iter.first.trigPiZInd.self);
+      }
       answer = answer + term;
     }
 
@@ -212,28 +465,43 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiXInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiXInd = A.getRe();
+    term.trigPiXInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiXInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiYInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiYInd = A.getRe();
+    term.trigPiYInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiYInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
-    term.ePiZInd = A;
-    FnPolynomial answer;
-    answer.self[term] = coeff;
-    return answer;
+    term.ePiZInd = A.getRe();
+    term.trigPiZInd = { A.getIm(), true };
+    FnPolynomial realTerm;
+    realTerm.self[term] = coeff;
+    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    term.trigPiZInd = { A.getIm(), false };
+    FnPolynomial imTerm;
+    imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
+    return realTerm + imTerm;
   }
 
   FnPolynomial FnPolynomial::eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
@@ -404,15 +672,21 @@ namespace FunctionalCalculator
       for (const auto& jter : rhs.self)
       {
         auto summand = iter.second * jter.second;
-        auto kk = iter.first + jter.first;
-        if (answer.self.find(kk) == answer.self.end())
+        auto monomials = iter.first.trigSum(jter.first);
+        for (const auto& kter : monomials)
         {
-          answer.self[kk] = summand;
-          continue;
+          auto currentSummand = summand * PiPolynomial(kter.second);
+          auto kk = kter.first;
+          if (answer.self.find(kk) == answer.self.end())
+          { 
+            answer.self[kk] = currentSummand;
+            continue;
+          }
+          answer.self[kk] = answer.self[kk] + currentSummand;
         }
-        answer.self[kk] = answer.self[kk] + summand;
       }
     }
+    answer.clean();
     return answer;
   }
 
@@ -460,21 +734,36 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.xInd));
-      --(newIndex.first.xInd);
+      if (newIndex.first.xInd > 0) { --(newIndex.first.xInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(newIndex.first.ePiXInd);
-      newIndex.second = newIndex.second * PiPolynomial(1, 1);
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiXInd != 0)
       {
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiXInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiXInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiXInd.isCosine = !iter.first.trigPiXInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiXInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiXInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;
@@ -487,21 +776,36 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.yInd));
-      --(newIndex.first.yInd);
+      if (newIndex.first.yInd > 0) { --(newIndex.first.yInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(newIndex.first.ePiYInd);
-      newIndex.second = newIndex.second * PiPolynomial(1, 1);
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiYInd != 0)
       {
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiYInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiYInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiYInd.isCosine = !iter.first.trigPiYInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiYInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiYInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;
@@ -514,21 +818,36 @@ namespace FunctionalCalculator
     {
       std::pair<Monomial, PiRational> newIndex = iter;
       newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.zInd));
-      --(newIndex.first.zInd);
+      if (newIndex.first.zInd > 0) { --(newIndex.first.zInd); }
       if (answer.self.find(newIndex.first) != answer.self.end())
       {
         answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
 
-      newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(newIndex.first.ePiZInd);
-      newIndex.second = newIndex.second * PiPolynomial(1, 1);
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      if (iter.first.ePiZInd != 0)
       {
+        newIndex = iter;
+        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiZInd) * PiPolynomial(1, 1));
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
           answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
       }
-      else { answer.self[newIndex.first] = newIndex.second; }
+
+      if (iter.first.trigPiZInd != TrigIndex())
+      {
+        newIndex = iter;
+        newIndex.first.trigPiZInd.isCosine = !iter.first.trigPiZInd.isCosine;
+        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiZInd.self) * PiPolynomial(1, 1));
+        if (iter.first.trigPiZInd.isCosine) { newIndex.second = -newIndex.second; }
+        if (answer.self.find(newIndex.first) != answer.self.end())
+        {
+          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        }
+        else { answer.self[newIndex.first] = newIndex.second; }
+      }
     }
     answer.clean();
     return answer;

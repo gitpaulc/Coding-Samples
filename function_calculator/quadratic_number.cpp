@@ -146,6 +146,11 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  QuadraticNumber QuadraticNumber::abs() const
+  {
+    return ((*this) < QuadraticNumber(0)) ? (-(*this)) : (*this);
+  }
+
   QuadraticNumber QuadraticNumber::operator+() const
   {
     return *this;
@@ -306,8 +311,18 @@ namespace FunctionalCalculator
     return !((*this) == rhs);
   }
 
+  bool QuadraticNumber::operator!=(int rhs) const
+  {
+    return !((*this) == QuadraticNumber(rhs));
+  }
+
   bool QuadraticNumber::operator<(const QuadraticNumber& rhs) const
   {
     return get() < rhs.get();
+  }
+
+  bool QuadraticNumber::operator>(const QuadraticNumber& rhs) const
+  {
+    return (rhs < (*this));
   }
 }

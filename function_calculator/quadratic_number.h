@@ -36,6 +36,7 @@ public:
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
+  QuadraticNumber abs() const;
 
   QuadraticNumber operator+() const;
   QuadraticNumber operator-() const;
@@ -47,8 +48,10 @@ public:
   QuadraticNumber pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const QuadraticNumber& rhs) const;
   bool operator!=(const QuadraticNumber& rhs) const;
+  bool operator!=(int rhs) const;
   /** \remark Does not use algebra to determine < since it would be very inefficient. */
   bool operator<(const QuadraticNumber& rhs) const;
+  bool operator>(const QuadraticNumber& rhs) const;
 };
 }
 
