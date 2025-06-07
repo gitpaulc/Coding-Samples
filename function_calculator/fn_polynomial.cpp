@@ -243,7 +243,37 @@ namespace FunctionalCalculator
       }
       answer.self[iter.first] = iter.second;
     }
-    self = answer.self;
+    self = std::map<Monomial, PiRational>();
+    for (auto& iter : answer.self)
+    {
+      auto coeff = iter.second;
+      auto newIndex = iter.first;
+      if (iter.first.trigPiXInd != TrigIndex())
+      {
+        if (iter.first.trigPiXInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiXInd.self = -iter.first.trigPiXInd.self;
+          if (!iter.first.trigPiXInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      if (iter.first.trigPiYInd != TrigIndex())
+      {
+        if (iter.first.trigPiYInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiYInd.self = -iter.first.trigPiYInd.self;
+          if (!iter.first.trigPiYInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      if (iter.first.trigPiZInd != TrigIndex())
+      {
+        if (iter.first.trigPiZInd.self < QuadraticNumber(0))
+        {
+          newIndex.trigPiZInd.self = -iter.first.trigPiZInd.self;
+          if (!iter.first.trigPiZInd.isCosine) { coeff = -coeff; }
+        }
+      }
+      self[newIndex] = coeff;
+    }
   }
 
   FnPolynomial::FnPolynomial(const PiRational& coeff)
