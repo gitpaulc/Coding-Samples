@@ -338,6 +338,9 @@ namespace FunctionalCalculator
     QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
     QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
     unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+    output = powered.getRe();
+    return true;
   }
 
   bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output) const
@@ -357,5 +360,8 @@ namespace FunctionalCalculator
     QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
     QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
     unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+    output = powered.getIm();
+    return true;
   }
 }

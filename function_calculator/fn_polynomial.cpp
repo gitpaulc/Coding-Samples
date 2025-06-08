@@ -911,14 +911,14 @@ namespace FunctionalCalculator
         if (newKey.trigPiXInd.isCos())
         {
           QuadraticNumber factor;
-          bool trigSuccess = tryGetCosine(rationalVal, factor);
+          bool trigSuccess = newKey.trigPiXInd.self.tryGetCosine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
         else
         {
           QuadraticNumber factor;
-          bool trigSuccess = tryGetSine(rationalVal, factor);
+          bool trigSuccess = newKey.trigPiXInd.self.tryGetSine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
