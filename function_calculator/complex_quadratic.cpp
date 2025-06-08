@@ -154,13 +154,14 @@ namespace FunctionalCalculator
     std::vector<ComplexQuadratic> bbPowers(p + 1);
     aaPowers[0] = ComplexQuadratic(1);
     bbPowers[0] = ComplexQuadratic(1);
-    for (int ii = 0; ii < p; ++ii)
+    int pp = (int)p;
+    for (int ii = 0; ii < pp; ++ii)
     {
       aaPowers[ii + 1] = aaPowers[ii] * aa;
       bbPowers[ii + 1] = bbPowers[ii] * bb;
     }
     ComplexQuadratic sum;
-    for (int ii = 0; ii <= p; ++ii)
+    for (int ii = 0; ii <= pp; ++ii)
     {
       sum = sum + aaPowers[ii] * (bbPowers[p - ii] * QuadraticNumber(Rational(mp::binomialCoeff((int)p, ii), 1)));
     }

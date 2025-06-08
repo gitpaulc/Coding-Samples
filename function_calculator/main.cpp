@@ -5,6 +5,29 @@
 
 using namespace FunctionalCalculator;
 
+bool test_evaluation()
+{
+  auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+  auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
+  auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
+  auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
+  auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
+  auto half = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 2)));
+  PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+  {
+    FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
+    std::cout << "\n\ncos(pi * x) = " << fn.print();
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(unit - unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(0) = " << result.print();
+    success = fn.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 2) = " << result.print();
+  }
+  return true;
+}
+
 bool test_composition()
 {
   PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
@@ -515,6 +538,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting function evaluation:\n";
+  test_evaluation();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting function composition:\n";
   test_composition();
   std::cout << "\nContinue, or 'Q' to exit? ";
