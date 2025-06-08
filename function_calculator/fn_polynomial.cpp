@@ -898,8 +898,32 @@ namespace FunctionalCalculator
         newVal = newVal * PiPolynomial(xVal.pow(newKey.xInd));
         newKey.xInd = 0;
       }
-      if (newKey.ePiXInd != 0) { if (xVal != 0) { return false; } }
-      else { newKey.ePiXInd = QuadraticNumber(); }
+      if (newKey.ePiXInd != 0)
+      {
+        if (xVal != 0) { return false; }
+        newKey.ePiXInd = QuadraticNumber();
+      }
+      if (newKey.trigPiXInd != TrigIndex())
+      {
+        Rational rationalVal;
+        bool isRational = newKey.trigPiXInd.self.getRational(rationalVal);
+        if (!isRational) { return false; }
+        if (newKey.trigPiXInd.isCos())
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = tryGetCosine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        else
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = tryGetSine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        newKey.trigPiXInd = TrigIndex();
+      }
       auto newIter = answer.self.find(newKey);
       if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
       else { newIter->second = newIter->second + newVal; }
