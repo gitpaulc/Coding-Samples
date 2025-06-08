@@ -24,6 +24,30 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(half, result);
     if (!success) { return false; }
     std::cout << "\n\ncos(pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(oneThird, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 3) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneTwelfth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtX(unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + half, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(3 * pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(2 * pi) = " << result.print();
+    success = fn.tryEvaluateAtX(-oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(-pi / 6) = " << result.print();
   }
   return true;
 }
