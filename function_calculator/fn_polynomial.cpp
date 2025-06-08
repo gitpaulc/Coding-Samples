@@ -885,4 +885,28 @@ namespace FunctionalCalculator
   {
     return (laplacian() == FnPolynomial(PiPolynomial(0)));
   }
+
+  bool FnPolynomial::tryEvaluateAtX(const ComplexQuadratic& xVal, FnPolynomial& output) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      auto newKey = iter.first;
+      auto newVal = iter.second;
+      if (newKey.xInd != 0)
+      {
+        newVal = newVal * PiPolynomial(xVal.pow(newKey.xInd));
+        newKey.xInd = 0;
+      }
+      if (newKey.ePiXInd != 0) { if (xVal != 0) { return false; } }
+      else { newKey.ePiXInd = QuadraticNumber(); }
+      auto newIter = answer.self.find(newKey);
+      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
+      else { newIter->second = newIter->second + newVal; }
+    }
+    answer.clean();
+    output = answer;
+    return true;
+  }
+
 }

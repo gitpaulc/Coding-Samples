@@ -137,6 +137,8 @@ public:
   bool isLaplaceEigenfunction(PiRational& eigenvalue) const;
   bool isHarmonic() const;
 
+  // EXACT EVALUATION:
+
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a complex number and (a)^p is attempted for nonnegative integers p, it should always succeed.
    *  \remark Currently when a is a real number and e^a is attempted, evaluation only succeeds for a == 0. This is because e polynomials are unsupported.

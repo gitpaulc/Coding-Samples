@@ -148,6 +148,25 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  ComplexQuadratic ComplexQuadratic::aPlusBTotheP(const ComplexQuadratic& aa, const ComplexQuadratic& bb, unsigned int p)
+  {
+    std::vector<ComplexQuadratic> aaPowers(p + 1);
+    std::vector<ComplexQuadratic> bbPowers(p + 1);
+    aaPowers[0] = ComplexQuadratic(1);
+    bbPowers[0] = ComplexQuadratic(1);
+    for (int ii = 0; ii < p; ++ii)
+    {
+      aaPowers[ii + 1] = aaPowers[ii] * aa;
+      bbPowers[ii + 1] = bbPowers[ii] * bb;
+    }
+    ComplexQuadratic sum;
+    for (int ii = 0; ii <= p; ++ii)
+    {
+      sum = sum + aaPowers[ii] * (bbPowers[p - ii] * QuadraticNumber(Rational(mp::binomialCoeff((int)p, ii), 1)));
+    }
+    return sum;
+  }
+
   bool ComplexQuadratic::operator==(const ComplexQuadratic& rhs) const
   {
     if (re != rhs.re) { return false; }
