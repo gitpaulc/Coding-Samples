@@ -905,20 +905,22 @@ namespace FunctionalCalculator
       }
       if (newKey.trigPiXInd != TrigIndex())
       {
+        ComplexQuadratic trigInput = xVal * newKey.trigPiXInd.self;
+        if (trigInput.getIm() != 0) { return false; }
         Rational rationalVal;
-        bool isRational = newKey.trigPiXInd.self.getRational(rationalVal);
+        bool isRational = trigInput.getRe().getRational(rationalVal);
         if (!isRational) { return false; }
         if (newKey.trigPiXInd.isCos())
         {
           QuadraticNumber factor;
-          bool trigSuccess = newKey.trigPiXInd.self.tryGetCosine(rationalVal, factor);
+          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
         else
         {
           QuadraticNumber factor;
-          bool trigSuccess = newKey.trigPiXInd.self.tryGetSine(rationalVal, factor);
+          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }

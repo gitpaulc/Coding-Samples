@@ -328,7 +328,7 @@ namespace FunctionalCalculator
     return (rhs < (*this));
   }
 
-  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output) const
+  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
   {
     if (input < Rational()) { return tryGetCosine(-input, output); }
     if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
@@ -343,7 +343,7 @@ namespace FunctionalCalculator
     return true;
   }
 
-  bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output) const
+  bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output)
   {
     if (input < Rational())
     {
