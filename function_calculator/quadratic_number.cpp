@@ -333,6 +333,11 @@ namespace FunctionalCalculator
     if (input < Rational()) { return tryGetCosine(-input, output); }
     if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
     if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
+    auto sqrt2 = QuadraticNumber::sqrt(2);
+    auto sqrt6 = QuadraticNumber::sqrt(6);
+    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
   }
 
   bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output) const
@@ -347,5 +352,10 @@ namespace FunctionalCalculator
     }
     if (input == Rational()) { output = QuadraticNumber(); return true; }
     if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
+    auto sqrt2 = QuadraticNumber::sqrt(2);
+    auto sqrt6 = QuadraticNumber::sqrt(6);
+    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
   }
 }
