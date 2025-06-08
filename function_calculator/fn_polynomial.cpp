@@ -1032,4 +1032,19 @@ namespace FunctionalCalculator
     output = answer;
     return true;
   }
+
+  bool FnPolynomial::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
+  {
+    FnPolynomial answerX, answerY, answerZ;
+    bool success = tryEvaluateAtX(xVal, answerX);
+    if (!success) { return false; }
+    success = answerX.tryEvaluateAtY(yVal, answerY);
+    if (!success) { return false; }
+    success = answerY.tryEvaluateAtZ(zVal, answerZ);
+    if (!success) { return false; }
+    if (answerZ.self.size() != 1) { return false; }
+    if (answerZ.self.find(Monomial()) == answerZ.self.end()) { return false; }
+    output = answerZ.self.at(Monomial());
+    return true;
+  }
 }

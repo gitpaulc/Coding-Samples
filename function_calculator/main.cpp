@@ -91,6 +91,22 @@ bool test_evaluation()
     std::cout << "\n\nsin(-pi / 6) = " << result.print();
   }
 
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    FnPolynomial fn = FnPolynomial::sinPi_AX_plus_BY_plus_CZ(one, oneThird, oneThird, oneThird);
+    PiRational result;
+    bool success = fn.tryEvaluateAtXYZ(unit, half, oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi/3 + pi/6 + pi/12) = cos(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtXYZ(unit, -half, oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi/3 - pi/6 + pi/12) = sin(pi / 4) = " << result.print();
+  }
+
+  std::cout << "\n";
   return true;
 }
 
