@@ -262,4 +262,52 @@ namespace FunctionalCalculator
     qq = qq / A;
     return sphericalNeumannATimesPiX(A, n - 1).partial_x() * FnPolynomial(PiPolynomial(qq));
   }
+
+  bool Function::tryEvaluateAtX(const ComplexQuadratic& xVal, Function& output) const
+  {
+    FnPolynomial numFn;
+    bool success = num.tryEvaluateAtX(xVal, numFn);
+    if (!success) { return false; }
+    FnPolynomial denomFn;
+    success = denom.tryEvaluateAtX(xVal, denomFn);
+    if (!success) { return false; }
+    output = Function(numFn, denomFn);
+    return true;
+  }
+
+  bool Function::tryEvaluateAtY(const ComplexQuadratic& yVal, Function& output) const
+  {
+    FnPolynomial numFn;
+    bool success = num.tryEvaluateAtY(yVal, numFn);
+    if (!success) { return false; }
+    FnPolynomial denomFn;
+    success = denom.tryEvaluateAtY(yVal, denomFn);
+    if (!success) { return false; }
+    output = Function(numFn, denomFn);
+    return true;
+  }
+
+  bool Function::tryEvaluateAtZ(const ComplexQuadratic& zVal, Function& output) const
+  {
+    FnPolynomial numFn;
+    bool success = num.tryEvaluateAtZ(zVal, numFn);
+    if (!success) { return false; }
+    FnPolynomial denomFn;
+    success = denom.tryEvaluateAtZ(zVal, denomFn);
+    if (!success) { return false; }
+    output = Function(numFn, denomFn);
+    return true;
+  }
+
+  bool Function::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
+  {
+    PiRational numConstant;
+    bool success = num.tryEvaluateAtXYZ(xVal, yVal, zVal, numConstant);
+    if (!success) { return false; }
+    PiRational denomConstant;
+    success = denom.tryEvaluateAtXYZ(xVal, yVal, zVal, denomConstant);
+    if (!success) { return false; }
+    output = numConstant / denomConstant;
+    return true;
+  }
 }

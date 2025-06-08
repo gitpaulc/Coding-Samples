@@ -628,6 +628,25 @@ bool test_function()
   std::cout << "\n";
   {
     auto tan = Function::tanATimesPiX(PiPolynomial(1), 1);
+    std::cout << "\ntan(pi * x) = " << tan.print();
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto zippo = unit - unit;
+    auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
+    auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
+    auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
+    auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    PiRational expression;
+    tan.tryEvaluateAtXYZ(unit, zippo, zippo, expression);
+    std::cout << "\ntan(pi) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneThird, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 3) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneFourth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 4) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneSixth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 6) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneTwelfth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 12) = " << expression.print();
     auto sec = Function(FnPolynomial(PiPolynomial(1)), FnPolynomial::cosATimesPiX(PiPolynomial(1), 1));
     auto sec2_times_pi = sec * sec * Function::constant(PiPolynomial(1, 1));
     std::cout << "\npi * sec^2(pi * x) - (d/dx)tan(pi * x) = " << (sec2_times_pi - tan.partial_x()).print();
