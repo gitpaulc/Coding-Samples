@@ -3,6 +3,8 @@ All Rights Reserved.*/
 
 #include "quadratic_number.h"
 
+#include "complex_quadratic.h"
+
 #include <stdexcept>
 #include <sstream>
 
@@ -324,5 +326,26 @@ namespace FunctionalCalculator
   bool QuadraticNumber::operator>(const QuadraticNumber& rhs) const
   {
     return (rhs < (*this));
+  }
+
+  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output) const
+  {
+    if (input < Rational()) { return tryGetCosine(-input, output); }
+    if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
+    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
+  }
+
+  bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output) const
+  {
+    if (input < Rational())
+    {
+      QuadraticNumber output0;
+      bool answer = tryGetSine(-input, output0);
+      if (!answer) { return answer; }
+      output = -output0;
+      return true;
+    }
+    if (input == Rational()) { output = QuadraticNumber(); return true; }
+    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
   }
 }

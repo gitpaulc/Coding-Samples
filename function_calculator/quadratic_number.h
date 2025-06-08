@@ -52,6 +52,13 @@ public:
   /** \remark Does not use algebra to determine < since it would be very inefficient. */
   bool operator<(const QuadraticNumber& rhs) const;
   bool operator>(const QuadraticNumber& rhs) const;
+
+  /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
+   *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
+   *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
+   */
+  bool tryGetCosine(const Rational& input, QuadraticNumber& output) const;
+  bool tryGetSine(const Rational& input, QuadraticNumber& output) const;
 };
 }
 
