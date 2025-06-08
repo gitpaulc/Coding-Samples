@@ -49,6 +49,48 @@ bool test_evaluation()
     if (!success) { return false; }
     std::cout << "\n\ncos(-pi / 6) = " << result.print();
   }
+
+  std::string prompt = "";
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
+    std::cout << "\n\nsin(pi * x) = " << fn.print();
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(unit - unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(0) = " << result.print();
+    success = fn.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(oneThird, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 3) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneTwelfth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtX(unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(3 * pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(2 * pi) = " << result.print();
+    success = fn.tryEvaluateAtX(-oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(-pi / 6) = " << result.print();
+  }
+
   return true;
 }
 
