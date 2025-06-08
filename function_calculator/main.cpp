@@ -136,6 +136,12 @@ bool test_composition()
   if (isEigen) { std::cout << "\n\n" << sine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+
+  std::string prompt = "";
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
   std::set<Matrix<ComplexQuadratic> > cubeVertices;
   {
     ComplexQuadratic unit(Rational(1, 1));
@@ -148,6 +154,7 @@ bool test_composition()
     cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, -unit }));
     cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, unit }));
   }
+
   FnPolynomial cubeSine, cubeCosine;
   for (const auto& vertex : cubeVertices)
   {
@@ -161,7 +168,34 @@ bool test_composition()
   isEigen = cubeSine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cubeSine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   isEigen = cubeCosine.isLaplaceEigenfunction(eigen);
-  if (isEigen) { std::cout << "\n\n" << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  if (isEigen) { std::cout << "\n\nF(x, y, z) = " << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    ComplexQuadratic half(Rational(1, 2));
+    FnPolynomial result;
+    bool success = cubeCosine.tryEvaluateAtX(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(-1/2, y, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(1/2, y, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtY(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, -1/2, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtY(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, 1/2, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtZ(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, y, -1/2) = " << result.print();
+    success = cubeCosine.tryEvaluateAtZ(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, y, 1/2) = " << result.print();
+  }
   return true;
 }
 
