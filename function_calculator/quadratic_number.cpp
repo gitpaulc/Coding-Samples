@@ -3,6 +3,8 @@ All Rights Reserved.*/
 
 #include "quadratic_number.h"
 
+#include "complex_quadratic.h"
+
 #include <stdexcept>
 #include <sstream>
 
@@ -324,5 +326,42 @@ namespace FunctionalCalculator
   bool QuadraticNumber::operator>(const QuadraticNumber& rhs) const
   {
     return (rhs < (*this));
+  }
+
+  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
+  {
+    if (input < Rational()) { return tryGetCosine(-input, output); }
+    if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
+    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
+    auto sqrt2 = QuadraticNumber::sqrt(2);
+    auto sqrt6 = QuadraticNumber::sqrt(6);
+    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+    output = powered.getRe();
+    return true;
+  }
+
+  bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output)
+  {
+    if (input < Rational())
+    {
+      QuadraticNumber output0;
+      bool answer = tryGetSine(-input, output0);
+      if (!answer) { return answer; }
+      output = -output0;
+      return true;
+    }
+    if (input == Rational()) { output = QuadraticNumber(); return true; }
+    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
+    auto sqrt2 = QuadraticNumber::sqrt(2);
+    auto sqrt6 = QuadraticNumber::sqrt(6);
+    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+    output = powered.getIm();
+    return true;
   }
 }

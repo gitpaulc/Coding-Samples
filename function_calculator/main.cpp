@@ -5,6 +5,111 @@
 
 using namespace FunctionalCalculator;
 
+bool test_evaluation()
+{
+  auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+  auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
+  auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
+  auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
+  auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
+  auto half = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 2)));
+  PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+  {
+    FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
+    std::cout << "\n\ncos(pi * x) = " << fn.print();
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(unit - unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(0) = " << result.print();
+    success = fn.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(oneThird, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 3) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneTwelfth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtX(unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + half, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(3 * pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(2 * pi) = " << result.print();
+    success = fn.tryEvaluateAtX(-oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(-pi / 6) = " << result.print();
+  }
+
+  std::string prompt = "";
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
+    std::cout << "\n\nsin(pi * x) = " << fn.print();
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(unit - unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(0) = " << result.print();
+    success = fn.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(oneThird, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 3) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneTwelfth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtX(unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(3 * pi / 2) = " << result.print();
+    success = fn.tryEvaluateAtX(unit + unit, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(2 * pi) = " << result.print();
+    success = fn.tryEvaluateAtX(-oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(-pi / 6) = " << result.print();
+  }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    FnPolynomial fn = FnPolynomial::sinPi_AX_plus_BY_plus_CZ(one, oneThird, oneThird, oneThird);
+    PiRational result;
+    bool success = fn.tryEvaluateAtXYZ(unit, half, oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi/3 + pi/6 + pi/12) = cos(pi / 12) = " << result.print();
+    success = fn.tryEvaluateAtXYZ(unit, -half, oneFourth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi/3 - pi/6 + pi/12) = sin(pi / 4) = " << result.print();
+  }
+
+  std::cout << "\n";
+  return true;
+}
+
 bool test_composition()
 {
   PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
@@ -31,6 +136,12 @@ bool test_composition()
   if (isEigen) { std::cout << "\n\n" << sine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+
+  std::string prompt = "";
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
   std::set<Matrix<ComplexQuadratic> > cubeVertices;
   {
     ComplexQuadratic unit(Rational(1, 1));
@@ -43,6 +154,7 @@ bool test_composition()
     cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, -unit }));
     cubeVertices.insert(Matrix<ComplexQuadratic>({ unit, unit, unit }));
   }
+
   FnPolynomial cubeSine, cubeCosine;
   for (const auto& vertex : cubeVertices)
   {
@@ -56,7 +168,34 @@ bool test_composition()
   isEigen = cubeSine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cubeSine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
   isEigen = cubeCosine.isLaplaceEigenfunction(eigen);
-  if (isEigen) { std::cout << "\n\n" << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+  if (isEigen) { std::cout << "\n\nF(x, y, z) = " << cubeCosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    ComplexQuadratic half(Rational(1, 2));
+    FnPolynomial result;
+    bool success = cubeCosine.tryEvaluateAtX(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(-1/2, y, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtX(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(1/2, y, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtY(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, -1/2, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtY(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, 1/2, z) = " << result.print();
+    success = cubeCosine.tryEvaluateAtZ(-half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, y, -1/2) = " << result.print();
+    success = cubeCosine.tryEvaluateAtZ(half, result);
+    if (!success) { return false; }
+    std::cout << "\n\nF(x, y, 1/2) = " << result.print();
+  }
   return true;
 }
 
@@ -489,6 +628,25 @@ bool test_function()
   std::cout << "\n";
   {
     auto tan = Function::tanATimesPiX(PiPolynomial(1), 1);
+    std::cout << "\ntan(pi * x) = " << tan.print();
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto zippo = unit - unit;
+    auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
+    auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
+    auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
+    auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    PiRational expression;
+    tan.tryEvaluateAtXYZ(unit, zippo, zippo, expression);
+    std::cout << "\ntan(pi) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneThird, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 3) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneFourth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 4) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneSixth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 6) = " << expression.print();
+    tan.tryEvaluateAtXYZ(oneTwelfth, zippo, zippo, expression);
+    std::cout << "\ntan(pi / 12) = " << expression.print();
     auto sec = Function(FnPolynomial(PiPolynomial(1)), FnPolynomial::cosATimesPiX(PiPolynomial(1), 1));
     auto sec2_times_pi = sec * sec * Function::constant(PiPolynomial(1, 1));
     std::cout << "\npi * sec^2(pi * x) - (d/dx)tan(pi * x) = " << (sec2_times_pi - tan.partial_x()).print();
@@ -515,6 +673,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTesting function evaluation:\n";
+  test_evaluation();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting function composition:\n";
   test_composition();
   std::cout << "\nContinue, or 'Q' to exit? ";

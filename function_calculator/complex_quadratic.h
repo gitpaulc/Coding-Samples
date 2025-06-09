@@ -33,6 +33,7 @@ public:
   ComplexQuadratic operator*(const ComplexQuadratic& rhs) const;
   ComplexQuadratic operator/(const ComplexQuadratic& rhs) const;
   ComplexQuadratic pow(int p) const; /**< `return` The p'th power of the number. */
+  static ComplexQuadratic aPlusBTotheP(const ComplexQuadratic& aa, const ComplexQuadratic& bb, unsigned int p);
   bool operator==(const ComplexQuadratic& rhs) const;
   bool operator!=(const ComplexQuadratic& rhs) const;
   /** \brief Uses lexicographical comparison since there is no canonical ordering on complex numbers. */

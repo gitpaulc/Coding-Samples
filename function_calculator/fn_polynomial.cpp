@@ -885,4 +885,166 @@ namespace FunctionalCalculator
   {
     return (laplacian() == FnPolynomial(PiPolynomial(0)));
   }
+
+  bool FnPolynomial::tryEvaluateAtX(const ComplexQuadratic& xVal, FnPolynomial& output) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      auto newKey = iter.first;
+      auto newVal = iter.second;
+      if (newKey.xInd != 0)
+      {
+        newVal = newVal * PiPolynomial(xVal.pow(newKey.xInd));
+        newKey.xInd = 0;
+      }
+      if (newKey.ePiXInd != 0)
+      {
+        if (xVal != 0) { return false; }
+        newKey.ePiXInd = QuadraticNumber();
+      }
+      if (newKey.trigPiXInd != TrigIndex())
+      {
+        ComplexQuadratic trigInput = xVal * newKey.trigPiXInd.self;
+        if (trigInput.getIm() != 0) { return false; }
+        Rational rationalVal;
+        bool isRational = trigInput.getRe().getRational(rationalVal);
+        if (!isRational) { return false; }
+        if (newKey.trigPiXInd.isCos())
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        else
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        newKey.trigPiXInd = TrigIndex();
+      }
+      auto newIter = answer.self.find(newKey);
+      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
+      else { newIter->second = newIter->second + newVal; }
+    }
+    answer.clean();
+    output = answer;
+    return true;
+  }
+
+  bool FnPolynomial::tryEvaluateAtY(const ComplexQuadratic& yVal, FnPolynomial& output) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      auto newKey = iter.first;
+      auto newVal = iter.second;
+      if (newKey.yInd != 0)
+      {
+        newVal = newVal * PiPolynomial(yVal.pow(newKey.yInd));
+        newKey.yInd = 0;
+      }
+      if (newKey.ePiYInd != 0)
+      {
+        if (yVal != 0) { return false; }
+        newKey.ePiYInd = QuadraticNumber();
+      }
+      if (newKey.trigPiYInd != TrigIndex())
+      {
+        ComplexQuadratic trigInput = yVal * newKey.trigPiYInd.self;
+        if (trigInput.getIm() != 0) { return false; }
+        Rational rationalVal;
+        bool isRational = trigInput.getRe().getRational(rationalVal);
+        if (!isRational) { return false; }
+        if (newKey.trigPiYInd.isCos())
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        else
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        newKey.trigPiYInd = TrigIndex();
+      }
+      auto newIter = answer.self.find(newKey);
+      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
+      else { newIter->second = newIter->second + newVal; }
+    }
+    answer.clean();
+    output = answer;
+    return true;
+  }
+
+  bool FnPolynomial::tryEvaluateAtZ(const ComplexQuadratic& zVal, FnPolynomial& output) const
+  {
+    FnPolynomial answer;
+    for (const auto& iter : self)
+    {
+      auto newKey = iter.first;
+      auto newVal = iter.second;
+      if (newKey.zInd != 0)
+      {
+        newVal = newVal * PiPolynomial(zVal.pow(newKey.zInd));
+        newKey.zInd = 0;
+      }
+      if (newKey.ePiZInd != 0)
+      {
+        if (zVal != 0) { return false; }
+        newKey.ePiZInd = QuadraticNumber();
+      }
+      if (newKey.trigPiZInd != TrigIndex())
+      {
+        ComplexQuadratic trigInput = zVal * newKey.trigPiZInd.self;
+        if (trigInput.getIm() != 0) { return false; }
+        Rational rationalVal;
+        bool isRational = trigInput.getRe().getRational(rationalVal);
+        if (!isRational) { return false; }
+        if (newKey.trigPiZInd.isCos())
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        else
+        {
+          QuadraticNumber factor;
+          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          if (!trigSuccess) { return false; }
+          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
+        }
+        newKey.trigPiZInd = TrigIndex();
+      }
+      auto newIter = answer.self.find(newKey);
+      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
+      else { newIter->second = newIter->second + newVal; }
+    }
+    answer.clean();
+    output = answer;
+    return true;
+  }
+
+  bool FnPolynomial::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
+  {
+    FnPolynomial answerX, answerY, answerZ;
+    bool success = tryEvaluateAtX(xVal, answerX);
+    if (!success) { return false; }
+    success = answerX.tryEvaluateAtY(yVal, answerY);
+    if (!success) { return false; }
+    success = answerY.tryEvaluateAtZ(zVal, answerZ);
+    if (!success) { return false; }
+    if (answerZ.self.size() != 1) { return false; }
+    if (answerZ.self.find(Monomial()) == answerZ.self.end()) { return false; }
+    output = answerZ.self.at(Monomial());
+    return true;
+  }
 }
