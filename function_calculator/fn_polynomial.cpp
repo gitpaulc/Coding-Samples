@@ -340,20 +340,41 @@ namespace FunctionalCalculator
         strm << "z";
         if (iter.first.zInd != 1) { strm << "^" << iter.first.zInd; }
       }
-      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
+      if (iter.first.ePiXInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiXInd != 1) { strm << iter.first.ePiXInd.print(true) << " * "; }
+        strm << "x}";
+      }
       if (iter.first.trigPiXInd != TrigIndex())
       {
-        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiXInd.self.print(true) << " * x)";
+        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiXInd.self != 1) { strm << iter.first.trigPiXInd.self.print(true) << " * "; }
+        strm << "x)";
       }
-      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
+      if (iter.first.ePiYInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiYInd != 1) { strm << iter.first.ePiYInd.print(true) << " * "; }
+        strm << "y}";
+      }
       if (iter.first.trigPiYInd != TrigIndex())
       {
-        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiYInd.self.print(true) << " * y)";
+        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiYInd.self != 1) { strm << iter.first.trigPiYInd.self.print(true) << " * "; }
+        strm << "y)";
       }
-      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
+      if (iter.first.ePiZInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiZInd != 1) { strm << iter.first.ePiZInd.print(true) << " * "; }
+        strm << "z}";
+      }
       if (iter.first.trigPiZInd != TrigIndex())
       {
-        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiZInd.self.print(true) << " * z)";
+        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiZInd.self != 1) { strm << iter.first.trigPiZInd.self.print(true) << " * "; }
+        strm << "z)";
       }
     }
     if (count < 0) { strm << "0"; }
