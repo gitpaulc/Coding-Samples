@@ -207,11 +207,17 @@ namespace FunctionalCalculator
       bool yNeg = (((i / 2) % 2) == 1) ? true : false;
       bool zNeg = ((i % 2) == 1) ? true : false;
       auto indB = ind;
-      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; xNegative = true; }
-      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; yNegative = true; }
-      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; zNegative = true; }
+      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; }
+      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; }
+      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; }
       auto iter = self.find(indB);
-      if (iter != self.end()) { return iter; }
+      if (iter != self.end())
+      {
+        if (ind.trigPiXInd != indB.trigPiXInd) { xNegative = true; }
+        if (ind.trigPiYInd != indB.trigPiYInd) { yNegative = true; }
+        if (ind.trigPiZInd != indB.trigPiZInd) { zNegative = true; }
+        return iter;
+      }
     }
     return self.end();
   }
@@ -219,6 +225,7 @@ namespace FunctionalCalculator
   void FnPolynomial::clean()
   {
     FnPolynomial answer;
+
     for (const auto& iter : self)
     {
       if (iter.second == PiRational()) { continue; }
@@ -241,6 +248,7 @@ namespace FunctionalCalculator
           continue;
         }
       }
+
       answer.self[iter.first] = iter.second;
     }
     self = std::map<Monomial, PiRational>();
