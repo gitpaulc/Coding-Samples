@@ -207,11 +207,17 @@ namespace FunctionalCalculator
       bool yNeg = (((i / 2) % 2) == 1) ? true : false;
       bool zNeg = ((i % 2) == 1) ? true : false;
       auto indB = ind;
-      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; xNegative = true; }
-      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; yNegative = true; }
-      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; zNegative = true; }
+      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; }
+      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; }
+      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; }
       auto iter = self.find(indB);
-      if (iter != self.end()) { return iter; }
+      if (iter != self.end())
+      {
+        if (ind.trigPiXInd != indB.trigPiXInd) { xNegative = true; }
+        if (ind.trigPiYInd != indB.trigPiYInd) { yNegative = true; }
+        if (ind.trigPiZInd != indB.trigPiZInd) { zNegative = true; }
+        return iter;
+      }
     }
     return self.end();
   }
@@ -219,6 +225,7 @@ namespace FunctionalCalculator
   void FnPolynomial::clean()
   {
     FnPolynomial answer;
+
     for (const auto& iter : self)
     {
       if (iter.second == PiRational()) { continue; }
@@ -241,6 +248,7 @@ namespace FunctionalCalculator
           continue;
         }
       }
+
       answer.self[iter.first] = iter.second;
     }
     self = std::map<Monomial, PiRational>();
@@ -332,20 +340,41 @@ namespace FunctionalCalculator
         strm << "z";
         if (iter.first.zInd != 1) { strm << "^" << iter.first.zInd; }
       }
-      if (iter.first.ePiXInd != 0) { strm << "e^{Pi * " << iter.first.ePiXInd.print(true) << " * x}"; }
+      if (iter.first.ePiXInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiXInd != 1) { strm << iter.first.ePiXInd.print(true) << " * "; }
+        strm << "x}";
+      }
       if (iter.first.trigPiXInd != TrigIndex())
       {
-        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiXInd.self.print(true) << " * x)";
+        strm << (iter.first.trigPiXInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiXInd.self != 1) { strm << iter.first.trigPiXInd.self.print(true) << " * "; }
+        strm << "x)";
       }
-      if (iter.first.ePiYInd != 0) { strm << "e^{Pi * " << iter.first.ePiYInd.print(true) << " * y}"; }
+      if (iter.first.ePiYInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiYInd != 1) { strm << iter.first.ePiYInd.print(true) << " * "; }
+        strm << "y}";
+      }
       if (iter.first.trigPiYInd != TrigIndex())
       {
-        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiYInd.self.print(true) << " * y)";
+        strm << (iter.first.trigPiYInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiYInd.self != 1) { strm << iter.first.trigPiYInd.self.print(true) << " * "; }
+        strm << "y)";
       }
-      if (iter.first.ePiZInd != 0) { strm << "e^{Pi * " << iter.first.ePiZInd.print(true) << " * z}"; }
+      if (iter.first.ePiZInd != 0)
+      {
+        strm << "e^{Pi * ";
+        if (iter.first.ePiZInd != 1) { strm << iter.first.ePiZInd.print(true) << " * "; }
+        strm << "z}";
+      }
       if (iter.first.trigPiZInd != TrigIndex())
       {
-        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * " << iter.first.trigPiZInd.self.print(true) << " * z)";
+        strm << (iter.first.trigPiZInd.isCosine ? "cos" : "sin") << "(Pi * ";
+        if (iter.first.trigPiZInd.self != 1) { strm << iter.first.trigPiZInd.self.print(true) << " * "; }
+        strm << "z)";
       }
     }
     if (count < 0) { strm << "0"; }

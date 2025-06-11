@@ -26,7 +26,6 @@ namespace FunctionalCalculator
   std::string ComplexQuadratic::print(bool useParentheses) const
   {
     std::stringstream strm;
-    if (useParentheses) { strm << "("; }
     bool reIsZero = (re == Rational(0));
     bool imIsZero = (im == Rational(0));
     bool imIsOne = (im == Rational(1));
@@ -55,8 +54,10 @@ namespace FunctionalCalculator
       else if (imIsNegOne) { strm << "-"; }
       strm << "i";
     }
-    if (useParentheses) { strm << ")"; }
-    return strm.str();
+    auto answer = strm.str();
+    if (answer.empty()) { answer = "0"; }
+    if (useParentheses) { answer = std::string("(") + answer + ")"; }
+    return answer;
   }
 
   QuadraticNumber ComplexQuadratic::getRe() const { return re; }

@@ -196,6 +196,38 @@ bool test_composition()
     if (!success) { return false; }
     std::cout << "\n\nF(x, y, 1/2) = " << result.print();
   }
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  {
+    ComplexQuadratic unit = ComplexQuadratic(QuadraticNumber(1));
+    auto zippo = unit - unit;
+    Matrix<ComplexQuadratic> ninetyDegreeX;
+    ninetyDegreeX.addRow({ unit, zippo, zippo });
+    ninetyDegreeX.addRow({ zippo, zippo, unit });
+    ninetyDegreeX.addRow({ zippo, -unit, zippo });
+    std::cout << "\n\nA = Fix x-axis, Rotation by angle pi / 2:\n" << ninetyDegreeX.print(true);
+    Matrix<ComplexQuadratic> ninetyDegreeY;
+    ninetyDegreeY.addRow({ zippo, zippo, unit });
+    ninetyDegreeY.addRow({ zippo, unit, zippo });
+    ninetyDegreeY.addRow({ -unit, zippo, zippo });
+    std::cout << "\n\nB = Fix y-axis, Rotation by angle pi / 2:\n" << ninetyDegreeY.print(true);
+    Matrix<ComplexQuadratic> ninetyDegreeZ;
+    ninetyDegreeZ.addRow({ zippo, unit, zippo });
+    ninetyDegreeZ.addRow({ -unit, zippo, zippo });
+    ninetyDegreeZ.addRow({ zippo, zippo, unit });
+    std::cout << "\n\nA = Fix z-axis, Rotation by angle pi / 2:\n" << ninetyDegreeZ.print(true);
+    std::cout << "\n\nF(x, y, z) = " << cubeCosine.print();
+    auto cubeCosine_ = cubeCosine.composeWith(ninetyDegreeX);
+    std::cout << "\n\nF(A(x, y, z)) - F(x, y, z) = " << (cubeCosine_ - cubeCosine).print(true);
+    cubeCosine_ = cubeCosine.composeWith(ninetyDegreeY);
+    std::cout << "\n\nF(B(x, y, z)) - F(x, y, z) = " << (cubeCosine_ - cubeCosine).print(true);
+    cubeCosine_ = cubeCosine.composeWith(ninetyDegreeZ);
+    std::cout << "\n\nF(C(x, y, z)) - F(x, y, z) = " << (cubeCosine_ - cubeCosine).print(true);
+  }
+
   return true;
 }
 
