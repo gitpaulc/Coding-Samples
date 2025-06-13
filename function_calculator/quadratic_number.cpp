@@ -228,15 +228,14 @@ namespace FunctionalCalculator
     QuadraticNumber product;
     for (const auto& iter : content)
     {
-      auto iterSq = iter.second * iter.second;
       for (const auto& jter : rhs.content)
       {
-        bool iterNegative = (iter.second < 0);
-        bool jterNegative = (jter.second < 0);
-        auto summand = sqrt(Rational(iter.first, mp(1)) * Rational(jter.first, mp(1)) *
-          iterSq * jter.second * jter.second);
-        if (iterNegative && !jterNegative) { summand = -summand; }
-        else if (jterNegative && !iterNegative) { summand = -summand; }
+        auto summand = sqrt(Rational(iter.first, mp(1)) * Rational(jter.first, mp(1)));
+        auto factor = iter.second * jter.second;
+        for (auto& kter : summand.content)
+        {
+          kter.second = kter.second * factor;
+        }
         product = product + summand;
       }
     }

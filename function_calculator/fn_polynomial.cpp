@@ -1071,7 +1071,8 @@ namespace FunctionalCalculator
     if (!success) { return false; }
     success = answerY.tryEvaluateAtZ(zVal, answerZ);
     if (!success) { return false; }
-    if (answerZ.self.size() != 1) { return false; }
+    if (answerZ.self.size() > 1) { return false; }
+    if (answerZ.self.size() < 1) { output = PiRational(); return true; }
     if (answerZ.self.find(Monomial()) == answerZ.self.end()) { return false; }
     output = answerZ.self.at(Monomial());
     return true;
