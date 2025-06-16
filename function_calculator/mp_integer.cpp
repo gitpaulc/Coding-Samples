@@ -185,10 +185,12 @@ namespace FunctionalCalculator
     if (numRhsDigits > numOfDigits) { return -(rhs - (*this)); }
     if (numRhsDigits == numOfDigits)
     {
-      for (int ind = (int)self.size() - 1; ind >= 0; --ind)
+      for (int ii = numOfDigits - 1; ii >= 0; --ii)
       {
-        if (rhs.self[ind] > self[ind]) { return -(rhs - (*this)); }
-        if (rhs.self[ind] < self[ind]) { break; }
+        int digit = rhs.getDigit(ii);
+        int subFrom = getDigit(ii);
+        if (digit > subFrom) { return -(rhs - (*this)); }
+        if (digit < subFrom) { break; }
       }
     }
 
