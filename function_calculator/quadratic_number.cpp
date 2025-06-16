@@ -125,6 +125,7 @@ namespace FunctionalCalculator
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
   {
     QuadraticNumber answer;
+    if (radicand == Rational(0, 1)) { return answer; }
     if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
     Rational coefficient(1, radicand.denominator());
     mp key = radicand.numerator() * radicand.denominator();

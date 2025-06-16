@@ -546,6 +546,20 @@ bool test_quadratic()
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+
   return true;
 }
 
