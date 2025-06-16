@@ -50,7 +50,7 @@ namespace FunctionalCalculator
       std::set<mp> rootsSoFar;
       const int NN = (int)content.size();
       auto current = *this;
-      for (int II = 0; II < NN; ++II)
+      for (int II = 0; II < (NN + 1); ++II)
       {
         for (const auto& iter : current.content)
         {
@@ -74,8 +74,9 @@ namespace FunctionalCalculator
       {
         std::vector<Rational> row(dimMatrix, 0);
         const auto& radB = index2Root[ii];
-        if (radB % radA == mp(0)) { row[root2Index[radB / radA]] = Rational(radA, 1); }
-        else { row[root2Index[radA * radB]] = Rational(1, 1); }
+        auto root = radA * radB;
+        auto sqrtSplit = root.separateSquaredPart();
+        row[root2Index[sqrtSplit.second]] = Rational(sqrtSplit.first, 1);
         summand.addRow(row);
       }
       answer = answer + summand.transpose() * iter.second;
