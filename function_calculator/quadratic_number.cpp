@@ -129,7 +129,7 @@ namespace FunctionalCalculator
     if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
     Rational coefficient(1, radicand.denominator());
     mp key = radicand.numerator() * radicand.denominator();
-    auto primes = Rational::primeFactorization(key);
+    auto primes = key.primeFactorization();
     for (const auto& iter : primes)
     {
       auto& factor = iter.first;
@@ -170,7 +170,7 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       Rational coeff = iter.second;
-      auto primes = Rational::primeFactorization(radicand);
+      auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
           auto& factor = jter.first;
@@ -197,7 +197,7 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       Rational coeff = iter.second;
-      auto primes = Rational::primeFactorization(radicand);
+      auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;

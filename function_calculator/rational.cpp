@@ -95,6 +95,16 @@ namespace FunctionalCalculator
     return aa;
   }
 
+  std::pair<Rational, Rational> Rational::separateSquaredPart() const
+  {
+    std::pair<Rational, Rational> answer;
+    auto sqPartNum = num.separateSquaredPart();
+    auto sqPartDen = denom.separateSquaredPart();
+    answer.first = Rational(sqPartNum.first, sqPartDen.first);
+    answer.first = Rational(sqPartNum.second, sqPartDen.second);
+    return answer;
+  }
+
   Rational Rational::operator+() const
   {
     return *this;
@@ -200,65 +210,10 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  std::map<mp, int> Rational::primeFactorization(mp input)
-  {
-    if (input * input <= 1)
-    {
-        std::map<mp, int> answer;
-        answer[input] = 1;
-        return answer;
-    }
-    std::map<mp, int> answer;
-    if (input < 0) { answer[-1] = 1; input = -input; }
-    mp lim = input + 1;
-    std::set<mp> sieved;
-    bool foundFactor = false;
-    for (mp init = 2; init < lim; init = init + 1)
-    {
-      for (mp factor = init; factor < lim; factor = factor + init)
-      {
-        if (sieved.find(factor) != sieved.end()) { continue; }
-        sieved.insert(factor);
-        if (input % factor != 0) { continue; }
-        foundFactor = true;
-        if (factor == input)
-        {
-          if (answer.find(factor) == answer.end())
-          {
-            answer[factor] = 1;
-            break;
-          }
-          answer[factor] = answer[factor] + 1;
-          break;
-        }
-        if (answer.find(factor) == answer.end())
-        {
-          answer[factor] = 1;
-        }
-        else { answer[factor] = answer[factor] + 1; }
-        auto quotient = input / factor;
-        if (quotient.abs() >= input.abs()) { break; } // Should never happen.
-        auto others = primeFactorization(quotient);
-        for (auto& iter : others)
-        {
-          if (answer.find(iter.first) == answer.end())
-          {
-            answer[iter.first] = iter.second;
-            continue;
-          }
-          answer[iter.first] += iter.second;
-        }
-        break;
-      }
-      if (foundFactor) { break; }
-    }
-    return answer;
-  }
-
   std::map<mp, int> Rational::primeFactorization() const
   {
-    auto numFactors = primeFactorization(num);
-    auto denomFactors = primeFactorization(denom);
+    auto numFactors = num.primeFactorization();
+    auto denomFactors = denom.primeFactorization();
     for (auto& iter : denomFactors)
     {
       if (iter.first == 1) { continue; }
