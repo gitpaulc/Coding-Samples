@@ -47,25 +47,21 @@ namespace FunctionalCalculator
     root2Index = std::map<mp, int>();
     index2Root = std::map<int, mp>();
     {
-      int i = 0;
       std::set<mp> rootsSoFar;
-      root2Index[mp(1)] = i; index2Root[i] = mp(1); rootsSoFar.insert(mp(1));
-      for (const auto& iter : content)
+      const int NN = (int)content.size();
+      auto current = *this;
+      for (int II = 0; II < NN; ++II)
       {
-        if (iter.first == mp(1)) { continue; }
-        ++i; root2Index[iter.first] = i; index2Root[i] = iter.first; rootsSoFar.insert(iter.first);
-      }
-      for (const auto& iter : content)
-      {
-        for (const auto& jter : content)
+        for (const auto& iter : current.content)
         {
-          if (iter.first == jter.first) { continue; }
-          auto computed = QuadraticNumber::sqrt(Rational(iter.first * jter.first, 1));
-          if (computed.content.empty()) { continue; }
-          auto radicand = computed.content.begin()->first;
-          if (rootsSoFar.find(radicand) != rootsSoFar.end()) { continue; }
-          ++i; root2Index[radicand] = i; index2Root[i] = radicand; rootsSoFar.insert(radicand);
+          rootsSoFar.insert(iter.first);
         }
+        current = current * (*this);
+      }
+      int ii = 0;
+      for (const auto& rootSoFar : rootsSoFar)
+      {
+        root2Index[rootSoFar] = ii; index2Root[ii] = rootSoFar; ++ii;
       }
     }
     const int dimMatrix = (int)root2Index.size();
