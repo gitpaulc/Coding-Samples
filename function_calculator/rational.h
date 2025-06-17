@@ -30,6 +30,8 @@ public:
   mp denominator() const;
   mp numerator() const;
   static mp gcd(mp aa, mp bb);
+  /** \return { a, b } where a is the maximal number such that this number == a * a * b */
+  std::pair<Rational, Rational> separateSquaredPart() const;
   Rational operator+() const;
   Rational operator-() const;
   Rational operator+(const Rational& rhs) const;
@@ -43,8 +45,6 @@ public:
   bool operator>(const Rational& rhs) const;
   bool operator<=(const Rational& rhs) const;
   bool operator>=(const Rational& rhs) const;
-  /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  static std::map<mp, int> primeFactorization(mp input);
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
   std::map<mp, int> primeFactorization() const;
   /** \brief Print the prime factorization of the rational number. */

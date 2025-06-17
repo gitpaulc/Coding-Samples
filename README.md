@@ -164,8 +164,8 @@
 * The **Function Calculator** is notable in that it mostly uses combinations of integers, square roots, and pi instead of floating-point arithmetic (doubles).
 * This allows for the manipulation of exact expressions which often come up in mathematical work, such as `cos(pi / 6) = sqrt(3) / 2`.
 * It demonstrates the practical application of the irrationality of `sqrt(2), sqrt(3)` and the transcendental nature of `pi`: We can check, for instance, whether `A == 0` if we can write finite sums `A = a + b(pi) + c(pi)^2 + ...` and each of the `a, b, c... = 0`.
-* The calculator is useful for checking long tedious calculations involving polynomials and exponentials.
-* Currently, for instance, it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`.
+* The calculator is useful for checking long tedious calculations involving square roots, polynomials, and exponentials.
+* For instance it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`. It computes that the reciprocal of `1 + sqrt(3) + sqrt(5) + sqrt(7)` is `(-7 + 5 * sqrt(3) + 3 * sqrt(5) - sqrt(7) - sqrt(15) + sqrt(21) + sqrt(35) - sqrt(105)) * (1/16)`.
 * It computes that `(d/dx)sin(pi * x) / pi = cos(pi * x)` and simplifies `sin^2(pi * x) + cos^2(pi * x) = 1`.
 * It computes that `e^(ax)sin(ax)` is not a harmonic function but `e^(ax)sin(ay)` is a harmonic function.
 

@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #ifndef MP_INTEGER_H
 #define MP_INTEGER_H
 
+#include <map>
 #include <ostream>
 #include <vector>
 
@@ -32,6 +33,8 @@ public:
   void setDigit(int i, int val);
   int numDigits() const;
   int toInt() const;
+  /** \return { a, b } where a is the maximal number such that this integer == a * a * b */
+  std::pair<mp, mp> separateSquaredPart() const;
 
   mp operator+() const;
   mp operator-() const;
@@ -52,6 +55,8 @@ public:
 
   /** \return n! / ((n - k)! * k!) */
   static mp binomialCoeff(int n, int k);
+  /** \brief The keys are the prime factors, the values are the number of occurrences. */
+  std::map<mp, int> primeFactorization() const;
 
   friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 };

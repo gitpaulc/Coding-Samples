@@ -536,12 +536,48 @@ bool test_quadratic()
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
   sumOfSquareRoots = QuadraticNumber::sqrt(5) - QuadraticNumber::sqrt(3) + Rational(1);
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
   sumOfSquareRoots = QuadraticNumber::sqrt(7) + QuadraticNumber::sqrt(3) + Rational(1);
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = QuadraticNumber::sqrt(7) + QuadraticNumber::sqrt(5) + QuadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    QuadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+
   return true;
 }
 

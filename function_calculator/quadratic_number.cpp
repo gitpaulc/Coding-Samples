@@ -47,25 +47,21 @@ namespace FunctionalCalculator
     root2Index = std::map<mp, int>();
     index2Root = std::map<int, mp>();
     {
-      int i = 0;
       std::set<mp> rootsSoFar;
-      root2Index[mp(1)] = i; index2Root[i] = mp(1); rootsSoFar.insert(mp(1));
-      for (const auto& iter : content)
+      const int NN = (int)content.size();
+      auto current = *this;
+      for (int II = 0; II < (NN + 1); ++II)
       {
-        if (iter.first == mp(1)) { continue; }
-        ++i; root2Index[iter.first] = i; index2Root[i] = iter.first; rootsSoFar.insert(iter.first);
-      }
-      for (const auto& iter : content)
-      {
-        for (const auto& jter : content)
+        for (const auto& iter : current.content)
         {
-          if (iter.first == jter.first) { continue; }
-          auto computed = QuadraticNumber::sqrt(Rational(iter.first * jter.first, 1));
-          if (computed.content.empty()) { continue; }
-          auto radicand = computed.content.begin()->first;
-          if (rootsSoFar.find(radicand) != rootsSoFar.end()) { continue; }
-          ++i; root2Index[radicand] = i; index2Root[i] = radicand; rootsSoFar.insert(radicand);
+          rootsSoFar.insert(iter.first);
         }
+        current = current * (*this);
+      }
+      int ii = 0;
+      for (const auto& rootSoFar : rootsSoFar)
+      {
+        root2Index[rootSoFar] = ii; index2Root[ii] = rootSoFar; ++ii;
       }
     }
     const int dimMatrix = (int)root2Index.size();
@@ -78,8 +74,9 @@ namespace FunctionalCalculator
       {
         std::vector<Rational> row(dimMatrix, 0);
         const auto& radB = index2Root[ii];
-        if (radB % radA == mp(0)) { row[root2Index[radB / radA]] = Rational(radA, 1); }
-        else { row[root2Index[radA * radB]] = Rational(1, 1); }
+        auto root = radA * radB;
+        auto sqrtSplit = root.separateSquaredPart();
+        row[root2Index[sqrtSplit.second]] = Rational(sqrtSplit.first, 1);
         summand.addRow(row);
       }
       answer = answer + summand.transpose() * iter.second;
@@ -129,10 +126,11 @@ namespace FunctionalCalculator
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
   {
     QuadraticNumber answer;
+    if (radicand == Rational(0, 1)) { return answer; }
     if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
     Rational coefficient(1, radicand.denominator());
     mp key = radicand.numerator() * radicand.denominator();
-    auto primes = Rational::primeFactorization(key);
+    auto primes = key.primeFactorization();
     for (const auto& iter : primes)
     {
       auto& factor = iter.first;
@@ -173,7 +171,7 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       Rational coeff = iter.second;
-      auto primes = Rational::primeFactorization(radicand);
+      auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
           auto& factor = jter.first;
@@ -200,7 +198,7 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       Rational coeff = iter.second;
-      auto primes = Rational::primeFactorization(radicand);
+      auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;

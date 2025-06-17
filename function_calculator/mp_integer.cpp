@@ -3,7 +3,7 @@ All Rights Reserved.*/
 
 #include "mp_integer.h"
 
-#include <map>
+#include <set>
 #include <stdexcept>
 #include <sstream>
 
@@ -118,6 +118,37 @@ namespace FunctionalCalculator
     return negative ? (-self[0]) : self[0];
   }
 
+  std::pair<mp, mp> mp::separateSquaredPart() const
+  {
+    std::pair<mp, mp> answer;
+    if ((*this) == mp(0))
+    {
+      answer.first = mp(0);
+      answer.second = mp(0);
+      return answer;
+    }
+    answer.first = mp(1);
+    answer.second = mp(1);
+    auto factors = primeFactorization();
+    for (const auto& iter : factors)
+    {
+      if ((iter.second % 2) == 1)
+      {
+        if (answer.first < 0)
+        {
+          answer.second = answer.second * iter.first;
+          continue;
+        }
+        answer.first = answer.first * iter.first.pow((iter.second - 1) / 2);
+        answer.second = answer.second * iter.first;
+        continue;
+      }
+      if (answer.first < 0) { continue; }
+      answer.first = answer.first * iter.first.pow(iter.second / 2);
+    }
+    return answer;
+  }
+
   mp mp::operator+() const
   {
     return *this;
@@ -185,10 +216,12 @@ namespace FunctionalCalculator
     if (numRhsDigits > numOfDigits) { return -(rhs - (*this)); }
     if (numRhsDigits == numOfDigits)
     {
-      for (int ind = (int)self.size() - 1; ind >= 0; --ind)
+      for (int ii = numOfDigits - 1; ii >= 0; --ii)
       {
-        if (rhs.self[ind] > self[ind]) { return -(rhs - (*this)); }
-        if (rhs.self[ind] < self[ind]) { break; }
+        int digit = rhs.getDigit(ii);
+        int subFrom = getDigit(ii);
+        if (digit > subFrom) { return -(rhs - (*this)); }
+        if (digit < subFrom) { break; }
       }
     }
 
@@ -406,6 +439,62 @@ namespace FunctionalCalculator
     if (iter != binoms.end()) { return iter->second; }
     auto answer = binomialCoeff(n - 1, k) + binomialCoeff(n - 1, k - 1);
     binoms[{n, k}] = answer;
+    return answer;
+  }
+
+  std::map<mp, int> mp::primeFactorization() const
+  {
+    auto input = *this;
+    if (input * input <= 1)
+    {
+      std::map<mp, int> answer;
+      answer[input] = 1;
+      return answer;
+    }
+    std::map<mp, int> answer;
+    if (input < 0) { answer[-1] = 1; input = -input; }
+    mp lim = input + 1;
+    std::set<mp> sieved;
+    bool foundFactor = false;
+    for (mp init = 2; init < lim; init = init + 1)
+    {
+      for (mp factor = init; factor < lim; factor = factor + init)
+      {
+        if (sieved.find(factor) != sieved.end()) { continue; }
+        sieved.insert(factor);
+        if (input % factor != 0) { continue; }
+        foundFactor = true;
+        if (factor == input)
+        {
+          if (answer.find(factor) == answer.end())
+          {
+            answer[factor] = 1;
+            break;
+          }
+          answer[factor] = answer[factor] + 1;
+          break;
+        }
+        if (answer.find(factor) == answer.end())
+        {
+          answer[factor] = 1;
+        }
+        else { answer[factor] = answer[factor] + 1; }
+        auto quotient = input / factor;
+        if (quotient.abs() >= input.abs()) { throw std::logic_error("Bad prime factorization."); break; } // Should never happen.
+        auto others = quotient.primeFactorization();
+        for (auto& iter : others)
+        {
+          if (answer.find(iter.first) == answer.end())
+          {
+            answer[iter.first] = iter.second;
+            continue;
+          }
+          answer[iter.first] += iter.second;
+        }
+        break;
+      }
+      if (foundFactor) { break; }
+    }
     return answer;
   }
 
