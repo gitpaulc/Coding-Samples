@@ -596,10 +596,6 @@ bool test_complex()
   auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
   std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
   std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
-  auto minusTwoI = ComplexQuadratic(Rational(1, 1)) / ComplexQuadratic::sqrt(Rational(-1, 4));
-  std::cout << "\n\n-2 * i = " << minusTwoI.print();
-  minusTwoI = -ComplexQuadratic::sqrt(Rational(-4, 1));
-  std::cout << "\n\n-2 * i = " << minusTwoI.print();
   return true;
 }
 
