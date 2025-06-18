@@ -33,6 +33,8 @@ public:
   void setDigit(int i, int val);
   int numDigits() const;
   int toInt() const;
+  static mp gcd(const mp& aa, const mp& bb);
+  static mp gcd(const std::vector<mp>& arguments);
   /** \return { a, b } where a is the maximal number such that this integer == a * a * b */
   std::pair<mp, mp> separateSquaredPart() const;
 
@@ -44,7 +46,6 @@ public:
   mp operator/(const mp& rhs) const;
   mp operator%(const mp& rhs) const;
   mp abs() const;
-  static mp gcd(const mp& aa, const mp& bb);
   mp pow(int p) const; /**< `return` The p'th power of the number. */
   bool operator==(const mp& rhs) const;
   bool operator!=(const mp& rhs) const;

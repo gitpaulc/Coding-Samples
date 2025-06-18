@@ -29,7 +29,6 @@ public:
 
   mp denominator() const;
   mp numerator() const;
-  static mp gcd(mp aa, mp bb);
   /** \return { a, b } where a is the maximal number such that this number == a * a * b */
   std::pair<Rational, Rational> separateSquaredPart() const;
   Rational operator+() const;

@@ -118,6 +118,40 @@ namespace FunctionalCalculator
     return negative ? (-self[0]) : self[0];
   }
 
+  mp mp::gcd(const mp& aa, const mp& bb)
+  {
+    if ((aa == bb) || (aa == mp(0))) { return bb; }
+    if (bb == mp(0)) { return aa; }
+    auto aPoly = aa;
+    auto bPoly = bb;
+    while (bPoly != mp(0))
+    {
+      auto aa_old = aPoly;
+      auto bb_old = bPoly;
+      aPoly = bb_old;
+      auto quotient = aa_old.division(bb_old, bPoly);
+    }
+    if (aPoly == mp(0)) { return aPoly; }
+    auto coeff = aPoly.self[(int)(aPoly.self.size()) - 1];
+    for (auto& iter : aPoly.self)
+    {
+      iter = iter / coeff;
+    }
+    return aPoly;
+  }
+
+  mp mp::gcd(const std::vector<mp>& arguments)
+  {
+    if (arguments.empty()) { throw std::logic_error("Cannot take gcd of no integers."); return mp(0); }
+    int numArgs = (int)arguments.size();
+    mp answer = arguments[0];
+    for (int ii = 1; ii < numArgs; ++ii)
+    {
+      answer = gcd(answer, arguments[ii]);
+    }
+    return answer;
+  }
+
   std::pair<mp, mp> mp::separateSquaredPart() const
   {
     std::pair<mp, mp> answer;
@@ -355,28 +389,6 @@ namespace FunctionalCalculator
     mp answer = *this;
     answer.negative = false;
     return answer;
-  }
-
-  mp mp::gcd(const mp& aa, const mp& bb)
-  {
-    if ((aa == bb) || (aa == mp(0))) { return bb; }
-    if (bb == mp(0)) { return aa; }
-    auto aPoly = aa;
-    auto bPoly = bb;
-    while (bPoly != mp(0))
-    {
-      auto aa_old = aPoly;
-      auto bb_old = bPoly;
-      aPoly = bb_old;
-      auto quotient = aa_old.division(bb_old, bPoly);
-    }
-    if (aPoly == mp(0)) { return aPoly; }
-    auto coeff = aPoly.self[(int)(aPoly.self.size()) - 1];
-    for (auto& iter : aPoly.self)
-    {
-      iter = iter / coeff;
-    }
-    return aPoly;
   }
 
   mp mp::pow(int p) const

@@ -26,7 +26,7 @@ namespace FunctionalCalculator
     }
     else
     {
-      mp gcd_ = gcd(nn, dd);
+      mp gcd_ = mp::gcd(nn, dd);
       num = nn; denom = dd;
       if (gcd_ != 0)
       {
@@ -75,25 +75,6 @@ namespace FunctionalCalculator
 
   mp Rational::denominator() const { return denom; }
   mp Rational::numerator() const { return num; }
-
-  mp Rational::gcd(mp aa, mp bb)
-  {
-    if ((aa == bb) || (bb == 0)) { return (aa > 0) ? aa : (-aa); }
-    if (aa == 0) { return (bb > 0) ? bb : (-bb); }
-    mp abs_a = (aa > mp(0)) ? aa : -aa;
-    mp abs_b = (bb > mp(0)) ? bb : -bb;
-    //if (bb != 0) { return gcd(bb, aa % bb); }
-    for (mp safety_counter = mp(2) * abs_a + mp(2) * abs_b; bb != 0; safety_counter = safety_counter - mp(1))
-    {
-      if (safety_counter <= 0) { break; }
-      mp aa_old = aa;
-      mp bb_old = bb;
-      aa = bb_old;
-      bb = aa_old % bb_old;
-    }
-    if (aa < 0) { return -aa; }
-    return aa;
-  }
 
   std::pair<Rational, Rational> Rational::separateSquaredPart() const
   {
