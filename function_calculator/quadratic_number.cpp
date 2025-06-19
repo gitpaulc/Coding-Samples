@@ -42,9 +42,18 @@ namespace FunctionalCalculator
     {
       answer.second = answer.second * iter.second.denominator();
     }
+    std::vector<mp> numerators;
+    numerators.push_back(answer.second);
     for (auto& iter : answer.first.content)
     {
       iter.second = iter.second * Rational(answer.second, mp(1));
+      numerators.push_back(iter.second.numerator());
+    }
+    auto gcd_ = mp::gcd(numerators);
+    answer.second = answer.second / gcd_;
+    for (auto& iter : answer.first.content)
+    {
+      iter.second = iter.second * Rational(mp(1), gcd_);
     }
     return answer;
   }
