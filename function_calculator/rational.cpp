@@ -8,6 +8,24 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool parenthesesWellFormed(const std::string& str, const std::pair<char, char>& leftRight)
+  {
+    auto& left = leftRight.first;
+    auto& right = leftRight.second;
+    int stackHeight = 0;
+    for (const auto& current : str)
+    {
+      if (current == left) { ++stackHeight; continue; }
+      if (current == right)
+      {
+        if (stackHeight == 0) { return false; }
+        --stackHeight;
+        continue;
+      }
+    }
+    return (stackHeight == 0);
+  }
+
   Rational::Rational(int nn, int dd)
   {
     *this = Rational(mp(nn), mp(dd));
