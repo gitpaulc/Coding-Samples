@@ -49,7 +49,6 @@ namespace FunctionalCalculator
   std::string PiPolynomial::print(bool useParentheses) const
   {
     std::stringstream strm;
-    if (useParentheses) { strm << "("; }
     int count = -1;
     for (const auto& iter : self)
     {
@@ -78,8 +77,10 @@ namespace FunctionalCalculator
       if (iter.first > 1) { strm << "^" << iter.first; }
     }
     if (count < 0) { strm << "0"; }
-    if (useParentheses) { strm << ")"; }
-    return strm.str();
+    auto outputStr = strm.str();
+    trimParentheses(outputStr, { '(', ')' });
+    if (useParentheses) { outputStr = std::string("(") + outputStr + ")"; }
+    return outputStr;
   }
 
   double PiPolynomial::piValue() { return 3.14159265359; }

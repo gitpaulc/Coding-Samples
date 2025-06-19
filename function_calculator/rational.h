@@ -13,6 +13,7 @@ All Rights Reserved.*/
 namespace FunctionalCalculator
 {
   bool parenthesesWellFormed(const std::string& str, const std::pair<char, char>& leftRight = { '(', ')' });
+  void trimParentheses(std::string& str, const std::pair<char, char>& leftRight = { '(', ')' });
 
 class Rational : public Number
 {
