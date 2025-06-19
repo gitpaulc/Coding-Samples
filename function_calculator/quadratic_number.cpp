@@ -81,7 +81,7 @@ namespace FunctionalCalculator
       }
       answer = answer + summand.transpose() * iter.second;
     }
-    return answer;
+    return answer; //
   }
 
   std::string QuadraticNumber::print(bool useParentheses) const
