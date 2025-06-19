@@ -33,6 +33,22 @@ namespace FunctionalCalculator
     return { answer, 0.0 };
   }
 
+  std::pair<QuadraticNumber, mp> QuadraticNumber::factorAsIntegral() const
+  {
+    std::pair<QuadraticNumber, mp> answer;
+    answer.first = *this;
+    answer.second = mp(1);
+    for (const auto& iter : answer.first.content)
+    {
+      answer.second = answer.second * iter.second.denominator();
+    }
+    for (auto& iter : answer.first.content)
+    {
+      iter.second = iter.second * Rational(answer.second, mp(1));
+    }
+    return answer;
+  }
+
   bool QuadraticNumber::getRational(Rational& self) const
   {
     if (content.size() == 0) { self = Rational(0, 1); return true; }

@@ -33,6 +33,9 @@ class QuadraticNumber : public Number
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
   virtual std::pair<double, double> get() const override;
+
+  /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
+  std::pair<QuadraticNumber, mp> factorAsIntegral() const;
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);

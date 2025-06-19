@@ -50,6 +50,7 @@ public:
   std::string printFactors(bool useParentheses = false) const;
 
   virtual std::pair<double, double> get() const override;
+  bool isInt() const;
   virtual std::string print(bool useParentheses = false) const override;
 };
 }

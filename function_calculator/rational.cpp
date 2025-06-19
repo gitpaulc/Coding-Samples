@@ -180,6 +180,11 @@ namespace FunctionalCalculator
     return { nn / dd, 0.0 };
   }
 
+  bool Rational::isInt() const
+  {
+    return (denom == mp(1));
+  }
+
   std::string Rational::print(bool useParentheses) const
   {
     std::stringstream strm;
