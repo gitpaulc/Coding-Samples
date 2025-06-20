@@ -10,7 +10,7 @@ namespace function_calculator_cs
 public class mp
 {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
-  private List<int> self = null;
+  private List<int> self;
   private Boolean negative = false;
 
   private static int digPow = 6;
@@ -21,7 +21,9 @@ public class mp
     for (int ii = 0; ii < p; ++ii) { answer *= baseInt; }
     return answer;
   }
-  static int limit = intPow(10, digPow);
+  private static int limit = intPow(10, digPow);
+  private struct IntPair { public int x; public int y; }
+  private static Dictionary<IntPair, mp> binoms = new Dictionary<IntPair, mp>();
   private void clean()
   {
     int siz = self.Count;
@@ -31,7 +33,8 @@ public class mp
       if (self[i] != 0) { break; }
       newSiz--;
     }
-    if (newSiz < siz)
+    if (newSiz <= 0) { self.Clear(); }
+    else if (newSiz < siz)
     {
       self.RemoveRange(newSiz, siz - newSiz);
     }
@@ -260,8 +263,26 @@ public class mp
   public static mp operator*(in mp body, int rhs) { return; }
   public static mp operator/(in mp body, in mp rhs) { return; }
   public static mp operator%(in mp body, in mp rhs) { return; }
-  mp abs() const;
-  mp pow(int p) const; /**< `return` The p'th power of the number. */
+
+  mp abs()
+  {
+    mp answer = new mp(this);
+    answer.negative = false;
+    return answer;
+  }
+
+  mp pow(int p) /**< `return` The p'th power of the number. */
+  {
+    Boolean isNeg = (p < 0);
+    if (isNeg) { throw new System.Exception("Exponent must be nonnegative."); }
+    mp answer = new mp(1);
+    for (int i = 0; i < p; ++i)
+    {
+      answer = answer * (this);
+    }
+    return answer;
+  }
+
   public static bool operator==(in mp body, in mp rhs) { return new mp(); }
   public static bool operator!=(in mp body, in mp rhs) { return new mp(); }
   public static bool operator<(in mp body, in mp rhs) { return new mp(); }
@@ -270,9 +291,90 @@ public class mp
   public static bool operator>=(in mp body, in mp rhs) { return new mp(); }
 
   /** \return n! / ((n - k)! * k!) */
-  static mp binomialCoeff(int n, int k);
+  public static mp binomialCoeff(int n, int k)
+  {
+    if (n < 0) { return zero(); }
+    if (k < 0) { return zero(); }
+    if (k > n) { return zero(); }
+    if (binoms.Count == 0)
+    {
+      var zeroZero = new IntPair();
+      zeroZero.x = 0;
+      zeroZero.y = 0;
+      binoms[zeroZero] = new mp(1);
+    }
+    var nK = new IntPair();
+    nK.x = n;
+    nK.y = k;
+    var iterSecond = new mp(0);
+    Boolean found = binoms.TryGetValue(nK, out iterSecond);
+    if (found && !(iterSecond is null)) { return iterSecond; }
+    var answer = binomialCoeff(n - 1, k) + binomialCoeff(n - 1, k - 1);
+    binoms[nK] = answer;
+    return answer;
+  }
+
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  Dictionary<mp, int> primeFactorization() const;
+  public Dictionary<mp, int> primeFactorization()
+  {
+    var input = new mp(this);
+    var one_ = new mp(1);
+    var two_ = new mp(1);
+    var answer = new Dictionary<mp, int>();
+    if (input * input <= new mp(1))
+    {
+      answer[input] = 1;
+      return answer;
+    }
+    var zero_ = zero();
+    if (input < zero_) { answer[new mp(-1)] = 1; input = -input; }
+    mp lim = input + one_;
+    HashSet<mp> sieved = new HashSet<mp>();
+    bool foundFactor = false;
+    for (mp init = new mp(two_); init < lim; init = init + one_)
+    {
+      for (mp factor = new mp(init); factor < lim; factor = factor + init)
+      {
+        if (sieved.Contains(factor)) { continue; }
+        sieved.Add(factor);
+        if (input % factor != zero_) { continue; }
+        foundFactor = true;
+        if (factor == input)
+        {
+          if (!(answer.ContainsKey(factor)))
+          {
+            answer[factor] = 1;
+            break;
+          }
+          answer[factor] = answer[factor] + 1;
+          break;
+        }
+        if (!(answer.ContainsKey(factor)))
+        {
+          answer[factor] = 1;
+        }
+        else { answer[factor] = answer[factor] + 1; }
+        var quotient = input / factor;
+        if (quotient.abs() >= input.abs()) // Should never happen.
+        {
+          throw new System.Exception("Bad prime factorization."); // break;
+        }
+        var others = quotient.primeFactorization();
+        foreach (var iter in others)
+        {
+          if (!(answer.ContainsKey(iter.Key)))
+          {
+            answer[iter.Key] = iter.Value;
+            continue;
+          }
+          answer[iter.Key] += iter.Value;
+        }
+        break;
+      }
+      if (foundFactor) { break; }
+    }
+    return answer;
+  }
 
   friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 };
