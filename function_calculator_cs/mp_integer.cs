@@ -1,6 +1,8 @@
 /*  Copyright Paul Cernea, June 2025.
 All Rights Reserved.*/
 
+using System.Reflection.Metadata.Ecma335;
+
 namespace function_calculator_cs
 {
 /** \class Multiple-precision integer.
@@ -376,11 +378,35 @@ public class mp
     return answer;
   }
 
-  friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
+  public override string ToString()
+  {
+    var zero_ = zero();
+    if (this == zero_) { return new string("0"); }
+    if (negative) { return new string("-") + (-(this)).ToString(); }
+    string reversed = new string("");
+    int digitCount = 0;
+    int nn = (int)(self.Count);
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      var element = self[ii];
+      for (int jj = 0; jj < digPow; ++jj)
+      {
+        reversed += (element % 10);
+        ++digitCount;
+        element = element / 10;
+        if ((element == 0) && (ii == nn - 1)) { break; }
+        if ((digitCount % 3) == 0) { reversed += ","; }
+      }
+    }
+    nn = (int)reversed.Length;
+    string strm = new string("");
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      strm = strm + reversed[nn - ii - 1];
+    }
+    return strm;
+  }
 };
-
-std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 
 }
 
-#endif //def MP_INTEGER_H
