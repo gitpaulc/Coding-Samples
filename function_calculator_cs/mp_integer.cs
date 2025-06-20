@@ -38,16 +38,18 @@ public class mp
     if (self.Count == 0) { negative = false; }
   }
 
+  public static mp zero() { return new mp(0); }
+
   private mp division(in mp rhs, ref mp remainder)
   {
-    mp zero_ = new mp(0);
+    mp zero_ = zero();
     mp ten_ = new mp(10);
     if (rhs == zero_)
     {
       if (this == zero_) { remainder = new mp(0);  return new mp(1); }
       throw new System.Exception("Division by zero.");
     }
-    if (this == zero_) { remainder = new mp(0);  return new mp(0); }
+    if (this == zero_) { remainder = new mp(0);  return zero(); }
     if (negative && rhs.negative) { return (-this).division(-rhs, ref remainder); }
     if (negative) { return -((-(this)).division(rhs, ref remainder)); }
     if (rhs.negative) { return -(division(-rhs, ref remainder)); }
@@ -135,6 +137,7 @@ public class mp
     current = current / intPow(10, j);
     return current % 10;
   }
+
   public void setDigit(int i, int val)
   {
     if (i < 0) { throw new System.Exception("Index must be nonnegative."); }
@@ -158,6 +161,7 @@ public class mp
     self[ind] = left + summand;
     if (shouldClean) { clean(); }
   }
+
   public int numDigits()
   {
     if (self.Count == 0) { return 0; }
@@ -171,11 +175,82 @@ public class mp
     }
     return best + digPow * (int)(self.Count - 1);
   }
-  public int toInt();
-  static mp gcd(in mp aa, in mp bb);
-  static mp gcd(in List<mp> arguments);
+
+  public int toInt()
+  {
+    if (self.Count == 0) { return 0; }
+    return negative ? (-self[0]) : self[0];
+  }
+
+  public static mp gcd(in mp aa, in mp bb)
+  {
+    var zero_ = zero();
+    mp one_ = new mp(1);
+    mp two = new mp(2);
+    var aa0 = new mp(aa); var bb0 = new mp(bb);
+    if ((aa0 == bb0) || (bb0 == zero_)) { return (aa0 > zero_) ? aa0 : (-aa0); }
+    if (aa0 == zero_) { return (bb0 > zero_) ? bb0 : (-bb0); }
+    mp abs_a = (aa0 > zero_) ? aa0 : -aa0;
+    mp abs_b = (bb0 > zero_) ? bb0 : -bb0;
+    //if (bb0 != 0) { return gcd(bb0, aa0 % bb0); }
+    for (mp safety_counter = two * abs_a + two * abs_b; bb0 != zero_; safety_counter = safety_counter - one_)
+    {
+      if (safety_counter <= zero_) { break; }
+      mp aa0_old = aa0;
+      mp bb0_old = bb0;
+      aa0 = bb0_old;
+      bb0 = aa0_old % bb0_old;
+    }
+    if (aa0 < zero_) { return -aa0; }
+    return aa0;
+  }
+
+  public static mp gcd(in List<mp> arguments)
+  {
+    if (arguments.Count == 0) { throw new System.Exception("Cannot take gcd of no integers."); }
+    int numArgs = (int)arguments.Count;
+    mp answer = new mp(arguments[0]);
+    for (int ii = 1; ii < numArgs; ++ii)
+    {
+      answer = gcd(answer, arguments[ii]);
+    }
+    return answer;
+  }
+
   /** \return { a, b } where a is the maximal number such that this integer == a * a * b */
-  KeyValuePair<mp, mp> separateSquaredPart();
+  public KeyValuePair<mp, mp> separateSquaredPart()
+  {
+    var answerFirst = new mp();
+    var answerSecond = new mp();
+    var zero_ = zero();
+    if (this == zero_)
+    {
+      answerFirst = zero_;
+      answerSecond = zero_;
+      return new KeyValuePair<mp, mp>(answerFirst, answerSecond);
+    }
+    answerFirst = new mp(1);
+    answerSecond = new mp(1);
+    var factors = primeFactorization();
+    foreach (var iter in factors)
+    {
+      if ((iter.Value % 2) == 1)
+      {
+        if (answerFirst < zero_)
+        {
+          answerSecond = answerSecond * iter.Key;
+          continue;
+        }
+        answerFirst = answerFirst * iter.Key.pow((iter.Value - 1) / 2);
+        answerSecond = answerSecond * iter.Key;
+        continue;
+      }
+      if (answerFirst < zero_) { continue; }
+      answerFirst = answerFirst * iter.Key.pow(iter.Value / 2);
+    }
+    return new KeyValuePair<mp, mp>(answerFirst, answerSecond);
+  }
+
 
   public static mp operator+(in mp body) { return; }
   public static mp operator-(in mp body) { return; }
@@ -197,7 +272,7 @@ public class mp
   /** \return n! / ((n - k)! * k!) */
   static mp binomialCoeff(int n, int k);
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  std::map<mp, int> primeFactorization() const;
+  Dictionary<mp, int> primeFactorization() const;
 
   friend std::ostream& operator<<(std::ostream& strm, const mp& mpIn);
 };
