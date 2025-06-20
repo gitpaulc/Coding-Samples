@@ -10,10 +10,19 @@ namespace function_calculator_cs
 public class mp
 {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
-  List<int> self;
-  Boolean negative = false;
+  private List<int> self = null;
+  private Boolean negative = false;
 
-  void clean()
+  private static int digPow = 6;
+  private static int intPow(int baseInt, int p)
+  {
+    if (p < 0) { throw new System.Exception("Exponent must be nonnegative."); }
+    int answer = 1;
+    for (int ii = 0; ii < p; ++ii) { answer *= baseInt; }
+    return answer;
+  }
+  static int limit = intPow(10, digPow);
+  private void clean()
   {
     int siz = self.Count;
     int newSiz = siz;
@@ -29,39 +38,118 @@ public class mp
     if (self.Count == 0) { negative = false; }
   }
 
-  const static int digPow;
-  const static int limit;
+  private mp division(in mp rhs, ref mp remainder)
+  {
+    mp zero_ = new mp(0);
+    mp ten_ = new mp(10);
+    if (rhs == zero_)
+    {
+      if (this == zero_) { remainder = new mp(0);  return new mp(1); }
+      throw new System.Exception("Division by zero.");
+    }
+    if (this == zero_) { remainder = new mp(0);  return new mp(0); }
+    if (negative && rhs.negative) { return (-this).division(-rhs, ref remainder); }
+    if (negative) { return -((-(this)).division(rhs, ref remainder)); }
+    if (rhs.negative) { return -(division(-rhs, ref remainder)); }
 
-  mp division(const mp& rhs, mp& remainder) const;
+    mp dividend = new mp(this);
+    mp quotient = new mp(0);
+    mp prevDividend = dividend;
+    while (rhs <= dividend)
+    {
+      int numOfDigits = dividend.numDigits();
+      int remainingDigits = numOfDigits - 1;
+      mp miniDividend = new mp(dividend.getDigit(remainingDigits));
+      for (int ii = 2; rhs > miniDividend; --ii)
+      {
+        --remainingDigits;
+        miniDividend = miniDividend * ten_;
+        miniDividend = miniDividend + (new mp(dividend.getDigit(remainingDigits)));
+        if (remainingDigits == 0) { break; }
+      }
+      int bestDigit = 1;
+      while (rhs * (bestDigit + 1) < miniDividend)
+      {
+        if (bestDigit == 9) { break; }
+        ++bestDigit;
+      }
+      mp factor = (new mp(bestDigit)) * ten_.pow(remainingDigits);
+      quotient = quotient + factor;
+      dividend = dividend - factor * rhs;
+      if (dividend >= prevDividend) { break; } // Should never happen.
+      prevDividend = dividend;
+    }
+    remainder = dividend;
+    return quotient;
+  }
 
-public:
-  mp(int value = 0);
-  mp(const long long& value);
+  static mp()
+  {
+  }
 
-  int getDigit(int i) const;
-  void setDigit(int i, int val);
-  int numDigits() const;
-  int toInt() const;
-  static mp gcd(const mp& aa, const mp& bb);
-  static mp gcd(const std::vector<mp>& arguments);
+  public mp(int value = 0)
+  {
+    self = new List<int>();
+    if (value != 0)
+    {
+      if (value < 0) { negative = true; value = -value; }
+      while (value >= limit)
+      {
+        self.Add(value % limit);
+        value = value / limit;
+      }
+      self.Add(value);
+    }
+  }
+
+  public mp(in long value)
+  {
+    self = new List<int>();
+    if (value != 0)
+    {
+      long lim = limit;
+      long val = value;
+      if (value < 0) { negative = true; val = -value; }
+      while (val >= lim)
+      {
+        self.Add((int)(val % lim));
+        val = val / lim;
+      }
+      self.Add((int)val);
+    }
+  }
+
+  public mp(in mp other)
+  {
+    self = new List<int>(other.self);
+    negative = other.negative;
+  }
+
+  public int getDigit(int i);
+  public void setDigit(int i, int val);
+  public int numDigits();
+  public int toInt();
+  static mp gcd(in mp aa, in mp bb);
+  static mp gcd(in List<mp> arguments);
   /** \return { a, b } where a is the maximal number such that this integer == a * a * b */
-  std::pair<mp, mp> separateSquaredPart() const;
+  KeyValuePair<mp, mp> separateSquaredPart();
 
-  mp operator+() const;
-  mp operator-() const;
-  mp operator+(const mp& rhs) const;
-  mp operator-(const mp& rhs) const;
-  mp operator*(const mp& rhs) const;
-  mp operator/(const mp& rhs) const;
-  mp operator%(const mp& rhs) const;
+  public static mp operator+(in mp body) { return; }
+  public static mp operator-(in mp body) { return; }
+  public static mp operator+(in mp body, in mp rhs) { return; }
+  public static mp operator-(in mp body, in mp rhs) { return; }
+  public static mp operator*(in mp body, in mp rhs) { return; }
+  public static mp operator*(in mp body, int rhs) { return; }
+  public static mp operator/(in mp body, in mp rhs) { return; }
+  public static mp operator%(in mp body, in mp rhs) { return; }
   mp abs() const;
   mp pow(int p) const; /**< `return` The p'th power of the number. */
-  bool operator==(const mp& rhs) const;
-  bool operator!=(const mp& rhs) const;
-  bool operator<(const mp& rhs) const;
-  bool operator>(const mp& rhs) const;
-  bool operator<=(const mp& rhs) const;
-  bool operator>=(const mp& rhs) const;
+  public static bool operator==(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator!=(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator<(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator>(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator<=(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator>=(in mp body, in mp rhs) { return new mp(); }
 
   /** \return n! / ((n - k)! * k!) */
   static mp binomialCoeff(int n, int k);
