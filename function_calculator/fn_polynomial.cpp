@@ -296,11 +296,11 @@ namespace FunctionalCalculator
   std::string FnPolynomial::print(bool useParentheses) const
   {
     std::stringstream strm;
-    if (useParentheses) { strm << "("; }
     bool useBrackets = true;
     if (self.size() == 1)
     {
-      useBrackets = !(self.begin()->first.isConstTerm());
+      bool isConstFunc = (self.begin()->first.isConstTerm());
+      if (isConstFunc) { return self.begin()->second.print(useParentheses); }
     }
     int count = -1;
     for (const auto& iter : self)
@@ -378,8 +378,10 @@ namespace FunctionalCalculator
       }
     }
     if (count < 0) { strm << "0"; }
-    if (useParentheses) { strm << ")"; }
-    return strm.str();
+    auto outStr = strm.str();
+    trimParentheses(outStr, { '(', ')' });
+    if (useParentheses) { outStr = std::string("(") + outStr + ")"; }
+    return outStr;
   }
 
   FnPolynomial FnPolynomial::composeWith(const Matrix<ComplexQuadratic>& transform) const

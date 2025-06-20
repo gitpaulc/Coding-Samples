@@ -12,6 +12,8 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool parenthesesWellFormed(const std::string& str, const std::pair<char, char>& leftRight = { '(', ')' });
+  void trimParentheses(std::string& str, const std::pair<char, char>& leftRight = { '(', ')' });
 
 class Rational : public Number
 {
@@ -50,6 +52,7 @@ public:
   std::string printFactors(bool useParentheses = false) const;
 
   virtual std::pair<double, double> get() const override;
+  bool isInt() const;
   virtual std::string print(bool useParentheses = false) const override;
 };
 }

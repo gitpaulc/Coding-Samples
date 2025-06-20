@@ -8,6 +8,39 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  bool parenthesesWellFormed(const std::string& str, const std::pair<char, char>& leftRight)
+  {
+    auto& left = leftRight.first;
+    auto& right = leftRight.second;
+    int stackHeight = 0;
+    for (const auto& current : str)
+    {
+      if (current == left) { ++stackHeight; continue; }
+      if (current == right)
+      {
+        if (stackHeight == 0) { return false; }
+        --stackHeight;
+        continue;
+      }
+    }
+    return (stackHeight == 0);
+  }
+
+  void trimParentheses(std::string& str, const std::pair<char, char>& leftRight)
+  {
+    auto& left = leftRight.first;
+    auto& right = leftRight.second;
+    for (int shearingString = 50; shearingString > 0; --shearingString)
+    {
+      if (str.empty()) { return; }
+      if (str[0] != left) { return; }
+      if (str[str.size() - 1] != right) { return; }
+      auto midString = str.substr(1, str.size() - 2);
+      if (!parenthesesWellFormed(midString, leftRight)) { return; }
+      str = midString;
+    }
+  }
+
   Rational::Rational(int nn, int dd)
   {
     *this = Rational(mp(nn), mp(dd));
@@ -178,6 +211,11 @@ namespace FunctionalCalculator
     double nn = (double)(num.toInt());
     double dd = (double)(denom.toInt());
     return { nn / dd, 0.0 };
+  }
+
+  bool Rational::isInt() const
+  {
+    return (denom == mp(1));
   }
 
   std::string Rational::print(bool useParentheses) const

@@ -576,7 +576,57 @@ bool test_quadratic()
   }
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
-  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  auto recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    QuadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = QuadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    QuadraticNumber coeff(-1);
+    if ((ii % 2) == 1) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
 
   return true;
 }
@@ -595,7 +645,7 @@ bool test_complex()
   std::cout << "\nThe reciprocal of i is " << (ComplexQuadratic::sqrt(-1).pow(-1)).print();
   auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
   std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
-  std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print();
+  std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print() << std::endl;
   return true;
 }
 

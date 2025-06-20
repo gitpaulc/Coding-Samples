@@ -56,6 +56,7 @@ namespace FunctionalCalculator
     }
     auto answer = strm.str();
     if (answer.empty()) { answer = "0"; }
+    trimParentheses(answer, { '(', ')' });
     if (useParentheses) { answer = std::string("(") + answer + ")"; }
     return answer;
   }
