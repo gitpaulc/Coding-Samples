@@ -125,9 +125,52 @@ public class mp
     negative = other.negative;
   }
 
-  public int getDigit(int i);
-  public void setDigit(int i, int val);
-  public int numDigits();
+  public int getDigit(int i)
+  {
+    if (i < 0) { throw new System.Exception("Index must be nonnegative."); }
+    int j = i % digPow;
+    int ind = i / digPow;
+    if (ind >= self.Count) { return 0; }
+    int current = self[ind];
+    current = current / intPow(10, j);
+    return current % 10;
+  }
+  public void setDigit(int i, int val)
+  {
+    if (i < 0) { throw new System.Exception("Index must be nonnegative."); }
+    if (val < 0) { throw new System.Exception("Digit must be between 0 and 9 inclusive."); }
+    if (val >= 10) { throw new System.Exception("Digit must be between 0 and 9 inclusive."); }
+    int j = i % digPow;
+    int ind = i / digPow;
+    bool shouldClean = (val == 0);
+    if (ind >= self.Count)
+    {
+      int oldSize = (int)self.Count;
+      self.AddRange(new List<int>(ind + 1 - oldSize)); //self.resize(ind + 1);
+      shouldClean = true;
+      for (int k = oldSize; k < (ind + 1); ++k) { self[k] = 0; }
+    }
+    var powJ = intPow(10, j);
+    var powJ1 = 10 * powJ;
+    var right = self[ind] % powJ;
+    int summand = val * powJ + right;
+    var left = ((j + 1) == digPow) ? 0 : (self[ind] / powJ1) * powJ1;
+    self[ind] = left + summand;
+    if (shouldClean) { clean(); }
+  }
+  public int numDigits()
+  {
+    if (self.Count == 0) { return 0; }
+    int ind = (int)(self.Count) - 1;
+    int current = self[ind];
+    int best = 0;
+    for (int i = 0; i < digPow; ++i)
+    {
+      if ((current % 10) != 0) { best = i + 1; }
+      current = current / 10;
+    }
+    return best + digPow * (int)(self.Count - 1);
+  }
   public int toInt();
   static mp gcd(in mp aa, in mp bb);
   static mp gcd(in List<mp> arguments);
