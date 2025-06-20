@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿/*  Copyright Paul Cernea, June 2025.
+All Rights Reserved.*/
+
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
