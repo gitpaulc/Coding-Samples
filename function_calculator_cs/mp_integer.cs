@@ -1,7 +1,7 @@
 /*  Copyright Paul Cernea, June 2025.
 All Rights Reserved.*/
 
-#pragma Nullable
+#pragma warning disable CS8981 // Do not warn about lowercase class names.
 
 namespace function_calculator_cs
 {
@@ -448,12 +448,33 @@ public class mp : Object
     return answer;
   }
 
-  public static bool operator==(in mp body, in mp rhs) { return new mp(); }
-  public static bool operator!=(in mp body, in mp rhs) { return new mp(); }
-  public static bool operator<(in mp body, in mp rhs) { return new mp(); }
-  public static bool operator>(in mp body, in mp rhs) { return new mp(); }
-  public static bool operator<=(in mp body, in mp rhs) { return new mp(); }
-  public static bool operator>=(in mp body, in mp rhs) { return new mp(); }
+  public static bool operator==(in mp body, in mp rhs)
+  {
+    var diff = body - rhs;
+    foreach (var iter in diff.self)
+    {
+      if (iter != 0) { return false; }
+    }
+    return true;
+  }
+
+  public static bool operator!=(in mp body, in mp rhs) { return !(body == rhs); }
+
+  public static bool operator<(in mp body, in mp rhs)
+  {
+    var diff = body - rhs;
+    return diff.negative;
+  }
+
+  public static bool operator>(in mp body, in mp rhs) { return (rhs < body); }
+
+  public static bool operator<=(in mp body, in mp rhs)
+  {
+    if (body == rhs) { return true; }
+    return (body < rhs);
+  }
+
+  public static bool operator>=(in mp body, in mp rhs) { return (rhs <= body); }
 
   /** \return n! / ((n - k)! * k!) */
   public static mp binomialCoeff(int n, int k)
