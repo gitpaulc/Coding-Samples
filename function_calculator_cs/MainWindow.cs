@@ -85,14 +85,14 @@ namespace function_calculator_cs
       return true;
     }
 
-    void endTests()
+    private void endTests()
     {
       testState = new TestingState();
       continueBtn.Visible = false;
       endCurrentTest.Visible = false;
     }
 
-    void runTests()
+    private void runTests()
     {
       if (testState.whichTest == 0)
       {
