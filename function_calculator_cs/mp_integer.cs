@@ -575,9 +575,10 @@ public class mp // : IEquatable<mp?>
     for (int ii = 0; ii < strLen; ++ii)
     {
       char cc = trimmed[ii];
-      if (ii == 0)
+      if (cc == '-')
       {
-        if (cc == '-') { negativeNumber = true; continue; }
+        if (!started) { negativeNumber = !negativeNumber; continue; }
+        return false;
       }
       if (cc == ',')
       {
