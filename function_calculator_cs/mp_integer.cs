@@ -584,9 +584,18 @@ public class mp // : IEquatable<mp?>
         continue;
       }
       started = true;
-      int num = (int)(cc - '0');
-      if (num < 0) { return false; }
-      if (num > 9) { return false; }
+      int num = 0;
+      if (cc == '0') { num = 0; }
+      else if (cc == '1') { num = 1; }
+      else if (cc == '2') { num = 2; }
+      else if (cc == '3') { num = 3; }
+      else if (cc == '4') { num = 4; }
+      else if (cc == '5') { num = 5; }
+      else if (cc == '6') { num = 6; }
+      else if (cc == '7') { num = 7; }
+      else if (cc == '8') { num = 8; }
+      else if (cc == '9') { num = 9; }
+      else { return false; }
       mp mpNum = new mp(num);
       answer = answer * ten_ + mpNum;
     }
