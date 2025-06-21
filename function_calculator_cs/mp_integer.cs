@@ -570,6 +570,7 @@ public class mp // : IEquatable<mp?>
     Boolean negativeNumber = false;
     var trimmed = str.Trim();
     int strLen = trimmed.Length;
+    if (strLen == 0) { return false; }
     Boolean started = false;
     for (int ii = 0; ii < strLen; ++ii)
     {
@@ -582,6 +583,11 @@ public class mp // : IEquatable<mp?>
       {
         if (!started) { return false; }
         continue;
+      }
+      if (cc == '.')
+      {
+        if (!started) { return false; }
+        break;
       }
       started = true;
       int num = 0;
