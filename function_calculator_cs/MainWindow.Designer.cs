@@ -14,6 +14,9 @@ namespace function_calculator_cs
     private Button endCurrentTest;
     private Button testBtn;
     private TextBox console;
+    private MaskedTextBox numberInput;
+    private Label enterIntegerLbl;
+    private Button okBtn;
     private IContainer components = null;
     private class TestingState
     {
@@ -37,24 +40,27 @@ namespace function_calculator_cs
       endCurrentTest = new Button();
       console = new TextBox();
       testBtn = new Button();
+      numberInput = new MaskedTextBox();
+      enterIntegerLbl = new Label();
+      okBtn = new Button();
       SuspendLayout();
 
-      continueBtn.Location = new Point(694, 456);
+      continueBtn.Location = new Point(694, 559);
       continueBtn.Name = "continueBtn";
       continueBtn.Size = new Size(94, 29);
       continueBtn.TabIndex = 0;
       continueBtn.Text = "Continue";
       continueBtn.UseVisualStyleBackColor = true;
       continueBtn.Click += OnContinue;
- 
-      endCurrentTest.Location = new Point(550, 456);
+
+      endCurrentTest.Location = new Point(549, 559);
       endCurrentTest.Name = "endCurrentTest";
       endCurrentTest.Size = new Size(138, 29);
       endCurrentTest.TabIndex = 1;
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
       endCurrentTest.Click += OnEndCurrentTest;
- 
+
       console.Location = new Point(12, 12);
       console.Multiline = true;
       console.Name = "console";
@@ -62,7 +68,7 @@ namespace function_calculator_cs
       console.Size = new Size(776, 438);
       console.TabIndex = 2;
 
-      testBtn.Location = new Point(12, 456);
+      testBtn.Location = new Point(12, 559);
       testBtn.Name = "testBtn";
       testBtn.Size = new Size(94, 29);
       testBtn.TabIndex = 3;
@@ -70,9 +76,33 @@ namespace function_calculator_cs
       testBtn.UseVisualStyleBackColor = true;
       testBtn.Click += OnTestClicked;
 
+      numberInput.Location = new Point(195, 453);
+      numberInput.Name = "maskedTextBox1";
+      numberInput.Size = new Size(593, 27);
+      numberInput.TabIndex = 4;
+
+      enterIntegerLbl.AutoSize = true;
+      enterIntegerLbl.Location = new Point(12, 456);
+      enterIntegerLbl.Name = "enterIntegerLbl";
+      enterIntegerLbl.Size = new Size(161, 20);
+      enterIntegerLbl.TabIndex = 5;
+      enterIntegerLbl.Text = "Enter a whole number: ";
+      enterIntegerLbl.Click += OnNumberLabelClick;
+ 
+      okBtn.Location = new Point(694, 484);
+      okBtn.Name = "okBtn";
+      okBtn.Size = new Size(94, 29);
+      okBtn.TabIndex = 6;
+      okBtn.Text = "OK";
+      okBtn.UseVisualStyleBackColor = true;
+      okBtn.Click += OnOK;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(okBtn);
+      Controls.Add(enterIntegerLbl);
+      Controls.Add(numberInput);
       Controls.Add(testBtn);
       Controls.Add(console);
       Controls.Add(endCurrentTest);
@@ -82,8 +112,6 @@ namespace function_calculator_cs
 
       ResumeLayout(false);
       PerformLayout();
-
-      endTests();
     }
 
     private void OnContinue(object sender, EventArgs e)
@@ -103,6 +131,13 @@ namespace function_calculator_cs
     private void OnTestClicked(object sender, EventArgs e)
     {
       runTests();
+    }
+
+    private void OnNumberLabelClick(object sender, EventArgs e) { }
+
+    private void OnOK(object sender, EventArgs e)
+    {
+
     }
 
     #endregion // UI Code
