@@ -1,7 +1,7 @@
 /*  Copyright Paul Cernea, June 2025.
 All Rights Reserved.*/
 
-using System.Reflection.Metadata.Ecma335;
+#pragma Nullable
 
 namespace function_calculator_cs
 {
@@ -9,7 +9,7 @@ namespace function_calculator_cs
  *
  *  Important for avoiding overflow as calculations become more complicated.
  */
-public class mp
+public class mp : Object
 {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   private List<int> self;
@@ -257,10 +257,55 @@ public class mp
   }
 
 
-  public static mp operator+(in mp body) { return; }
-  public static mp operator-(in mp body) { return; }
-  public static mp operator+(in mp body, in mp rhs) { return; }
+  public static mp operator+(in mp body) { return new mp(body); }
+
+  public static mp operator-(in mp body)
+  {
+    var answer = new mp(body);
+    if (answer.self.Count == 0) { return answer; }
+    answer.negative = !answer.negative;
+    return answer;
+  }
+
+  public static mp operator+(in mp body, in mp rhs)
+  {
+    if (body.negative && rhs.negative) { return -((-rhs) + (-body)); }
+    if (rhs.negative) { return (body - (-rhs)); }
+    if (body.negative) { return (rhs - (-body)); }
+    if (rhs.self.Count > body.self.Count) { return (rhs + body); }
+    mp answer = new mp(body);
+    var rhsSize = rhs.self.Count;
+
+    int ii = -1;
+    int carry = 0;
+    long summandA = 0;
+    long summandB = 0;
+    long lim = limit;
+    foreach (var iter in rhs.self)
+    {
+      ++ii;
+      if (ii >= rhsSize) { continue; }
+      summandA = answer.self[ii];
+      summandB = iter;
+      var sum = summandA + summandB + carry;
+      carry = 0;
+      if (sum >= (long)lim)
+      {
+        carry = 1;
+        sum = sum % lim;
+      }
+      answer.self[ii] = (int)sum;
+    }
+    if (carry > 0)
+    {
+      answer.self.Add(carry);
+    }
+    answer.clean();
+    return answer;
+  }
+
   public static mp operator-(in mp body, in mp rhs) { return; }
+
   public static mp operator*(in mp body, in mp rhs) { return; }
   public static mp operator*(in mp body, int rhs) { return; }
   public static mp operator/(in mp body, in mp rhs) { return; }
@@ -406,6 +451,13 @@ public class mp
     }
     return strm;
   }
+
+  public override bool Equals(object? o) /**< Implement to remove warning. */
+  {  
+    return base.Equals(o);  
+  }
+
+  public override int GetHashCode() { return base.GetHashCode(); } /**< Implement to remove warning. */
 };
 
 }
