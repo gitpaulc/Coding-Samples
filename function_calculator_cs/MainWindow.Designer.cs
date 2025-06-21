@@ -97,6 +97,7 @@ namespace function_calculator_cs
       testState.whichTest = -1;
       testState.testState = 0;
       console.Text = Environment.NewLine + "Done.";
+      endCurrentTest.Visible = false;
     }
 
     private void OnTestClicked(object sender, EventArgs e)
