@@ -92,6 +92,9 @@ namespace function_calculator_cs
       testBtn.Visible = true;
       continueBtn.Visible = false;
       endCurrentTest.Visible = false;
+      numberInput.Visible = true;
+      enterIntegerLbl.Visible = true;
+      okBtn.Visible = true;
     }
 
     private void runTests()
@@ -99,6 +102,9 @@ namespace function_calculator_cs
       testBtn.Visible = false;
       continueBtn.Visible = true;
       endCurrentTest.Visible = true;
+      numberInput.Visible = false;
+      enterIntegerLbl.Visible = false;
+      okBtn.Visible = false;
 
       if (testState.whichTest == 0)
       {

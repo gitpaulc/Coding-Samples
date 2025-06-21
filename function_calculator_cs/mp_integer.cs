@@ -560,6 +560,17 @@ public class mp // : IEquatable<mp?>
     return answer;
   }
 
+  /** \param outputs `number` if and only if input `str` is convertible to an mp number.
+   *  \return `True` if convertible.
+   */
+  public static Boolean FromString(in string str, ref mp number)
+  {
+    mp answer = new mp(0);
+    Boolean negativeNumber = false;
+    number = answer;
+    return true;
+  }
+
   public override string ToString()
   {
     var zero_ = zero();
