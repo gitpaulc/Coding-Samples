@@ -95,7 +95,7 @@ namespace function_calculator_cs
       numberInput.Visible = true;
       enterIntegerLbl.Visible = true;
       okBtn.Visible = true;
-      calculatorHeight = 0;
+      calc = new CalculatorState();
     }
 
     private void runTests()
@@ -106,7 +106,7 @@ namespace function_calculator_cs
       numberInput.Visible = false;
       enterIntegerLbl.Visible = false;
       okBtn.Visible = false;
-      calculatorHeight = 0;
+      calc = new CalculatorState();
 
       if (testState.whichTest == 0)
       {
