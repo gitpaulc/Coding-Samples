@@ -168,6 +168,9 @@
 * For instance it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`. It computes that the reciprocal of `1 + sqrt(3) + sqrt(5) + sqrt(7)` is `(-7 + 5 * sqrt(3) + 3 * sqrt(5) - sqrt(7) - sqrt(15) + sqrt(21) + sqrt(35) - sqrt(105)) * (1/16)`.
 * It computes that `(d/dx)sin(pi * x) / pi = cos(pi * x)` and simplifies `sin^2(pi * x) + cos^2(pi * x) = 1`.
 * It computes that `e^(ax)sin(ax)` is not a harmonic function but `e^(ax)sin(ay)` is a harmonic function.
+* Also included is a C# version of the project in the `function_calculator_cs` folder, as pictured:
+
+<a href="#"><img alt="ComputationalGeometry" src="function_calculator_cs/FunctionCalculatorCSharp.png" width="100%"/></a>
 
 [Back to Table of Contents.](##table-of-contents)
 
