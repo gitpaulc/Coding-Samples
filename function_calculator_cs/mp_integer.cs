@@ -154,9 +154,10 @@ public class mp // : IEquatable<mp?>
     if (ind >= self.Count)
     {
       int oldSize = (int)self.Count;
-      self.AddRange(new List<int>(ind + 1 - oldSize)); //self.resize(ind + 1);
+      var more = new List<int>();
+      for (int ll = 0; ll < ind + 1 - oldSize; ++ll) { more.Add(0); }
+      self.AddRange(more);
       shouldClean = true;
-      for (int k = oldSize; k < (ind + 1); ++k) { self[k] = 0; }
     }
     var powJ = intPow(10, j);
     var powJ1 = 10 * powJ;
@@ -390,8 +391,9 @@ public class mp // : IEquatable<mp?>
         int answerSize = answer.self.Count;
         if (kk >= answerSize)
         {
-          answer.self.AddRange(new List<int>(kk + 1 - answerSize));
-          for (int ll = answerSize; ll < kk + 1; ++ll) { answer.self[ll] = 0; }
+          var more = new List<int>();
+          for (int ll = 0; ll < kk + 1 - answerSize; ++ll) { more.Add(0); }
+          answer.self.AddRange(more);
         }
         long product = (long)(body.self[ii]) * (long)(rhs.self[jj]) + carry;
         carry = (int)(product / lim);
@@ -403,8 +405,9 @@ public class mp // : IEquatable<mp?>
         int answerSize = answer.self.Count;
         if (kk >= answerSize)
         {
-          answer.self.AddRange(new List<int>(kk + 1 - answerSize));
-          for (int ll = answerSize; ll < kk + 1; ++ll) { answer.self[ll] = 0; }
+          var more = new List<int>();
+          for (int ll = 0; ll < kk + 1 - answerSize; ++ll) { more.Add(0); }
+          answer.self.AddRange(more);
         }
         answer.self[kk] = answer.self[kk] + carry;
       }
