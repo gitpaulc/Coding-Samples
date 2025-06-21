@@ -333,7 +333,7 @@ public class mp : Object
     //Nonnegative number:
     mp answer = new mp(0);
     answer.self = new List<int>(body.self.Count);
-    for (int ii = 0; ii < body.self.Count; ++ii) { answer.self[ii] = 0; }
+    for (int ii = 0; ii < answer.self.Count; ++ii) { answer.self[ii] = 0; }
     answer.negative = false;
     var from = new mp(body);
     for (int ii = 0; ii < numOfDigits; ++ii)
@@ -363,7 +363,56 @@ public class mp : Object
     return answer;
   }
 
-  public static mp operator*(in mp body, in mp rhs) { return; }
+  public static mp operator*(in mp body, in mp rhs)
+  {
+    mp answer = new mp(0);
+    if (body.self.Count == 0) { return answer; }
+    if (rhs.self.Count == 0) { return answer; }
+    answer.negative = (body.negative || rhs.negative) && !(body.negative && rhs.negative);
+
+    int sizA = (int)body.self.Count;
+    int sizB = (int)rhs.self.Count;
+    {
+      int maxSiz = sizA;
+      if (sizB > sizA) { maxSiz = sizB; }
+      int newSiz = maxSiz * maxSiz + 1;
+      answer.self = new List<int>(newSiz);
+      for (int ii = 0; ii < answer.self.Count; ++ii) { answer.self[ii] = 0; }
+    }
+    long lim = (long)limit;
+
+    for (int ii = 0; ii < sizA; ++ii)
+    {
+      int carry = 0;
+      for (int jj = 0; jj < sizB; ++jj)
+      {
+        var kk = ii + jj;
+        int answerSize = answer.self.Count;
+        if (kk >= answerSize)
+        {
+          answer.self.AddRange(new List<int>(kk + 1 - answerSize));
+          for (int ll = answerSize; ll < kk + 1; ++ll) { answer.self[ll] = 0; }
+        }
+        long product = (long)(body.self[ii]) * (long)(rhs.self[jj]) + carry;
+        carry = (int)(product / lim);
+        answer.self[kk] = answer.self[kk] + ((int)(product % lim));
+      }
+      if (carry > 0)
+      {
+        var kk = ii + sizB;
+        int answerSize = answer.self.Count;
+        if (kk >= answerSize)
+        {
+          answer.self.AddRange(new List<int>(kk + 1 - answerSize));
+          for (int ll = answerSize; ll < kk + 1; ++ll) { answer.self[ll] = 0; }
+        }
+        answer.self[kk] = answer.self[kk] + carry;
+      }
+    }
+    answer.clean();
+    return answer;
+  }
+
   public static mp operator*(in mp body, int rhs) { return; }
   public static mp operator/(in mp body, in mp rhs) { return; }
   public static mp operator%(in mp body, in mp rhs) { return; }
