@@ -87,25 +87,35 @@ namespace function_calculator_cs
 
     private void endTests()
     {
+      console.Text = "";
       testState = new TestingState();
+      testBtn.Visible = true;
       continueBtn.Visible = false;
       endCurrentTest.Visible = false;
     }
 
     private void runTests()
     {
+      testBtn.Visible = false;
+      continueBtn.Visible = true;
+      endCurrentTest.Visible = true;
+
       if (testState.whichTest == 0)
       {
         if (testState.testState == 0) { test_mp(); }
         else if (testState.testState == 1) { test_mp2(); }
         else if (testState.testState == 2) { test_mp3(); }
-        else if (testState.testState > 0)
+        else if (testState.testState == 3)
         {
           console.Text = "";
           console.Text = Environment.NewLine + "Done.";
         }
+        else if (testState.testState > 0)
+        {
+          endTests(); return;
+        }
       }
-      else if (testState.whichTest < 0) { console.Text = ""; }
+      else if (testState.whichTest < 0) { endTests(); return; }
     }
 
     public MainWindow()
