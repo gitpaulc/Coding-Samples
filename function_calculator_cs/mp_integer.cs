@@ -566,7 +566,31 @@ public class mp // : IEquatable<mp?>
   public static Boolean FromString(in string str, ref mp number)
   {
     mp answer = new mp(0);
+    mp ten_ = new mp(10);
     Boolean negativeNumber = false;
+    var trimmed = str.Trim();
+    int strLen = trimmed.Length;
+    Boolean started = false;
+    for (int ii = 0; ii < strLen; ++ii)
+    {
+      char cc = trimmed[ii];
+      if (ii == 0)
+      {
+        if (cc == '-') { negativeNumber = true; continue; }
+      }
+      if (cc == ',')
+      {
+        if (!started) { return false; }
+        continue;
+      }
+      started = true;
+      int num = (int)(cc - '0');
+      if (num < 0) { return false; }
+      if (num > 9) { return false; }
+      mp mpNum = new mp(num);
+      answer = answer * ten_ + mpNum;
+    }
+    if (negativeNumber) { answer = -answer; }
     number = answer;
     return true;
   }
