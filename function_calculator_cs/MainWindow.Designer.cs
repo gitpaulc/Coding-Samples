@@ -14,6 +14,7 @@ namespace function_calculator_cs
     private Button endCurrentTest;
     private Button testBtn;
     private TextBox console;
+    private int calculatorHeight = 0;
     private MaskedTextBox numberInput;
     private Label enterIntegerLbl;
     private Button okBtn;
@@ -137,7 +138,17 @@ namespace function_calculator_cs
 
     private void OnOK(object sender, EventArgs e)
     {
-
+      if (calculatorHeight > 10)
+      {
+        console.Text = "";
+        calculatorHeight = 0;
+      }
+      mp numberOut = new mp(0);
+      var valid = mp.FromString(numberInput.Text, ref numberOut);
+      console.Text += Environment.NewLine;
+      if (valid) { console.Text += "Not a valid number."; }
+      else { console.Text += numberOut.ToString(); }
+      ++calculatorHeight;
     }
 
     #endregion // UI Code
