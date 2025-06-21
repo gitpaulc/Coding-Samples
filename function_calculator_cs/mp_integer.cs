@@ -413,9 +413,21 @@ public class mp : Object
     return answer;
   }
 
-  public static mp operator*(in mp body, int rhs) { return; }
-  public static mp operator/(in mp body, in mp rhs) { return; }
-  public static mp operator%(in mp body, in mp rhs) { return; }
+  public static mp operator*(in mp body, int rhs) { var rhs_ = new mp(rhs); return body * rhs_; }
+
+  public static mp operator/(in mp body, in mp rhs)
+  {
+    mp remainder = new mp(0);
+    var quotient = body.division(rhs, ref remainder);
+    return quotient;
+  }
+
+  public static mp operator%(in mp body, in mp rhs)
+  {
+    mp remainder = new mp(0);
+    var quotient = body.division(rhs, ref remainder);
+    return remainder;
+  }
 
   mp abs()
   {
