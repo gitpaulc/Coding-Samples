@@ -570,7 +570,6 @@ public class mp // : IEquatable<mp?>
     Boolean negativeNumber = false;
     var trimmed = str.Trim();
     int strLen = trimmed.Length;
-    if (strLen == 0) { return false; }
     Boolean started = false;
     for (int ii = 0; ii < strLen; ++ii)
     {
@@ -606,6 +605,7 @@ public class mp // : IEquatable<mp?>
       mp mpNum = new mp(num);
       answer = answer * ten_ + mpNum;
     }
+    if (!started) { return false; }
     if (negativeNumber) { answer = -answer; }
     number = answer;
     return true;

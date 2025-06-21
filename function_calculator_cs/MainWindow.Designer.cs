@@ -29,6 +29,7 @@ namespace function_calculator_cs
     private class CalculatorState
     {
       public int outBufferHeight = 0;
+      public List<mp> numberStack = new List<mp>();
     }
     CalculatorState calc = new CalculatorState();
 
@@ -86,6 +87,7 @@ namespace function_calculator_cs
       numberInput.Name = "maskedTextBox1";
       numberInput.Size = new Size(593, 27);
       numberInput.TabIndex = 4;
+      numberInput.KeyUp += HandleKeyUp;
 
       enterIntegerLbl.AutoSize = true;
       enterIntegerLbl.Location = new Point(12, 456);
@@ -143,17 +145,32 @@ namespace function_calculator_cs
 
     private void OnOK(object sender, EventArgs e)
     {
+      if (!(okBtn.Visible)) { return; }
+      var trimmed = numberInput.Text.Trim();
+      if (trimmed.Length == 0) { return; }
       if (calc.outBufferHeight > 10)
       {
         console.Text = "";
         calc.outBufferHeight = 0;
       }
       mp numberOut = new mp(0);
-      var valid = mp.FromString(numberInput.Text, ref numberOut);
+      var valid = mp.FromString(trimmed, ref numberOut);
       console.Text += Environment.NewLine;
-      if (valid) { console.Text += numberOut.ToString(); numberInput.Text = ""; }
+      if (valid)
+      {
+        console.Text += numberOut.ToString();
+        numberInput.Text = "";
+        calc.numberStack.Add(numberOut);
+      }
       else { console.Text += "Not a valid number."; }
       ++(calc.outBufferHeight);
+    }
+
+    private void HandleKeyUp(object sender, EventArgs e)
+    {
+      var ee = e as KeyEventArgs;
+      if (ee == null) { return; }
+      if (ee.KeyCode == Keys.Enter) { OnOK(sender, e); }
     }
 
     #endregion // UI Code
