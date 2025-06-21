@@ -304,7 +304,64 @@ public class mp : Object
     return answer;
   }
 
-  public static mp operator-(in mp body, in mp rhs) { return; }
+  public static mp operator-(in mp body, in mp rhs)
+  {
+    if (rhs.self.Count == 0) { return body; }
+    if (body.self.Count == 0) { return -rhs; }
+    if (rhs.negative && (!body.negative)) { return body + (-rhs); }
+    if (rhs.negative && body.negative) { return ((-rhs) - (-body)); }
+    // rhs is nonnegative:
+    if (body.negative) { return -((-body) + rhs); }
+    // Both are nonnegative...
+
+    int numOfDigits = body.numDigits();
+    int numRhsDigits = rhs.numDigits();
+
+    // Negative answer:
+    if (numRhsDigits > numOfDigits) { return -(rhs - body); }
+    if (numRhsDigits == numOfDigits)
+    {
+      for (int ii = numOfDigits - 1; ii >= 0; --ii)
+      {
+        int digit = rhs.getDigit(ii);
+        int subFrom = body.getDigit(ii);
+        if (digit > subFrom) { return -(rhs - body); }
+        if (digit < subFrom) { break; }
+      }
+    }
+
+    //Nonnegative number:
+    mp answer = new mp(0);
+    answer.self = new List<int>(body.self.Count);
+    for (int ii = 0; ii < body.self.Count; ++ii) { answer.self[ii] = 0; }
+    answer.negative = false;
+    var from = new mp(body);
+    for (int ii = 0; ii < numOfDigits; ++ii)
+    {
+      int digit = rhs.getDigit(ii);
+      int subFrom = from.getDigit(ii);
+      if (digit > subFrom)
+      {
+        if (ii == (numOfDigits - 1)) { throw new System.Exception("Bad subtraction."); }
+        else
+        {
+          int jj = ii + 1;
+          int current = from.getDigit(jj);
+          while (current == 0)
+          {
+            from.setDigit(jj, 9);
+            ++jj;
+            current = from.getDigit(jj);
+          }
+          from.setDigit(jj, current - 1);
+          subFrom += 10;
+        }
+      }
+      answer.setDigit(ii, subFrom - digit);
+    }
+    answer.clean();
+    return answer;
+  }
 
   public static mp operator*(in mp body, in mp rhs) { return; }
   public static mp operator*(in mp body, int rhs) { return; }
