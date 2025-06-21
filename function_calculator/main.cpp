@@ -628,6 +628,30 @@ bool test_quadratic()
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
   std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
 
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  for (int lim_ = 7; lim_ < 11; ++lim_)
+  {
+    if (lim_ == 9)
+    {
+      std::cout << "\n\nThe next part of this test is slow.";
+      std::cout << "\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+    sumOfSquareRoots = QuadraticNumber();
+    for (int ii = 0; ii < lim_; ++ii)
+    {
+      sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
+    }
+    reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+    std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+    recipIntegral = reciprocal.factorAsIntegral();
+    std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+    std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  }
+
   return true;
 }
 
