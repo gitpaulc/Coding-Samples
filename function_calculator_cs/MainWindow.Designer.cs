@@ -82,6 +82,8 @@ namespace function_calculator_cs
 
       ResumeLayout(false);
       PerformLayout();
+
+      endTests();
     }
 
     private void OnContinue(object sender, EventArgs e)

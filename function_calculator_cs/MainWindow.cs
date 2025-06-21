@@ -111,7 +111,6 @@ namespace function_calculator_cs
     public MainWindow()
     {
       InitializeComponent();
-      runTests();
     }
   }
 }
