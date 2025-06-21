@@ -429,14 +429,14 @@ public class mp // : IEquatable<mp?>
     return remainder;
   }
 
-  mp abs()
+  public mp abs()
   {
     mp answer = new mp(this);
     answer.negative = false;
     return answer;
   }
 
-  mp pow(int p) /**< `return` The p'th power of the number. */
+  public mp pow(int p) /**< `return` The p'th power of the number. */
   {
     Boolean isNeg = (p < 0);
     if (isNeg) { throw new System.Exception("Exponent must be nonnegative."); }
@@ -451,12 +451,6 @@ public class mp // : IEquatable<mp?>
   public static bool operator==(in mp body, in mp rhs)
   {
     return body.Equals(rhs);
-    //var diff = body - rhs;
-    //foreach (var iter in diff.self)
-    //{
-    //  if (iter != 0) { return false; }
-    //}
-    //return true;
   }
 
   public static bool operator!=(in mp body, in mp rhs) { return !(body == rhs); }
@@ -566,9 +560,9 @@ public class mp // : IEquatable<mp?>
   public override string ToString()
   {
     var zero_ = zero();
-    if (this == zero_) { return new string("0"); }
-    if (negative) { return new string("-") + (-(this)).ToString(); }
-    string reversed = new string("");
+    if (this == zero_) { return "0"; }
+    if (negative) { return "-" + (-(this)).ToString(); }
+    string reversed = "";
     int digitCount = 0;
     int nn = (int)(self.Count);
     for (int ii = 0; ii < nn; ++ii)
@@ -584,7 +578,7 @@ public class mp // : IEquatable<mp?>
       }
     }
     nn = (int)reversed.Length;
-    string strm = new string("");
+    string strm = "";
     for (int ii = 0; ii < nn; ++ii)
     {
       strm = strm + reversed[nn - ii - 1];
@@ -600,8 +594,16 @@ public class mp // : IEquatable<mp?>
   public bool Equals(mp? other)
   {
     if (other is null) { return false; }
-    if (other.negative != negative) { return false; }
-    return EqualityComparer<List<int> >.Default.Equals(self, other.self);
+    //if (other.negative != negative) { return false; }
+    //if ((self.Count == 0) && (other.self.Count == 0)) { return true; }
+    //return EqualityComparer<List<int> >.Default.Equals(self, other.self);
+    
+    var diff = this - other;
+    foreach (var iter in diff.self)
+    {
+      if (iter != 0) { return false; }
+    }
+    return true;
   }
 
   public override int GetHashCode()
