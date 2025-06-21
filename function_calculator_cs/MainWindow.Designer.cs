@@ -13,6 +13,9 @@ namespace function_calculator_cs
     private Button endCurrentTest;
     private TextBox console;
     private IContainer components = null;
+    //private Boolean testing = false;
+    private int whichTest = 0;
+    private int testState = 0;
 
     protected override void Dispose(bool disposing)
     {
@@ -35,6 +38,7 @@ namespace function_calculator_cs
       continueBtn.TabIndex = 0;
       continueBtn.Text = "Continue";
       continueBtn.UseVisualStyleBackColor = true;
+      continueBtn.Click += new EventHandler(OnContinue);
 
       endCurrentTest.Location = new Point(550, 456);
       endCurrentTest.Name = "endCurrentTest";
@@ -42,6 +46,7 @@ namespace function_calculator_cs
       endCurrentTest.TabIndex = 1;
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
+      endCurrentTest.Click += new EventHandler(OnEndCurrentTest);
 
       console.Location = new Point(12, 12);
       console.Multiline = true;
@@ -61,6 +66,19 @@ namespace function_calculator_cs
 
       ResumeLayout(false);
       PerformLayout();
+    }
+
+    private void OnContinue(object sender, EventArgs e)
+    {
+      if (whichTest >= 0) { testState++; }
+      runTests();
+    }
+
+    private void OnEndCurrentTest(object sender, EventArgs e)
+    {
+      whichTest = -1;
+      testState = 0;
+      console.Text = Environment.NewLine + "Done.";
     }
 
     #endregion // UI Code
