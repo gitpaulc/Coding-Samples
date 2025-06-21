@@ -146,8 +146,8 @@ namespace function_calculator_cs
       mp numberOut = new mp(0);
       var valid = mp.FromString(numberInput.Text, ref numberOut);
       console.Text += Environment.NewLine;
-      if (valid) { console.Text += "Not a valid number."; }
-      else { console.Text += numberOut.ToString(); }
+      if (valid) { console.Text += numberOut.ToString(); numberInput.Text = ""; }
+      else { console.Text += "Not a valid number."; }
       ++calculatorHeight;
     }
 
