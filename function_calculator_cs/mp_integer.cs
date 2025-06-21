@@ -9,8 +9,8 @@ namespace function_calculator_cs
  *
  *  Important for avoiding overflow as calculations become more complicated.
  */
-public class mp : Object
-{
+public class mp // : IEquatable<mp?>
+  {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   private List<int> self;
   private Boolean negative = false;
@@ -450,12 +450,13 @@ public class mp : Object
 
   public static bool operator==(in mp body, in mp rhs)
   {
-    var diff = body - rhs;
-    foreach (var iter in diff.self)
-    {
-      if (iter != 0) { return false; }
-    }
-    return true;
+    return body.Equals(rhs);
+    //var diff = body - rhs;
+    //foreach (var iter in diff.self)
+    //{
+    //  if (iter != 0) { return false; }
+    //}
+    //return true;
   }
 
   public static bool operator!=(in mp body, in mp rhs) { return !(body == rhs); }
@@ -591,12 +592,22 @@ public class mp : Object
     return strm;
   }
 
-  public override bool Equals(object? o) /**< Implement to remove warning. */
-  {  
-    return base.Equals(o);  
+  public override bool Equals(object? obj)
+  {
+    return Equals(obj as mp);
   }
 
-  public override int GetHashCode() { return base.GetHashCode(); } /**< Implement to remove warning. */
+  public bool Equals(mp? other)
+  {
+    if (other is null) { return false; }
+    if (other.negative != negative) { return false; }
+    return EqualityComparer<List<int> >.Default.Equals(self, other.self);
+  }
+
+  public override int GetHashCode()
+  {
+    return HashCode.Combine(self, negative);
+  }
 };
 
 }
