@@ -35,40 +35,58 @@ namespace function_calculator_cs
       continueBtn = new Button();
       endCurrentTest = new Button();
       console = new TextBox();
+      button1 = new Button();
       SuspendLayout();
-
+      // 
+      // continueBtn
+      // 
       continueBtn.Location = new Point(694, 456);
       continueBtn.Name = "continueBtn";
       continueBtn.Size = new Size(94, 29);
       continueBtn.TabIndex = 0;
       continueBtn.Text = "Continue";
       continueBtn.UseVisualStyleBackColor = true;
-      continueBtn.Click += new EventHandler(OnContinue);
-
+      continueBtn.Click += OnContinue;
+      // 
+      // endCurrentTest
+      // 
       endCurrentTest.Location = new Point(550, 456);
       endCurrentTest.Name = "endCurrentTest";
       endCurrentTest.Size = new Size(138, 29);
       endCurrentTest.TabIndex = 1;
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
-      endCurrentTest.Click += new EventHandler(OnEndCurrentTest);
-
+      endCurrentTest.Click += OnEndCurrentTest;
+      // 
+      // console
+      // 
       console.Location = new Point(12, 12);
       console.Multiline = true;
       console.Name = "console";
-      console.Size = new Size(776, 438);
       console.ReadOnly = true;
+      console.Size = new Size(776, 438);
       console.TabIndex = 2;
-
+      // 
+      // button1
+      // 
+      button1.Location = new Point(12, 456);
+      button1.Name = "button1";
+      button1.Size = new Size(94, 29);
+      button1.TabIndex = 3;
+      button1.Text = "button1";
+      button1.UseVisualStyleBackColor = true;
+      // 
+      // MainWindow
+      // 
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(button1);
       Controls.Add(console);
       Controls.Add(endCurrentTest);
       Controls.Add(continueBtn);
       Name = "MainWindow";
       Text = "Function Calculator";
-
       ResumeLayout(false);
       PerformLayout();
     }
@@ -87,5 +105,7 @@ namespace function_calculator_cs
     }
 
     #endregion // UI Code
+
+    private Button button1;
   }
 }
