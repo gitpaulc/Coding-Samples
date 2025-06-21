@@ -7,15 +7,20 @@ using System.Windows.Forms;
 
 namespace function_calculator_cs
 {
+
   partial class MainWindow
   {
     private Button continueBtn;
     private Button endCurrentTest;
     private TextBox console;
     private IContainer components = null;
-    //private Boolean testing = false;
-    private int whichTest = 0;
-    private int testState = 0;
+    private class TestingState
+    {
+      public Boolean testing = false;
+      public int whichTest = 0;
+      public int testState = 0;
+    }
+    TestingState testState = new TestingState();
 
     protected override void Dispose(bool disposing)
     {
@@ -70,14 +75,14 @@ namespace function_calculator_cs
 
     private void OnContinue(object sender, EventArgs e)
     {
-      if (whichTest >= 0) { testState++; }
+      if (testState.whichTest >= 0) { testState.testState++; }
       runTests();
     }
 
     private void OnEndCurrentTest(object sender, EventArgs e)
     {
-      whichTest = -1;
-      testState = 0;
+      testState.whichTest = -1;
+      testState.testState = 0;
       console.Text = Environment.NewLine + "Done.";
     }
 

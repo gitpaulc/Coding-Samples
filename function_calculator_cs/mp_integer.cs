@@ -613,7 +613,7 @@ public class mp // : IEquatable<mp?>
   {
     return HashCode.Combine(self, negative);
   }
-};
+}
 
 }
 

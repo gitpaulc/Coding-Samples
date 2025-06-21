@@ -87,18 +87,18 @@ namespace function_calculator_cs
 
     void runTests()
     {
-      if (whichTest == 0)
+      if (testState.whichTest == 0)
       {
-        if (testState == 0) { test_mp(); }
-        else if (testState == 1) { test_mp2(); }
-        else if (testState == 2) { test_mp3(); }
-        else if (testState > 0)
+        if (testState.testState == 0) { test_mp(); }
+        else if (testState.testState == 1) { test_mp2(); }
+        else if (testState.testState == 2) { test_mp3(); }
+        else if (testState.testState > 0)
         {
           console.Text = "";
           console.Text = Environment.NewLine + "Done.";
         }
       }
-      else if (whichTest < 0) { console.Text = ""; }
+      else if (testState.whichTest < 0) { console.Text = ""; }
     }
 
     public MainWindow()
