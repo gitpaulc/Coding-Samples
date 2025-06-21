@@ -447,13 +447,13 @@ bool test_mp()
   std::cout << "\n65,536^2 = " << squareOf_65536;
   auto squareOf_8192 = mp(8192) * mp(8192);
   std::cout << "\n8192^2 = " << (squareOf_8192);
-  std::cout << "\n6th digit of 8192^2 = " << squareOf_8192.getDigit(6);
+  std::cout << "\n7th digit of 8192^2 (from the right) = " << squareOf_8192.getDigit(6);
   auto replaced = squareOf_8192;
   replaced.setDigit(6, 5);
-  std::cout << "\nReplace 6th digit to 5 in 8192^2 = " << replaced;
+  std::cout << "\nReplace 7th digit to 5 in 8192^2 = " << replaced;
   replaced = squareOf_8192;
   replaced.setDigit(7, 5);
-  std::cout << "\nReplace 7th digit to 5 in 8192^2 = " << replaced;
+  std::cout << "\nReplace 8th digit to 5 in 8192^2 = " << replaced;
   std::cout << "\nNumber of digits in " << squareOf_65536 << " = " << squareOf_65536.numDigits();
   std::cout << "\n10^6 - 500,000 = " << million - mp(500000);
   std::cout << "\n500,000 - 10^6 = " << mp(500000) - million;
