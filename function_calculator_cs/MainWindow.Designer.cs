@@ -246,31 +246,37 @@ namespace function_calculator_cs
     private void OnPlus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Plus;
-      EnableCalcPanel(false);
+      HandleCalculating();
     }
 
     private void OnMinus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Minus;
-      EnableCalcPanel(false);
+      HandleCalculating();
     }
 
     private void OnTimes(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Times;
-      EnableCalcPanel(false);
+      HandleCalculating();
     }
 
     private void OnDiv(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Div;
-      EnableCalcPanel(false);
+      HandleCalculating();
     }
 
     private void OnPower(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Power;
+      HandleCalculating();
+    }
+
+    private void HandleCalculating()
+    {
       EnableCalcPanel(false);
+      okBtn.Text = "=";
     }
 
     private void EnableCalcPanel(Boolean show)

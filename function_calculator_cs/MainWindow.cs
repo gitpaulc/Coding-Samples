@@ -87,6 +87,7 @@ namespace function_calculator_cs
 
     private void ResetCalcPanel()
     {
+      okBtn.Text = "OK";
       ShowCalcPanel(false);
       EnableCalcPanel(true);
       calc = new CalculatorState();
