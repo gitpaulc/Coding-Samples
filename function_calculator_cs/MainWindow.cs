@@ -85,6 +85,13 @@ namespace function_calculator_cs
       return true;
     }
 
+    private void ResetCalcPanel()
+    {
+      ShowCalcPanel(false);
+      EnableCalcPanel(true);
+      calc = new CalculatorState();
+    }
+
     private void endTests()
     {
       console.Text = "";
@@ -95,9 +102,7 @@ namespace function_calculator_cs
       numberInput.Visible = true;
       enterIntegerLbl.Visible = true;
       okBtn.Visible = true;
-      ShowCalcPanel(false);
-      EnableCalcPanel(true);
-      calc = new CalculatorState();
+      ResetCalcPanel();
     }
 
     private void runTests()
@@ -108,9 +113,7 @@ namespace function_calculator_cs
       numberInput.Visible = false;
       enterIntegerLbl.Visible = false;
       okBtn.Visible = false;
-      ShowCalcPanel(false);
-      EnableCalcPanel(true);
-      calc = new CalculatorState();
+      ResetCalcPanel();
 
       if (testState.whichTest == 0)
       {
