@@ -457,10 +457,29 @@ public class mp // : IEquatable<mp?>
     Boolean isNeg = (p.negative == true);
     mp one_ = new mp(1);
     if (isNeg) { return one_ / powerOf(-p); }
+    var factors = p.primeFactorization();
     mp answer = new mp(1);
-    for (mp i = zero(); i < p; i = i + one_)
+    if (factors.Count <= 1)
     {
-      answer = answer * (this);
+      for (mp i = zero(); i < p; i = i + one_)
+      {
+        answer = answer * (this);
+      }
+      return answer;
+    }
+    mp baseInt = new mp(this);
+    while (factors.Count > 0)
+    {
+      var powerPair = factors.FirstOrDefault();
+      var power_ = powerPair.Key.pow(powerPair.Value);
+      var prevCount = factors.Count;
+      factors.Remove(powerPair.Key);
+      if (factors.Count >= prevCount) { break; }
+      for (mp i = zero(); i < power_; i = i + one_)
+      {
+        answer = answer * baseInt;
+      }
+      baseInt = new mp(answer);
     }
     return answer;
   }
@@ -517,7 +536,7 @@ public class mp // : IEquatable<mp?>
   {
     var input = new mp(this);
     var one_ = new mp(1);
-    var two_ = new mp(1);
+    var two_ = new mp(2);
     var answer = new Dictionary<mp, int>();
     if (input * input <= new mp(1))
     {
