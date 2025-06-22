@@ -124,7 +124,7 @@ namespace function_calculator_cs
       enterIntegerLbl.Text = "Enter a whole number: ";
       enterIntegerLbl.Click += OnNumberLabelClick;
 
-      okBtn.Location = new Point(694, 484);
+      okBtn.Location = new Point(694, 486);
       okBtn.Name = "okBtn";
       okBtn.Size = new Size(94, 29);
       okBtn.TabIndex = 6;
@@ -164,7 +164,7 @@ namespace function_calculator_cs
       plusBtn.UseVisualStyleBackColor = true;
       plusBtn.Click += OnPlus;
 
-      powerBtn.Location = new Point(653, 484);
+      powerBtn.Location = new Point(653, 486);
       powerBtn.Name = "powerBtn";
       powerBtn.Size = new Size(34, 29);
       powerBtn.TabIndex = 11;
@@ -188,7 +188,7 @@ namespace function_calculator_cs
       undoBtn.UseVisualStyleBackColor = true;
       undoBtn.Click += OnUndo;
 
-      redoBtn.Location = new Point(493, 521);
+      redoBtn.Location = new Point(195, 486);
       redoBtn.Name = "redoBtn";
       redoBtn.Size = new Size(94, 29);
       redoBtn.TabIndex = 14;
