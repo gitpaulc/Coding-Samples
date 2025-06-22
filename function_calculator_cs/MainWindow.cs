@@ -87,6 +87,7 @@ namespace function_calculator_cs
 
     private void ResetCalcPanel(bool resetState = true)
     {
+      enterIntegerLbl.Text = "Enter a whole number: ";
       okBtn.Text = "OK";
       cancelBtn.Visible = false;
       ShowCalcPanel(false);

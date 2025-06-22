@@ -248,8 +248,11 @@ namespace function_calculator_cs
       console.Text += Environment.NewLine;
       if (calc.numberStack.Count == 0)
       {
+        numberInput.Focus();
         console.Text += "Cleared calculator.";
         undoBtn.Visible = false;
+        ShowCalcPanel(false);
+        calc.calculating = CalculatorState.Calculating.Not;
         return;
       }
       console.Text += "Most recent number was ";
@@ -264,23 +267,79 @@ namespace function_calculator_cs
       {
         ResetCalcPanel(false);
         calc.calculating = CalculatorState.Calculating.Not;
+        if (calc.numberStack.Count > 0)
+        {
+          ShowCalcPanel(true);
+        }
       }
     }
 
     private void OnOK(object sender, EventArgs e)
     {
       if (!(okBtn.Visible)) { return; }
-      if (calc.calculating != CalculatorState.Calculating.Not)
-      {
-        undoBtn.Visible = (calc.numberStack.Count > 0);
-        return;
-      }
       var trimmed = numberInput.Text.Trim();
       if (trimmed.Length == 0) { return; }
       TrimOutputBuffer();
       mp numberOut = new mp(0);
       var valid = mp.FromString(trimmed, ref numberOut);
+      ++(calc.outBufferHeight);
       console.Text += Environment.NewLine;
+      if (calc.calculating != CalculatorState.Calculating.Not)
+      {
+        if (calc.numberStack.Count <= 0)
+        {
+          console.Text += "No previous operand.";
+          OnCancel(sender, e);
+          return;
+        }
+        if (!valid) { console.Text += "Not a valid number."; return; }
+        mp prev = calc.numberStack[calc.numberStack.Count - 1];
+        mp result = new mp();
+        if (calc.calculating == CalculatorState.Calculating.Plus)
+        {
+          result = prev + numberOut;
+          console.Text += prev.ToString() + " + ";
+        }
+        else if (calc.calculating == CalculatorState.Calculating.Minus)
+        {
+          result = prev - numberOut;
+          console.Text += prev.ToString() + " - ";
+        }
+        else if (calc.calculating == CalculatorState.Calculating.Times)
+        {
+          result = prev * numberOut;
+          console.Text += prev.ToString() + " × ";
+        }
+        else if (calc.calculating == CalculatorState.Calculating.Div)
+        {
+          result = prev / numberOut;
+          console.Text += prev.ToString() + " ÷ ";
+        }
+        else if (calc.calculating == CalculatorState.Calculating.Power)
+        {
+          result = prev.powerOf(numberOut);
+          console.Text += prev.ToString() + " to the power of ";
+        }
+        numberInput.Text = "";
+        console.Text += numberOut.ToString() + " = ";
+        console.Text += result.ToString();
+        if (calc.calculating == CalculatorState.Calculating.Div)
+        {
+          var remainder = prev % numberOut;
+          console.Text += " with a remainder of " + remainder.ToString();
+        }
+        calc.numberStack.Add(result);
+        cancelBtn.Visible = false;
+        ResetCalcPanel(false);
+        calc.calculating = CalculatorState.Calculating.Not;
+        if (calc.numberStack.Count > 0)
+        {
+          ShowCalcPanel(true);
+        }
+        undoBtn.Visible = (calc.numberStack.Count > 0);
+        enterIntegerLbl.Text = "Enter a whole number: ";
+        return;
+      }
       if (valid)
       {
         console.Text += numberOut.ToString();
@@ -290,7 +349,7 @@ namespace function_calculator_cs
         ShowCalcPanel(true);
       }
       else { console.Text += "Not a valid number."; }
-      ++(calc.outBufferHeight);
+      enterIntegerLbl.Text = "Enter a whole number: ";
     }
 
     private void HandleKeyUp(object sender, EventArgs e)
@@ -303,30 +362,35 @@ namespace function_calculator_cs
     private void OnPlus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Plus;
+      enterIntegerLbl.Text = "Add what? ";
       HandleCalculating();
     }
 
     private void OnMinus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Minus;
+      enterIntegerLbl.Text = "Subtract what? ";
       HandleCalculating();
     }
 
     private void OnTimes(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Times;
+      enterIntegerLbl.Text = "Multiply by what? ";
       HandleCalculating();
     }
 
     private void OnDiv(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Div;
+      enterIntegerLbl.Text = "Divide by what? ";
       HandleCalculating();
     }
 
     private void OnPower(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Power;
+      enterIntegerLbl.Text = "Raise to what power? ";
       HandleCalculating();
     }
 
