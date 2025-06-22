@@ -319,6 +319,11 @@ namespace function_calculator_cs
       console.Text += Environment.NewLine;
       if (calc.calculating != CalculatorState.Calculating.Not)
       {
+        if ((calc.calculating == CalculatorState.Calculating.Div) && (numberOut == (new mp(0))))
+        {
+          console.Text += "Cannot divide by zero.";
+          return;
+        }
         if (calc.numberStack.Count <= 0)
         {
           console.Text += "No previous operand.";
