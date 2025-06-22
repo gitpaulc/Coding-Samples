@@ -17,6 +17,8 @@ namespace function_calculator_cs
     private MaskedTextBox numberInput;
     private Label enterIntegerLbl;
     private Button okBtn;
+    private Button cancelBtn;
+    private Button undoBtn;
     private Button divisionBtn;
     private Button timesBtn;
     private Button minusBtn;
@@ -70,6 +72,8 @@ namespace function_calculator_cs
       minusBtn = new Button();
       plusBtn = new Button();
       powerBtn = new Button();
+      cancelBtn = new Button();
+      undoBtn = new Button();
       SuspendLayout();
 
       continueBtn.Location = new Point(694, 559);
@@ -87,7 +91,7 @@ namespace function_calculator_cs
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
       endCurrentTest.Click += OnEndCurrentTest;
-
+ 
       console.Location = new Point(12, 12);
       console.Multiline = true;
       console.Name = "console";
@@ -165,9 +169,27 @@ namespace function_calculator_cs
       powerBtn.UseVisualStyleBackColor = true;
       powerBtn.Click += OnPower;
 
+      cancelBtn.Location = new Point(694, 519);
+      cancelBtn.Name = "cancelBtn";
+      cancelBtn.Size = new Size(94, 29);
+      cancelBtn.TabIndex = 12;
+      cancelBtn.Text = "Cancel";
+      cancelBtn.UseVisualStyleBackColor = true;
+      cancelBtn.Click += OnCancel;
+
+      undoBtn.Location = new Point(593, 519);
+      undoBtn.Name = "undoBtn";
+      undoBtn.Size = new Size(94, 29);
+      undoBtn.TabIndex = 13;
+      undoBtn.Text = "Undo";
+      undoBtn.UseVisualStyleBackColor = true;
+      undoBtn.Click += OnUndo;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(undoBtn);
+      Controls.Add(cancelBtn);
       Controls.Add(powerBtn);
       Controls.Add(plusBtn);
       Controls.Add(minusBtn);
@@ -208,20 +230,54 @@ namespace function_calculator_cs
 
     private void OnNumberLabelClick(object sender, EventArgs e) { }
 
-    private void OnOK(object sender, EventArgs e)
+    private void TrimOutputBuffer()
     {
-      if (!(okBtn.Visible)) { return; }
-      if (calc.calculating != CalculatorState.Calculating.Not)
-      {
-        return;
-      }
-      var trimmed = numberInput.Text.Trim();
-      if (trimmed.Length == 0) { return; }
       if (calc.outBufferHeight > 10)
       {
         console.Text = "";
         calc.outBufferHeight = 0;
       }
+    }
+
+    private void OnUndo(object sender, EventArgs e)
+    {
+      if (!(undoBtn.Visible)) { return; }
+      if (calc.numberStack.Count == 0) { undoBtn.Visible = false; return; }
+      calc.numberStack.RemoveAt(calc.numberStack.Count - 1);
+      TrimOutputBuffer();
+      console.Text += Environment.NewLine;
+      if (calc.numberStack.Count == 0)
+      {
+        console.Text += "Cleared calculator.";
+        undoBtn.Visible = false;
+        return;
+      }
+      console.Text += "Most recent number was ";
+      console.Text += calc.numberStack[calc.numberStack.Count - 1].ToString();
+    }
+
+    private void OnCancel(object sender, EventArgs e)
+    {
+      if (!(cancelBtn.Visible)) { return; }
+      cancelBtn.Visible = false;
+      if (calc.calculating != CalculatorState.Calculating.Not)
+      {
+        ResetCalcPanel(false);
+        calc.calculating = CalculatorState.Calculating.Not;
+      }
+    }
+
+    private void OnOK(object sender, EventArgs e)
+    {
+      if (!(okBtn.Visible)) { return; }
+      if (calc.calculating != CalculatorState.Calculating.Not)
+      {
+        undoBtn.Visible = (calc.numberStack.Count > 0);
+        return;
+      }
+      var trimmed = numberInput.Text.Trim();
+      if (trimmed.Length == 0) { return; }
+      TrimOutputBuffer();
       mp numberOut = new mp(0);
       var valid = mp.FromString(trimmed, ref numberOut);
       console.Text += Environment.NewLine;
@@ -230,6 +286,7 @@ namespace function_calculator_cs
         console.Text += numberOut.ToString();
         numberInput.Text = "";
         calc.numberStack.Add(numberOut);
+        undoBtn.Visible = (calc.numberStack.Count > 0);
         ShowCalcPanel(true);
       }
       else { console.Text += "Not a valid number."; }
@@ -277,6 +334,8 @@ namespace function_calculator_cs
     {
       EnableCalcPanel(false);
       okBtn.Text = "=";
+      cancelBtn.Visible = true;
+      undoBtn.Visible = false;
     }
 
     private void EnableCalcPanel(Boolean show)

@@ -85,12 +85,14 @@ namespace function_calculator_cs
       return true;
     }
 
-    private void ResetCalcPanel()
+    private void ResetCalcPanel(bool resetState = true)
     {
       okBtn.Text = "OK";
+      cancelBtn.Visible = false;
       ShowCalcPanel(false);
       EnableCalcPanel(true);
-      calc = new CalculatorState();
+      if (resetState) { calc = new CalculatorState(); }
+      undoBtn.Visible = (calc.numberStack.Count > 0);
     }
 
     private void endTests()
