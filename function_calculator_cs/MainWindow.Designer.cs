@@ -330,27 +330,35 @@ namespace function_calculator_cs
         mp result = new mp();
         if (calc.calculating == CalculatorState.Calculating.Plus)
         {
+          console.Text += "Adding...";
+          console.Text += Environment.NewLine;
           result = prev + numberOut;
           console.Text += prev.ToString() + " + ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Minus)
         {
+          console.Text += "Subtracting...";
+          console.Text += Environment.NewLine;
           result = prev - numberOut;
           console.Text += prev.ToString() + " - ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Times)
         {
+          console.Text += "Multiplying...";
+          console.Text += Environment.NewLine;
           result = prev * numberOut;
           console.Text += prev.ToString() + " × ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Div)
         {
+          console.Text += "Dividing...";
+          console.Text += Environment.NewLine;
           result = prev / numberOut;
           console.Text += prev.ToString() + " ÷ ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Power)
         {
-          console.Text += "Thinking...";
+          console.Text += "Exponentiating...";
           console.Text += Environment.NewLine;
           result = prev.powerOf(numberOut);
           console.Text += prev.ToString() + " to the power of ";
