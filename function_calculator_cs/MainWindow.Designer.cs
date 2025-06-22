@@ -317,6 +317,8 @@ namespace function_calculator_cs
         }
         else if (calc.calculating == CalculatorState.Calculating.Power)
         {
+          console.Text += "Thinking...";
+          console.Text += Environment.NewLine;
           result = prev.powerOf(numberOut);
           console.Text += prev.ToString() + " to the power of ";
         }
