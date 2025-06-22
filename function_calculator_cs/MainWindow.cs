@@ -85,26 +85,63 @@ namespace function_calculator_cs
       return true;
     }
 
-    void runTests()
+    private void ResetCalcPanel(bool resetState = true)
     {
-      if (whichTest == 0)
+      enterIntegerLbl.Text = "Enter a whole number: ";
+      okBtn.Text = "OK";
+      cancelBtn.Visible = false;
+      ShowCalcPanel(false);
+      EnableCalcPanel(true);
+      if (resetState) { calc = new CalculatorState(); }
+      undoBtn.Visible = (calc.numberStack.Count > 0);
+      redoBtn.Visible = (calc.redoStack.Count > 0);
+    }
+
+    private void endTests()
+    {
+      console.Text = "";
+      testState = new TestingState();
+      testBtn.Visible = true;
+      continueBtn.Visible = false;
+      endCurrentTest.Visible = false;
+      numberInput.Visible = true;
+      enterIntegerLbl.Visible = true;
+      okBtn.Visible = true;
+      ResetCalcPanel();
+    }
+
+    private void runTests()
+    {
+      testBtn.Visible = false;
+      continueBtn.Visible = true;
+      endCurrentTest.Visible = true;
+      numberInput.Visible = false;
+      enterIntegerLbl.Visible = false;
+      okBtn.Visible = false;
+      ResetCalcPanel();
+
+      if (testState.whichTest == 0)
       {
-        if (testState == 0) { test_mp(); }
-        else if (testState == 1) { test_mp2(); }
-        else if (testState == 2) { test_mp3(); }
-        else if (testState > 0)
+        if (testState.testState == 0) { test_mp(); }
+        else if (testState.testState == 1) { test_mp2(); }
+        else if (testState.testState == 2) { test_mp3(); }
+        else if (testState.testState == 3)
         {
           console.Text = "";
           console.Text = Environment.NewLine + "Done.";
         }
+        else if (testState.testState > 0)
+        {
+          endTests(); return;
+        }
       }
-      else if (whichTest < 0) { console.Text = ""; }
+      else if (testState.whichTest < 0) { endTests(); return; }
     }
 
     public MainWindow()
     {
       InitializeComponent();
-      runTests();
+      endTests();
     }
   }
 }

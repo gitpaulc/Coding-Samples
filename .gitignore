@@ -59,7 +59,8 @@ function_calculator/FunctionCalculator/RelWithDebugInfo
 function_calculator/FunctionCalculator/x64
 
 function_calculator_cs/.vs
-function_calculator_cs/bin
+function_calculator_cs/bin/Debug
+function_calculator_cs/bin/Release/net8.0-windows/function_calculator_cs.pdb
 function_calculator_cs/obj
 
 graphing_math/*.exe

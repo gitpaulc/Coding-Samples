@@ -451,6 +451,40 @@ public class mp // : IEquatable<mp?>
     return answer;
   }
 
+  public mp powerOf(in mp p) /**< `return` The p'th power of the number. */
+  {
+    if (p == zero()) { return new mp(1); }
+    Boolean isNeg = (p.negative == true);
+    mp one_ = new mp(1);
+    if (isNeg) { return one_ / powerOf(-p); }
+    var factors = p.primeFactorization();
+    mp answer = new mp(1);
+    if (factors.Count <= 1)
+    {
+      for (mp i = zero(); i < p; i = i + one_)
+      {
+        answer = answer * (this);
+      }
+      return answer;
+    }
+    mp baseInt = new mp(this);
+    while (factors.Count > 0)
+    {
+      answer = new mp(1);
+      var powerPair = factors.FirstOrDefault();
+      var power_ = powerPair.Key.pow(powerPair.Value);
+      var prevCount = factors.Count;
+      factors.Remove(powerPair.Key);
+      if (factors.Count >= prevCount) { break; }
+      for (mp i = zero(); i < power_; i = i + one_)
+      {
+        answer = answer * baseInt;
+      }
+      baseInt = new mp(answer);
+    }
+    return answer;
+  }
+
   public static bool operator==(in mp body, in mp rhs)
   {
     return body.Equals(rhs);
@@ -503,7 +537,7 @@ public class mp // : IEquatable<mp?>
   {
     var input = new mp(this);
     var one_ = new mp(1);
-    var two_ = new mp(1);
+    var two_ = new mp(2);
     var answer = new Dictionary<mp, int>();
     if (input * input <= new mp(1))
     {
@@ -560,6 +594,57 @@ public class mp // : IEquatable<mp?>
     return answer;
   }
 
+  /** \param outputs `number` if and only if input `str` is convertible to an mp number.
+   *  \return `True` if convertible.
+   */
+  public static Boolean FromString(in string str, ref mp number)
+  {
+    mp answer = new mp(0);
+    mp ten_ = new mp(10);
+    Boolean negativeNumber = false;
+    var trimmed = str.Trim();
+    int strLen = trimmed.Length;
+    Boolean started = false;
+    for (int ii = 0; ii < strLen; ++ii)
+    {
+      char cc = trimmed[ii];
+      if (cc == '-')
+      {
+        if (!started) { negativeNumber = !negativeNumber; continue; }
+        return false;
+      }
+      if (cc == ',')
+      {
+        if (!started) { return false; }
+        continue;
+      }
+      if (cc == '.')
+      {
+        if (!started) { return false; }
+        break;
+      }
+      started = true;
+      int num = 0;
+      if (cc == '0') { num = 0; }
+      else if (cc == '1') { num = 1; }
+      else if (cc == '2') { num = 2; }
+      else if (cc == '3') { num = 3; }
+      else if (cc == '4') { num = 4; }
+      else if (cc == '5') { num = 5; }
+      else if (cc == '6') { num = 6; }
+      else if (cc == '7') { num = 7; }
+      else if (cc == '8') { num = 8; }
+      else if (cc == '9') { num = 9; }
+      else { return false; }
+      mp mpNum = new mp(num);
+      answer = answer * ten_ + mpNum;
+    }
+    if (!started) { return false; }
+    if (negativeNumber) { answer = -answer; }
+    number = answer;
+    return true;
+  }
+
   public override string ToString()
   {
     var zero_ = zero();
@@ -613,7 +698,7 @@ public class mp // : IEquatable<mp?>
   {
     return HashCode.Combine(self, negative);
   }
-};
+}
 
 }
 
