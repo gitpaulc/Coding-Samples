@@ -35,6 +35,16 @@ namespace function_calculator_cs
     {
       public int outBufferHeight = 0;
       public List<mp> numberStack = new List<mp>();
+      public enum Calculating
+      {
+        Not,
+        Plus,
+        Minus,
+        Times,
+        Div,
+        Power
+      }
+      public Calculating calculating = Calculating.Not;
     }
     CalculatorState calc = new CalculatorState();
 
@@ -121,6 +131,7 @@ namespace function_calculator_cs
       divisionBtn.TabIndex = 7;
       divisionBtn.Text = "÷";
       divisionBtn.UseVisualStyleBackColor = true;
+      divisionBtn.Click += OnDiv;
 
       timesBtn.Location = new Point(574, 486);
       timesBtn.Name = "timesBtn";
@@ -128,6 +139,7 @@ namespace function_calculator_cs
       timesBtn.TabIndex = 8;
       timesBtn.Text = "×";
       timesBtn.UseVisualStyleBackColor = true;
+      timesBtn.Click += OnTimes;
 
       minusBtn.Location = new Point(534, 486);
       minusBtn.Name = "minusBtn";
@@ -135,6 +147,7 @@ namespace function_calculator_cs
       minusBtn.TabIndex = 9;
       minusBtn.Text = "-";
       minusBtn.UseVisualStyleBackColor = true;
+      minusBtn.Click += OnMinus;
 
       plusBtn.Location = new Point(494, 486);
       plusBtn.Name = "plusBtn";
@@ -142,6 +155,7 @@ namespace function_calculator_cs
       plusBtn.TabIndex = 10;
       plusBtn.Text = "+";
       plusBtn.UseVisualStyleBackColor = true;
+      plusBtn.Click += OnPlus;
 
       powerBtn.Location = new Point(653, 484);
       powerBtn.Name = "powerBtn";
@@ -149,6 +163,7 @@ namespace function_calculator_cs
       powerBtn.TabIndex = 11;
       powerBtn.Text = "^";
       powerBtn.UseVisualStyleBackColor = true;
+      powerBtn.Click += OnPower;
 
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
@@ -221,6 +236,31 @@ namespace function_calculator_cs
       var ee = e as KeyEventArgs;
       if (ee == null) { return; }
       if (ee.KeyCode == Keys.Enter) { OnOK(sender, e); }
+    }
+
+    private void OnPlus(object sender, EventArgs e)
+    {
+      calc.calculating = CalculatorState.Calculating.Plus;
+    }
+
+    private void OnMinus(object sender, EventArgs e)
+    {
+      calc.calculating = CalculatorState.Calculating.Minus;
+    }
+
+    private void OnTimes(object sender, EventArgs e)
+    {
+      calc.calculating = CalculatorState.Calculating.Times;
+    }
+
+    private void OnDiv(object sender, EventArgs e)
+    {
+      calc.calculating = CalculatorState.Calculating.Div;
+    }
+
+    private void OnPower(object sender, EventArgs e)
+    {
+      calc.calculating = CalculatorState.Calculating.Power;
     }
 
     #endregion // UI Code
