@@ -192,9 +192,9 @@ namespace function_calculator_cs
       redoBtn.Name = "redoBtn";
       redoBtn.Size = new Size(94, 29);
       redoBtn.TabIndex = 14;
-      redoBtn.Text = "redoBtn";
+      redoBtn.Text = "Redo";
       redoBtn.UseVisualStyleBackColor = true;
-      undoBtn.Click += OnRedo;
+      redoBtn.Click += OnRedo;
 
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
@@ -255,9 +255,11 @@ namespace function_calculator_cs
     {
       if (!(redoBtn.Visible)) { return; }
       if (calc.redoStack.Count == 0) { redoBtn.Visible = false; return; }
-      var recent = calc.redoStack.Last();
+      var recent = new mp(calc.redoStack.Last());
       calc.redoStack.RemoveAt(calc.redoStack.Count - 1);
       calc.numberStack.Add(recent);
+      undoBtn.Visible = (calc.numberStack.Count > 0);
+      redoBtn.Visible = (calc.redoStack.Count > 0);
       TrimOutputBuffer();
       console.Text += Environment.NewLine;
       console.Text += "Redo. Most recent number was ";
@@ -268,9 +270,10 @@ namespace function_calculator_cs
     {
       if (!(undoBtn.Visible)) { return; }
       if (calc.numberStack.Count == 0) { undoBtn.Visible = false; return; }
-      var recent = calc.numberStack.Last();
+      var recent = new mp(calc.numberStack.Last());
       calc.numberStack.RemoveAt(calc.numberStack.Count - 1);
       calc.redoStack.Add(recent);
+      redoBtn.Visible = (calc.redoStack.Count > 0);
       TrimOutputBuffer();
       console.Text += Environment.NewLine;
       if (calc.numberStack.Count == 0)
@@ -299,6 +302,8 @@ namespace function_calculator_cs
           ShowCalcPanel(true);
         }
       }
+      undoBtn.Visible = (calc.numberStack.Count > 0);
+      redoBtn.Visible = (calc.redoStack.Count > 0);
     }
 
     private void OnOK(object sender, EventArgs e)
@@ -358,6 +363,8 @@ namespace function_calculator_cs
           console.Text += " with a remainder of " + remainder.ToString();
         }
         calc.numberStack.Add(result);
+        calc.redoStack.Clear();
+        redoBtn.Visible = (calc.redoStack.Count > 0);
         cancelBtn.Visible = false;
         ResetCalcPanel(false);
         calc.calculating = CalculatorState.Calculating.Not;
@@ -374,6 +381,8 @@ namespace function_calculator_cs
         console.Text += numberOut.ToString();
         numberInput.Text = "";
         calc.numberStack.Add(numberOut);
+        calc.redoStack.Clear();
+        redoBtn.Visible = (calc.redoStack.Count > 0);
         undoBtn.Visible = (calc.numberStack.Count > 0);
         ShowCalcPanel(true);
       }
@@ -425,6 +434,7 @@ namespace function_calculator_cs
 
     private void HandleCalculating()
     {
+      numberInput.Focus();
       EnableCalcPanel(false);
       okBtn.Text = "=";
       cancelBtn.Visible = true;

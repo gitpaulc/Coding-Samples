@@ -94,6 +94,7 @@ namespace function_calculator_cs
       EnableCalcPanel(true);
       if (resetState) { calc = new CalculatorState(); }
       undoBtn.Visible = (calc.numberStack.Count > 0);
+      redoBtn.Visible = (calc.redoStack.Count > 0);
     }
 
     private void endTests()
