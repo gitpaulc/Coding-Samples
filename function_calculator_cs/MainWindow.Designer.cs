@@ -249,7 +249,7 @@ namespace function_calculator_cs
       if (calc.numberStack.Count == 0)
       {
         numberInput.Focus();
-        console.Text += "Cleared calculator.";
+        console.Text = "Cleared calculator.";
         undoBtn.Visible = false;
         ShowCalcPanel(false);
         calc.calculating = CalculatorState.Calculating.Not;
