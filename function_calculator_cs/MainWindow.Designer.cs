@@ -260,6 +260,7 @@ namespace function_calculator_cs
       calc.numberStack.Add(recent);
       undoBtn.Visible = (calc.numberStack.Count > 0);
       redoBtn.Visible = (calc.redoStack.Count > 0);
+      ShowCalcPanel(calc.numberStack.Count > 0);
       TrimOutputBuffer();
       console.Text += Environment.NewLine;
       console.Text += "Redo. Most recent number was ";
@@ -276,12 +277,12 @@ namespace function_calculator_cs
       redoBtn.Visible = (calc.redoStack.Count > 0);
       TrimOutputBuffer();
       console.Text += Environment.NewLine;
+      ShowCalcPanel(calc.numberStack.Count > 0);
       if (calc.numberStack.Count == 0)
       {
         numberInput.Focus();
         console.Text = "Cleared calculator.";
         undoBtn.Visible = false;
-        ShowCalcPanel(false);
         calc.calculating = CalculatorState.Calculating.Not;
         return;
       }
