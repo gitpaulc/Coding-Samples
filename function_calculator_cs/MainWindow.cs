@@ -95,6 +95,10 @@ namespace function_calculator_cs
       numberInput.Visible = true;
       enterIntegerLbl.Visible = true;
       okBtn.Visible = true;
+      plusBtn.Visible = true;
+      minusBtn.Visible = true;
+      timesBtn.Visible = true;
+      divisionBtn.Visible = true;
       calc = new CalculatorState();
     }
 
@@ -106,6 +110,10 @@ namespace function_calculator_cs
       numberInput.Visible = false;
       enterIntegerLbl.Visible = false;
       okBtn.Visible = false;
+      plusBtn.Visible = false;
+      minusBtn.Visible = false;
+      timesBtn.Visible= false;
+      divisionBtn.Visible = false;
       calc = new CalculatorState();
 
       if (testState.whichTest == 0)
