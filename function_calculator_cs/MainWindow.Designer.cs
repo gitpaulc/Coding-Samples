@@ -19,6 +19,7 @@ namespace function_calculator_cs
     private Button okBtn;
     private Button cancelBtn;
     private Button undoBtn;
+    private Button redoBtn;
     private Button divisionBtn;
     private Button timesBtn;
     private Button minusBtn;
@@ -37,6 +38,7 @@ namespace function_calculator_cs
     {
       public int outBufferHeight = 0;
       public List<mp> numberStack = new List<mp>();
+      public List<mp> redoStack = new List<mp>();
       public enum Calculating
       {
         Not,
@@ -74,6 +76,7 @@ namespace function_calculator_cs
       powerBtn = new Button();
       cancelBtn = new Button();
       undoBtn = new Button();
+      redoBtn = new Button();
       SuspendLayout();
 
       continueBtn.Location = new Point(694, 559);
@@ -91,7 +94,7 @@ namespace function_calculator_cs
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
       endCurrentTest.Click += OnEndCurrentTest;
- 
+
       console.Location = new Point(12, 12);
       console.Multiline = true;
       console.Name = "console";
@@ -169,7 +172,7 @@ namespace function_calculator_cs
       powerBtn.UseVisualStyleBackColor = true;
       powerBtn.Click += OnPower;
 
-      cancelBtn.Location = new Point(694, 519);
+      cancelBtn.Location = new Point(694, 521);
       cancelBtn.Name = "cancelBtn";
       cancelBtn.Size = new Size(94, 29);
       cancelBtn.TabIndex = 12;
@@ -177,7 +180,7 @@ namespace function_calculator_cs
       cancelBtn.UseVisualStyleBackColor = true;
       cancelBtn.Click += OnCancel;
 
-      undoBtn.Location = new Point(593, 519);
+      undoBtn.Location = new Point(594, 521);
       undoBtn.Name = "undoBtn";
       undoBtn.Size = new Size(94, 29);
       undoBtn.TabIndex = 13;
@@ -185,9 +188,18 @@ namespace function_calculator_cs
       undoBtn.UseVisualStyleBackColor = true;
       undoBtn.Click += OnUndo;
 
+      redoBtn.Location = new Point(493, 521);
+      redoBtn.Name = "redoBtn";
+      redoBtn.Size = new Size(94, 29);
+      redoBtn.TabIndex = 14;
+      redoBtn.Text = "redoBtn";
+      redoBtn.UseVisualStyleBackColor = true;
+      undoBtn.Click += OnRedo;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(redoBtn);
       Controls.Add(undoBtn);
       Controls.Add(cancelBtn);
       Controls.Add(powerBtn);
@@ -239,11 +251,26 @@ namespace function_calculator_cs
       }
     }
 
+    private void OnRedo(object sender, EventArgs e)
+    {
+      if (!(redoBtn.Visible)) { return; }
+      if (calc.redoStack.Count == 0) { redoBtn.Visible = false; return; }
+      var recent = calc.redoStack.Last();
+      calc.redoStack.RemoveAt(calc.redoStack.Count - 1);
+      calc.numberStack.Add(recent);
+      TrimOutputBuffer();
+      console.Text += Environment.NewLine;
+      console.Text += "Redo. Most recent number was ";
+      console.Text += recent.ToString();
+    }
+
     private void OnUndo(object sender, EventArgs e)
     {
       if (!(undoBtn.Visible)) { return; }
       if (calc.numberStack.Count == 0) { undoBtn.Visible = false; return; }
+      var recent = calc.numberStack.Last();
       calc.numberStack.RemoveAt(calc.numberStack.Count - 1);
+      calc.redoStack.Add(recent);
       TrimOutputBuffer();
       console.Text += Environment.NewLine;
       if (calc.numberStack.Count == 0)
