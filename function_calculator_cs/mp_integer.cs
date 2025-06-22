@@ -470,6 +470,7 @@ public class mp // : IEquatable<mp?>
     mp baseInt = new mp(this);
     while (factors.Count > 0)
     {
+      answer = new mp(1);
       var powerPair = factors.FirstOrDefault();
       var power_ = powerPair.Key.pow(powerPair.Value);
       var prevCount = factors.Count;
