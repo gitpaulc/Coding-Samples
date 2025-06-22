@@ -99,6 +99,7 @@ namespace function_calculator_cs
       minusBtn.Visible = true;
       timesBtn.Visible = true;
       divisionBtn.Visible = true;
+      powerBtn.Visible = true;
       calc = new CalculatorState();
     }
 
@@ -114,6 +115,7 @@ namespace function_calculator_cs
       minusBtn.Visible = false;
       timesBtn.Visible= false;
       divisionBtn.Visible = false;
+      powerBtn.Visible = false;
       calc = new CalculatorState();
 
       if (testState.whichTest == 0)

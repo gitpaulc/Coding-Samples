@@ -451,6 +451,20 @@ public class mp // : IEquatable<mp?>
     return answer;
   }
 
+  public mp powerOf(in mp p) /**< `return` The p'th power of the number. */
+  {
+    if (p == zero()) { return new mp(1); }
+    Boolean isNeg = (p.negative == true);
+    mp one_ = new mp(1);
+    if (isNeg) { return one_ / powerOf(-p); }
+    mp answer = new mp(1);
+    for (mp i = zero(); i < p; i = i + one_)
+    {
+      answer = answer * (this);
+    }
+    return answer;
+  }
+
   public static bool operator==(in mp body, in mp rhs)
   {
     return body.Equals(rhs);

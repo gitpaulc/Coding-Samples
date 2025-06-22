@@ -21,6 +21,7 @@ namespace function_calculator_cs
     private Button timesBtn;
     private Button minusBtn;
     private Button plusBtn;
+    private Button powerBtn;
     private IContainer components = null;
     private class TestingState
     {
@@ -58,10 +59,9 @@ namespace function_calculator_cs
       timesBtn = new Button();
       minusBtn = new Button();
       plusBtn = new Button();
+      powerBtn = new Button();
       SuspendLayout();
-      // 
-      // continueBtn
-      // 
+
       continueBtn.Location = new Point(694, 559);
       continueBtn.Name = "continueBtn";
       continueBtn.Size = new Size(94, 29);
@@ -69,9 +69,7 @@ namespace function_calculator_cs
       continueBtn.Text = "Continue";
       continueBtn.UseVisualStyleBackColor = true;
       continueBtn.Click += OnContinue;
-      // 
-      // endCurrentTest
-      // 
+
       endCurrentTest.Location = new Point(549, 559);
       endCurrentTest.Name = "endCurrentTest";
       endCurrentTest.Size = new Size(138, 29);
@@ -79,18 +77,14 @@ namespace function_calculator_cs
       endCurrentTest.Text = "End Current Test";
       endCurrentTest.UseVisualStyleBackColor = true;
       endCurrentTest.Click += OnEndCurrentTest;
-      // 
-      // console
-      // 
+
       console.Location = new Point(12, 12);
       console.Multiline = true;
       console.Name = "console";
       console.ReadOnly = true;
       console.Size = new Size(776, 438);
       console.TabIndex = 2;
-      // 
-      // testBtn
-      // 
+
       testBtn.Location = new Point(12, 559);
       testBtn.Name = "testBtn";
       testBtn.Size = new Size(94, 29);
@@ -98,17 +92,13 @@ namespace function_calculator_cs
       testBtn.Text = "Run Tests";
       testBtn.UseVisualStyleBackColor = true;
       testBtn.Click += OnTestClicked;
-      // 
-      // numberInput
-      // 
+
       numberInput.Location = new Point(195, 453);
       numberInput.Name = "numberInput";
       numberInput.Size = new Size(593, 27);
       numberInput.TabIndex = 4;
       numberInput.KeyUp += HandleKeyUp;
-      // 
-      // enterIntegerLbl
-      // 
+
       enterIntegerLbl.AutoSize = true;
       enterIntegerLbl.Location = new Point(12, 456);
       enterIntegerLbl.Name = "enterIntegerLbl";
@@ -116,9 +106,7 @@ namespace function_calculator_cs
       enterIntegerLbl.TabIndex = 5;
       enterIntegerLbl.Text = "Enter a whole number: ";
       enterIntegerLbl.Click += OnNumberLabelClick;
-      // 
-      // okBtn
-      // 
+
       okBtn.Location = new Point(694, 484);
       okBtn.Name = "okBtn";
       okBtn.Size = new Size(94, 29);
@@ -126,48 +114,46 @@ namespace function_calculator_cs
       okBtn.Text = "OK";
       okBtn.UseVisualStyleBackColor = true;
       okBtn.Click += OnOK;
-      // 
-      // divisionBtn
-      // 
-      divisionBtn.Location = new Point(654, 486);
+
+      divisionBtn.Location = new Point(614, 486);
       divisionBtn.Name = "divisionBtn";
       divisionBtn.Size = new Size(34, 29);
       divisionBtn.TabIndex = 7;
-      divisionBtn.Text = "" + (char)247;
+      divisionBtn.Text = "÷";
       divisionBtn.UseVisualStyleBackColor = true;
-      // 
-      // timesBtn
-      // 
-      timesBtn.Location = new Point(614, 486);
+
+      timesBtn.Location = new Point(574, 486);
       timesBtn.Name = "timesBtn";
       timesBtn.Size = new Size(34, 29);
       timesBtn.TabIndex = 8;
-      timesBtn.Text = "" + (char)215;
+      timesBtn.Text = "×";
       timesBtn.UseVisualStyleBackColor = true;
-      // 
-      // minusBtn
-      // 
-      minusBtn.Location = new Point(574, 486);
+
+      minusBtn.Location = new Point(534, 486);
       minusBtn.Name = "minusBtn";
       minusBtn.Size = new Size(34, 29);
       minusBtn.TabIndex = 9;
       minusBtn.Text = "-";
       minusBtn.UseVisualStyleBackColor = true;
-      // 
-      // plusBtn
-      // 
-      plusBtn.Location = new Point(534, 486);
+
+      plusBtn.Location = new Point(494, 486);
       plusBtn.Name = "plusBtn";
       plusBtn.Size = new Size(34, 29);
       plusBtn.TabIndex = 10;
       plusBtn.Text = "+";
       plusBtn.UseVisualStyleBackColor = true;
-      // 
-      // MainWindow
-      // 
+
+      powerBtn.Location = new Point(653, 484);
+      powerBtn.Name = "powerBtn";
+      powerBtn.Size = new Size(34, 29);
+      powerBtn.TabIndex = 11;
+      powerBtn.Text = "^";
+      powerBtn.UseVisualStyleBackColor = true;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(powerBtn);
       Controls.Add(plusBtn);
       Controls.Add(minusBtn);
       Controls.Add(timesBtn);
@@ -181,6 +167,7 @@ namespace function_calculator_cs
       Controls.Add(continueBtn);
       Name = "MainWindow";
       Text = "Function Calculator";
+
       ResumeLayout(false);
       PerformLayout();
     }
