@@ -211,6 +211,10 @@ namespace function_calculator_cs
     private void OnOK(object sender, EventArgs e)
     {
       if (!(okBtn.Visible)) { return; }
+      if (calc.calculating != CalculatorState.Calculating.Not)
+      {
+        return;
+      }
       var trimmed = numberInput.Text.Trim();
       if (trimmed.Length == 0) { return; }
       if (calc.outBufferHeight > 10)
@@ -226,6 +230,7 @@ namespace function_calculator_cs
         console.Text += numberOut.ToString();
         numberInput.Text = "";
         calc.numberStack.Add(numberOut);
+        ShowCalcPanel(true);
       }
       else { console.Text += "Not a valid number."; }
       ++(calc.outBufferHeight);
@@ -241,26 +246,49 @@ namespace function_calculator_cs
     private void OnPlus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Plus;
+      EnableCalcPanel(false);
     }
 
     private void OnMinus(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Minus;
+      EnableCalcPanel(false);
     }
 
     private void OnTimes(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Times;
+      EnableCalcPanel(false);
     }
 
     private void OnDiv(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Div;
+      EnableCalcPanel(false);
     }
 
     private void OnPower(object sender, EventArgs e)
     {
       calc.calculating = CalculatorState.Calculating.Power;
+      EnableCalcPanel(false);
+    }
+
+    private void EnableCalcPanel(Boolean show)
+    {
+      plusBtn.Enabled = show;
+      minusBtn.Enabled = show;
+      timesBtn.Enabled = show;
+      divisionBtn.Enabled = show;
+      powerBtn.Enabled = show;
+    }
+
+    private void ShowCalcPanel(Boolean show)
+    {
+      plusBtn.Visible = show;
+      minusBtn.Visible = show;
+      timesBtn.Visible = show;
+      divisionBtn.Visible = show;
+      powerBtn.Visible = show;
     }
 
     #endregion // UI Code
