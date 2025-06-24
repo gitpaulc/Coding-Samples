@@ -5,7 +5,7 @@ namespace function_calculator_cs
 {
 public class StringMethods
 {
-  public static bool parenthesesWellFormed(in string str, in string leftRight = "()")
+  public static Boolean parenthesesWellFormed(in string str, in string leftRight = "()")
   {
     if (leftRight.Length != 2) { throw new System.Exception("Left-right parentheses should consist of two characters."); }
     var left = leftRight[0];
