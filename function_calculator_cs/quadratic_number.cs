@@ -168,8 +168,21 @@ public class QuadraticNumber
     return HashCode.Combine(content);
   }
 
-  public static bool operator!=(const QuadraticNumber& rhs) const;
-  public static bool operator!=(int rhs) const;
+  public static Boolean operator!=(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    return !(body == rhs);
+  }
+
+  public static Boolean operator==(in QuadraticNumber body, int rhs)
+  {
+    return (body == (new QuadraticNumber(new Rational(rhs))));
+  }
+
+  public static Boolean operator!=(in QuadraticNumber body, int rhs)
+  {
+    return !(body == rhs);
+  }
+
   /** \remark Does not use algebra to determine < since it would be very inefficient. */
   public static bool operator<(const QuadraticNumber& rhs) const;
   public static bool operator>(const QuadraticNumber& rhs) const;
