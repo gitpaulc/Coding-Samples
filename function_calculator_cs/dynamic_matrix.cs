@@ -98,8 +98,9 @@ public class MatrixRational
 
   public static MatrixRational zeroMatrixRational(int rowDim, int colDim)
   {
-    MatrixRational answer;
-    std::vector<Rational> row(colDim);
+    MatrixRational answer = new MatrixRational();
+    List<Rational> row = new List<Rational>();
+    for (int ii = 0; ii < colDim; ++ii) { row.Add(new Rational()); }
     for (int ii = 0; ii < rowDim; ++ii) { answer.addRow(row); }
     return answer;
   }
@@ -134,30 +135,36 @@ public class MatrixRational
     return new Rational(rows[i][j]);
   }
 
-  public MatrixRational(const std::vector<Rational>& rowIn = {})
+  public MatrixRational()
   {
-    rows.resize(0); if (!rowIn.empty()) { rows.push_back(rowIn); }
+    rows = new List<List<Rational> >();
   }
 
-  public void addRow(const std::vector<Rational>& rowIn)
+  public MatrixRational(in List<Rational> rowIn)
   {
-    if (rows.empty()) { rows.push_back(rowIn); return; }
-    if (rowIn.size() != rows[0].size()) { throw std::invalid_argument("Rows must have equal length."); return; }
-    rows.push_back(rowIn);
+    rows = new List<List<Rational> >();
+    if (rowIn.Count > 0) { rows.Add(rowIn); }
+  }
+
+  public void addRow(in List<Rational> rowIn)
+  {
+    if (rows.Count == 0) { rows.Add(rowIn); return; }
+    if (rowIn.Count != rows[0].Count) { throw new System.Exception("Rows must have equal length."); }
+    rows.Add(rowIn);
   }
 
   /** \brief Elementary row operation. Changes sign of the determinant if i != j. */
   public void swapRows(int i, int j)
   {
-    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
-    if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
-    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
-    if (j >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
+    if (i < 0) { throw new System.Exception("Index out of bounds."); } // If size == 0 one of these always is called.
+    if (j < 0) { throw new System.Exception("Index out of bounds."); }
+    if (i >= ((int)rows.Count)) { throw new System.Exception("Index out of bounds."); }
+    if (j >= ((int)rows.Count)) { throw new System.Exception("Index out of bounds."); }
     if (i == j) { return; }
-    int nn = (int)(rows[0].size());
+    int nn = (int)(rows[0].Count);
     for (int kk = 0; kk < nn; ++kk)
     {
-      auto temp = rows[i][kk];
+      var temp = new Rational(rows[i][kk]);
       rows[i][kk] = rows[j][kk];
       rows[j][kk] = temp;
     }
