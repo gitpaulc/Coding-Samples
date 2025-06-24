@@ -1,6 +1,8 @@
 /*  Copyright Paul Cernea, June 2025.
 All Rights Reserved.*/
 
+using function_calculator_cs;
+
 namespace function_calculator_cs
 {
 
@@ -20,6 +22,45 @@ public class QuadraticNumber
    */
   private MatrixRational getMultiplicationMatrix(ref Dictionary<mp, int> root2Index, ref Dictionary<int, mp> index2Root)
   {
+    root2Index = new Dictionary<mp, int>();
+    index2Root = new Dictionary<int, mp>();
+    {
+      HashSet<mp> rootsSoFar = new HashSet<mp>();
+      int NN = (int)content.Count;
+      var current = new QuadraticNumber(this);
+      for (int II = 0; II < (NN + 1); ++II)
+      {
+        foreach (var iter in current.content)
+        {
+          rootsSoFar.Add(new mp(iter.Key));
+        }
+        current = current * (this);
+      }
+      int ii = 0;
+      foreach (var rootSoFar in rootsSoFar)
+      {
+        root2Index[rootSoFar] = ii; index2Root[ii] = rootSoFar; ++ii;
+      }
+    }
+    int dimMatrix = (int)root2Index.Count;
+    var answer = MatrixRational.zeroMatrix(dimMatrix);
+    foreach (var iter in content)
+    {
+      MatrixRational summand = new MatrixRational();
+      var radA = new mp(iter.Key);
+      for (int ii = 0; ii < dimMatrix; ++ii)
+      {
+        List<Rational> row = new List<Rational>();
+        for (int jj = 0; jj < dimMatrix; ++jj) { row.Add(new Rational()); }
+        var radB = new mp(index2Root[ii]);
+        var root = radA * radB;
+        var sqrtSplit = root.separateSquaredPart();
+        row[root2Index[sqrtSplit.Value]] = new Rational(sqrtSplit.Key, new mp(1));
+        summand.addRow(row);
+      }
+      answer = answer + summand.transpose() * iter.Value;
+    }
+    return answer;
   }
 
   public QuadraticNumber()
@@ -35,6 +76,12 @@ public class QuadraticNumber
       var one_ = new mp(1);
       content[one_] = number;
     }
+  }
+
+  public QuadraticNumber(in QuadraticNumber other)
+  {
+    if (other is null) { throw new System.Exception("Trying to copy a null quadratic number."); }
+    content = new Dictionary<mp, Rational>(content);
   }
 
   public virtual double toDouble()
