@@ -118,7 +118,7 @@ public:
     for (int ii = 0; ii < dim; ++ii)
     {
       std::vector<Num> row(dim);
-      dim[ii] = Num(1);
+      row[ii] = Num(1);
       answer.addRow(row);
     }
     return answer;

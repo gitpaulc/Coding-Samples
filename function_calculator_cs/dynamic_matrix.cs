@@ -89,14 +89,14 @@ public class MatrixRational
     return strm;
   }
 
-  int RationalRows() const { return (int)(rows.size()); }
-  int RationalCols() const
+  public int RationalRows() { return (int)(rows.Count); }
+  public int RationalCols()
   {
-    if (rows.empty()) { return 0; }
-    return (int)(rows[0].size());
+    if (rows.Count == 0) { return 0; }
+    return (int)(rows[0].Count);
   }
 
-  static MatrixRational zeroMatrixRational(int rowDim, int colDim)
+  public static MatrixRational zeroMatrixRational(int rowDim, int colDim)
   {
     MatrixRational answer;
     std::vector<Rational> row(colDim);
@@ -104,38 +104,42 @@ public class MatrixRational
     return answer;
   }
 
-  static MatrixRational zeroMatrixRational(int dim)
+  public static MatrixRational zeroMatrixRational(int dim)
   {
     return zeroMatrixRational(dim, dim);
   }
 
-  static MatrixRational identity(int dim)
+  public static MatrixRational identity(int dim)
   {
-    MatrixRational answer;
+    MatrixRational answer = new MatrixRational();
     for (int ii = 0; ii < dim; ++ii)
     {
-      std::vector<Rational> row(dim);
-      dim[ii] = Rational(1);
+      List<Rational> row = new List<Rational>();
+      for (int jj = 0; jj < dim; ++jj)
+      {
+        row.Add(new Rational());
+      }
+      row[ii] = new Rational(1);
       answer.addRow(row);
     }
     return answer;
   }
 
-  Rational at(int i, int j) const
+  public Rational at(int i, int j)
   {
-    if (i < 0) { throw std::invalid_argument("Row index cannot be negative."); return Rational(); }
-    if (j < 0) { throw std::invalid_argument("Columns index cannot be negative."); return Rational(); }
-    if (i >= RationalRows()) { throw std::invalid_argument("Row index must be less than MatrixRational dimension."); return Rational(); }
-    if (j >= RationalCols()) { throw std::invalid_argument("Columns index must be less than MatrixRational dimension."); return Rational(); }
-    return rows[i][j];
+    if (i < 0) { throw new System.Exception("Row index cannot be negative."); }
+    if (j < 0) { throw new System.Exception("Columns index cannot be negative."); }
+    if (i >= RationalRows()) { throw new System.Exception("Row index must be less than MatrixRational dimension."); }
+    if (j >= RationalCols()) { throw new System.Exception("Columns index must be less than MatrixRational dimension."); }
+    return new Rational(rows[i][j]);
   }
 
-  MatrixRational(const std::vector<Rational>& rowIn = {})
+  public MatrixRational(const std::vector<Rational>& rowIn = {})
   {
     rows.resize(0); if (!rowIn.empty()) { rows.push_back(rowIn); }
   }
 
-  void addRow(const std::vector<Rational>& rowIn)
+  public void addRow(const std::vector<Rational>& rowIn)
   {
     if (rows.empty()) { rows.push_back(rowIn); return; }
     if (rowIn.size() != rows[0].size()) { throw std::invalid_argument("Rows must have equal length."); return; }
@@ -143,7 +147,7 @@ public class MatrixRational
   }
 
   /** \brief Elementary row operation. Changes sign of the determinant if i != j. */
-  void swapRows(int i, int j)
+  public void swapRows(int i, int j)
   {
     if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
     if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
@@ -160,7 +164,7 @@ public class MatrixRational
   }
 
   /** \brief Elementary row operation. Multiplies the determinant by scal. */
-  void scaleRow(int i, const Rational& scal)
+  public void scaleRow(int i, const Rational& scal)
   {
     if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
     if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
@@ -172,7 +176,7 @@ public class MatrixRational
   }
 
   /** \brief Elementary row operation. Leaves determinant unchanged if i != j, otherwise acts as scaleRow method by (1 + scal). */
-  void addScaledRowJ_toI(int i, int j, const Rational& scal)
+  public void addScaledRowJ_toI(int i, int j, const Rational& scal)
   {
     if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
     if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
@@ -185,10 +189,10 @@ public class MatrixRational
     }
   }
 
-  bool isSquare() const
+  public Boolean isSquare()
   {
-    if (rows.empty()) { return true; }
-    return (rows.size() == (rows[0].size()));
+    if (rows.Count == 0) { return true; }
+    return (rows.Count == (rows[0].size()));
   }
 
   /** \return Reduced row echelon form.
@@ -197,7 +201,7 @@ public class MatrixRational
    *  \param `linInd` Output reference is set to true if rows of the MatrixRational are linearly independent
    *  \param `ignoreDeterminant` Speeds up algorithm by ignoring determinant (use O(n * log(n)) sort rather than bubble sort)
    */
-  MatrixRational rref(Rational& determinant, bool& linIndep, bool ignoreDeterminant = false) const
+  public MatrixRational rref(ref Rational determinant, ref Boolean linIndep, Boolean ignoreDeterminant = false)
   {
     if (!ignoreDeterminant) { determinant = Rational(); }
     linIndep = true;
@@ -278,7 +282,7 @@ public class MatrixRational
     return answer;
   }
 
-  Rational determinant() const
+  public Rational determinant()
   {
     Rational det; bool success = false;
     rref(det, success);
@@ -288,7 +292,7 @@ public class MatrixRational
   /** \param `success` is true if and only MatrixRational is invertible.
    *  \return Inverse MatrixRational if the MatrixRational is invertible, zero otherwise.
    */
-  MatrixRational inverse(bool& success) const
+  public MatrixRational inverse(bool& success) const
   {
     MatrixRational answer;
     if (!isSquare()) { throw std::invalid_argument("MatrixRational must be square."); success = false; return answer; }
@@ -321,7 +325,7 @@ public class MatrixRational
     return answer;
   }
 
-  MatrixRational operator+() const { return *this; }
+  public static MatrixRational operator+(in MatrixRational body) { return body; }
   MatrixRational operator-() const
   {
     MatrixRational answer;
