@@ -24,8 +24,8 @@ namespace FunctionalCalculator
     double answer = 0.0;
     for (const auto& iter : content)
     {
+      if (iter.second == Rational()) { continue; }
       double val = iter.second.get().first;
-      if (val == 0) { continue; }
       double radicand = iter.first.toInt();
       if (iter.first < 0) { throw std::invalid_argument("\nRadicands should be nonnegative."); radicand = -radicand; }
       answer += val * std::sqrt(radicand);
@@ -106,7 +106,7 @@ namespace FunctionalCalculator
       }
       answer = answer + summand.transpose() * iter.second;
     }
-    return answer; //
+    return answer;
   }
 
   std::string QuadraticNumber::print(bool useParentheses) const

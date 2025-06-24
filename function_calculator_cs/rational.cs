@@ -53,6 +53,8 @@ public class Rational
     denom = rhs.denom;
   }
 
+  public static Rational zero() { return new Rational(0, 1); }
+
   public mp denominator() { return new mp(denom); }
   public mp numerator() { return new mp(num); }
 
