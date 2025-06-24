@@ -1,8 +1,6 @@
 /*  Copyright Paul Cernea, June 2025.
 All Rights Reserved.*/
 
-using function_calculator_cs;
-
 namespace function_calculator_cs
 {
 
@@ -23,9 +21,10 @@ public class MatrixRational
   }
 
   /** \brief Useful for resorting rows in MatrixRational. */
-  private static Boolean compareLessThan(in List<Rational> P, in List<Rational> Q)
+  private static int compareLessThan(in List<Rational> P, in List<Rational> Q)
   {
-    return getLeadingOneIndex(P) < getLeadingOneIndex(Q);
+    if (getLeadingOneIndex(P) < getLeadingOneIndex(Q)) { return 1; }
+    return -1;
   }
 
   public override string ToString()
@@ -146,6 +145,23 @@ public class MatrixRational
     if (rowIn.Count > 0) { rows.Add(rowIn); }
   }
 
+  public MatrixRational(in MatrixRational rhs)
+  {
+    rows = new List<List<Rational> >();
+    if (!(rhs is null))
+    {
+      for (int ii = 0; ii < rhs.rows.Count; ++ii)
+      {
+        var current = new List<Rational>();
+        for (int jj = 0; jj < rhs.rows[ii].Count; ++jj)
+        {
+          current.Add(rhs.rows[ii][jj]);
+        }
+        rows.Add(current);
+      }
+    }
+  }
+
   public void addRow(in List<Rational> rowIn)
   {
     if (rows.Count == 0) { rows.Add(rowIn); return; }
@@ -212,19 +228,18 @@ public class MatrixRational
   {
     if (!ignoreDeterminant) { determinant = new Rational(); }
     linIndep = true;
-    if (rows.empty()) { return *this; }
-    Rational unit(1);
-    Rational det = unit;
-    int Rational_Rows = (int)rows.size();
-    int Rational_Cols = (int)rows[0].size();
-    MatrixRational answer;
-    answer.rows = rows;
+    if (rows.Count == 0) { return new MatrixRational(this); }
+    Rational unit = new Rational(1);
+    Rational det = new Rational(unit);
+    int Rational_Rows = (int)rows.Count;
+    int Rational_Cols = (int)rows[0].Count;
+    MatrixRational answer = new MatrixRational(this);
     bool gotToRowEchelon = false;
     for (bool performingRref = true; performingRref; performingRref = !performingRref)
     {
       if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
       {
-        std::sort(answer.rows.begin(), answer.rows.end(), compareLessThan);
+        answer.rows.Sort((P, Q) => compareLessThan(P, Q)); // Sort in ascending order.
       }
       // else ... Bubble sort while computing determinant.
       for (int ii = 0; ii < Rational_Rows; ++ii)
@@ -244,14 +259,14 @@ public class MatrixRational
         if (!performingRref) { break; }
       }
       if (!performingRref) { continue; }
-      bool adjusting = false;
+      Boolean adjusting = false;
       for (int ii = 0; ii < Rational_Rows; ++ii) // Divide by leading coefficient.
       {
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
         if (jj >= Rational_Cols) { linIndep = false; break; }
         if (answer.rows[ii][jj] == unit) { continue; }
-        auto factor = unit / answer.rows[ii][jj];
+        var factor = unit / answer.rows[ii][jj];
         answer.scaleRow(ii, factor);
         det = det * factor;
         adjusting = true;
@@ -279,20 +294,20 @@ public class MatrixRational
         if (ind >= Rational_Cols) { linIndep = false; continue; }
         for (int jj = ii - 1; jj >= 0; --jj)
         {
-          if (answer.rows[jj][ind] == Rational()) { continue; }
+          if (answer.rows[jj][ind] == new Rational()) { continue; }
           answer.addScaledRowJ_toI(jj, ii, -(answer.rows[jj][ind])); // det unchanged.
         }
       }
       // Now the answer is in rref.
     }
-    if (isSquare()) { determinant = det; }
+    if (isSquare()) { determinant = new Rational(det); }
     return answer;
   }
 
   public Rational determinant()
   {
-    Rational det; bool success = false;
-    rref(det, success);
+    Rational det = new Rational(); bool success = false;
+    rref(ref det, ref success);
     return det;
   }
 
@@ -301,31 +316,38 @@ public class MatrixRational
    */
   public MatrixRational inverse(ref Boolean success)
   {
-    MatrixRational answer;
-    if (!isSquare()) { throw std::invalid_argument("MatrixRational must be square."); success = false; return answer; }
-    const int dim = RationalRows();
+    MatrixRational answer = new MatrixRational();
+    if (!isSquare()) { success = false; throw new System.Exception("MatrixRational must be square."); }
+    int dim = RationalRows();
     if (dim == 0) { success = false; return answer; }
-    Rational zero;
-    Rational unit(1);
-    MatrixRational rREFed;
+    Rational zero_ = new Rational();
+    Rational unit = new Rational(1);
+    MatrixRational rREFed = new MatrixRational();
     for (int ii = 0; ii < dim; ++ii)
     {
-      auto newRow = rows[ii];
-      newRow.resize(2 * dim);
-      for (int jj = 0; jj < dim; ++jj) { newRow[dim + jj] = ((ii == jj) ? unit : zero); }
+      var newRow = new List<Rational>(rows[ii]);
+      {
+        int newRowCount = newRow.Count;
+        for (int jj = newRowCount; jj < 2 * dim; ++jj)
+        {
+          newRow.Add(new Rational());
+        }
+      }
+      for (int jj = 0; jj < dim; ++jj) { newRow[dim + jj] = ((ii == jj) ? unit : zero_); }
       rREFed.addRow(newRow);
     }
-    Rational det;
-    rREFed = rREFed.rref(det, success, true);
+    Rational det = new Rational();
+    rREFed = rREFed.rref(ref det, ref success, true);
     if (!success) { return answer; }
-    auto dimTwice = 2 * dim;
+    var dimTwice = 2 * dim;
     for (int ii = 0; ii < dim; ++ii)
     {
-      std::vector<Rational> newRow(dim);
-      auto& current = rREFed.rows[ii];
+      var newRow = new List<Rational>();
+      for (int jj = 0; jj < dim; ++jj) { newRow.Add(new Rational()); }
+      var current = rREFed.rows[ii];
       for (int jj = 0; jj < dim; ++jj)
       {
-        newRow[jj] = current[dim + jj];
+        newRow[jj] = new Rational(current[dim + jj]);
       }
       answer.addRow(newRow);
     }
@@ -333,11 +355,16 @@ public class MatrixRational
   }
 
   public static MatrixRational operator+(in MatrixRational body) { return body; }
-  MatrixRational operator-() const
+  public static MatrixRational operator-(in MatrixRational body)
   {
-    MatrixRational answer;
-    answer.rows = rows;
-    for (auto& row : rows) { for (auto& item : row) { item = -item; } }
+    MatrixRational answer = new MatrixRational(body);
+    for (int ii = 0; ii < answer.rows.Count; ++ii)
+    {
+      for (int jj = 0; jj < answer.rows[ii].Count; ++jj)
+      {
+        answer.rows[ii][jj] = -answer.rows[ii][jj];
+      }
+    }
     return answer;
   }
 
