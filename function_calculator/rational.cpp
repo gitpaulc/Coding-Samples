@@ -115,7 +115,7 @@ namespace FunctionalCalculator
     auto sqPartNum = num.separateSquaredPart();
     auto sqPartDen = denom.separateSquaredPart();
     answer.first = Rational(sqPartNum.first, sqPartDen.first);
-    answer.first = Rational(sqPartNum.second, sqPartDen.second);
+    answer.second = Rational(sqPartNum.second, sqPartDen.second);
     return answer;
   }
 
