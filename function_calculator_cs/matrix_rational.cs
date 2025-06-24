@@ -11,9 +11,9 @@ public class MatrixRational
   private static int getLeadingOneIndex(in List<Rational> row)
   {
     Rational zero_ = new Rational();
-    int Rational_Cols = (int)row.Count;
+    int num_Cols = (int)row.Count;
     int ii = 0;
-    for (; ii < Rational_Cols; ++ii)
+    for (; ii < num_Cols; ++ii)
     {
       if (row[ii] != zero_) { return ii; }
     }
@@ -36,25 +36,25 @@ public class MatrixRational
   {
     if (rows.Count == 0) { return (useParentheses ? "(0)" : "0"); }
     string strm = "";
-    int Rational_Rows = (int)rows.Count;
-    int Rational_Cols = (int)rows[0].Count;
+    int num_Rows = (int)rows.Count;
+    int num_Cols = (int)rows[0].Count;
     List<List<string>> buffer = new List<List<string>>();
     List<int> longestRows = new List<int>();
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       buffer.Add(new List<string>());
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         buffer[ii].Add("");
       }
     }
-    for (int ii = 0; ii < Rational_Cols; ++ii)
+    for (int ii = 0; ii < num_Cols; ++ii)
     {
       longestRows.Add(0);
     }
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         string current = "";
         current += rows[ii][jj];
@@ -62,18 +62,18 @@ public class MatrixRational
         if ((int)(current.Length) > longestRows[jj]) { longestRows[jj] = (int)(current.Length); }
       }
     }
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       strm += "\n";
       if (useParentheses)
       {
-        if (Rational_Rows == 1) { strm += "("; } else { strm += "|| "; }
+        if (num_Rows == 1) { strm += "("; } else { strm += "|| "; }
       }
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         if (jj > 0)
         {
-          if (Rational_Rows == 1) { strm += ", "; } else { strm += " | "; }
+          if (num_Rows == 1) { strm += ", "; } else { strm += " | "; }
         }
         var current = buffer[ii][jj];
         int currentLength = (int)current.Length;
@@ -82,20 +82,20 @@ public class MatrixRational
       }
       if (useParentheses)
       {
-        if (Rational_Rows == 1) { strm += ")"; } else { strm += " ||"; }
+        if (num_Rows == 1) { strm += ")"; } else { strm += " ||"; }
       }
     }
     return strm;
   }
 
-  public int RationalRows() { return (int)(rows.Count); }
-  public int RationalCols()
+  public int numRows() { return (int)(rows.Count); }
+  public int numCols()
   {
     if (rows.Count == 0) { return 0; }
     return (int)(rows[0].Count);
   }
 
-  public static MatrixRational zeroMatrixRational(int rowDim, int colDim)
+  public static MatrixRational zeroMatrix(int rowDim, int colDim)
   {
     MatrixRational answer = new MatrixRational();
     List<Rational> row = new List<Rational>();
@@ -104,9 +104,9 @@ public class MatrixRational
     return answer;
   }
 
-  public static MatrixRational zeroMatrixRational(int dim)
+  public static MatrixRational zeroMatrix(int dim)
   {
-    return zeroMatrixRational(dim, dim);
+    return zeroMatrix(dim, dim);
   }
 
   public static MatrixRational identity(int dim)
@@ -129,8 +129,8 @@ public class MatrixRational
   {
     if (i < 0) { throw new System.Exception("Row index cannot be negative."); }
     if (j < 0) { throw new System.Exception("Columns index cannot be negative."); }
-    if (i >= RationalRows()) { throw new System.Exception("Row index must be less than MatrixRational dimension."); }
-    if (j >= RationalCols()) { throw new System.Exception("Columns index must be less than MatrixRational dimension."); }
+    if (i >= numRows()) { throw new System.Exception("Row index must be less than MatrixRational dimension."); }
+    if (j >= numCols()) { throw new System.Exception("Columns index must be less than MatrixRational dimension."); }
     return new Rational(rows[i][j]);
   }
 
@@ -231,8 +231,8 @@ public class MatrixRational
     if (rows.Count == 0) { return new MatrixRational(this); }
     Rational unit = new Rational(1);
     Rational det = new Rational(unit);
-    int Rational_Rows = (int)rows.Count;
-    int Rational_Cols = (int)rows[0].Count;
+    int num_Rows = (int)rows.Count;
+    int num_Cols = (int)rows[0].Count;
     MatrixRational answer = new MatrixRational(this);
     bool gotToRowEchelon = false;
     for (bool performingRref = true; performingRref; performingRref = !performingRref)
@@ -242,12 +242,12 @@ public class MatrixRational
         answer.rows.Sort((P, Q) => compareLessThan(P, Q)); // Sort in ascending order.
       }
       // else ... Bubble sort while computing determinant.
-      for (int ii = 0; ii < Rational_Rows; ++ii)
+      for (int ii = 0; ii < num_Rows; ++ii)
       {
         if (ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
-        for (int jj = ii + 1; jj < Rational_Rows; ++jj)
+        for (int jj = ii + 1; jj < num_Rows; ++jj)
         {
           int leadJ = getLeadingOneIndex(answer.rows[jj]);
           if (leadI <= leadJ) { continue; }
@@ -260,11 +260,11 @@ public class MatrixRational
       }
       if (!performingRref) { continue; }
       Boolean adjusting = false;
-      for (int ii = 0; ii < Rational_Rows; ++ii) // Divide by leading coefficient.
+      for (int ii = 0; ii < num_Rows; ++ii) // Divide by leading coefficient.
       {
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
-        if (jj >= Rational_Cols) { linIndep = false; break; }
+        if (jj >= num_Cols) { linIndep = false; break; }
         if (answer.rows[ii][jj] == unit) { continue; }
         var factor = unit / answer.rows[ii][jj];
         answer.scaleRow(ii, factor);
@@ -275,11 +275,11 @@ public class MatrixRational
       {
         int prevInd = -1;
         if (!gotToRowEchelon) { prevInd = getLeadingOneIndex(answer.rows[0]); }
-        for (int ii = 1; ii < Rational_Rows; ++ii)
+        for (int ii = 1; ii < num_Rows; ++ii)
         {
           if (gotToRowEchelon) { break; }
           int jj = getLeadingOneIndex(answer.rows[ii]);
-          if (jj >= Rational_Cols) { linIndep = false; break; }
+          if (jj >= num_Cols) { linIndep = false; break; }
           if (jj > prevInd) { prevInd = jj; continue; }
           answer.addScaledRowJ_toI(ii, prevInd, -unit); // det unchanged.
           adjusting = true;
@@ -288,10 +288,10 @@ public class MatrixRational
       if (adjusting) { performingRref = false; continue; }
       gotToRowEchelon = true;
       // Now from row echelon form, modify to reduced row echelon form.
-      for (int ii = Rational_Rows - 1; ii >= 0; --ii)
+      for (int ii = num_Rows - 1; ii >= 0; --ii)
       {
         int ind = getLeadingOneIndex(answer.rows[ii]);
-        if (ind >= Rational_Cols) { linIndep = false; continue; }
+        if (ind >= num_Cols) { linIndep = false; continue; }
         for (int jj = ii - 1; jj >= 0; --jj)
         {
           if (answer.rows[jj][ind] == new Rational()) { continue; }
@@ -318,7 +318,7 @@ public class MatrixRational
   {
     MatrixRational answer = new MatrixRational();
     if (!isSquare()) { success = false; throw new System.Exception("MatrixRational must be square."); }
-    int dim = RationalRows();
+    int dim = numRows();
     if (dim == 0) { success = false; return answer; }
     Rational zero_ = new Rational();
     Rational unit = new Rational(1);
@@ -370,16 +370,15 @@ public class MatrixRational
 
   public static MatrixRational operator+(in MatrixRational body, in MatrixRational rhs)
   {
-    MatrixRational answer;
-    if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    int Rational_Rows = (int)rows.size(); int Rational_Cols = (int)rows[0].size();
-    answer.rows = rows;
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    if ((body.rows.Count == 0) && !(rhs.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if ((rhs.rows.Count == 0) && !(body.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if (body.rows.Count != rhs.rows.Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if (body.rows[0].Count != rhs.rows[0].Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    int num_Rows = (int)body.rows.Count; int num_Cols = (int)body.rows[0].Count;
+    MatrixRational answer = new MatrixRational(body);
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer.rows[ii][jj] = answer.rows[ii][jj] + rhs.rows[ii][jj];
       }
@@ -391,14 +390,13 @@ public class MatrixRational
 
   public static MatrixRational operator*(in MatrixRational body, in Rational rhs)
   {
-    MatrixRational answer;
-    answer.rows = rows;
-    const int Rational_Rows = RationalRows();
-    if (Rational_Rows == 0) { return answer; }
-    const int Rational_Cols = RationalCols();
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    MatrixRational answer = new MatrixRational(body);
+    int num_Rows = body.numRows();
+    if (num_Rows == 0) { return answer; }
+    int num_Cols = body.numCols();
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer.rows[ii][jj] = answer.rows[ii][jj] * rhs;
       }
@@ -406,27 +404,25 @@ public class MatrixRational
     return answer;
   }
 
-  public static MatrixRational operator*(in MatrixRational, in MatrixRational rhs)
+  public static MatrixRational operator*(in MatrixRational body, in MatrixRational rhs)
   {
-    MatrixRational answer;
+    MatrixRational answer = new MatrixRational();
 
-    int mm = (int)rows.size();
+    int mm = (int)body.rows.Count;
     if (mm == 0) { return answer; }
-    int nn = (int)rows[0].size();
-    if (nn != (int)rhs.rows.size()) { throw std::invalid_argument("MatrixRational mult A * B: RationalCols(A) must equal RationalRows(B)"); return answer; }
-    int pp = (int)rhs.rows[0].size();
+    int nn = (int)body.rows[0].Count;
+    if (nn != (int)rhs.rows.Count) { throw new System.Exception("Matrix mult A * B: numCols(A) must equal numRows(B)"); }
+    int pp = (int)rhs.rows[0].Count;
 
-    answer.rows.resize(mm);
-    for (int ii = 0; ii < mm; ++ii) { answer.rows[ii].resize(pp); }
+    answer = zeroMatrix(mm, pp);
 
     for (int ii = 0; ii < mm; ++ii)
     {
       for (int jj = 0; jj < pp; ++jj)
       {
-        auto& current = answer.rows[ii][jj];
         for (int kk = 0; kk < nn; ++kk)
         {
-          current = current + rows[ii][kk] * rhs.rows[kk][jj];
+          answer.rows[ii][jj] = answer.rows[ii][jj] + body.rows[ii][kk] * rhs.rows[kk][jj];
         }
       }
     }
@@ -435,16 +431,14 @@ public class MatrixRational
 
   public MatrixRational transpose()
   {
-    MatrixRational answer;
-    if (rows.empty()) { return answer; }
+    MatrixRational answer = new MatrixRational();
+    if (rows.Count == 0) { return answer; }
 
-    int Rational_Rows = (int)rows.size();
-    int Rational_Cols = (int)rows[0].size();
+    int num_Rows = (int)rows.Count;
+    int num_Cols = (int)rows[0].Count;
+    answer = zeroMatrix(num_Cols, num_Rows);
 
-    answer.rows.resize(Rational_Cols);
-    for (int ii = 0; ii < Rational_Cols; ++ii) { answer.rows[ii].resize(Rational_Rows); }
-
-    for (int ii = 0; ii < Rational_Cols; ++ii) { for (int jj = 0; jj < Rational_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
+    for (int ii = 0; ii < num_Cols; ++ii) { for (int jj = 0; jj < num_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
     return answer;
   }
 
@@ -459,22 +453,23 @@ public class MatrixRational
   }
   public bool Equals(MatrixRational? other)
   {
-    if (rows.size() != rhs.rows.size()) { return false; }
-    int Rational_Rows = (int)rows.size();
-    int Rational_Cols = 0;
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    if (other is null) { return false; }
+    if (rows.Count != other.rows.Count) { return false; }
+    int num_Rows = (int)rows.Count;
+    int num_Cols = 0;
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      if (rows[ii].size() != rhs.rows[ii].size()) { return false; }
+      if (rows[ii].Count != other.rows[ii].Count) { return false; }
       if (ii > 0)
       {
-        if (rows[0].size() != rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
-        if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+        if (rows[0].Count != rows[ii].Count) { throw new System.Exception("Matrices must have the same size."); }
+        if (other.rows[0].Count != other.rows[ii].Count) { throw new System.Exception("Matrices must have the same size."); }
       }
       else
-      { Rational_Cols = (int)rows[0].size(); }
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      { num_Cols = (int)rows[0].Count; }
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
-        if (rows[ii][jj] == rhs.rows[ii][jj]) { continue; }
+        if (rows[ii][jj] == other.rows[ii][jj]) { continue; }
         return false;
       }
     }
@@ -490,9 +485,9 @@ public class MatrixRational
   {
     if (rows.size() < rhs.rows.size()) { return true; }
     if (rows.size() > rhs.rows.size()) { return false; }
-    int Rational_Rows = (int)rows.size();
-    int Rational_Cols = 0;
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    int num_Rows = (int)rows.size();
+    int num_Cols = 0;
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
       if (ii > 0)
       {
@@ -503,9 +498,9 @@ public class MatrixRational
       {
         if (rows[0].size() < rhs.rows[0].size()) { return true; }
         if (rows[0].size() > rhs.rows[0].size()) { return false; }
-        Rational_Cols = (int)rows[0].size();
+        num_Cols = (int)rows[0].size();
       }
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         auto& aa = rows[ii][jj];
         auto& bb = rhs.rows[ii][jj];
@@ -544,11 +539,11 @@ public class MatrixRational
     if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
     if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
     if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    int Rational_Rows = (int)rows.size(); int Rational_Cols = (int)rows[0].size();
-    if ((Rational_Rows == 0) || (Rational_Cols == 0)) { return answer; }
-    for (int ii = 0; ii < Rational_Rows; ++ii)
+    int num_Rows = (int)rows.size(); int num_Cols = (int)rows[0].size();
+    if ((num_Rows == 0) || (num_Cols == 0)) { return answer; }
+    for (int ii = 0; ii < num_Rows; ++ii)
     {
-      for (int jj = 0; jj < Rational_Cols; ++jj)
+      for (int jj = 0; jj < num_Cols; ++jj)
       {
         answer = answer + rows[ii][jj] * rhs.rows[ii][jj];
       }
