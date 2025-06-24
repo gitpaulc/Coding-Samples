@@ -221,8 +221,15 @@ public class QuadraticNumber
     return ((this) < zero()) ? (-(this)) : (+(this));
   }
 
-  public static QuadraticNumber operator+(in QuadraticNumber body) const;
-  public static QuadraticNumber operator-(in QuadraticNumber body) const;
+  public static QuadraticNumber operator+(in QuadraticNumber body) { return new QuadraticNumber(body); }
+
+  public static QuadraticNumber operator-(in QuadraticNumber body)
+  {
+    var answer = new QuadraticNumber();
+    foreach (var iter in body.content) { answer.content[iter.Key] = -iter.Value; }
+    return answer;
+  }
+
   public static QuadraticNumber operator+(in QuadraticNumber body, in QuadraticNumber rhs) const;
   public static QuadraticNumber operator-(in QuadraticNumber body, in QuadraticNumber rhs) const;
   public static QuadraticNumber operator*(in QuadraticNumber body, in QuadraticNumber rhs)
@@ -299,8 +306,15 @@ public class QuadraticNumber
   }
 
   /** \remark Does not use algebra to determine < since it would be very inefficient. */
-  public static bool operator<(const QuadraticNumber& rhs) const;
-  public static bool operator>(const QuadraticNumber& rhs) const;
+  public static Boolean operator<(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    return (body.toDouble() < rhs.toDouble());
+  }
+
+  public static Boolean operator>(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    return (rhs < body);
+  }
 
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
