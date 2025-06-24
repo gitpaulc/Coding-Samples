@@ -141,13 +141,78 @@ public class Rational
   }
 
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
-  public std::map<mp, int> primeFactorization() const;
+  public Dictionary<mp, int> primeFactorization()
+  {
+    var numFactors = num.primeFactorization();
+    var denomFactors = denom.primeFactorization();
+    var one_ = new mp(1);
+    foreach (var iter in denomFactors)
+    {
+      if (iter.Key == one_) { continue; }
+      if (numFactors.find(iter.first) == numFactors.end())
+      {
+        numFactors[iter.first] = -iter.second;
+        continue;
+      }
+      numFactors[iter.first] -= iter.second;
+    }
+    Dictionary<mp, int> answer = new Dictionary<mp, int>();
+    int countFactors = (int)numFactors.size();
+    for (auto& iter : numFactors)
+    {
+      mp base = iter.first;
+      int power = iter.second;
+      if (base == -1)
+      {
+        if (power < 0) { power = -power; }
+        power = (power % 2);
+        if ((countFactors == 1) && (power == 0)) { base = 1; power = 1; }
+      }
+      if ((base == 1) && (countFactors > 0)) { power = 0; }
+      if (power == 0)
+      {
+        if (countFactors == 1) { base = 1; power = 1; }
+        else { continue; }
+      }
+      answer[base] = power;
+    }
+    return answer;
+  }
+
   /** \brief Print the prime factorization of the rational number. */
   public std::string printFactors(bool useParentheses = false) const;
 
-  public virtual std::pair<double, double> get() const;
-  public Boolean isInt() const;
-  public virtual std::string print(bool useParentheses = false) const override;
+  public virtual double toDouble()
+  {
+    double nn = (double)(num.toInt());
+    double dd = (double)(denom.toInt());
+    return nn / dd;
+  }
+
+  public Boolean isInt()
+  {
+    return (denom == new mp(1));
+  }
+
+  public override string ToString()
+  {
+    return ToString(false);
+  }
+
+  public string ToString(Boolean useParentheses)
+  {
+    string strm = "";
+    if (num == mp.zero()) { strm = strm + num; }
+    else if (denom == new mp(1)) { strm = strm + num; }
+    else { strm  = strm + num + " / " + denom; }
+    if (useParentheses) { return "(" + strm + ")"; }
+    return strm;
+  }
+
+  public override bool Equals(object? obj)
+  {
+    return Equals(obj as Rational);
+  }
 
   public bool Equals(Rational? other)
   {
