@@ -171,11 +171,11 @@ public class MatrixRational
   }
 
   /** \brief Elementary row operation. Multiplies the determinant by scal. */
-  public void scaleRow(int i, const Rational& scal)
+  public void scaleRow(int i, in Rational scal)
   {
-    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
-    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
-    int nn = (int)(rows[0].size());
+    if (i < 0) { throw new System.Exception("Index out of bounds."); } // If size == 0 one of these always is called.
+    if (i >= ((int)rows.Count)) { throw new System.Exception("Index out of bounds."); }
+    int nn = (int)(rows[0].Count);
     for (int kk = 0; kk < nn; ++kk)
     {
       rows[i][kk] = scal * rows[i][kk];
@@ -183,13 +183,13 @@ public class MatrixRational
   }
 
   /** \brief Elementary row operation. Leaves determinant unchanged if i != j, otherwise acts as scaleRow method by (1 + scal). */
-  public void addScaledRowJ_toI(int i, int j, const Rational& scal)
+  public void addScaledRowJ_toI(int i, int j, in Rational scal)
   {
-    if (i < 0) { throw std::invalid_argument("Index out of bounds."); return; } // If size == 0 one of these always is called.
-    if (j < 0) { throw std::invalid_argument("Index out of bounds."); return; }
-    if (i >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
-    if (j >= ((int)rows.size())) { throw std::invalid_argument("Index out of bounds."); return; }
-    int nn = (int)(rows[0].size());
+    if (i < 0) { throw new System.Exception("Index out of bounds."); } // If size == 0 one of these always is called.
+    if (j < 0) { throw new System.Exception("Index out of bounds."); }
+    if (i >= ((int)rows.Count)) { throw new System.Exception("Index out of bounds."); }
+    if (j >= ((int)rows.Count)) { throw new System.Exception("Index out of bounds."); }
+    int nn = (int)(rows[0].Count);
     for (int kk = 0; kk < nn; ++kk)
     {
       rows[i][kk] = rows[i][kk] + scal * rows[j][kk];
@@ -199,7 +199,7 @@ public class MatrixRational
   public Boolean isSquare()
   {
     if (rows.Count == 0) { return true; }
-    return (rows.Count == (rows[0].size()));
+    return (rows.Count == (rows[0].Count));
   }
 
   /** \return Reduced row echelon form.
@@ -210,7 +210,7 @@ public class MatrixRational
    */
   public MatrixRational rref(ref Rational determinant, ref Boolean linIndep, Boolean ignoreDeterminant = false)
   {
-    if (!ignoreDeterminant) { determinant = Rational(); }
+    if (!ignoreDeterminant) { determinant = new Rational(); }
     linIndep = true;
     if (rows.empty()) { return *this; }
     Rational unit(1);
@@ -299,7 +299,7 @@ public class MatrixRational
   /** \param `success` is true if and only MatrixRational is invertible.
    *  \return Inverse MatrixRational if the MatrixRational is invertible, zero otherwise.
    */
-  public MatrixRational inverse(bool& success) const
+  public MatrixRational inverse(ref Boolean success)
   {
     MatrixRational answer;
     if (!isSquare()) { throw std::invalid_argument("MatrixRational must be square."); success = false; return answer; }
