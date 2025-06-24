@@ -149,38 +149,59 @@ public class Rational
     foreach (var iter in denomFactors)
     {
       if (iter.Key == one_) { continue; }
-      if (numFactors.find(iter.first) == numFactors.end())
+      int iterSecond = 0;
+      Boolean found = numFactors.TryGetValue(iter.Key, out iterSecond);
+      if (!found)
       {
-        numFactors[iter.first] = -iter.second;
+        numFactors[iter.Key] = -iterSecond;
         continue;
       }
-      numFactors[iter.first] -= iter.second;
+      numFactors[iter.Key] -= iterSecond;
     }
     Dictionary<mp, int> answer = new Dictionary<mp, int>();
-    int countFactors = (int)numFactors.size();
-    for (auto& iter : numFactors)
+    int countFactors = (int)numFactors.Count;
+    foreach (var iter in numFactors)
     {
-      mp base = iter.first;
-      int power = iter.second;
-      if (base == -1)
+      mp baseMp = new mp(iter.Key);
+      int power = iter.Value;
+      if (baseMp == new mp(-1))
       {
         if (power < 0) { power = -power; }
         power = (power % 2);
-        if ((countFactors == 1) && (power == 0)) { base = 1; power = 1; }
+        if ((countFactors == 1) && (power == 0)) { baseMp = new mp(one_); power = 1; }
       }
-      if ((base == 1) && (countFactors > 0)) { power = 0; }
+      if ((baseMp == one_) && (countFactors > 0)) { power = 0; }
       if (power == 0)
       {
-        if (countFactors == 1) { base = 1; power = 1; }
+        if (countFactors == 1) { baseMp = new mp(one_); power = 1; }
         else { continue; }
       }
-      answer[base] = power;
+      answer[baseMp] = power;
     }
     return answer;
   }
 
   /** \brief Print the prime factorization of the rational number. */
-  public std::string printFactors(bool useParentheses = false) const;
+  public string printFactors(Boolean useParentheses = false)
+  {
+    string strm = "";
+    var zero_ = mp.zero();
+    if (useParentheses) { strm += "("; }
+    var factors = primeFactorization();
+    int count = -1;
+    foreach (var iter in factors)
+    {
+      if (iter.Value == 0) { continue; }
+      ++count;
+      if (count > 0) { strm += " * "; }
+      if (iter.Key < zero_) { strm += "("; }
+      strm += iter.Key;
+      if (iter.Key < zero_) { strm += ")"; }
+      strm += "^" + iter.Value;
+    }
+    if (useParentheses) { strm += ")"; }
+    return strm;
+  }
 
   public virtual double toDouble()
   {
