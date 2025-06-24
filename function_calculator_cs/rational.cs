@@ -115,11 +115,31 @@ public class Rational
 
   public static Boolean operator==(in Rational body, in Rational rhs) { return body.Equals(rhs); }
 
-  public static Boolean operator!=(in Rational body, in Rational rhs) const;
-  public static Boolean operator<(in Rational body, in Rational rhs) const;
-  public static Boolean operator>(in Rational body, in Rational rhs) const;
-  public static Boolean operator<=(in Rational body, in Rational rhs) const;
-  public static Boolean operator>=(in Rational body, in Rational rhs) const;
+  public static Boolean operator!=(in Rational body, in Rational rhs)
+  {
+    if (body == rhs) { return false; }
+    return true;
+  }
+
+  public static Boolean operator<(in Rational body, in Rational rhs)
+  {
+    if (body.num * rhs.denom < body.denom * rhs.num) { return true; } // denom always > 0
+    return false;
+  }
+
+  public static Boolean operator>(in Rational body, in Rational rhs) { return (rhs < body); }
+  public static Boolean operator<=(in Rational body, in Rational rhs)
+  {
+    if (body == rhs) { return true; }
+    return (body < rhs);
+  }
+
+  public static Boolean operator>=(in Rational body, in Rational rhs)
+  {
+    if (body == rhs) { return true; }
+    return (body > rhs);
+  }
+
   /** \brief The keys are the prime factors, the values are the number of occurrences. */
   public std::map<mp, int> primeFactorization() const;
   /** \brief Print the prime factorization of the rational number. */
