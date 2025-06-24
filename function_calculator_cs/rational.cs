@@ -46,7 +46,16 @@ public class Rational
   public mp numerator() { return new mp(num); }
 
   /** \return { a, b } where a is the maximal number such that this number == a * a * b */
-  public std::pair<Rational, Rational> separateSquaredPart() const;
+  public KeyValuePair<Rational, Rational> separateSquaredPart()
+  {
+    var sqPartNum = num.separateSquaredPart();
+    var sqPartDen = denom.separateSquaredPart();
+    KeyValuePair<Rational, Rational> answer = new KeyValuePair<Rational, Rational>(
+      new Rational(sqPartNum.Key, sqPartDen.Key),
+      new Rational(sqPartNum.Value, sqPartDen.Value));
+    return answer;
+  }
+
   public Rational operator+() const;
   public Rational operator-() const;
   public Rational operator+(const Rational& rhs) const;
