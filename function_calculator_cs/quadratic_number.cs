@@ -101,26 +101,28 @@ public class QuadraticNumber
   /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
   public KeyValuePair<QuadraticNumber, mp> factorAsIntegral()
   {
-    std::pair<QuadraticNumber, mp> answer;
-    answer.first = *this;
-    answer.second = mp(1);
-    for (const auto& iter : answer.first.content)
+    mp answerSecond = new mp(1);
+    foreach (var iter in content)
     {
-      answer.second = answer.second * iter.second.denominator();
+      answerSecond = answerSecond * iter.Value.denominator();
     }
-    std::vector<mp> numerators;
-    numerators.push_back(answer.second);
-    for (auto& iter : answer.first.content)
+    List<mp> numerators = new List<mp>();
+    numerators.Add(answerSecond);
+    QuadraticNumber answerFirst0 = new QuadraticNumber(this);
+    foreach (var iter in content)
     {
-      iter.second = iter.second * Rational(answer.second, mp(1));
-      numerators.push_back(iter.second.numerator());
+      var newVal = iter.Value * (new Rational(answerSecond, new mp(1)));
+      answerFirst0.content[iter.Key] = newVal;
+      numerators.Add(newVal.numerator());
     }
-    auto gcd_ = mp::gcd(numerators);
-    answer.second = answer.second / gcd_;
-    for (auto& iter : answer.first.content)
+    var gcd_ = mp.gcd(numerators);
+    answerSecond = answerSecond / gcd_;
+    var answerFirst = new QuadraticNumber(answerFirst0);
+    foreach (var iter in answerFirst0.content)
     {
-      iter.second = iter.second * Rational(mp(1), gcd_);
+      answerFirst.content[iter.Key] = iter.Value * (new Rational(new mp(1), gcd_));
     }
+    var answer = new KeyValuePair<QuadraticNumber, mp>(answerFirst, answerSecond);
     return answer;
   }
 
@@ -170,16 +172,61 @@ public class QuadraticNumber
     return strm.str();
   }
 
-  public static QuadraticNumber sqrt(const Rational& radicand);
+  public static QuadraticNumber sqrt(in Rational radicand)
+  {
+    QuadraticNumber answer = new QuadraticNumber();
+    var zero_ = Rational.zero();
+    var one_ = new mp(1);
+    var minusOne = new mp(-1);
+    if (radicand == zero_) { return answer; }
+    if (radicand < zero_) { throw new System.Exception("Radicand should be nonnegative."); }
+    Rational coefficient = new Rational(one_, radicand.denominator());
+    mp key = radicand.numerator() * radicand.denominator();
+    var primes = key.primeFactorization();
+    foreach (var iter in primes)
+    {
+      var factor = new mp(iter.Key);
+      if (factor == minusOne) { continue; }
+      var power = iter.Value;
+      if (power <= 1) { continue; }
+      int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+      Rational sqrtRational = (new Rational(factor, one_)).pow(coeffPow);
+      coefficient = coefficient * sqrtRational;
+      key = key / (sqrtRational * sqrtRational).numerator();
+    }
+    answer.content[key] = coefficient;
+    return answer;
+  }
+
   public QuadraticNumber abs() const;
 
-  public QuadraticNumber operator+() const;
-  public static QuadraticNumber operator-() const;
-  public static QuadraticNumber operator+(const QuadraticNumber& rhs) const;
-  public static QuadraticNumber operator-(const QuadraticNumber& rhs) const;
-  public static QuadraticNumber operator*(const QuadraticNumber& rhs) const;
+  public static QuadraticNumber operator+(in QuadraticNumber body) const;
+  public static QuadraticNumber operator-(in QuadraticNumber body) const;
+  public static QuadraticNumber operator+(in QuadraticNumber body, in QuadraticNumber rhs) const;
+  public static QuadraticNumber operator-(in QuadraticNumber body, in QuadraticNumber rhs) const;
+  public static QuadraticNumber operator*(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    QuadraticNumber product = new QuadraticNumber();
+    var one_ = new mp(1);
+    foreach (var iter in body.content)
+    {
+      foreach (var jter in rhs.content)
+      {
+        var summand0 = sqrt((new Rational(iter.Key, one_)) * (new Rational(jter.Key, one_)));
+        var factor = iter.Value * jter.Value;
+        QuadraticNumber summand = new QuadraticNumber();
+        foreach (var kter in summand0.content)
+        {
+          summand.content[kter.Key] = kter.Value * factor;
+        }
+        product = product + summand;
+      }
+    }
+    return product;
+  }
+
   /** \brief Uses inversion of the multiplication operator. */
-  public static QuadraticNumber operator/(const QuadraticNumber& rhs) const;
+  public static QuadraticNumber operator/(in QuadraticNumber body, in QuadraticNumber rhs) const;
   public QuadraticNumber pow(int p); /**< `return` The p'th power of the number. */
 
   public override bool Equals(object? obj)
