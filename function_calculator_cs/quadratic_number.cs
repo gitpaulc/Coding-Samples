@@ -84,6 +84,11 @@ public class QuadraticNumber
     content = new Dictionary<mp, Rational>(content);
   }
 
+  public static QuadraticNumber zero()
+  {
+    return new QuadraticNumber();
+  }
+
   public virtual double toDouble()
   {
     double answer = 0.0;
@@ -126,7 +131,19 @@ public class QuadraticNumber
     return answer;
   }
 
-  public Boolean getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
+  public Boolean getRational(ref Rational self) /**< \return `true` iff the number is actually rational. Only then is self redefined. */
+  {
+    if (content.Count == 0) { self = new Rational(0, 1); return true; }
+    if (content.Count > 1) { return false; }
+    var one_ = new mp(1);
+    var val = new Rational();
+    Boolean answer = content.TryGetValue(one_, out val);
+    if (!answer) { return false; }
+    if (val is null) { return false; }
+    self = new Rational(val);
+    return true;
+  }
+
 
   public override string ToString()
   {
@@ -135,41 +152,42 @@ public class QuadraticNumber
 
   public string ToString(Boolean useParentheses)
   {
-    std::stringstream strm;
+    string strm = "";
     int count = -1;
-    if (useParentheses) { strm << "("; }
-    if (content.size() == 0) { strm << "0"; }
-    for (const auto& iter : content)
+    if (useParentheses) { strm += "("; }
+    if (content.Count == 0) { strm += "0"; }
+    foreach (var iter in content)
     {
-      auto val = iter.second;
-      if (val == 0) { continue; }
+      var val = new Rational(iter.Value);
+      if (val == Rational.zero()) { continue; }
       ++count;
       if (count > 0)
       {
-        if (val >= 0) { strm << " + "; }
+        if (val >= Rational.zero()) { strm += " + "; }
         else
         {
           val = -val;
-          strm << " - ";
+          strm += " - ";
         }
       }
-      bool coeffIsOne = (val == 1);
-      auto radicand = iter.first;
-      bool printCoeffParents = (val.denominator() != 1) && (radicand != 1);
-      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
-      if (radicand == 1) { continue; }
-      bool complex = false;
-      if (radicand < 0) { radicand = -radicand; complex = true; }
-      if (!coeffIsOne) { strm << " * "; }
-      if (!complex || (radicand != 1))
+      mp one_ = new mp(1);
+      Boolean coeffIsOne = (val == new Rational(one_, one_));
+      var radicand = new mp(iter.Key);
+      bool printCoeffParents = (val.denominator() != one_) && (radicand != one_);
+      if ((radicand == one_) || (!coeffIsOne)) { strm += val.ToString(printCoeffParents); }
+      if (radicand == one_) { continue; }
+      Boolean complex = false;
+      if (radicand < mp.zero()) { radicand = -radicand; complex = true; }
+      if (!coeffIsOne) { strm += " * "; }
+      if (!complex || (radicand != one_))
       {
-        strm << "Sqrt(" << radicand << ")";
-        if (complex) { strm << " * "; }
+        strm += "Sqrt(" + radicand + ")";
+        if (complex) { strm += " * "; }
       }
-      if (complex) { strm << "i"; }
+      if (complex) { strm += "i"; }
     }
-    if (useParentheses) { strm << ")"; }
-    return strm.str();
+    if (useParentheses) { strm += ")"; }
+    return strm;
   }
 
   public static QuadraticNumber sqrt(in Rational radicand)
@@ -198,7 +216,10 @@ public class QuadraticNumber
     return answer;
   }
 
-  public QuadraticNumber abs() const;
+  public QuadraticNumber abs()
+  {
+    return ((this) < zero()) ? (-(this)) : (+(this));
+  }
 
   public static QuadraticNumber operator+(in QuadraticNumber body) const;
   public static QuadraticNumber operator-(in QuadraticNumber body) const;
