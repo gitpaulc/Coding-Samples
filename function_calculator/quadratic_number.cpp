@@ -319,13 +319,15 @@ namespace FunctionalCalculator
   {
     for (const auto& iter : content)
     {
-      if (rhs.content.find(iter.first) == rhs.content.end()) { return false; }
-      if (rhs.content.at(iter.first) != iter.second) { return false; }
+      auto jter = rhs.content.find(iter.first);
+      if (jter == rhs.content.end()) { return false; }
+      if ((jter->second) != iter.second) { return false; }
     }
     for (const auto& iter : rhs.content)
     {
-      if (content.find(iter.first) == content.end()) { return false; }
-      if (content.at(iter.first) != iter.second) { return false; }
+      auto jter = content.find(iter.first);
+      if (jter == content.end()) { return false; }
+      if ((jter->second) != iter.second) { return false; }
     }
     return true;
   }

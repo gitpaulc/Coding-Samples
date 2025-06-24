@@ -451,6 +451,7 @@ public class MatrixRational
   {
     return body.Equals(rhs);
   }
+
   public bool Equals(MatrixRational? other)
   {
     if (other is null) { return false; }
