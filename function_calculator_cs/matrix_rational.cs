@@ -478,32 +478,32 @@ public class MatrixRational
 
   public static bool operator!=(in MatrixRational body, in MatrixRational rhs)
   {
-    return !((*this) == rhs);
+    return !(body == rhs);
   }
 
-  public static bool operator <(in MatrixRational body, in MatrixRational rhs)
+  public static bool operator<(in MatrixRational body, in MatrixRational rhs)
   {
-    if (rows.size() < rhs.rows.size()) { return true; }
-    if (rows.size() > rhs.rows.size()) { return false; }
-    int num_Rows = (int)rows.size();
+    if (body.rows.Count < rhs.rows.Count) { return true; }
+    if (body.rows.Count > rhs.rows.Count) { return false; }
+    int num_Rows = (int)body.rows.Count;
     int num_Cols = 0;
     for (int ii = 0; ii < num_Rows; ++ii)
     {
       if (ii > 0)
       {
-        if (rows[0].size() != rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
-        if (rhs.rows[0].size() != rhs.rows[ii].size()) { throw std::invalid_argument("Matrices must have the same size."); }
+        if (body.rows[0].Count != body.rows[ii].Count) { throw new System.Exception("Matrices must have the same size."); }
+        if (rhs.rows[0].Count != rhs.rows[ii].Count) { throw new System.Exception("Matrices must have the same size."); }
       }
       else
       {
-        if (rows[0].size() < rhs.rows[0].size()) { return true; }
-        if (rows[0].size() > rhs.rows[0].size()) { return false; }
-        num_Cols = (int)rows[0].size();
+        if (body.rows[0].Count < rhs.rows[0].Count) { return true; }
+        if (body.rows[0].Count > rhs.rows[0].Count) { return false; }
+        num_Cols = (int)body.rows[0].Count;
       }
       for (int jj = 0; jj < num_Cols; ++jj)
       {
-        auto& aa = rows[ii][jj];
-        auto& bb = rhs.rows[ii][jj];
+        var aa = body.rows[ii][jj];
+        var bb = rhs.rows[ii][jj];
         if (aa < bb) { return true; }
         if (aa == bb) { continue; }
         return false;
@@ -519,27 +519,26 @@ public class MatrixRational
 
   public static bool operator<=(in MatrixRational body, in MatrixRational rhs)
   {
-    if ((*this) < rhs) { return true; }
-    if ((*this) == rhs) { return true; }
+    if (body < rhs) { return true; }
+    if (body == rhs) { return true; }
     return false;
   }
 
   public static bool operator>=(in MatrixRational body, in MatrixRational rhs)
   {
-    if (rhs < (*this)) { return true; }
-    if (rhs == (*this)) { return true; }
+    if (rhs < body) { return true; }
+    if (rhs == body) { return true; }
     return false;
   }
 
   public Rational MatrixDot(in MatrixRational rhs)
   {
-    Rational answer;
-    answer = answer - answer;
-    if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
-    int num_Rows = (int)rows.size(); int num_Cols = (int)rows[0].size();
+    Rational answer = new Rational();
+    if ((rows.Count == 0) && !(rhs.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if ((rhs.rows.Count == 0) && !(rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if (rows.Count != rhs.rows.Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if (rows[0].Count != rhs.rows[0].Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    int num_Rows = (int)rows.Count; int num_Cols = (int)rows[0].Count;
     if ((num_Rows == 0) || (num_Cols == 0)) { return answer; }
     for (int ii = 0; ii < num_Rows; ++ii)
     {
@@ -551,7 +550,7 @@ public class MatrixRational
     return answer;
   }
 
-  public Rational MatrixSqNorm() { return MatrixRationalDot(*this); }
+  public Rational MatrixSqNorm() { return MatrixDot(this); }
 
   public override int GetHashCode()
   {
