@@ -27,7 +27,7 @@ public:
   Rational(Rational&&) noexcept;
   Rational& operator=(const Rational&);
   Rational& operator=(Rational&&) noexcept;
-  ~Rational() = default;
+  virtual ~Rational() = default;
 
   mp denominator() const;
   mp numerator() const;
