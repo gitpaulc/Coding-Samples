@@ -341,7 +341,7 @@ public class MatrixRational
     return answer;
   }
 
-  MatrixRational operator+(const MatrixRational& rhs) const
+  public static MatrixRational operator+(in MatrixRational body, in MatrixRational rhs)
   {
     MatrixRational answer;
     if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("MatrixRational sizes must be equal."); return answer; }
@@ -360,9 +360,9 @@ public class MatrixRational
     return answer;
   }
 
-  MatrixRational operator-(const MatrixRational& rhs) const { return ((*this) + (-rhs)); }
+  public static MatrixRational operator-(in MatrixRational body, in MatrixRational rhs) { return (body + (-rhs)); }
 
-  MatrixRational operator*(const Rational& rhs) const
+  public static MatrixRational operator*(in MatrixRational body, in Rational rhs)
   {
     MatrixRational answer;
     answer.rows = rows;
@@ -379,7 +379,7 @@ public class MatrixRational
     return answer;
   }
 
-  MatrixRational operator*(const MatrixRational& rhs) const
+  public static MatrixRational operator*(in MatrixRational, in MatrixRational rhs)
   {
     MatrixRational answer;
 
@@ -406,7 +406,7 @@ public class MatrixRational
     return answer;
   }
 
-  MatrixRational transpose() const
+  public MatrixRational transpose()
   {
     MatrixRational answer;
     if (rows.empty()) { return answer; }
@@ -454,12 +454,12 @@ public class MatrixRational
     return true;
   }
 
-  bool operator!=(const MatrixRational& rhs) const
+  public static bool operator!=(in MatrixRational body, in MatrixRational rhs)
   {
     return !((*this) == rhs);
   }
 
-  bool operator<(const MatrixRational& rhs) const
+  public static bool operator <(in MatrixRational body, in MatrixRational rhs)
   {
     if (rows.size() < rhs.rows.size()) { return true; }
     if (rows.size() > rhs.rows.size()) { return false; }
@@ -490,26 +490,26 @@ public class MatrixRational
     return false;
   }
 
-  bool operator>(const MatrixRational& rhs) const
+  public static bool operator>(in MatrixRational body, in MatrixRational rhs)
   {
-    return (rhs < (*this));
+    return (rhs < body);
   }
 
-  bool operator<=(const MatrixRational& rhs) const
+  public static bool operator<=(in MatrixRational body, in MatrixRational rhs)
   {
     if ((*this) < rhs) { return true; }
     if ((*this) == rhs) { return true; }
     return false;
   }
 
-  bool operator>=(const MatrixRational& rhs) const
+  public static bool operator>=(in MatrixRational body, in MatrixRational rhs)
   {
     if (rhs < (*this)) { return true; }
     if (rhs == (*this)) { return true; }
     return false;
   }
 
-  Rational MatrixRationalDot(const MatrixRational& rhs) const
+  public Rational MatrixDot(in MatrixRational rhs)
   {
     Rational answer;
     answer = answer - answer;
@@ -529,7 +529,7 @@ public class MatrixRational
     return answer;
   }
 
-  Rational MatrixRationalSqNorm() const { return MatrixRationalDot(*this); }
+  public Rational MatrixSqNorm() { return MatrixRationalDot(*this); }
 
   public override int GetHashCode()
   {
