@@ -111,7 +111,6 @@ public:
     return zeroMatrix(dim, dim);
   }
 
-#if false
   static Matrix identity(int dim)
   {
     Matrix answer;
@@ -123,7 +122,6 @@ public:
     }
     return answer;
   }
-#endif
 
   Num at(int i, int j) const
   {
