@@ -349,7 +349,22 @@ public class QuadraticNumber
     return body * reciprocal;
   }
 
-  public QuadraticNumber pow(int p); /**< `return` The p'th power of the number. */
+  public QuadraticNumber pow(int p) /**< `return` The p'th power of the number. */
+  {
+    Boolean isNeg = (p < 0);
+    if (isNeg) { p = -p; }
+    Rational one_ = new Rational(1);
+    QuadraticNumber answer = new QuadraticNumber(one_);
+    for (int ii = 0; ii < p; ++ii)
+    {
+      answer = answer * (this);
+    }
+    if (isNeg)
+    {
+      return new QuadraticNumber(one_) / answer;
+    }
+    return answer;
+  }
 
   public override bool Equals(object? obj)
   {
@@ -364,17 +379,21 @@ public class QuadraticNumber
   public Boolean Equals(QuadraticNumber? rhs)
   {
     if (rhs is null) { return false; }
-    for (const auto& iter : content)
+    foreach (var iter in content)
     {
-      auto jter = rhs.content.find(iter.first);
-      if (jter == rhs.content.end()) { return false; }
-      if ((jter->second) != iter.second) { return false; }
+      Rational? val = new Rational();
+      Boolean found = rhs.content.TryGetValue(iter.Key, out val);
+      if (!found) { return false; }
+      if (val is null) { return false; }
+      if (val != iter.Value) { return false; }
     }
-    for (const auto& iter : rhs.content)
+    foreach (var iter in rhs.content)
     {
-      auto jter = content.find(iter.first);
-      if (jter == content.end()) { return false; }
-      if ((jter->second) != iter.second) { return false; }
+      Rational? val = new Rational();
+      Boolean found = content.TryGetValue(iter.Key, out val);
+      if (!found) { return false; }
+      if (val is null) { return false; }
+      if (val != iter.Value) { return false; }
     }
     return true;
   }
