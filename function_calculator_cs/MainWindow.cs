@@ -165,9 +165,14 @@ bool test_quadratic()
   console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
   console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-  sumOfSquareRoots = QuadraticNumber.sqrt(5) - QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
-  reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " +
+  return true;
+}
+
+bool test_quadratic2()
+{
+  var sumOfSquareRoots = QuadraticNumber.sqrt(5) - QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
+  var reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
+  console.Text = "The reciprocal of " +
     sumOfSquareRoots + " is:";
   console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
@@ -346,7 +351,8 @@ bool test_quadratic()
       {
         endCurrentTest.Visible = false;
         if (testState.testState == 0) { test_quadratic(); }
-        else if (testState.testState == 1)
+        else if (testState.testState == 1) { test_quadratic2(); }
+        else if (testState.testState == 2)
         {
           console.Text = "";
           console.Text = Environment.NewLine + "Done.";
