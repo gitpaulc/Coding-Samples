@@ -164,9 +164,9 @@ public class MatrixRational
 
   public void addRow(in List<Rational> rowIn)
   {
-    if (rows.Count == 0) { rows.Add(rowIn); return; }
+    if (rows.Count == 0) { rows.Add(new List<Rational>(rowIn)); return; }
     if (rowIn.Count != rows[0].Count) { throw new System.Exception("Rows must have equal length."); }
-    rows.Add(rowIn);
+    rows.Add(new List<Rational>(rowIn));
   }
 
   /** \brief Elementary row operation. Changes sign of the determinant if i != j. */
@@ -438,8 +438,15 @@ public class MatrixRational
     int num_Rows = (int)rows.Count;
     int num_Cols = (int)rows[0].Count;
     answer = zeroMatrix(num_Cols, num_Rows);
-      
-    for (int ii = 0; ii < num_Cols; ++ii) { for (int jj = 0; jj < num_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
+
+    for (int ii = 0; ii < num_Cols; ++ii)
+    {
+      for (int jj = 0; jj < num_Rows; ++jj)
+      {
+        answer.rows[ii][jj] = new Rational(rows[jj][ii]);
+      }
+    }
+
     return answer;
   }
 
