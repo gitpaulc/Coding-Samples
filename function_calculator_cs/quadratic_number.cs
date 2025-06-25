@@ -230,7 +230,67 @@ public class QuadraticNumber
     return answer;
   }
 
-  public static QuadraticNumber operator+(in QuadraticNumber body, in QuadraticNumber rhs) const;
+  public static QuadraticNumber operator+(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    HashSet<mp> added = new HashSet<mp>();
+    QuadraticNumber sum = new QuadraticNumber();
+    mp one_ = new mp(1);
+    mp minusOne = new mp(-1);
+    foreach (var iter in body.content)
+    {
+      mp radicand = new mp(iter.Key);
+      Rational coeff = new Rational(iter.Value);
+      Dictionary<mp, int> primes = radicand.primeFactorization();
+      foreach (var jter in primes)
+      {
+          var factor = jter.Key;
+          if (factor == minusOne) { continue; }
+          var power = jter.Value;
+          if (power <= 1) { continue; }
+          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+          Rational sqrtRational = (new Rational(factor, one_)).pow(coeffPow);
+          coeff = coeff * sqrtRational;
+          radicand = radicand / (sqrtRational * sqrtRational).numerator();
+      }
+      Rational? summand = new Rational();
+      Boolean found = rhs.content.TryGetValue(radicand, out summand);
+      if ((!found) || (summand is null))
+      {
+        sum.content[radicand] = coeff;
+      }
+      else if (summand != (-coeff))
+      {
+        sum.content[radicand] = summand + coeff;
+      }
+      added.Add(radicand);
+    }
+    foreach (var iter in rhs.content)
+    {
+      mp radicand = new mp(iter.Key);
+      Rational coeff = new Rational(iter.Value);
+      Dictionary<mp, int> primes = radicand.primeFactorization();
+      foreach (var jter in primes)
+      {
+        var factor = jter.Key;
+        if (factor == minusOne) { continue; }
+        var power = jter.Value;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        Rational sqrtRational = (new Rational(factor, one_)).pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand = radicand / (sqrtRational * sqrtRational).numerator();
+      }
+      Rational? summand = new Rational();
+      Boolean found = rhs.content.TryGetValue(radicand, out summand);
+      if ((!found) || (summand is null))
+      {
+        sum.content[radicand] = coeff;
+      }
+      // else continue.
+    }
+    return sum;
+  }
+
   public static QuadraticNumber operator-(in QuadraticNumber body, in QuadraticNumber rhs) const;
   public static QuadraticNumber operator*(in QuadraticNumber body, in QuadraticNumber rhs)
   {
