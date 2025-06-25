@@ -292,13 +292,8 @@ public class QuadraticNumber
         coeff = coeff * sqrtRational;
         radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
-      Rational? summand = new Rational();
-      Boolean found = rhs.content.TryGetValue(radicand, out summand);
-      if ((!found) || (summand is null))
-      {
-        sum.content[radicand] = coeff;
-      }
-      // else continue.
+      if (added.Contains(radicand)) { continue; }
+      sum.content[radicand] = coeff;
     }
     return sum;
   }
