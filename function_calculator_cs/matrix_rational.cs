@@ -142,7 +142,7 @@ public class MatrixRational
   public MatrixRational(in List<Rational> rowIn)
   {
     rows = new List<List<Rational> >();
-    if (rowIn.Count > 0) { rows.Add(rowIn); }
+    if (rowIn.Count > 0) { rows.Add(new List<Rational>(rowIn)); }
   }
 
   public MatrixRational(in MatrixRational rhs)
@@ -155,7 +155,7 @@ public class MatrixRational
         var current = new List<Rational>();
         for (int jj = 0; jj < rhs.rows[ii].Count; ++jj)
         {
-          current.Add(rhs.rows[ii][jj]);
+          current.Add(new Rational(rhs.rows[ii][jj]));
         }
         rows.Add(current);
       }
@@ -569,7 +569,7 @@ public class MatrixRational
     {
       for (int jj = 0; jj < num_Cols; ++jj)
       {
-        hash.Add(rows[ii][jj]);
+        hash.Add(new Rational(rows[ii][jj]));
       }
     }
     return hash.ToHashCode();
