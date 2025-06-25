@@ -61,7 +61,7 @@ public class mp // : IEquatable<mp?>
 
     mp dividend = new mp(this);
     mp quotient = new mp(0);
-    mp prevDividend = dividend;
+    mp prevDividend = new mp(dividend);
     while (rhs <= dividend)
     {
       int numOfDigits = dividend.numDigits();
@@ -84,9 +84,9 @@ public class mp // : IEquatable<mp?>
       quotient = quotient + factor;
       dividend = dividend - factor * rhs;
       if (dividend >= prevDividend) { break; } // Should never happen.
-      prevDividend = dividend;
+      prevDividend = new mp(dividend);
     }
-    remainder = dividend;
+    remainder = new mp(dividend);
     return quotient;
   }
 
