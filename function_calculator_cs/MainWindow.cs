@@ -155,28 +155,32 @@ bool test_quadratic()
   console.Text += Environment.NewLine + "Square root of 2/3 = " + QuadraticNumber.sqrt(rationalOut);
   var goldenRatio = QuadraticNumber.sqrt(new Rational(5, 4)) + new QuadraticNumber(new Rational(1, 2));
   console.Text += Environment.NewLine + "The golden ratio is " + goldenRatio;
-  return true; ////
   var oneOverGolden = QuadraticNumber.sqrt(new Rational(5, 4)) - new QuadraticNumber(new Rational(1, 2));
   console.Text += Environment.NewLine + "One = " + (goldenRatio * oneOverGolden);
   oneOverGolden = new QuadraticNumber(new Rational(1)) / goldenRatio;
-  console.Text += Environment.NewLine + "The reciprocal golden ratio is " + oneOverGolden;
+  console.Text += Environment.NewLine + "The reciprocal golden ratio is:";
+  console.Text += Environment.NewLine + "" + oneOverGolden;
   var sumOfSquareRoots = QuadraticNumber.sqrt(2) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
   var reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is " + reciprocal;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
   sumOfSquareRoots = QuadraticNumber.sqrt(5) - QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
   reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
   console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " +
-    sumOfSquareRoots + " is:\n" + reciprocal;
+    sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
   sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
   reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
   var unity = new QuadraticNumber(new Rational(1));
   sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(5) + QuadraticNumber.sqrt(3) + unity;
   reciprocal = unity / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
 
   /*std::string prompt;
