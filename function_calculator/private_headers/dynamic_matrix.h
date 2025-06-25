@@ -336,6 +336,7 @@ public:
   {
     Matrix answer;
     if (rows.empty() && !(rhs.rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
+    if (rows.empty() && (rhs.rows.empty())) { return answer; }
     if (rhs.rows.empty() && !(rows.empty())) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows.size() != rhs.rows.size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }
     if (rows[0].size() != rhs.rows[0].size()) { throw std::invalid_argument("Matrix sizes must be equal."); return answer; }

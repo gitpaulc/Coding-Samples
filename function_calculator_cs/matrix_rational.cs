@@ -371,6 +371,7 @@ public class MatrixRational
   public static MatrixRational operator+(in MatrixRational body, in MatrixRational rhs)
   {
     if ((body.rows.Count == 0) && !(rhs.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if ((body.rows.Count == 0) && (rhs.rows.Count == 0)) { return new MatrixRational(); }
     if ((rhs.rows.Count == 0) && !(body.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
     if (body.rows.Count != rhs.rows.Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
     if (body.rows[0].Count != rhs.rows[0].Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
