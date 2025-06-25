@@ -190,6 +190,18 @@ public class QuadraticNumber
     return strm;
   }
 
+  public static QuadraticNumber sqrt(int radicand)
+  {
+    Rational rad = new Rational(radicand, 1);
+    return sqrt(rad);
+  }
+
+  public static QuadraticNumber sqrt(in mp radicand)
+  {
+    Rational rad = new Rational(radicand, new mp(1));
+    return sqrt(rad);
+  }
+
   public static QuadraticNumber sqrt(in Rational radicand)
   {
     QuadraticNumber answer = new QuadraticNumber();
