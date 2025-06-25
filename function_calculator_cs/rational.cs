@@ -96,7 +96,7 @@ public class Rational
     {
       throw new System.Exception("Operator division by zero.");
     }
-    return new Rational(rhs.num * rhs.denom, rhs.denom * rhs.num);
+    return new Rational(body.num * rhs.denom, body.denom * rhs.num);
   }
 
   public Rational pow(int p) /**< Returns the p'th power of the rational number. */

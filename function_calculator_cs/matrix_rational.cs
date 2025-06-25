@@ -265,8 +265,9 @@ public class MatrixRational
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
         if (jj >= num_Cols) { linIndep = false; break; }
-        if (answer.rows[ii][jj] == unit) { continue; }
-        var factor = unit / answer.rows[ii][jj];
+        Rational leadCoeff = new Rational(answer.rows[ii][jj]);
+        if (leadCoeff == unit) { continue; }
+        var factor = unit / leadCoeff;
         answer.scaleRow(ii, factor);
         det = det * factor;
         adjusting = true;
