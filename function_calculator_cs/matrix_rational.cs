@@ -244,7 +244,7 @@ public class MatrixRational
       // else ... Bubble sort while computing determinant.
       for (int ii = 0; ii < num_Rows; ++ii)
       {
-        if (ignoreDeterminant) { break; }
+        //if (ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
         for (int jj = ii + 1; jj < num_Rows; ++jj)
