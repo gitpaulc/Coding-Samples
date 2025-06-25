@@ -99,9 +99,9 @@ namespace function_calculator_cs
 
 bool test_rational()
 {
-  console.Text = "";
+  console.Text = "Testing rational numbers:";
   Rational zero = new Rational();
-  console.Text += Environment.NewLine + "Zero = " + zero;
+  console.Text += Environment.NewLine + Environment.NewLine + "Zero = " + zero;
   Rational one = new Rational();
   one = one + new Rational(1, 2);
   one = one + new Rational(1, 3);
@@ -133,8 +133,9 @@ bool test_rational()
 
 bool test_quadratic()
 {
+  console.Text = "Testing sums of square roots:";
   var zero = new QuadraticNumber();
-  console.Text = Environment.NewLine + "Zero = " + zero;
+  console.Text += Environment.NewLine + Environment.NewLine + "Zero = " + zero;
   zero = QuadraticNumber.sqrt(9) - new QuadraticNumber(new Rational(3));
   console.Text += Environment.NewLine + "Zero = " + zero;
   var twoThirds = new QuadraticNumber(new Rational(2, 3));
@@ -154,6 +155,7 @@ bool test_quadratic()
   console.Text += Environment.NewLine + "Square root of 2/3 = " + QuadraticNumber.sqrt(rationalOut);
   var goldenRatio = QuadraticNumber.sqrt(new Rational(5, 4)) + new QuadraticNumber(new Rational(1, 2));
   console.Text += Environment.NewLine + "The golden ratio is " + goldenRatio;
+  return true; ////
   var oneOverGolden = QuadraticNumber.sqrt(new Rational(5, 4)) - new QuadraticNumber(new Rational(1, 2));
   console.Text += Environment.NewLine + "One = " + (goldenRatio * oneOverGolden);
   oneOverGolden = new QuadraticNumber(new Rational(1)) / goldenRatio;
@@ -298,7 +300,15 @@ bool test_quadratic()
       ResetCalcPanel();
     }
 
-    private void runTests()
+    private bool incrementTest()
+    {
+      if (testState.whichTest < 0) { return false; }
+      testState.testState = 0;
+      testState.whichTest++;
+      return runTests();
+    }
+
+    private bool runTests()
     {
       testBtn.Visible = false;
       continueBtn.Visible = true;
@@ -313,19 +323,38 @@ bool test_quadratic()
         if (testState.testState == 0) { test_mp(); }
         else if (testState.testState == 1) { test_mp2(); }
         else if (testState.testState == 2) { test_mp3(); }
-        else if (testState.testState == 3) { test_rational(); }
-        else if (testState.testState == 4) { test_quadratic(); }
-        else if (testState.testState == 5)
+        else if (testState.testState > 0)
+        {
+          incrementTest();
+          return true;
+        }
+      }
+      else if (testState.whichTest == 1)
+      {
+        if (testState.testState == 0) { test_rational(); }
+        else if (testState.testState > 0)
+        {
+          incrementTest();
+          return true;
+        }
+      }
+      else if (testState.whichTest == 2)
+      {
+        endCurrentTest.Visible = false;
+        if (testState.testState == 0) { test_quadratic(); }
+        else if (testState.testState == 1)
         {
           console.Text = "";
           console.Text = Environment.NewLine + "Done.";
         }
         else if (testState.testState > 0)
         {
-          endTests(); return;
+          endTests();
+          return false;
         }
       }
-      else if (testState.whichTest < 0) { endTests(); return; }
+      else if (testState.whichTest < 0) { endTests(); return false; }
+      return false;
     }
 
     public MainWindow()

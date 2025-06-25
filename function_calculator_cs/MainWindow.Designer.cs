@@ -229,6 +229,7 @@ namespace function_calculator_cs
 
     private void OnEndCurrentTest(object sender, EventArgs e)
     {
+      if (!incrementTest()) { return; }
       testState.whichTest = -1;
       testState.testState = 0;
       console.Text = Environment.NewLine + "Done.";
