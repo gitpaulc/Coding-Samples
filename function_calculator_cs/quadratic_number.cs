@@ -291,7 +291,11 @@ public class QuadraticNumber
     return sum;
   }
 
-  public static QuadraticNumber operator-(in QuadraticNumber body, in QuadraticNumber rhs) const;
+  public static QuadraticNumber operator-(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    return body + (-rhs);
+  }
+
   public static QuadraticNumber operator*(in QuadraticNumber body, in QuadraticNumber rhs)
   {
     QuadraticNumber product = new QuadraticNumber();
@@ -314,7 +318,37 @@ public class QuadraticNumber
   }
 
   /** \brief Uses inversion of the multiplication operator. */
-  public static QuadraticNumber operator/(in QuadraticNumber body, in QuadraticNumber rhs) const;
+  public static QuadraticNumber operator/(in QuadraticNumber body, in QuadraticNumber rhs)
+  {
+    if (body.content.Count == 0) { return new QuadraticNumber(body); }
+    if (rhs == zero()) { throw new System.Exception("Division by zero."); }
+    Dictionary<int, mp> index2Root = new Dictionary<int, mp>();
+    Dictionary<mp, int> root2Index = new Dictionary<mp, int>();
+    MatrixRational multMatrix = rhs.getMultiplicationMatrix(ref root2Index, ref index2Root);
+    Boolean success = false;
+    MatrixRational multInverse = multMatrix.inverse(ref success);
+    if (!success) { throw new System.Exception("Division failed."); }
+    var dim = multMatrix.numRows();
+    MatrixRational multVector = new MatrixRational();
+    {
+      List<Rational> row = new List<Rational>();
+      for (int ii = 0; ii < dim; ++ii) { row[ii] = Rational.zero(); }
+      row[root2Index[new mp(1)]] = new Rational(1); // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
+      multVector.addRow(row);
+      multVector = multVector.transpose();
+    }
+    multVector = multInverse * multVector;
+    QuadraticNumber reciprocal = new QuadraticNumber();
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      Rational coeff = multVector.at(ii, 0);
+      if (coeff == Rational.zero()) { continue; }
+      reciprocal.content[index2Root[ii]] = coeff;
+      //reciprocal = reciprocal + QuadraticNumber::sqrt(Rational(index2Root[ii], 1)) * multVector.at(ii, 0);
+    }
+    return body * reciprocal;
+  }
+
   public QuadraticNumber pow(int p); /**< `return` The p'th power of the number. */
 
   public override bool Equals(object? obj)
