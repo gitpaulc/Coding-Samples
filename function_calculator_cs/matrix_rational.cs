@@ -237,14 +237,14 @@ public class MatrixRational
     bool gotToRowEchelon = false;
     for (bool performingRref = true; performingRref; performingRref = !performingRref)
     {
-      //if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+      if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
       {
-        //answer.rows.Sort((P, Q) => compareLessThan(P, Q)); // Sort in ascending order.
+        answer.rows.Sort((P, Q) => compareLessThan(Q, P)); // Sort in ascending order.
       }
       // else ... Bubble sort while computing determinant.
       for (int ii = 0; ii < num_Rows; ++ii)
       {
-        //if (ignoreDeterminant) { break; }
+        if (ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
         for (int jj = ii + 1; jj < num_Rows; ++jj)
