@@ -339,7 +339,7 @@ public class QuadraticNumber
     MatrixRational multVector = new MatrixRational();
     {
       List<Rational> row = new List<Rational>();
-      for (int ii = 0; ii < dim; ++ii) { row[ii] = Rational.zero(); }
+      for (int ii = 0; ii < dim; ++ii) { row.Add(Rational.zero()); }
       row[root2Index[new mp(1)]] = new Rational(1); // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
       multVector.addRow(row);
       multVector = multVector.transpose();
