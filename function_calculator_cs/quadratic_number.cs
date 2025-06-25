@@ -412,7 +412,9 @@ public class QuadraticNumber
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(content);
+    var hash = new HashCode();
+    foreach (var iter in content) { hash.Add(iter); }
+    return hash.ToHashCode();
   }
 
   public static Boolean operator!=(in QuadraticNumber body, in QuadraticNumber rhs)

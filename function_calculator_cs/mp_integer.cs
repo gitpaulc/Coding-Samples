@@ -682,10 +682,7 @@ public class mp // : IEquatable<mp?>
   public bool Equals(mp? other)
   {
     if (other is null) { return false; }
-    //if (other.negative != negative) { return false; }
-    //if ((self.Count == 0) && (other.self.Count == 0)) { return true; }
-    //return EqualityComparer<List<int> >.Default.Equals(self, other.self);
-    
+
     var diff = this - other;
     foreach (var iter in diff.self)
     {
@@ -696,7 +693,10 @@ public class mp // : IEquatable<mp?>
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(self, negative);
+    var hash = new HashCode();
+    hash.Add(negative);
+    foreach (var iter in self) { hash.Add(iter); }
+    return hash.ToHashCode();
   }
 }
 

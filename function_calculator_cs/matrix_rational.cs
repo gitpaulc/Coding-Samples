@@ -555,7 +555,16 @@ public class MatrixRational
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(rows);
+    var hash = new HashCode();
+    int num_Rows = numRows(); int num_Cols = numCols();
+    for (int ii = 0; ii < num_Rows; ++ii)
+    {
+      for (int jj = 0; jj < num_Cols; ++jj)
+      {
+        hash.Add(rows[ii][jj]);
+      }
+    }
+    return hash.ToHashCode();
   }
 }
 }
