@@ -155,10 +155,10 @@ public class Rational
       Boolean found = numFactors.TryGetValue(iter.Key, out iterSecond);
       if (!found)
       {
-        numFactors[iter.Key] = -iterSecond;
+        numFactors[iter.Key] = -iter.Value;
         continue;
       }
-      numFactors[iter.Key] -= iterSecond;
+      numFactors[iter.Key] -= iter.Value;
     }
     Dictionary<mp, int> answer = new Dictionary<mp, int>();
     int countFactors = (int)numFactors.Count;
