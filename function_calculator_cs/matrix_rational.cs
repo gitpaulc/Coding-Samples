@@ -438,7 +438,7 @@ public class MatrixRational
     int num_Rows = (int)rows.Count;
     int num_Cols = (int)rows[0].Count;
     answer = zeroMatrix(num_Cols, num_Rows);
-
+      
     for (int ii = 0; ii < num_Cols; ++ii) { for (int jj = 0; jj < num_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
     return answer;
   }

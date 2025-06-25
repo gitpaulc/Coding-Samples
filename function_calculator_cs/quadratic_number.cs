@@ -81,7 +81,7 @@ public class QuadraticNumber
   public QuadraticNumber(in QuadraticNumber other)
   {
     if (other is null) { throw new System.Exception("Trying to copy a null quadratic number."); }
-    content = new Dictionary<mp, Rational>(content);
+    content = new Dictionary<mp, Rational>(other.content);
   }
 
   public static QuadraticNumber zero()
