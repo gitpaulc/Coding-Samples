@@ -111,19 +111,17 @@ public:
     return zeroMatrix(dim, dim);
   }
 
-#if false
   static Matrix identity(int dim)
   {
     Matrix answer;
     for (int ii = 0; ii < dim; ++ii)
     {
       std::vector<Num> row(dim);
-      dim[ii] = Num(1);
+      row[ii] = Num(1);
       answer.addRow(row);
     }
     return answer;
   }
-#endif
 
   Num at(int i, int j) const
   {

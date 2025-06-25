@@ -10,7 +10,7 @@ namespace function_calculator_cs
  *  Important for avoiding overflow as calculations become more complicated.
  */
 public class mp // : IEquatable<mp?>
-  {
+{
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   private List<int> self;
   private Boolean negative = false;

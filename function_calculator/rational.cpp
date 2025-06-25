@@ -115,7 +115,7 @@ namespace FunctionalCalculator
     auto sqPartNum = num.separateSquaredPart();
     auto sqPartDen = denom.separateSquaredPart();
     answer.first = Rational(sqPartNum.first, sqPartDen.first);
-    answer.first = Rational(sqPartNum.second, sqPartDen.second);
+    answer.second = Rational(sqPartNum.second, sqPartDen.second);
     return answer;
   }
 
@@ -190,20 +190,19 @@ namespace FunctionalCalculator
 
   bool Rational::operator>(const Rational& rhs) const
   {
-    if (num * rhs.denom > denom * rhs.num) { return true; }
-    return false;
+    return (rhs < (*this));
   }
 
   bool Rational::operator<=(const Rational& rhs) const
   {
-    if (num * rhs.denom <= denom * rhs.num) { return true; }
-    return false;
+    if ((*this) == rhs) { return true; }
+    return ((*this) < rhs);
   }
 
   bool Rational::operator>=(const Rational& rhs) const
   {
-    if (num * rhs.denom >= denom * rhs.num) { return true; }
-    return false;
+    if ((*this) == rhs) { return true; }
+    return ((*this) > rhs);
   }
 
   std::pair<double, double> Rational::get() const
