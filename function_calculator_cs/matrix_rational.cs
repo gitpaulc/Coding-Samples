@@ -23,8 +23,16 @@ public class MatrixRational
   /** \brief Useful for resorting rows in MatrixRational. */
   private static int compareLessThan(in List<Rational> P, in List<Rational> Q)
   {
-    if (getLeadingOneIndex(P) < getLeadingOneIndex(Q)) { return 1; }
-    return -1;
+    var leadP = getLeadingOneIndex(P);
+    var leadQ = getLeadingOneIndex(Q);
+    if (leadP < leadQ) { return 1; }
+    if (leadQ < leadP) { return -1; }
+    if (P.Count != Q.Count) { return -1; }
+    for (int ii = 0; ii < P.Count; ++ii)
+    {
+      if (P[ii] != Q[ii]) { return -1; }
+    }
+    return 0;
   }
 
   public override string ToString()

@@ -15,7 +15,7 @@ public class QuadraticNumber
    * would be represented as:
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
-  private Dictionary<mp, Rational> content = new Dictionary<mp, Rational>();
+  private SortedDictionary<mp, Rational> content = new SortedDictionary<mp, Rational>();
   /** \brief From Galois Theory, multiplication acts as a linear transformation upon vector space where the square roots are basis elements.
    *  \param root2Index is an output parameter that assigns a row index to its corresponding square root.
    *  \param index2Root is an output parameter that assigns to each row index its corresponding square root.
@@ -65,12 +65,12 @@ public class QuadraticNumber
 
   public QuadraticNumber()
   {
-    content = new Dictionary<mp, Rational>();
+    content = new SortedDictionary<mp, Rational>();
   }
 
   public QuadraticNumber(in Rational number)
   {
-    content = new Dictionary<mp, Rational>();
+    content = new SortedDictionary<mp, Rational>();
     if (number != new Rational())
     {
       var one_ = new mp(1);
@@ -81,7 +81,7 @@ public class QuadraticNumber
   public QuadraticNumber(in QuadraticNumber other)
   {
     if (other is null) { throw new System.Exception("Trying to copy a null quadratic number."); }
-    content = new Dictionary<mp, Rational>(other.content);
+    content = new SortedDictionary<mp, Rational>(other.content);
   }
 
   public static QuadraticNumber zero()

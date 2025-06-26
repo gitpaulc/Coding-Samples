@@ -354,8 +354,7 @@ bool test_quadratic2()
         else if (testState.testState == 1) { test_quadratic2(); }
         else if (testState.testState == 2)
         {
-          console.Text = "";
-          console.Text = Environment.NewLine + "Done.";
+          console.Text = "Done.";
         }
         else if (testState.testState > 0)
         {

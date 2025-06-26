@@ -9,7 +9,7 @@ namespace function_calculator_cs
  *
  *  Important for avoiding overflow as calculations become more complicated.
  */
-public class mp // : IEquatable<mp?>
+public class mp : IComparable<mp> // : IEquatable<mp?>
 {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   private List<int> self;
@@ -697,6 +697,12 @@ public class mp // : IEquatable<mp?>
     hash.Add(negative);
     foreach (var iter in self) { hash.Add(iter); }
     return hash.ToHashCode();
+  }
+  public int CompareTo(mp? obj)
+  {
+    if (obj is null) { return 1; }
+    if (this == obj) { return 0; }
+    return (this < obj) ? -1 : 1;
   }
 }
 
