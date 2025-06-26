@@ -229,19 +229,6 @@ namespace function_calculator_cs
       console.Text = "";
       var unity = new QuadraticNumber(new Rational(1));
       var sumOfSquareRoots = new QuadraticNumber();
-      for (int ii = 0; ii < 6; ++ii)
-      {
-        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-      }
-      var reciprocal = unity / sumOfSquareRoots;
-      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
-      console.Text += Environment.NewLine + "" + reciprocal;
-      var recipIntegral = reciprocal.factorAsIntegral();
-      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
-      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
-        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
-
-      sumOfSquareRoots = new QuadraticNumber();
       QuadraticNumber minusOne = new QuadraticNumber(new Rational(-1));
       for (int ii = 0; ii < 6; ++ii)
       {
@@ -249,10 +236,10 @@ namespace function_calculator_cs
         if ((ii % 2) == 0) { coeff = coeff * coeff; }
         sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
       }
-      reciprocal = unity / sumOfSquareRoots;
+      var reciprocal = unity / sumOfSquareRoots;
       console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
       console.Text += Environment.NewLine + "" + reciprocal;
-      recipIntegral = reciprocal.factorAsIntegral();
+      var recipIntegral = reciprocal.factorAsIntegral();
       console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
       console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
         new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
@@ -283,6 +270,18 @@ namespace function_calculator_cs
         console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
         console.Text += Environment.NewLine + "" + reciprocal;
         console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+        sumOfSquareRoots = new QuadraticNumber();
+        for (int ii = 0; ii < 6; ++ii)
+        {
+          sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+        }
+        reciprocal = unity / sumOfSquareRoots;
+        console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+        console.Text += Environment.NewLine + "" + reciprocal;
+        recipIntegral = reciprocal.factorAsIntegral();
+        console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+        console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+          new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
       }
 
       /*console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
