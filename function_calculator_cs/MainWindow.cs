@@ -332,6 +332,7 @@ namespace function_calculator_cs
     private void endTests()
     {
       console.Text = "";
+      checkSqrt.Visible = false;
       testState = new TestingState();
       testBtn.Visible = true;
       continueBtn.Visible = false;

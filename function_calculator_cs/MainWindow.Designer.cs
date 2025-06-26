@@ -25,6 +25,7 @@ namespace function_calculator_cs
     private Button minusBtn;
     private Button plusBtn;
     private Button powerBtn;
+    private CheckBox checkSqrt;
     private IContainer components = null;
     private class TestingState
     {
@@ -37,6 +38,7 @@ namespace function_calculator_cs
     private class CalculatorState
     {
       public int outBufferHeight = 0;
+      public Boolean squareRooting = false;
       public List<mp> numberStack = new List<mp>();
       public List<mp> redoStack = new List<mp>();
       public enum Calculating
@@ -77,6 +79,7 @@ namespace function_calculator_cs
       cancelBtn = new Button();
       undoBtn = new Button();
       redoBtn = new Button();
+      checkSqrt = new CheckBox();
       SuspendLayout();
 
       continueBtn.Location = new Point(694, 559);
@@ -196,9 +199,19 @@ namespace function_calculator_cs
       redoBtn.UseVisualStyleBackColor = true;
       redoBtn.Click += OnRedo;
 
+      checkSqrt.AutoSize = true;
+      checkSqrt.Location = new Point(12, 486);
+      checkSqrt.Name = "checkSqrt";
+      checkSqrt.Size = new Size(101, 24);
+      checkSqrt.TabIndex = 15;
+      checkSqrt.Text = "Taking square root?";
+      checkSqrt.UseVisualStyleBackColor = true;
+      checkSqrt.CheckedChanged += OnCheckSqrt;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(checkSqrt);
       Controls.Add(redoBtn);
       Controls.Add(undoBtn);
       Controls.Add(cancelBtn);
@@ -239,6 +252,11 @@ namespace function_calculator_cs
     private void OnTestClicked(object sender, EventArgs e)
     {
       runTests();
+    }
+
+    private void OnCheckSqrt(object sender, EventArgs e)
+    {
+      calc.squareRooting = !calc.squareRooting;
     }
 
     private void OnNumberLabelClick(object sender, EventArgs e) { }
