@@ -188,88 +188,93 @@ bool test_quadratic2()
   console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
 
-  /*std::string prompt;
-  console.Text += Environment.NewLine + Environment.NewLine + "More... or 'T' to end current test?  ";
-  std::cin >> prompt;
-  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = QuadraticNumber();
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 5; ++ii)
   {
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
+  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
+  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    QuadraticNumber coeff(-1);
+    QuadraticNumber coeff = new QuadraticNumber(new Rational(-1));
     if ((ii % 2) == 0) { coeff = coeff * coeff; }
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
 
-  console.Text += Environment.NewLine + Environment.NewLine + "More... or 'T' to end current test?  ";
-  std::cin >> prompt;
-  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = QuadraticNumber();
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 5; ++ii)
   {
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   var recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
+  console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+    new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
+  console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+    new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
 
-  sumOfSquareRoots = QuadraticNumber();
+  sumOfSquareRoots = new QuadraticNumber();
+  QuadraticNumber minusOne = new QuadraticNumber(new Rational(-1));
   for (int ii = 0; ii < 6; ++ii)
   {
-    QuadraticNumber coeff(-1);
+    QuadraticNumber coeff = new QuadraticNumber(minusOne);
     if ((ii % 2) == 0) { coeff = coeff * coeff; }
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
+  console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+    new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
 
-  sumOfSquareRoots = QuadraticNumber();
+  sumOfSquareRoots = new QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    QuadraticNumber coeff(-1);
+    QuadraticNumber coeff = new QuadraticNumber(minusOne);
     if ((ii % 2) == 1) { coeff = coeff * coeff; }
     sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
   }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+  reciprocal = unity / sumOfSquareRoots;
+  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+  console.Text += Environment.NewLine + "" + reciprocal;
   recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
+  console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+    new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
 
-  console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
+  /*console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
   for (int lim_ = 7; lim_ < 11; ++lim_)
@@ -286,11 +291,11 @@ bool test_quadratic2()
     {
       sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
     }
-    reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+    reciprocal = unity / sumOfSquareRoots;
     console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
     recipIntegral = reciprocal.factorAsIntegral();
     console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-    console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
+    console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second));
   }*/
 
   return true;
