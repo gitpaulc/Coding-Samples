@@ -259,19 +259,10 @@ namespace function_calculator_cs
       console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
         new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
 
-      if (false) ///
+      for (int lim_ = 7; lim_ < 8; ++lim_)
       {
         sumOfSquareRoots = new QuadraticNumber();
-        for (int ii = 0; ii < 6; ++ii)
-        {
-          sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-        }
-        reciprocal = unity / sumOfSquareRoots;
-        console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
-        console.Text += Environment.NewLine + "" + reciprocal;
-        console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-        sumOfSquareRoots = new QuadraticNumber();
-        for (int ii = 0; ii < 6; ++ii)
+        for (int ii = 0; ii < lim_; ++ii)
         {
           sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
         }
@@ -283,31 +274,50 @@ namespace function_calculator_cs
         console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
           new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
       }
+      return true;
+    }
 
-      /*console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-      for (int lim_ = 7; lim_ < 11; ++lim_)
+    bool test_quadratic4()
+    {
+      console.Text = "";
+      var unity = new QuadraticNumber(new Rational(1));
+      QuadraticNumber minusOne = new QuadraticNumber(new Rational(-1));
+      var sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
       {
-        if (lim_ == 9)
-        {
-          console.Text += Environment.NewLine + Environment.NewLine + "The next part of this test is slow.";
-          console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
-          std::cin >> prompt;
-          if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-        }
-        sumOfSquareRoots = QuadraticNumber();
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      var reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      var recipIntegral = reciprocal.factorAsIntegral();
+      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      for (int lim_ = 8; lim_ < 11; ++lim_)
+      {
+        sumOfSquareRoots = new QuadraticNumber();
         for (int ii = 0; ii < lim_; ++ii)
         {
           sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
         }
         reciprocal = unity / sumOfSquareRoots;
-        console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
+        console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+        console.Text += Environment.NewLine + "" + reciprocal;
         recipIntegral = reciprocal.factorAsIntegral();
-        console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-        console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second));
-      }*/
-
+        console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+        console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+          new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      }
       return true;
     }
 
@@ -368,6 +378,7 @@ namespace function_calculator_cs
         if (testState.testState == 0) { test_quadratic(); }
         else if (testState.testState == 1) { test_quadratic2(); }
         else if (testState.testState == 2) { test_quadratic3(); }
+        //else if (testState.testState == 3) { test_quadratic4(); }
         else if (testState.testState == 3)
         {
           console.Text = "Done.";
