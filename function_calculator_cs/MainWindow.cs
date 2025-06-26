@@ -303,17 +303,25 @@ namespace function_calculator_cs
       console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
       console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
         new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      console.Text += Environment.NewLine + "The next test lasts a long time. \"End Current Test\" to skip it.";
+      return true;
+    }
+
+    bool test_quadratic5()
+    {
+      var unity = new QuadraticNumber(new Rational(1));
+      console.Text = "";
       for (int lim_ = 8; lim_ < 11; ++lim_)
       {
-        sumOfSquareRoots = new QuadraticNumber();
+        var sumOfSquareRoots = new QuadraticNumber();
         for (int ii = 0; ii < lim_; ++ii)
         {
           sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
         }
-        reciprocal = unity / sumOfSquareRoots;
+        var reciprocal = unity / sumOfSquareRoots;
         console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
         console.Text += Environment.NewLine + "" + reciprocal;
-        recipIntegral = reciprocal.factorAsIntegral();
+        var recipIntegral = reciprocal.factorAsIntegral();
         console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
         console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
           new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
@@ -334,9 +342,15 @@ namespace function_calculator_cs
       ResetCalcPanel();
     }
 
+    private int totalNumTests = 3;
+
     private bool incrementTest()
     {
       if (testState.whichTest < 0) { return false; }
+      if (testState.whichTest >= totalNumTests - 1)
+      {
+        return true;
+      }
       testState.testState = 0;
       testState.whichTest++;
       return runTests();
@@ -372,14 +386,14 @@ namespace function_calculator_cs
           return true;
         }
       }
-      else if (testState.whichTest == 2)
+      else if (testState.whichTest == totalNumTests - 1) // 2
       {
-        endCurrentTest.Visible = false;
         if (testState.testState == 0) { test_quadratic(); }
         else if (testState.testState == 1) { test_quadratic2(); }
         else if (testState.testState == 2) { test_quadratic3(); }
-        //else if (testState.testState == 3) { test_quadratic4(); }
-        else if (testState.testState == 3)
+        else if (testState.testState == 3) { test_quadratic4(); }
+        else if (testState.testState == 4) { test_quadratic5(); }
+        else if (testState.testState == 5)
         {
           console.Text = "Done.";
         }

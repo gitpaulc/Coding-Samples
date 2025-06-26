@@ -27,10 +27,11 @@ public class MatrixRational
     var leadQ = getLeadingOneIndex(Q);
     if (leadP < leadQ) { return 1; }
     if (leadQ < leadP) { return -1; }
-    if (P.Count != Q.Count) { return -1; }
+    if (P.Count > Q.Count) { return 1; }
+    if (Q.Count > P.Count) { return -1; }
     for (int ii = 0; ii < P.Count; ++ii)
     {
-      if (P[ii] != Q[ii]) { return -1; }
+      if (P[ii] != Q[ii]) { return (P[ii] > Q[ii]) ? 1 : -1; }
     }
     return 0;
   }
@@ -242,17 +243,21 @@ public class MatrixRational
     int num_Rows = (int)rows.Count;
     int num_Cols = (int)rows[0].Count;
     MatrixRational answer = new MatrixRational(this);
-    bool gotToRowEchelon = false;
+    Boolean gotToRowEchelon = false;
+    Boolean fastSorting = false;
     for (bool performingRref = true; performingRref; performingRref = !performingRref)
     {
-      if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+      if (fastSorting)
       {
-        answer.rows.Sort((P, Q) => compareLessThan(Q, P)); // Sort in ascending order.
+        if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+        {
+          answer.rows.Sort((P, Q) => compareLessThan(Q, P)); // Sort in ascending order.
+        }
       }
       // else ... Bubble sort while computing determinant.
       for (int ii = 0; ii < num_Rows; ++ii)
       {
-        if (ignoreDeterminant) { break; }
+        if (fastSorting && ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
         for (int jj = ii + 1; jj < num_Rows; ++jj)
