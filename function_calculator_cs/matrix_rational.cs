@@ -23,8 +23,17 @@ public class MatrixRational
   /** \brief Useful for resorting rows in MatrixRational. */
   private static int compareLessThan(in List<Rational> P, in List<Rational> Q)
   {
-    if (getLeadingOneIndex(P) < getLeadingOneIndex(Q)) { return 1; }
-    return -1;
+    var leadP = getLeadingOneIndex(P);
+    var leadQ = getLeadingOneIndex(Q);
+    if (leadP < leadQ) { return 1; }
+    if (leadQ < leadP) { return -1; }
+    if (P.Count > Q.Count) { return 1; }
+    if (Q.Count > P.Count) { return -1; }
+    for (int ii = 0; ii < P.Count; ++ii)
+    {
+      if (P[ii] != Q[ii]) { return (P[ii] > Q[ii]) ? 1 : -1; }
+    }
+    return 0;
   }
 
   public override string ToString()
@@ -142,7 +151,7 @@ public class MatrixRational
   public MatrixRational(in List<Rational> rowIn)
   {
     rows = new List<List<Rational> >();
-    if (rowIn.Count > 0) { rows.Add(rowIn); }
+    if (rowIn.Count > 0) { rows.Add(new List<Rational>(rowIn)); }
   }
 
   public MatrixRational(in MatrixRational rhs)
@@ -155,7 +164,7 @@ public class MatrixRational
         var current = new List<Rational>();
         for (int jj = 0; jj < rhs.rows[ii].Count; ++jj)
         {
-          current.Add(rhs.rows[ii][jj]);
+          current.Add(new Rational(rhs.rows[ii][jj]));
         }
         rows.Add(current);
       }
@@ -164,9 +173,9 @@ public class MatrixRational
 
   public void addRow(in List<Rational> rowIn)
   {
-    if (rows.Count == 0) { rows.Add(rowIn); return; }
+    if (rows.Count == 0) { rows.Add(new List<Rational>(rowIn)); return; }
     if (rowIn.Count != rows[0].Count) { throw new System.Exception("Rows must have equal length."); }
-    rows.Add(rowIn);
+    rows.Add(new List<Rational>(rowIn));
   }
 
   /** \brief Elementary row operation. Changes sign of the determinant if i != j. */
@@ -234,17 +243,21 @@ public class MatrixRational
     int num_Rows = (int)rows.Count;
     int num_Cols = (int)rows[0].Count;
     MatrixRational answer = new MatrixRational(this);
-    bool gotToRowEchelon = false;
+    Boolean gotToRowEchelon = false;
+    Boolean fastSorting = false;
     for (bool performingRref = true; performingRref; performingRref = !performingRref)
     {
-      if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+      if (fastSorting)
       {
-        answer.rows.Sort((P, Q) => compareLessThan(P, Q)); // Sort in ascending order.
+        if (ignoreDeterminant && (!gotToRowEchelon)) // Rearrange rows...
+        {
+          answer.rows.Sort((P, Q) => compareLessThan(Q, P)); // Sort in ascending order.
+        }
       }
       // else ... Bubble sort while computing determinant.
       for (int ii = 0; ii < num_Rows; ++ii)
       {
-        if (ignoreDeterminant) { break; }
+        if (fastSorting && ignoreDeterminant) { break; }
         if (gotToRowEchelon) { break; }
         int leadI = getLeadingOneIndex(answer.rows[ii]);
         for (int jj = ii + 1; jj < num_Rows; ++jj)
@@ -265,8 +278,9 @@ public class MatrixRational
         if (gotToRowEchelon) { break; }
         int jj = getLeadingOneIndex(answer.rows[ii]);
         if (jj >= num_Cols) { linIndep = false; break; }
-        if (answer.rows[ii][jj] == unit) { continue; }
-        var factor = unit / answer.rows[ii][jj];
+        Rational leadCoeff = new Rational(answer.rows[ii][jj]);
+        if (leadCoeff == unit) { continue; }
+        var factor = unit / leadCoeff;
         answer.scaleRow(ii, factor);
         det = det * factor;
         adjusting = true;
@@ -371,6 +385,7 @@ public class MatrixRational
   public static MatrixRational operator+(in MatrixRational body, in MatrixRational rhs)
   {
     if ((body.rows.Count == 0) && !(rhs.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
+    if ((body.rows.Count == 0) && (rhs.rows.Count == 0)) { return new MatrixRational(); }
     if ((rhs.rows.Count == 0) && !(body.rows.Count == 0)) { throw new System.Exception("MatrixRational sizes must be equal."); }
     if (body.rows.Count != rhs.rows.Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
     if (body.rows[0].Count != rhs.rows[0].Count) { throw new System.Exception("MatrixRational sizes must be equal."); }
@@ -438,7 +453,14 @@ public class MatrixRational
     int num_Cols = (int)rows[0].Count;
     answer = zeroMatrix(num_Cols, num_Rows);
 
-    for (int ii = 0; ii < num_Cols; ++ii) { for (int jj = 0; jj < num_Rows; ++jj) { answer.rows[ii][jj] = rows[jj][ii]; } }
+    for (int ii = 0; ii < num_Cols; ++ii)
+    {
+      for (int jj = 0; jj < num_Rows; ++jj)
+      {
+        answer.rows[ii][jj] = new Rational(rows[jj][ii]);
+      }
+    }
+
     return answer;
   }
 
@@ -555,7 +577,16 @@ public class MatrixRational
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(rows);
+    var hash = new HashCode();
+    int num_Rows = numRows(); int num_Cols = numCols();
+    for (int ii = 0; ii < num_Rows; ++ii)
+    {
+      for (int jj = 0; jj < num_Cols; ++jj)
+      {
+        hash.Add(new Rational(rows[ii][jj]));
+      }
+    }
+    return hash.ToHashCode();
   }
 }
 }

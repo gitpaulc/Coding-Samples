@@ -97,197 +97,242 @@ namespace function_calculator_cs
       redoBtn.Visible = (calc.redoStack.Count > 0);
     }
 
-bool test_rational()
-{
-  console.Text = "";
-  Rational zero = new Rational();
-  console.Text += Environment.NewLine + "Zero = " + zero;
-  Rational one = new Rational();
-  one = one + new Rational(1, 2);
-  one = one + new Rational(1, 3);
-  one = one + new Rational(1, 6);
-  console.Text += Environment.NewLine + "One = " + one;
-  console.Text += Environment.NewLine + "Prime factorization of one = " + one.printFactors();
-  console.Text += Environment.NewLine + "Prime factorization of -1 = " + (-one).printFactors();
-  Rational half = new Rational(-1, 4) * new Rational(4, -2);
-  console.Text += Environment.NewLine + "One half = " + half;
-  Rational thePower = new Rational(half);
-  for (int i = 0; i < 6; ++i)
-  {
-    var newPower = thePower * thePower;
-    console.Text += Environment.NewLine + "" + thePower + "^2 = " + newPower;
-    thePower = newPower;
-  }
-  Rational twelve = new Rational(36, 3);
-  console.Text += Environment.NewLine + "Prime factorization of twelve = " + twelve.printFactors();
-  Rational minusTwelve = new Rational(24, -2);
-  console.Text += Environment.NewLine + "Prime factorization of negative twelve = " + minusTwelve.printFactors();
-  Rational oneOver2048 = new Rational(2, 4096);
-  console.Text += Environment.NewLine + "Prime factorization of 1 / 2048 = " + oneOver2048.printFactors();
-  Rational hundred = new Rational(1000, 10);
-  console.Text += Environment.NewLine + "Prime factorization of 100 = " + hundred.printFactors();
-  Rational myNum = new Rational(-24, 138);
-  console.Text += Environment.NewLine + "Prime factorization of -24 / 138 = " + myNum.printFactors();
-  return true;
-}
-
-bool test_quadratic()
-{
-  var zero = new QuadraticNumber();
-  console.Text = Environment.NewLine + "Zero = " + zero;
-  zero = QuadraticNumber.sqrt(9) - new QuadraticNumber(new Rational(3));
-  console.Text += Environment.NewLine + "Zero = " + zero;
-  var twoThirds = new QuadraticNumber(new Rational(2, 3));
-  console.Text += Environment.NewLine + "Two-thirds = " + twoThirds;
-  var one = QuadraticNumber.sqrt(1);
-  console.Text += Environment.NewLine + "Square root of 1 = " + one;
-  var sqrt2 = QuadraticNumber.sqrt(2);
-  console.Text += Environment.NewLine + "Square root of 2 = " + sqrt2;
-  var sqrt36 = QuadraticNumber.sqrt(36);
-  console.Text += Environment.NewLine + "Square root of 36 = " + sqrt36;
-  var sqrt12 = QuadraticNumber.sqrt(12);
-  console.Text += Environment.NewLine + "Square root of 12 = " + sqrt12;
-  console.Text += Environment.NewLine + "Twelve is " + (sqrt12 * sqrt12);
-  Rational rationalOut = new Rational();
-  bool twoThirdsIsRational = twoThirds.getRational(ref rationalOut);
-  if (!twoThirdsIsRational) { return false; }
-  console.Text += Environment.NewLine + "Square root of 2/3 = " + QuadraticNumber.sqrt(rationalOut);
-  var goldenRatio = QuadraticNumber.sqrt(new Rational(5, 4)) + new QuadraticNumber(new Rational(1, 2));
-  console.Text += Environment.NewLine + "The golden ratio is " + goldenRatio;
-  var oneOverGolden = QuadraticNumber.sqrt(new Rational(5, 4)) - new QuadraticNumber(new Rational(1, 2));
-  console.Text += Environment.NewLine + "One = " + (goldenRatio * oneOverGolden);
-  oneOverGolden = new QuadraticNumber(new Rational(1)) / goldenRatio;
-  console.Text += Environment.NewLine + "The reciprocal golden ratio is " + oneOverGolden;
-  var sumOfSquareRoots = QuadraticNumber.sqrt(2) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
-  var reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is " + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-  sumOfSquareRoots = QuadraticNumber.sqrt(5) - QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
-  reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " +
-    sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-  sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
-  reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-  var unity = new QuadraticNumber(new Rational(1));
-  sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(5) + QuadraticNumber.sqrt(3) + unity;
-  reciprocal = unity / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-
-  /*std::string prompt;
-  console.Text += Environment.NewLine + Environment.NewLine + "More... or 'T' to end current test?  ";
-  std::cin >> prompt;
-  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 5; ++ii)
-  {
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 6; ++ii)
-  {
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 6; ++ii)
-  {
-    QuadraticNumber coeff(-1);
-    if ((ii % 2) == 0) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
-
-  console.Text += Environment.NewLine + Environment.NewLine + "More... or 'T' to end current test?  ";
-  std::cin >> prompt;
-  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 5; ++ii)
-  {
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  var recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 6; ++ii)
-  {
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 6; ++ii)
-  {
-    QuadraticNumber coeff(-1);
-    if ((ii % 2) == 0) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-
-  sumOfSquareRoots = QuadraticNumber();
-  for (int ii = 0; ii < 6; ++ii)
-  {
-    QuadraticNumber coeff(-1);
-    if ((ii % 2) == 1) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
-  }
-  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-  console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-  recipIntegral = reciprocal.factorAsIntegral();
-  console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-  console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-
-  console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
-  std::cin >> prompt;
-  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  for (int lim_ = 7; lim_ < 11; ++lim_)
-  {
-    if (lim_ == 9)
+    private bool test_rational()
     {
-      console.Text += Environment.NewLine + Environment.NewLine + "The next part of this test is slow.";
-      console.Text += Environment.NewLine + "More... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+      console.Text = "Testing rational numbers:";
+      Rational zero = new Rational();
+      console.Text += Environment.NewLine + Environment.NewLine + "Zero = " + zero;
+      Rational one = new Rational();
+      one = one + new Rational(1, 2);
+      one = one + new Rational(1, 3);
+      one = one + new Rational(1, 6);
+      console.Text += Environment.NewLine + "One = " + one;
+      console.Text += Environment.NewLine + "Prime factorization of one = " + one.printFactors();
+      console.Text += Environment.NewLine + "Prime factorization of -1 = " + (-one).printFactors();
+      Rational half = new Rational(-1, 4) * new Rational(4, -2);
+      console.Text += Environment.NewLine + "One half = " + half;
+      Rational thePower = new Rational(half);
+      for (int i = 0; i < 6; ++i)
+      {
+        var newPower = thePower * thePower;
+        console.Text += Environment.NewLine + "" + thePower + "^2 = " + newPower;
+        thePower = newPower;
+      }
+      Rational twelve = new Rational(36, 3);
+      console.Text += Environment.NewLine + "Prime factorization of twelve = " + twelve.printFactors();
+      Rational minusTwelve = new Rational(24, -2);
+      console.Text += Environment.NewLine + "Prime factorization of negative twelve = " + minusTwelve.printFactors();
+      Rational oneOver2048 = new Rational(2, 4096);
+      console.Text += Environment.NewLine + "Prime factorization of 1 / 2048 = " + oneOver2048.printFactors();
+      Rational hundred = new Rational(1000, 10);
+      console.Text += Environment.NewLine + "Prime factorization of 100 = " + hundred.printFactors();
+      Rational myNum = new Rational(-24, 138);
+      console.Text += Environment.NewLine + "Prime factorization of -24 / 138 = " + myNum.printFactors();
+      return true;
     }
-    sumOfSquareRoots = QuadraticNumber();
-    for (int ii = 0; ii < lim_; ++ii)
-    {
-      sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
-    }
-    reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
-    console.Text += Environment.NewLine + Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:\n" + reciprocal;
-    recipIntegral = reciprocal.factorAsIntegral();
-    console.Text += Environment.NewLine + "This equals " + recipIntegral.first.print(true) + " / " + recipIntegral.second;
-    console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)) + std::endl;
-  }*/
 
-  return true;
-}
+    bool test_quadratic()
+    {
+      console.Text = "Testing sums of square roots:";
+      var zero = new QuadraticNumber();
+      console.Text += Environment.NewLine + Environment.NewLine + "Zero = " + zero;
+      zero = QuadraticNumber.sqrt(9) - new QuadraticNumber(new Rational(3));
+      console.Text += Environment.NewLine + "Zero = " + zero;
+      var twoThirds = new QuadraticNumber(new Rational(2, 3));
+      console.Text += Environment.NewLine + "Two-thirds = " + twoThirds;
+      var one = QuadraticNumber.sqrt(1);
+      console.Text += Environment.NewLine + "Square root of 1 = " + one;
+      var sqrt2 = QuadraticNumber.sqrt(2);
+      console.Text += Environment.NewLine + "Square root of 2 = " + sqrt2;
+      var sqrt36 = QuadraticNumber.sqrt(36);
+      console.Text += Environment.NewLine + "Square root of 36 = " + sqrt36;
+      var sqrt12 = QuadraticNumber.sqrt(12);
+      console.Text += Environment.NewLine + "Square root of 12 = " + sqrt12;
+      console.Text += Environment.NewLine + "Twelve is " + (sqrt12 * sqrt12);
+      Rational rationalOut = new Rational();
+      bool twoThirdsIsRational = twoThirds.getRational(ref rationalOut);
+      if (!twoThirdsIsRational) { return false; }
+      console.Text += Environment.NewLine + "Square root of 2/3 = " + QuadraticNumber.sqrt(rationalOut);
+      var goldenRatio = QuadraticNumber.sqrt(new Rational(5, 4)) + new QuadraticNumber(new Rational(1, 2));
+      console.Text += Environment.NewLine + "The golden ratio is " + goldenRatio;
+      var oneOverGolden = QuadraticNumber.sqrt(new Rational(5, 4)) - new QuadraticNumber(new Rational(1, 2));
+      console.Text += Environment.NewLine + "One = " + (goldenRatio * oneOverGolden);
+      oneOverGolden = new QuadraticNumber(new Rational(1)) / goldenRatio;
+      console.Text += Environment.NewLine + "The reciprocal golden ratio is:";
+      console.Text += Environment.NewLine + "" + oneOverGolden;
+      var sumOfSquareRoots = QuadraticNumber.sqrt(2) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
+      var reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      return true;
+    }
+
+    bool test_quadratic2()
+    {
+      var sumOfSquareRoots = QuadraticNumber.sqrt(5) - QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
+      var reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
+      console.Text = "The reciprocal of " +
+        sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(3) + new QuadraticNumber(new Rational(1));
+      reciprocal = new QuadraticNumber(new Rational(1)) / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      var unity = new QuadraticNumber(new Rational(1));
+      sumOfSquareRoots = QuadraticNumber.sqrt(7) + QuadraticNumber.sqrt(5) + QuadraticNumber.sqrt(3) + unity;
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 5; ++ii)
+      {
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        QuadraticNumber coeff = new QuadraticNumber(new Rational(-1));
+        if ((ii % 2) == 0) { coeff = coeff * coeff; }
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 5; ++ii)
+      {
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      var recipIntegral = reciprocal.factorAsIntegral();
+      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      return true;
+    }
+
+    bool test_quadratic3()
+    {
+      console.Text = "";
+      var unity = new QuadraticNumber(new Rational(1));
+      var sumOfSquareRoots = new QuadraticNumber();
+      QuadraticNumber minusOne = new QuadraticNumber(new Rational(-1));
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        QuadraticNumber coeff = new QuadraticNumber(minusOne);
+        if ((ii % 2) == 0) { coeff = coeff * coeff; }
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
+      }
+      var reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      var recipIntegral = reciprocal.factorAsIntegral();
+      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        QuadraticNumber coeff = new QuadraticNumber(minusOne);
+        if ((ii % 2) == 1) { coeff = coeff * coeff; }
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii) * coeff;
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      recipIntegral = reciprocal.factorAsIntegral();
+      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+
+      for (int lim_ = 7; lim_ < 8; ++lim_)
+      {
+        sumOfSquareRoots = new QuadraticNumber();
+        for (int ii = 0; ii < lim_; ++ii)
+        {
+          sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+        }
+        reciprocal = unity / sumOfSquareRoots;
+        console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+        console.Text += Environment.NewLine + "" + reciprocal;
+        recipIntegral = reciprocal.factorAsIntegral();
+        console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+        console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+          new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      }
+      return true;
+    }
+
+    bool test_quadratic4()
+    {
+      console.Text = "";
+      var unity = new QuadraticNumber(new Rational(1));
+      QuadraticNumber minusOne = new QuadraticNumber(new Rational(-1));
+      var sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      var reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      console.Text += Environment.NewLine + "One = " + (reciprocal * sumOfSquareRoots);
+      sumOfSquareRoots = new QuadraticNumber();
+      for (int ii = 0; ii < 6; ++ii)
+      {
+        sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+      }
+      reciprocal = unity / sumOfSquareRoots;
+      console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+      console.Text += Environment.NewLine + "" + reciprocal;
+      var recipIntegral = reciprocal.factorAsIntegral();
+      console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+      console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+        new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      console.Text += Environment.NewLine + "The next test lasts a long time. \"End Current Test\" to skip it.";
+      return true;
+    }
+
+    bool test_quadratic5()
+    {
+      var unity = new QuadraticNumber(new Rational(1));
+      console.Text = "";
+      for (int lim_ = 8; lim_ < 11; ++lim_)
+      {
+        var sumOfSquareRoots = new QuadraticNumber();
+        for (int ii = 0; ii < lim_; ++ii)
+        {
+          sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber.sqrt(ii);
+        }
+        var reciprocal = unity / sumOfSquareRoots;
+        console.Text += Environment.NewLine + "The reciprocal of " + sumOfSquareRoots + " is:";
+        console.Text += Environment.NewLine + "" + reciprocal;
+        var recipIntegral = reciprocal.factorAsIntegral();
+        console.Text += Environment.NewLine + "This equals " + recipIntegral.Key.ToString(true) + " / " + recipIntegral.Value;
+        console.Text += Environment.NewLine + "One = " + (sumOfSquareRoots * recipIntegral.Key *
+          new QuadraticNumber(new Rational(new mp(1), recipIntegral.Value)));
+      }
+      return true;
+    }
 
     private void endTests()
     {
       console.Text = "";
+      checkSqrt.Visible = false;
       testState = new TestingState();
       testBtn.Visible = true;
       continueBtn.Visible = false;
@@ -298,7 +343,21 @@ bool test_quadratic()
       ResetCalcPanel();
     }
 
-    private void runTests()
+    private int totalNumTests = 3;
+
+    private bool incrementTest()
+    {
+      if (testState.whichTest < 0) { return false; }
+      if (testState.whichTest >= totalNumTests - 1)
+      {
+        return true;
+      }
+      testState.testState = 0;
+      testState.whichTest++;
+      return runTests();
+    }
+
+    private bool runTests()
     {
       testBtn.Visible = false;
       continueBtn.Visible = true;
@@ -313,19 +372,40 @@ bool test_quadratic()
         if (testState.testState == 0) { test_mp(); }
         else if (testState.testState == 1) { test_mp2(); }
         else if (testState.testState == 2) { test_mp3(); }
-        else if (testState.testState == 3) { test_rational(); }
-        else if (testState.testState == 4) { test_quadratic(); }
+        else if (testState.testState > 0)
+        {
+          incrementTest();
+          return true;
+        }
+      }
+      else if (testState.whichTest == 1)
+      {
+        if (testState.testState == 0) { test_rational(); }
+        else if (testState.testState > 0)
+        {
+          incrementTest();
+          return true;
+        }
+      }
+      else if (testState.whichTest == totalNumTests - 1) // 2
+      {
+        if (testState.testState == 0) { test_quadratic(); }
+        else if (testState.testState == 1) { test_quadratic2(); }
+        else if (testState.testState == 2) { test_quadratic3(); }
+        else if (testState.testState == 3) { test_quadratic4(); }
+        else if (testState.testState == 4) { test_quadratic5(); }
         else if (testState.testState == 5)
         {
-          console.Text = "";
-          console.Text = Environment.NewLine + "Done.";
+          console.Text = "Done.";
         }
         else if (testState.testState > 0)
         {
-          endTests(); return;
+          endTests();
+          return false;
         }
       }
-      else if (testState.whichTest < 0) { endTests(); return; }
+      else if (testState.whichTest < 0) { endTests(); return false; }
+      return false;
     }
 
     public MainWindow()

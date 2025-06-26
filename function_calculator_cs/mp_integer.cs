@@ -9,7 +9,7 @@ namespace function_calculator_cs
  *
  *  Important for avoiding overflow as calculations become more complicated.
  */
-public class mp // : IEquatable<mp?>
+public class mp : IComparable<mp> // : IEquatable<mp?>
 {
   /** \brief Stored in reverse place-value as a_0 + a_1 * b + ... + a_p * b^p. */
   private List<int> self;
@@ -61,7 +61,7 @@ public class mp // : IEquatable<mp?>
 
     mp dividend = new mp(this);
     mp quotient = new mp(0);
-    mp prevDividend = dividend;
+    mp prevDividend = new mp(dividend);
     while (rhs <= dividend)
     {
       int numOfDigits = dividend.numDigits();
@@ -84,9 +84,9 @@ public class mp // : IEquatable<mp?>
       quotient = quotient + factor;
       dividend = dividend - factor * rhs;
       if (dividend >= prevDividend) { break; } // Should never happen.
-      prevDividend = dividend;
+      prevDividend = new mp(dividend);
     }
-    remainder = dividend;
+    remainder = new mp(dividend);
     return quotient;
   }
 
@@ -682,10 +682,7 @@ public class mp // : IEquatable<mp?>
   public bool Equals(mp? other)
   {
     if (other is null) { return false; }
-    //if (other.negative != negative) { return false; }
-    //if ((self.Count == 0) && (other.self.Count == 0)) { return true; }
-    //return EqualityComparer<List<int> >.Default.Equals(self, other.self);
-    
+
     var diff = this - other;
     foreach (var iter in diff.self)
     {
@@ -696,7 +693,16 @@ public class mp // : IEquatable<mp?>
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(self, negative);
+    var hash = new HashCode();
+    hash.Add(negative);
+    foreach (var iter in self) { hash.Add(iter); }
+    return hash.ToHashCode();
+  }
+  public int CompareTo(mp? obj)
+  {
+    if (obj is null) { return 1; }
+    if (this == obj) { return 0; }
+    return (this < obj) ? -1 : 1;
   }
 }
 

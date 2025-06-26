@@ -96,7 +96,7 @@ public class Rational
     {
       throw new System.Exception("Operator division by zero.");
     }
-    return new Rational(rhs.num * rhs.denom, rhs.denom * rhs.num);
+    return new Rational(body.num * rhs.denom, body.denom * rhs.num);
   }
 
   public Rational pow(int p) /**< Returns the p'th power of the rational number. */
@@ -155,10 +155,10 @@ public class Rational
       Boolean found = numFactors.TryGetValue(iter.Key, out iterSecond);
       if (!found)
       {
-        numFactors[iter.Key] = -iterSecond;
+        numFactors[iter.Key] = -iter.Value;
         continue;
       }
-      numFactors[iter.Key] -= iterSecond;
+      numFactors[iter.Key] -= iter.Value;
     }
     Dictionary<mp, int> answer = new Dictionary<mp, int>();
     int countFactors = (int)numFactors.Count;

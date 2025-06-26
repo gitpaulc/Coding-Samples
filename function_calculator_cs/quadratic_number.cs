@@ -15,7 +15,7 @@ public class QuadraticNumber
    * would be represented as:
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
-  private Dictionary<mp, Rational> content = new Dictionary<mp, Rational>();
+  private SortedDictionary<mp, Rational> content = new SortedDictionary<mp, Rational>();
   /** \brief From Galois Theory, multiplication acts as a linear transformation upon vector space where the square roots are basis elements.
    *  \param root2Index is an output parameter that assigns a row index to its corresponding square root.
    *  \param index2Root is an output parameter that assigns to each row index its corresponding square root.
@@ -65,12 +65,12 @@ public class QuadraticNumber
 
   public QuadraticNumber()
   {
-    content = new Dictionary<mp, Rational>();
+    content = new SortedDictionary<mp, Rational>();
   }
 
   public QuadraticNumber(in Rational number)
   {
-    content = new Dictionary<mp, Rational>();
+    content = new SortedDictionary<mp, Rational>();
     if (number != new Rational())
     {
       var one_ = new mp(1);
@@ -81,7 +81,7 @@ public class QuadraticNumber
   public QuadraticNumber(in QuadraticNumber other)
   {
     if (other is null) { throw new System.Exception("Trying to copy a null quadratic number."); }
-    content = new Dictionary<mp, Rational>(content);
+    content = new SortedDictionary<mp, Rational>(other.content);
   }
 
   public static QuadraticNumber zero()
@@ -292,13 +292,8 @@ public class QuadraticNumber
         coeff = coeff * sqrtRational;
         radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
-      Rational? summand = new Rational();
-      Boolean found = rhs.content.TryGetValue(radicand, out summand);
-      if ((!found) || (summand is null))
-      {
-        sum.content[radicand] = coeff;
-      }
-      // else continue.
+      if (added.Contains(radicand)) { continue; }
+      sum.content[radicand] = coeff;
     }
     return sum;
   }
@@ -344,7 +339,7 @@ public class QuadraticNumber
     MatrixRational multVector = new MatrixRational();
     {
       List<Rational> row = new List<Rational>();
-      for (int ii = 0; ii < dim; ++ii) { row[ii] = Rational.zero(); }
+      for (int ii = 0; ii < dim; ++ii) { row.Add(Rational.zero()); }
       row[root2Index[new mp(1)]] = new Rational(1); // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
       multVector.addRow(row);
       multVector = multVector.transpose();
@@ -412,7 +407,9 @@ public class QuadraticNumber
 
   public override int GetHashCode()
   {
-    return HashCode.Combine(content);
+    var hash = new HashCode();
+    foreach (var iter in content) { hash.Add(iter); }
+    return hash.ToHashCode();
   }
 
   public static Boolean operator!=(in QuadraticNumber body, in QuadraticNumber rhs)
