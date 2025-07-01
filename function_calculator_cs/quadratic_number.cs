@@ -345,8 +345,6 @@ public class QuadraticNumber
     }
     if (rhs.content.Count == 2)
     {
-      Rational one_ = new Rational(1);
-      Rational norm = new Rational();
       mp aa = new mp(1);  mp bb = new mp(1);
       Rational cc = new Rational();  Rational dd = new Rational();
       int ii = 0;
@@ -357,12 +355,16 @@ public class QuadraticNumber
         else { bb = new mp(iter.Key); dd = new Rational(iter.Value); }
         ++ii;
       }
-      norm = (new Rational(aa, new mp(1))) * cc * cc - (new Rational(bb, new mp(1))) * dd * dd;
+      mp one_ = new mp(1);
+      Rational c_ = new Rational(cc.numerator() * dd.denominator(), one_);
+      Rational d_ = new Rational(dd.numerator() * cc.denominator(), one_);
+      Rational norm = (new Rational(aa, one_)) * c_ * c_ - (new Rational(bb, one_)) * d_ * d_;
       if (norm != Rational.zero())
       {
         var multiplicand = new QuadraticNumber();
-        multiplicand.content[aa] = cc / norm;
-        multiplicand.content[bb] = -dd / norm;
+        Rational factor = new Rational(cc.denominator() * dd.denominator(), one_);
+        multiplicand.content[aa] = (c_ / norm) * factor;
+        multiplicand.content[bb] = -(d_ / norm) * factor;
         return body * multiplicand;
       }
     }
