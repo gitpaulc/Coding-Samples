@@ -103,6 +103,8 @@ public class QuadraticNumber
     return answer;
   }
 
+  public Boolean isCompound() { return (content.Count > 1); }
+
   /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
   public KeyValuePair<QuadraticNumber, mp> factorAsIntegral()
   {

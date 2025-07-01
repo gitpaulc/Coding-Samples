@@ -390,21 +390,21 @@ namespace function_calculator_cs
           console.Text += "Adding...";
           console.Text += Environment.NewLine;
           result = prev + numberOut;
-          console.Text += prev.ToString() + " + ";
+          console.Text += prev.ToString(prev.isCompound()) + " + ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Minus)
         {
           console.Text += "Subtracting...";
           console.Text += Environment.NewLine;
           result = prev - numberOut;
-          console.Text += prev.ToString() + " - ";
+          console.Text += prev.ToString(prev.isCompound()) + " - ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Times)
         {
           console.Text += "Multiplying...";
           console.Text += Environment.NewLine;
           result = prev * numberOut;
-          console.Text += prev.ToString() + " × ";
+          console.Text += prev.ToString(prev.isCompound()) + " × ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Div)
         {
@@ -415,14 +415,14 @@ namespace function_calculator_cs
             result = new QuadraticNumber(new Rational(prevAsInteger / numberOut0, new mp(1)));
           }
           else { result = prev / numberOut; }
-          console.Text += prev.ToString() + " ÷ ";
+          console.Text += prev.ToString(prev.isCompound()) + " ÷ ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Power)
         {
           console.Text += "Exponentiating...";
           console.Text += Environment.NewLine;
           result = prev.powerOf(numberOut0);
-          console.Text += prev.ToString() + " to the power of ";
+          console.Text += prev.ToString(prev.isCompound()) + " to the power of ";
         }
         numberInput.Text = "";
         console.Text += numberOut.ToString() + " = ";
