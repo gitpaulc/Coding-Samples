@@ -332,18 +332,29 @@ namespace function_calculator_cs
       var trimmed = numberInput.Text.Trim();
       if (trimmed.Length == 0) { return; }
       TrimOutputBuffer();
-      Boolean numIsIntegral = new Boolean();
+      bool numIsIntegral = true;
       mp numberOut0 = new mp(0);
       var valid = mp.FromString(trimmed, ref numberOut0);
-      QuadraticNumber numberOut = new QuadraticNumber(new Rational(numberOut0, new mp(1)));
-      {
-        Rational ratio = new Rational();
-        numIsIntegral = numberOut.getRational(ref ratio);
-        if (numIsIntegral) { numIsIntegral = ratio.isInt(); }
-        numberOut0 = ratio.numerator();
-      }
       ++(calc.outBufferHeight);
       console.Text += Environment.NewLine;
+      QuadraticNumber numberOut = new QuadraticNumber();
+      if (calc.squareRooting)
+      {
+        if (numberOut0 >= mp.zero())
+        {
+          numberOut = QuadraticNumber.sqrt(numberOut0);
+          numIsIntegral = false;
+        }
+        else
+        {
+          console.Text += "Imaginary numbers not supported.";
+          return;
+        }
+      }
+      else
+      {
+        numberOut = new QuadraticNumber(new Rational(numberOut0, new mp(1)));
+      }
       if (calc.calculating != CalculatorState.Calculating.Not)
       {
         if ((calc.calculating == CalculatorState.Calculating.Div) && (numberOut == QuadraticNumber.zero()))
