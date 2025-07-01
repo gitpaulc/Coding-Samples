@@ -356,6 +356,7 @@ public class QuadraticNumber
         multiplicand.content[iter.Key] = one_ / (radicand * iter.Value);
       }
       divisionResults[rhs] = multiplicand;
+      divisionResults[multiplicand] = rhs;
       return body * multiplicand;
     }
     if (rhs.content.Count == 2)
@@ -381,6 +382,7 @@ public class QuadraticNumber
         multiplicand.content[aa] = (c_ / norm) * factor;
         multiplicand.content[bb] = -(d_ / norm) * factor;
         divisionResults[rhs] = multiplicand;
+        divisionResults[multiplicand] = rhs;
         return body * multiplicand;
       }
     }
@@ -409,6 +411,7 @@ public class QuadraticNumber
       //reciprocal = reciprocal + QuadraticNumber::sqrt(Rational(index2Root[ii], 1)) * multVector.at(ii, 0);
     }
     divisionResults[rhs] = reciprocal;
+    divisionResults[reciprocal] = rhs;
     return body * reciprocal;
   }
 
