@@ -343,6 +343,29 @@ public class QuadraticNumber
       }
       return body * multiplicand;
     }
+    if (rhs.content.Count == 2)
+    {
+      Rational one_ = new Rational(1);
+      Rational norm = new Rational();
+      mp aa = new mp(1);  mp bb = new mp(1);
+      Rational cc = new Rational();  Rational dd = new Rational();
+      int ii = 0;
+      foreach (var iter in rhs.content)
+      {
+        if (ii >= 2) { break; }
+        if (ii == 0) { aa = new mp(iter.Key); cc = new Rational(iter.Value); }
+        else { bb = new mp(iter.Key); dd = new Rational(iter.Value); }
+        ++ii;
+      }
+      norm = (new Rational(aa, new mp(1))) * cc * cc - (new Rational(bb, new mp(1))) * dd * dd;
+      if (norm != Rational.zero())
+      {
+        var multiplicand = new QuadraticNumber();
+        multiplicand.content[aa] = cc / norm;
+        multiplicand.content[bb] = -dd / norm;
+        return body * multiplicand;
+      }
+    }
     Dictionary<int, mp> index2Root = new Dictionary<int, mp>();
     Dictionary<mp, int> root2Index = new Dictionary<mp, int>();
     MatrixRational multMatrix = rhs.getMultiplicationMatrix(ref root2Index, ref index2Root);
