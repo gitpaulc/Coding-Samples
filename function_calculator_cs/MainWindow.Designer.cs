@@ -272,7 +272,32 @@ namespace function_calculator_cs
 
     private void OnReciprocal(object sender, EventArgs e)
     {
-
+      if (!(reciprocalBtn.Visible)) { return; }
+      if (!(reciprocalBtn.Enabled)) { return; }
+      if (calc.calculating != CalculatorState.Calculating.Not) { return; }
+      if (calc.numberStack.Count <= 0) { return; }
+      TrimOutputBuffer();
+      ++(calc.outBufferHeight);
+      console.Text += Environment.NewLine;
+      QuadraticNumber numberOut = new QuadraticNumber(calc.numberStack.Last());
+      if (numberOut == QuadraticNumber.zero())
+      {
+        console.Text += "Cannot divide by zero.";
+      }
+      else
+      {
+        console.Text += "Reciprocal of ";
+        console.Text += numberOut.ToString();
+        console.Text += " = ";
+        QuadraticNumber one_ = new QuadraticNumber(new Rational(1));
+        numberOut = one_ / numberOut;
+        console.Text += numberOut.ToString();
+        calc.numberStack.Add(numberOut);
+        calc.redoStack.Clear();
+        redoBtn.Visible = (calc.redoStack.Count > 0);
+        undoBtn.Visible = (calc.numberStack.Count > 0);
+        ShowCalcPanel(true);
+      }
     }
 
     private void OnNumberLabelClick(object sender, EventArgs e) { }
