@@ -365,6 +365,15 @@ namespace function_calculator_cs
         if (!valid) { console.Text += "Not a valid number."; return; }
         QuadraticNumber prev = calc.numberStack[calc.numberStack.Count - 1];
         QuadraticNumber result = new QuadraticNumber();
+        bool prevIsIntegral = false;
+        mp prevAsInteger = new mp();
+        if (numIsIntegral)
+        {
+          Rational ratio = new Rational();
+          prevIsIntegral = prev.getRational(ref ratio);
+          if (prevIsIntegral) { prevIsIntegral = ratio.isInt(); }
+          prevAsInteger = ratio.numerator();
+        }
         if (calc.calculating == CalculatorState.Calculating.Plus)
         {
           console.Text += "Adding...";
@@ -390,7 +399,11 @@ namespace function_calculator_cs
         {
           console.Text += "Dividing...";
           console.Text += Environment.NewLine;
-          result = prev / numberOut;
+          if (prevIsIntegral && numIsIntegral)
+          {
+            result = new QuadraticNumber(new Rational(prevAsInteger / numberOut0, new mp(1)));
+          }
+          else { result = prev / numberOut; }
           console.Text += prev.ToString() + " ÷ ";
         }
         else if (calc.calculating == CalculatorState.Calculating.Power)
@@ -405,15 +418,6 @@ namespace function_calculator_cs
         console.Text += result.ToString();
         if (calc.calculating == CalculatorState.Calculating.Div)
         {
-          bool prevIsIntegral = false;
-          mp prevAsInteger = new mp();
-          if (numIsIntegral)
-          {
-            Rational ratio = new Rational();
-            prevIsIntegral = prev.getRational(ref ratio);
-            if (prevIsIntegral) { prevIsIntegral = ratio.isInt(); }
-            prevAsInteger = ratio.numerator();
-          }
           if (prevIsIntegral && numIsIntegral)
           {
             var remainder = prevAsInteger % numberOut0;
