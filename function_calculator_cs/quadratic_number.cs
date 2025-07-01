@@ -2,6 +2,7 @@
 All Rights Reserved.*/
 
 using function_calculator_cs;
+using System.Numerics;
 
 namespace function_calculator_cs
 {
@@ -331,6 +332,17 @@ public class QuadraticNumber
   {
     if (body.content.Count == 0) { return new QuadraticNumber(body); }
     if (rhs == zero()) { throw new System.Exception("Division by zero."); }
+    if (rhs.content.Count == 1)
+    {
+      var multiplicand = new QuadraticNumber();
+      Rational one_ = new Rational(1);
+      foreach (var iter in rhs.content)
+      {
+        Rational radicand = new Rational(iter.Key, new mp(1));
+        multiplicand.content[iter.Key] = one_ / (radicand * iter.Value);
+      }
+      return body * multiplicand;
+    }
     Dictionary<int, mp> index2Root = new Dictionary<int, mp>();
     Dictionary<mp, int> root2Index = new Dictionary<mp, int>();
     MatrixRational multMatrix = rhs.getMultiplicationMatrix(ref root2Index, ref index2Root);
