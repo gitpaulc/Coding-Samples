@@ -209,6 +209,7 @@ namespace function_calculator_cs
       checkSqrt.Text = "Taking square root?";
       checkSqrt.UseVisualStyleBackColor = true;
       checkSqrt.CheckedChanged += OnCheckSqrt;
+      checkSqrt.KeyUp += HandleKeyUp;
 
       reciprocalBtn.Location = new Point(450, 486);
       reciprocalBtn.Name = "reciprocalBtn";

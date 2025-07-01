@@ -10,6 +10,7 @@ namespace function_calculator_cs
 /** \brief A number which is the sum of square roots of integers. */
 public class QuadraticNumber
 {
+  static private Dictionary<QuadraticNumber, QuadraticNumber> divisionResults;
   /** \brief The keys represent which numbers the square roots are taken of. The values are coefficients.
    *
    * So, for example (33 / 4) + 2 * sqrt(2) + 4 * sqrt(3) - (20 / 7) * sqrt(6)
@@ -62,6 +63,11 @@ public class QuadraticNumber
       answer = answer + summand.transpose() * iter.Value;
     }
     return answer;
+  }
+
+  static QuadraticNumber()
+  {
+    divisionResults = new Dictionary<QuadraticNumber, QuadraticNumber>();
   }
 
   public QuadraticNumber()
@@ -332,6 +338,14 @@ public class QuadraticNumber
   {
     if (body.content.Count == 0) { return new QuadraticNumber(body); }
     if (rhs == zero()) { throw new System.Exception("Division by zero."); }
+    {
+      QuadraticNumber? quotient = new QuadraticNumber();
+      Boolean foundQuotient = divisionResults.TryGetValue(rhs, out quotient);
+      if (foundQuotient && !(quotient is null))
+      {
+        return body * quotient;
+      }
+    }
     if (rhs.content.Count == 1)
     {
       var multiplicand = new QuadraticNumber();
@@ -341,6 +355,7 @@ public class QuadraticNumber
         Rational radicand = new Rational(iter.Key, new mp(1));
         multiplicand.content[iter.Key] = one_ / (radicand * iter.Value);
       }
+      divisionResults[rhs] = multiplicand;
       return body * multiplicand;
     }
     if (rhs.content.Count == 2)
@@ -365,6 +380,7 @@ public class QuadraticNumber
         Rational factor = new Rational(cc.denominator() * dd.denominator(), one_);
         multiplicand.content[aa] = (c_ / norm) * factor;
         multiplicand.content[bb] = -(d_ / norm) * factor;
+        divisionResults[rhs] = multiplicand;
         return body * multiplicand;
       }
     }
@@ -392,6 +408,7 @@ public class QuadraticNumber
       reciprocal.content[index2Root[ii]] = coeff;
       //reciprocal = reciprocal + QuadraticNumber::sqrt(Rational(index2Root[ii], 1)) * multVector.at(ii, 0);
     }
+    divisionResults[rhs] = reciprocal;
     return body * reciprocal;
   }
 
