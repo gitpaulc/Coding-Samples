@@ -26,6 +26,7 @@ namespace function_calculator_cs
     private Button plusBtn;
     private Button powerBtn;
     private CheckBox checkSqrt;
+    private Button reciprocalBtn;
     private IContainer components = null;
     private class TestingState
     {
@@ -80,6 +81,7 @@ namespace function_calculator_cs
       undoBtn = new Button();
       redoBtn = new Button();
       checkSqrt = new CheckBox();
+      reciprocalBtn = new Button();
       SuspendLayout();
 
       continueBtn.Location = new Point(694, 559);
@@ -202,15 +204,24 @@ namespace function_calculator_cs
       checkSqrt.AutoSize = true;
       checkSqrt.Location = new Point(12, 486);
       checkSqrt.Name = "checkSqrt";
-      checkSqrt.Size = new Size(101, 24);
+      checkSqrt.Size = new Size(160, 24);
       checkSqrt.TabIndex = 15;
       checkSqrt.Text = "Taking square root?";
       checkSqrt.UseVisualStyleBackColor = true;
       checkSqrt.CheckedChanged += OnCheckSqrt;
 
+      reciprocalBtn.Location = new Point(450, 486);
+      reciprocalBtn.Name = "reciprocalBtn";
+      reciprocalBtn.Size = new Size(38, 29);
+      reciprocalBtn.TabIndex = 16;
+      reciprocalBtn.Text = "1/x";
+      reciprocalBtn.UseVisualStyleBackColor = true;
+      reciprocalBtn.Click += OnReciprocal;
+
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
       ClientSize = new Size(800, 600);
+      Controls.Add(reciprocalBtn);
       Controls.Add(checkSqrt);
       Controls.Add(redoBtn);
       Controls.Add(undoBtn);
@@ -257,6 +268,11 @@ namespace function_calculator_cs
     private void OnCheckSqrt(object sender, EventArgs e)
     {
       calc.squareRooting = !calc.squareRooting;
+    }
+
+    private void OnReciprocal(object sender, EventArgs e)
+    {
+
     }
 
     private void OnNumberLabelClick(object sender, EventArgs e) { }
@@ -523,6 +539,7 @@ namespace function_calculator_cs
       timesBtn.Enabled = show;
       divisionBtn.Enabled = show;
       powerBtn.Enabled = show;
+      reciprocalBtn.Enabled = show;
     }
 
     private void ShowCalcPanel(Boolean show)
@@ -532,6 +549,7 @@ namespace function_calculator_cs
       timesBtn.Visible = show;
       divisionBtn.Visible = show;
       powerBtn.Visible = show;
+      reciprocalBtn.Visible = show;
     }
 
     #endregion // UI Code
