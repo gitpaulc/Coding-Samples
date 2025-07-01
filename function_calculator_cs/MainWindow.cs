@@ -339,6 +339,7 @@ namespace function_calculator_cs
       numberInput.Visible = true;
       enterIntegerLbl.Visible = true;
       okBtn.Visible = true;
+      checkSqrt.Checked = false;
       checkSqrt.Visible = true;
       ResetCalcPanel();
     }
@@ -365,6 +366,7 @@ namespace function_calculator_cs
       numberInput.Visible = false;
       enterIntegerLbl.Visible = false;
       okBtn.Visible = false;
+      checkSqrt.Checked = false;
       checkSqrt.Visible = false;
       ResetCalcPanel();
 

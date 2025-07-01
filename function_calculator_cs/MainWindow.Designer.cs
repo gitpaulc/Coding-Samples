@@ -340,6 +340,8 @@ namespace function_calculator_cs
       QuadraticNumber numberOut = new QuadraticNumber();
       if (calc.squareRooting)
       {
+        checkSqrt.Checked = false;
+        calc.squareRooting = false;
         if (numberOut0 >= mp.zero())
         {
           numberOut = QuadraticNumber.sqrt(numberOut0);
