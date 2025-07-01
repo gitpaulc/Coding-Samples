@@ -453,36 +453,12 @@ public class mp : IComparable<mp> // : IEquatable<mp?>
 
   public mp powerOf(in mp p) /**< `return` The p'th power of the number. */
   {
-    if (p == zero()) { return new mp(1); }
-    Boolean isNeg = (p.negative == true);
-    mp one_ = new mp(1);
-    if (isNeg) { return one_ / powerOf(-p); }
-    var factors = p.primeFactorization();
-    mp answer = new mp(1);
-    if (factors.Count <= 1)
-    {
-      for (mp i = zero(); i < p; i = i + one_)
-      {
-        answer = answer * (this);
-      }
-      return answer;
-    }
-    mp baseInt = new mp(this);
-    while (factors.Count > 0)
-    {
-      answer = new mp(1);
-      var powerPair = factors.FirstOrDefault();
-      var power_ = powerPair.Key.pow(powerPair.Value);
-      var prevCount = factors.Count;
-      factors.Remove(powerPair.Key);
-      if (factors.Count >= prevCount) { break; }
-      for (mp i = zero(); i < power_; i = i + one_)
-      {
-        answer = answer * baseInt;
-      }
-      baseInt = new mp(answer);
-    }
-    return answer;
+    QuadraticNumber answer = (new QuadraticNumber(new Rational(this, new mp(1)))).powerOf(p);
+    Rational ratio = new Rational();
+    Boolean calcValid = answer.getRational(ref ratio);
+    if (!calcValid) { throw new System.Exception("Error in power calculation."); }
+    if (!ratio.isInt()) { throw new System.Exception("Error in power calculation."); }
+    return ratio.numerator();
   }
 
   public static bool operator==(in mp body, in mp rhs)
