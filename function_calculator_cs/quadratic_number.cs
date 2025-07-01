@@ -373,6 +373,41 @@ public class QuadraticNumber
     return answer;
   }
 
+  public QuadraticNumber powerOf(in mp p) /**< `return` The p'th power of the number. */
+  {
+    var oneMp = new mp(1);
+    var one_ = new QuadraticNumber(new Rational(1));
+    if (p == mp.zero()) { return one_; }
+    Boolean isNeg = (p < mp.zero());
+    if (isNeg) { return one_ / powerOf(-p); }
+    var factors = p.primeFactorization();
+    var answer = new QuadraticNumber(one_);
+    if (factors.Count <= 1)
+    {
+      for (mp i = mp.zero(); i < p; i = i + oneMp)
+      {
+        answer = answer * (this);
+      }
+      return answer;
+    }
+    QuadraticNumber baseNum = new QuadraticNumber(this);
+    while (factors.Count > 0)
+    {
+      answer = new QuadraticNumber(one_);
+      var powerPair = factors.FirstOrDefault();
+      var power_ = powerPair.Key.pow(powerPair.Value);
+      var prevCount = factors.Count;
+      factors.Remove(powerPair.Key);
+      if (factors.Count >= prevCount) { break; }
+      for (mp i = mp.zero(); i < power_; i = i + oneMp)
+      {
+        answer = answer * baseNum;
+      }
+      baseNum = new QuadraticNumber(answer);
+    }
+    return answer;
+  }
+
   public override bool Equals(object? obj)
   {
     return Equals(obj as QuadraticNumber);

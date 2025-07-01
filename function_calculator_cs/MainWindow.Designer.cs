@@ -39,8 +39,8 @@ namespace function_calculator_cs
     {
       public int outBufferHeight = 0;
       public Boolean squareRooting = false;
-      public List<mp> numberStack = new List<mp>();
-      public List<mp> redoStack = new List<mp>();
+      public List<QuadraticNumber> numberStack = new List<QuadraticNumber>();
+      public List<QuadraticNumber> redoStack = new List<QuadraticNumber>();
       public enum Calculating
       {
         Not,
@@ -274,7 +274,7 @@ namespace function_calculator_cs
     {
       if (!(redoBtn.Visible)) { return; }
       if (calc.redoStack.Count == 0) { redoBtn.Visible = false; return; }
-      var recent = new mp(calc.redoStack.Last());
+      var recent = new QuadraticNumber(calc.redoStack.Last());
       calc.redoStack.RemoveAt(calc.redoStack.Count - 1);
       calc.numberStack.Add(recent);
       undoBtn.Visible = (calc.numberStack.Count > 0);
@@ -290,7 +290,7 @@ namespace function_calculator_cs
     {
       if (!(undoBtn.Visible)) { return; }
       if (calc.numberStack.Count == 0) { undoBtn.Visible = false; return; }
-      var recent = new mp(calc.numberStack.Last());
+      var recent = new QuadraticNumber(calc.numberStack.Last());
       calc.numberStack.RemoveAt(calc.numberStack.Count - 1);
       calc.redoStack.Add(recent);
       redoBtn.Visible = (calc.redoStack.Count > 0);
@@ -332,15 +332,28 @@ namespace function_calculator_cs
       var trimmed = numberInput.Text.Trim();
       if (trimmed.Length == 0) { return; }
       TrimOutputBuffer();
-      mp numberOut = new mp(0);
-      var valid = mp.FromString(trimmed, ref numberOut);
+      Boolean numIsIntegral = new Boolean();
+      mp numberOut0 = new mp(0);
+      var valid = mp.FromString(trimmed, ref numberOut0);
+      QuadraticNumber numberOut = new QuadraticNumber(new Rational(numberOut0, new mp(1)));
+      {
+        Rational ratio = new Rational();
+        numIsIntegral = numberOut.getRational(ref ratio);
+        if (numIsIntegral) { numIsIntegral = ratio.isInt(); }
+        numberOut0 = ratio.numerator();
+      }
       ++(calc.outBufferHeight);
       console.Text += Environment.NewLine;
       if (calc.calculating != CalculatorState.Calculating.Not)
       {
-        if ((calc.calculating == CalculatorState.Calculating.Div) && (numberOut == (new mp(0))))
+        if ((calc.calculating == CalculatorState.Calculating.Div) && (numberOut == QuadraticNumber.zero()))
         {
           console.Text += "Cannot divide by zero.";
+          return;
+        }
+        if ((calc.calculating == CalculatorState.Calculating.Power) && (!numIsIntegral))
+        {
+          console.Text += "Exponent must be an integer.";
           return;
         }
         if (calc.numberStack.Count <= 0)
@@ -350,8 +363,8 @@ namespace function_calculator_cs
           return;
         }
         if (!valid) { console.Text += "Not a valid number."; return; }
-        mp prev = calc.numberStack[calc.numberStack.Count - 1];
-        mp result = new mp();
+        QuadraticNumber prev = calc.numberStack[calc.numberStack.Count - 1];
+        QuadraticNumber result = new QuadraticNumber();
         if (calc.calculating == CalculatorState.Calculating.Plus)
         {
           console.Text += "Adding...";
@@ -384,7 +397,7 @@ namespace function_calculator_cs
         {
           console.Text += "Exponentiating...";
           console.Text += Environment.NewLine;
-          result = prev.powerOf(numberOut);
+          result = prev.powerOf(numberOut0);
           console.Text += prev.ToString() + " to the power of ";
         }
         numberInput.Text = "";
@@ -392,8 +405,20 @@ namespace function_calculator_cs
         console.Text += result.ToString();
         if (calc.calculating == CalculatorState.Calculating.Div)
         {
-          var remainder = prev % numberOut;
-          console.Text += " with a remainder of " + remainder.ToString();
+          bool prevIsIntegral = false;
+          mp prevAsInteger = new mp();
+          if (numIsIntegral)
+          {
+            Rational ratio = new Rational();
+            prevIsIntegral = prev.getRational(ref ratio);
+            if (prevIsIntegral) { prevIsIntegral = ratio.isInt(); }
+            prevAsInteger = ratio.numerator();
+          }
+          if (prevIsIntegral && numIsIntegral)
+          {
+            var remainder = prevAsInteger % numberOut0;
+            console.Text += " with a remainder of " + remainder.ToString();
+          }
         }
         calc.numberStack.Add(result);
         calc.redoStack.Clear();
