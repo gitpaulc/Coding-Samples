@@ -2,6 +2,7 @@
 All Rights Reserved.*/
 
 using function_calculator_cs;
+using System.Numerics;
 
 namespace function_calculator_cs
 {
@@ -9,6 +10,7 @@ namespace function_calculator_cs
 /** \brief A number which is the sum of square roots of integers. */
 public class QuadraticNumber
 {
+  static private Dictionary<QuadraticNumber, QuadraticNumber> divisionResults;
   /** \brief The keys represent which numbers the square roots are taken of. The values are coefficients.
    *
    * So, for example (33 / 4) + 2 * sqrt(2) + 4 * sqrt(3) - (20 / 7) * sqrt(6)
@@ -63,6 +65,11 @@ public class QuadraticNumber
     return answer;
   }
 
+  static QuadraticNumber()
+  {
+    divisionResults = new Dictionary<QuadraticNumber, QuadraticNumber>();
+  }
+
   public QuadraticNumber()
   {
     content = new SortedDictionary<mp, Rational>();
@@ -102,6 +109,8 @@ public class QuadraticNumber
     }
     return answer;
   }
+
+  public Boolean isCompound() { return (content.Count > 1); }
 
   /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
   public KeyValuePair<QuadraticNumber, mp> factorAsIntegral()
@@ -329,6 +338,54 @@ public class QuadraticNumber
   {
     if (body.content.Count == 0) { return new QuadraticNumber(body); }
     if (rhs == zero()) { throw new System.Exception("Division by zero."); }
+    {
+      QuadraticNumber? quotient = new QuadraticNumber();
+      Boolean foundQuotient = divisionResults.TryGetValue(rhs, out quotient);
+      if (foundQuotient && !(quotient is null))
+      {
+        return body * quotient;
+      }
+    }
+    if (rhs.content.Count == 1)
+    {
+      var multiplicand = new QuadraticNumber();
+      Rational one_ = new Rational(1);
+      foreach (var iter in rhs.content)
+      {
+        Rational radicand = new Rational(iter.Key, new mp(1));
+        multiplicand.content[iter.Key] = one_ / (radicand * iter.Value);
+      }
+      divisionResults[rhs] = multiplicand;
+      divisionResults[multiplicand] = rhs;
+      return body * multiplicand;
+    }
+    if (rhs.content.Count == 2)
+    {
+      mp aa = new mp(1);  mp bb = new mp(1);
+      Rational cc = new Rational();  Rational dd = new Rational();
+      int ii = 0;
+      foreach (var iter in rhs.content)
+      {
+        if (ii >= 2) { break; }
+        if (ii == 0) { aa = new mp(iter.Key); cc = new Rational(iter.Value); }
+        else { bb = new mp(iter.Key); dd = new Rational(iter.Value); }
+        ++ii;
+      }
+      mp one_ = new mp(1);
+      Rational c_ = new Rational(cc.numerator() * dd.denominator(), one_);
+      Rational d_ = new Rational(dd.numerator() * cc.denominator(), one_);
+      Rational norm = (new Rational(aa, one_)) * c_ * c_ - (new Rational(bb, one_)) * d_ * d_;
+      if (norm != Rational.zero())
+      {
+        var multiplicand = new QuadraticNumber();
+        Rational factor = new Rational(cc.denominator() * dd.denominator(), one_);
+        multiplicand.content[aa] = (c_ / norm) * factor;
+        multiplicand.content[bb] = -(d_ / norm) * factor;
+        divisionResults[rhs] = multiplicand;
+        divisionResults[multiplicand] = rhs;
+        return body * multiplicand;
+      }
+    }
     Dictionary<int, mp> index2Root = new Dictionary<int, mp>();
     Dictionary<mp, int> root2Index = new Dictionary<mp, int>();
     MatrixRational multMatrix = rhs.getMultiplicationMatrix(ref root2Index, ref index2Root);
@@ -353,6 +410,8 @@ public class QuadraticNumber
       reciprocal.content[index2Root[ii]] = coeff;
       //reciprocal = reciprocal + QuadraticNumber::sqrt(Rational(index2Root[ii], 1)) * multVector.at(ii, 0);
     }
+    divisionResults[rhs] = reciprocal;
+    divisionResults[reciprocal] = rhs;
     return body * reciprocal;
   }
 
@@ -369,6 +428,41 @@ public class QuadraticNumber
     if (isNeg)
     {
       return new QuadraticNumber(one_) / answer;
+    }
+    return answer;
+  }
+
+  public QuadraticNumber powerOf(in mp p) /**< `return` The p'th power of the number. */
+  {
+    var oneMp = new mp(1);
+    var one_ = new QuadraticNumber(new Rational(1));
+    if (p == mp.zero()) { return one_; }
+    Boolean isNeg = (p < mp.zero());
+    if (isNeg) { return one_ / powerOf(-p); }
+    var factors = p.primeFactorization();
+    var answer = new QuadraticNumber(one_);
+    if (factors.Count <= 1)
+    {
+      for (mp i = mp.zero(); i < p; i = i + oneMp)
+      {
+        answer = answer * (this);
+      }
+      return answer;
+    }
+    QuadraticNumber baseNum = new QuadraticNumber(this);
+    while (factors.Count > 0)
+    {
+      answer = new QuadraticNumber(one_);
+      var powerPair = factors.FirstOrDefault();
+      var power_ = powerPair.Key.pow(powerPair.Value);
+      var prevCount = factors.Count;
+      factors.Remove(powerPair.Key);
+      if (factors.Count >= prevCount) { break; }
+      for (mp i = mp.zero(); i < power_; i = i + oneMp)
+      {
+        answer = answer * baseNum;
+      }
+      baseNum = new QuadraticNumber(answer);
     }
     return answer;
   }

@@ -311,7 +311,7 @@ namespace function_calculator_cs
     {
       var unity = new QuadraticNumber(new Rational(1));
       console.Text = "";
-      for (int lim_ = 8; lim_ < 11; ++lim_)
+      for (int lim_ = 8; lim_ < 9; ++lim_)
       {
         var sumOfSquareRoots = new QuadraticNumber();
         for (int ii = 0; ii < lim_; ++ii)
@@ -332,7 +332,6 @@ namespace function_calculator_cs
     private void endTests()
     {
       console.Text = "";
-      checkSqrt.Visible = false;
       testState = new TestingState();
       testBtn.Visible = true;
       continueBtn.Visible = false;
@@ -340,6 +339,8 @@ namespace function_calculator_cs
       numberInput.Visible = true;
       enterIntegerLbl.Visible = true;
       okBtn.Visible = true;
+      checkSqrt.Checked = false;
+      checkSqrt.Visible = true;
       ResetCalcPanel();
     }
 
@@ -365,6 +366,8 @@ namespace function_calculator_cs
       numberInput.Visible = false;
       enterIntegerLbl.Visible = false;
       okBtn.Visible = false;
+      checkSqrt.Checked = false;
+      checkSqrt.Visible = false;
       ResetCalcPanel();
 
       if (testState.whichTest == 0)
