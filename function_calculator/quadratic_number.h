@@ -60,13 +60,13 @@ public:
    *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
-  static bool tryGetCosine(const Rational& input, QuadraticNumber& output);
+  //static bool tryGetCosine(const Rational& input, QuadraticNumber& output);
 
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
-  static bool tryGetSine(const Rational& input, QuadraticNumber& output);
+  //static bool tryGetSine(const Rational& input, QuadraticNumber& output);
 };
 }
 

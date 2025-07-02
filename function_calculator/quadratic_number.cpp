@@ -352,7 +352,7 @@ namespace FunctionalCalculator
     return (rhs < (*this));
   }
 
-  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
+  /*bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
   {
     if (input < Rational()) { return tryGetCosine(-input, output); }
     if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
@@ -387,5 +387,5 @@ namespace FunctionalCalculator
     ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
     output = powered.getIm();
     return true;
-  }
+  }*/
 }
