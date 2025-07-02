@@ -4,25 +4,25 @@ All Rights Reserved.*/
 #ifndef COMPLEX_QUADRATIC_H
 #define COMPLEX_QUADRATIC_H
 
-#include "quadratic_number.h"
+#include "biquadratic_number.h"
 
 namespace FunctionalCalculator
 {
 
 class ComplexQuadratic : public Number
 {
-  QuadraticNumber re; /**< The real part of the complex number. */
-  QuadraticNumber im; /**< The imaginary part of the complex number. */
+  BiquadraticNumber re; /**< The real part of the complex number. */
+  BiquadraticNumber im; /**< The imaginary part of the complex number. */
 public:
   ComplexQuadratic(int);
-  ComplexQuadratic(const QuadraticNumber& reIn = QuadraticNumber(), const QuadraticNumber& imIn = QuadraticNumber());
+  ComplexQuadratic(const BiquadraticNumber& reIn = BiquadraticNumber(), const BiquadraticNumber& imIn = BiquadraticNumber());
   virtual std::pair<double, double> get() const override;
   virtual std::string print(bool useParentheses = false) const override;
-  QuadraticNumber getRe() const;
-  QuadraticNumber getIm() const;
+  BiquadraticNumber getRe() const;
+  BiquadraticNumber getIm() const;
   ComplexQuadratic conjugate() const;
   bool isReal() const;
-  QuadraticNumber sqLength() const;
+  BiquadraticNumber sqLength() const;
   static ComplexQuadratic sqrt(const Rational& radicand);
   static ComplexQuadratic sqrtOfITimes(const Rational& radicand);
 

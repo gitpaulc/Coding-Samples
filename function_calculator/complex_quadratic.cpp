@@ -13,7 +13,7 @@ namespace FunctionalCalculator
     re = Rational(reIn, 1); im = Rational(0, 1);
   }
 
-  ComplexQuadratic::ComplexQuadratic(const QuadraticNumber& reIn, const QuadraticNumber& imIn)
+  ComplexQuadratic::ComplexQuadratic(const BiquadraticNumber& reIn, const BiquadraticNumber& imIn)
   {
     re = reIn; im = imIn;
   }
@@ -61,13 +61,13 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  QuadraticNumber ComplexQuadratic::getRe() const { return re; }
-  QuadraticNumber ComplexQuadratic::getIm() const { return im; }
+  BiquadraticNumber ComplexQuadratic::getRe() const { return re; }
+  BiquadraticNumber ComplexQuadratic::getIm() const { return im; }
 
   ComplexQuadratic ComplexQuadratic::conjugate() const { return ComplexQuadratic(re, -im); }
   bool ComplexQuadratic::isReal() const { return (*this) == conjugate(); }
 
-  QuadraticNumber ComplexQuadratic::sqLength() const
+  BiquadraticNumber ComplexQuadratic::sqLength() const
   {
     return re * re + im * im;
   }
@@ -75,14 +75,14 @@ namespace FunctionalCalculator
   ComplexQuadratic ComplexQuadratic::sqrt(const Rational& radicand)
   {
     ComplexQuadratic answer;
-    if (radicand < 0) { answer.im = QuadraticNumber::sqrt(-radicand); }
-    else { answer.re = QuadraticNumber::sqrt(radicand); }
+    if (radicand < 0) { answer.im = BiquadraticNumber::sqrt(-radicand); }
+    else { answer.re = BiquadraticNumber::sqrt(radicand); }
     return answer;
   }
 
   ComplexQuadratic ComplexQuadratic::sqrtOfITimes(const Rational& radicand)
   {
-    auto sqrtOfI = ComplexQuadratic(QuadraticNumber::sqrt(Rational(1, 2)), QuadraticNumber::sqrt(Rational(1, 2)));
+    auto sqrtOfI = ComplexQuadratic(BiquadraticNumber::sqrt(Rational(1, 2)), BiquadraticNumber::sqrt(Rational(1, 2)));
     return sqrtOfI * ComplexQuadratic::sqrt(radicand);
   }
 
@@ -165,7 +165,7 @@ namespace FunctionalCalculator
     ComplexQuadratic sum;
     for (int ii = 0; ii <= pp; ++ii)
     {
-      sum = sum + aaPowers[ii] * (bbPowers[p - ii] * QuadraticNumber(Rational(mp::binomialCoeff((int)p, ii), 1)));
+      sum = sum + aaPowers[ii] * (bbPowers[p - ii] * BiquadraticNumber(Rational(mp::binomialCoeff((int)p, ii), 1)));
     }
     return sum;
   }

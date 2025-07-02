@@ -10,14 +10,14 @@ namespace FunctionalCalculator
 {
   bool FnPolynomial::TrigIndex::isCos() const
   {
-    if (self == QuadraticNumber(0)) { return true; }
+    if (self == BiquadraticNumber(0)) { return true; }
     return isCosine;
   }
 
   bool FnPolynomial::TrigIndex::operator==(const FnPolynomial::TrigIndex& rhs) const
   {
-    if (self == QuadraticNumber(0)) { return (self == rhs.self); }
-    if (rhs.self == QuadraticNumber(0)) { return (self == rhs.self); }
+    if (self == BiquadraticNumber(0)) { return (self == rhs.self); }
+    if (rhs.self == BiquadraticNumber(0)) { return (self == rhs.self); }
     if (self != rhs.self) { return false; }
     return (isCosine == rhs.isCosine);
   }
@@ -31,7 +31,7 @@ namespace FunctionalCalculator
   {
     if (self < rhs.self) { return true; }
     if (rhs.self < self) { return false; }
-    if (self == QuadraticNumber(0)) { return false; } // They are both treated as cosine.
+    if (self == BiquadraticNumber(0)) { return false; } // They are both treated as cosine.
     if (isCosine == rhs.isCosine) { return false; }
     // One must be true, one must be false. false < true:
     return (isCosine == false);
@@ -53,9 +53,9 @@ namespace FunctionalCalculator
     return true;
   }
 
-  std::map<FnPolynomial::Monomial, QuadraticNumber> FnPolynomial::Monomial::trigSum(const Monomial& rhs) const
+  std::map<FnPolynomial::Monomial, BiquadraticNumber> FnPolynomial::Monomial::trigSum(const Monomial& rhs) const
   {
-    std::map<Monomial, QuadraticNumber> answers;
+    std::map<Monomial, BiquadraticNumber> answers;
     for (int i = 0; i < 8; ++i)
     {
       Monomial answer;
@@ -74,7 +74,7 @@ namespace FunctionalCalculator
       sin(ax)cos(Ax) = (1/2)sin((a + A)x) + (1/2)sin((a - A)x)
       sin(ax)sin(Ax) = (1/2)cos((a - A)x) - (1/2)cos((a + A)x)
       */
-      QuadraticNumber coeff(Rational(1, 1));
+      BiquadraticNumber coeff(Rational(1, 1));
       if (trigPiXInd.isCos() == rhs.trigPiXInd.isCos())
       {
         answer.trigPiXInd.isCosine = true;
@@ -96,13 +96,13 @@ namespace FunctionalCalculator
         {
           coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
           answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
-          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiXInd.self == BiquadraticNumber(0)) { continue; }
         }
         else // sin(ax)cos(Ax)
         {
           coeff = coeff * Rational(1, 2);
           answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
-          if (answer.trigPiXInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiXInd.self == BiquadraticNumber(0)) { continue; }
         }
       }
       if (trigPiYInd.isCos() == rhs.trigPiYInd.isCos())
@@ -126,13 +126,13 @@ namespace FunctionalCalculator
         {
           coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
           answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
-          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiYInd.self == BiquadraticNumber(0)) { continue; }
         }
         else // sin(ay)cos(Ay)
         {
           coeff = coeff * Rational(1, 2);
           answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
-          if (answer.trigPiYInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiYInd.self == BiquadraticNumber(0)) { continue; }
         }
       }
       if (trigPiZInd.isCos() == rhs.trigPiZInd.isCos())
@@ -156,13 +156,13 @@ namespace FunctionalCalculator
         {
           coeff = coeff * Rational(1, 2); if (zRight) { coeff = -coeff; }
           answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
-          if (answer.trigPiZInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiZInd.self == BiquadraticNumber(0)) { continue; }
         }
         else // sin(az)cos(Az)
         {
           coeff = coeff * Rational(1, 2);
           answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
-          if (answer.trigPiZInd.self == QuadraticNumber(0)) { continue; }
+          if (answer.trigPiZInd.self == BiquadraticNumber(0)) { continue; }
         }
       }
       auto answerIter = answers.find(answer);
@@ -258,7 +258,7 @@ namespace FunctionalCalculator
       auto newIndex = iter.first;
       if (iter.first.trigPiXInd != TrigIndex())
       {
-        if (iter.first.trigPiXInd.self < QuadraticNumber(0))
+        if (iter.first.trigPiXInd.self < BiquadraticNumber(0))
         {
           newIndex.trigPiXInd.self = -iter.first.trigPiXInd.self;
           if (!iter.first.trigPiXInd.isCosine) { coeff = -coeff; }
@@ -266,7 +266,7 @@ namespace FunctionalCalculator
       }
       if (iter.first.trigPiYInd != TrigIndex())
       {
-        if (iter.first.trigPiYInd.self < QuadraticNumber(0))
+        if (iter.first.trigPiYInd.self < BiquadraticNumber(0))
         {
           newIndex.trigPiYInd.self = -iter.first.trigPiYInd.self;
           if (!iter.first.trigPiYInd.isCosine) { coeff = -coeff; }
@@ -274,7 +274,7 @@ namespace FunctionalCalculator
       }
       if (iter.first.trigPiZInd != TrigIndex())
       {
-        if (iter.first.trigPiZInd.self < QuadraticNumber(0))
+        if (iter.first.trigPiZInd.self < BiquadraticNumber(0))
         {
           newIndex.trigPiZInd.self = -iter.first.trigPiZInd.self;
           if (!iter.first.trigPiZInd.isCosine) { coeff = -coeff; }
@@ -500,7 +500,7 @@ namespace FunctionalCalculator
     term.trigPiXInd = { A.getIm(), true };
     FnPolynomial realTerm;
     realTerm.self[term] = coeff;
-    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiXInd = { A.getIm(), false };
     FnPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
@@ -514,7 +514,7 @@ namespace FunctionalCalculator
     term.trigPiYInd = { A.getIm(), true };
     FnPolynomial realTerm;
     realTerm.self[term] = coeff;
-    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiYInd = { A.getIm(), false };
     FnPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
@@ -528,7 +528,7 @@ namespace FunctionalCalculator
     term.trigPiZInd = { A.getIm(), true };
     FnPolynomial realTerm;
     realTerm.self[term] = coeff;
-    if (A.getIm() == QuadraticNumber(0)) { return realTerm; }
+    if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiZInd = { A.getIm(), false };
     FnPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
@@ -932,7 +932,7 @@ namespace FunctionalCalculator
       if (newKey.ePiXInd != 0)
       {
         if (xVal != 0) { return false; }
-        newKey.ePiXInd = QuadraticNumber();
+        newKey.ePiXInd = BiquadraticNumber();
       }
       if (newKey.trigPiXInd != TrigIndex())
       {
@@ -943,15 +943,15 @@ namespace FunctionalCalculator
         if (!isRational) { return false; }
         if (newKey.trigPiXInd.isCos())
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
         else
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
@@ -981,7 +981,7 @@ namespace FunctionalCalculator
       if (newKey.ePiYInd != 0)
       {
         if (yVal != 0) { return false; }
-        newKey.ePiYInd = QuadraticNumber();
+        newKey.ePiYInd = BiquadraticNumber();
       }
       if (newKey.trigPiYInd != TrigIndex())
       {
@@ -992,15 +992,15 @@ namespace FunctionalCalculator
         if (!isRational) { return false; }
         if (newKey.trigPiYInd.isCos())
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
         else
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
@@ -1030,7 +1030,7 @@ namespace FunctionalCalculator
       if (newKey.ePiZInd != 0)
       {
         if (zVal != 0) { return false; }
-        newKey.ePiZInd = QuadraticNumber();
+        newKey.ePiZInd = BiquadraticNumber();
       }
       if (newKey.trigPiZInd != TrigIndex())
       {
@@ -1041,15 +1041,15 @@ namespace FunctionalCalculator
         if (!isRational) { return false; }
         if (newKey.trigPiZInd.isCos())
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetCosine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
         else
         {
-          QuadraticNumber factor;
-          bool trigSuccess = QuadraticNumber::tryGetSine(rationalVal, factor);
+          BiquadraticNumber factor;
+          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
           if (!trigSuccess) { return false; }
           newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
         }
