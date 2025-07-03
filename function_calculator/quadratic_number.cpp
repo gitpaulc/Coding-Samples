@@ -378,14 +378,14 @@ namespace FunctionalCalculator
       auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
-          auto& factor = jter.first;
-          if (factor == -1) { continue; }
-          auto& power = jter.second;
-          if (power <= 1) { continue; }
-          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
-          Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
-          coeff = coeff * sqrtRational;
-          radicand = radicand / (sqrtRational * sqrtRational).numerator();
+        auto& factor = jter.first;
+        if (factor == -1) { continue; }
+        auto& power = jter.second;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
       if (rhs.content.find(radicand) != rhs.content.end())
       {
@@ -602,40 +602,27 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  /*bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
+  bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
   {
-    if (input < Rational()) { return tryGetCosine(-input, output); }
-    if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = QuadraticNumber::sqrt(2);
-    auto sqrt6 = QuadraticNumber::sqrt(6);
-    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getRe();
+    BiquadraticNumber answer;
+    bool success = BiquadraticNumber::tryGetCosine(input, answer);
+    if (!success) { return false; }
+    QuadraticNumber answerQ;
+    success = answer.getAsQuadratic(answerQ);
+    if (!success) { return false; }
+    output = answerQ;
     return true;
   }
 
   bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output)
   {
-    if (input < Rational())
-    {
-      QuadraticNumber output0;
-      bool answer = tryGetSine(-input, output0);
-      if (!answer) { return answer; }
-      output = -output0;
-      return true;
-    }
-    if (input == Rational()) { output = QuadraticNumber(); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = QuadraticNumber::sqrt(2);
-    auto sqrt6 = QuadraticNumber::sqrt(6);
-    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getIm();
+    BiquadraticNumber answer;
+    bool success = BiquadraticNumber::tryGetSine(input, answer);
+    if (!success) { return false; }
+    QuadraticNumber answerQ;
+    success = answer.getAsQuadratic(answerQ);
+    if (!success) { return false; }
+    output = answerQ;
     return true;
-  }*/
+  }
 }
