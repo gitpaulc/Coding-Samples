@@ -4,7 +4,7 @@ All Rights Reserved.*/
 #ifndef BIQUADRATIC_NUMBER_H
 #define BIQUADRATIC_NUMBER_H
 
-#include "rational.h"
+#include "quadratic_number.h"
 
 #include "dynamic_matrix.h"
 

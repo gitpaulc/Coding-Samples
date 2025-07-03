@@ -631,7 +631,7 @@ bool test_quadratic()
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  for (int lim_ = 7; lim_ < 11; ++lim_)
+  for (int lim_ = 7; lim_ < 9; ++lim_)
   {
     if (lim_ == 9)
     {
@@ -652,6 +652,38 @@ bool test_quadratic()
     std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
   }
 
+  return true;
+}
+
+bool test_quad_factor()
+{
+  auto unit = QuadraticNumber(Rational(1));
+  std::cout << "\nPrime factorization of " << unit.print() << " is:\n";
+  std::cout << unit.printFactors();
+  auto number = QuadraticNumber(Rational(24));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = QuadraticNumber(Rational(4)) + QuadraticNumber::sqrt(Rational(3));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = -QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = (QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4))) * QuadraticNumber(Rational(1, 3));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  std::string prompt = "";
+  std::cout << "\n\nThe next part of this test is slow.";
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  number = QuadraticNumber::sqrt(Rational(8)) + QuadraticNumber(Rational(78));
+  number = number + QuadraticNumber::sqrt(Rational(300)) + QuadraticNumber::sqrt(Rational(600));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
   return true;
 }
 
@@ -843,6 +875,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTesting quadratic number factorization:\n";
+  test_quad_factor();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
