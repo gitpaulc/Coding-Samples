@@ -12,10 +12,15 @@ namespace FunctionalCalculator
 {
   BiquadraticNumber::BiquadraticNumber(const Rational& number)
   {
+    BiquadraticNumber(QuadraticNumber(number));
+  }
+
+  BiquadraticNumber::BiquadraticNumber(const QuadraticNumber& number)
+  {
     if (number != 0)
     {
-      *this = BiquadraticNumber::sqrt(1);
-      content[1] = content[1] * number;
+      QuadraticNumber one_(Rational(1));
+      content[one_] = number;
     }
   }
 
@@ -24,10 +29,10 @@ namespace FunctionalCalculator
     double answer = 0.0;
     for (const auto& iter : content)
     {
-      if (iter.second == Rational()) { continue; }
+      if (iter.second == QuadraticNumber()) { continue; }
       double val = iter.second.get().first;
-      double radicand = iter.first.toInt();
-      if (iter.first < 0) { throw std::invalid_argument("\nRadicands should be nonnegative."); radicand = -radicand; }
+      double radicand = iter.first.get().first;
+      if (radicand < 0) { throw std::invalid_argument("\nRadicands should be nonnegative."); radicand = -radicand; }
       answer += val * std::sqrt(radicand);
     }
     return { answer, 0.0 };
@@ -36,38 +41,57 @@ namespace FunctionalCalculator
   std::pair<BiquadraticNumber, mp> BiquadraticNumber::factorAsIntegral() const
   {
     std::pair<BiquadraticNumber, mp> answer;
-    answer.first = *this;
-    answer.second = mp(1);
-    for (const auto& iter : answer.first.content)
+    std::vector<QuadraticNumber> keys, gammas;
+    std::vector<mp> iotas, js;
+    mp bigDenom(1);
+    for (const auto& iter : content)
     {
-      answer.second = answer.second * iter.second.denominator();
+      auto rr = iter.first.factorAsIntegral();
+      auto qq = iter.second.factorAsIntegral();
+      keys.push_back(rr.first * QuadraticNumber(Rational(qq.second, mp(1))));
+      gammas.push_back(qq.first);
+      iotas.push_back(rr.second);
+      js.push_back(qq.second);
+      bigDenom = bigDenom * (rr.second * qq.second);
     }
-    std::vector<mp> numerators;
-    numerators.push_back(answer.second);
-    for (auto& iter : answer.first.content)
+    std::vector<mp> coeffs(iotas.size() + 1);
+    const int numCoeffs = (int)iotas.size();
+    for (int ii = 0; ii < numCoeffs; ++ii)
     {
-      iter.second = iter.second * Rational(answer.second, mp(1));
-      numerators.push_back(iter.second.numerator());
+      coeffs[ii] = bigDenom / (iotas[ii] * js[ii]);
     }
-    auto gcd_ = mp::gcd(numerators);
-    answer.second = answer.second / gcd_;
-    for (auto& iter : answer.first.content)
+    coeffs[numCoeffs] = bigDenom;
+    const mp gcd_ = mp::gcd(coeffs);
+    for (auto& coeff : coeffs) { coeff = coeff / gcd_; }
+    answer.second = coeffs[numCoeffs];
+    for (int ii = 0; ii < numCoeffs; ++ii)
     {
-      iter.second = iter.second * Rational(mp(1), gcd_);
+      answer.first.content[keys[ii]] = gammas[ii] * QuadraticNumber(Rational(coeffs[ii], mp(1)));
     }
     return answer;
   }
 
-  bool BiquadraticNumber::getRational(Rational& self) const
+  bool BiquadraticNumber::getAsQuadratic(QuadraticNumber& self) const
   {
     if (content.size() == 0) { self = Rational(0, 1); return true; }
     if (content.size() > 1) { return false; }
-    if (content.find(1) == content.end()) { return false; }
-    self = content.at(1);
+    auto iter = content.find(QuadraticNumber(Rational(1)));
+    if (iter == content.end()) { return false; }
+    self = iter->second;
     return true;
   }
 
-  Matrix<Rational> BiquadraticNumber::getMultiplicationMatrix(std::map<mp, int>& root2Index, std::map<int, mp>& index2Root) const
+  bool BiquadraticNumber::getRational(Rational& self) const
+  {
+    QuadraticNumber quad;
+    if (!getAsQuadratic(quad)) { return false; }
+    Rational rr;
+    if (!quad.getRational(rr)) { return false; }
+    self = rr;
+    return true;
+  }
+
+  Matrix<QuadraticNumber> BiquadraticNumber::getMultiplicationMatrix(std::map<QuadraticNumber, int>& root2Index, std::map<int, QuadraticNumber>& index2Root) const
   {
     root2Index = std::map<mp, int>();
     index2Root = std::map<int, mp>();

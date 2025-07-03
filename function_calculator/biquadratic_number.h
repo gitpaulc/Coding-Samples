@@ -23,19 +23,21 @@ class BiquadraticNumber : public Number
    * would be represented as:
    * content[1] = 33/ 4; content[2] = 2; content[3] = 4; content[6] = (-20 / 7);
    */
-  std::map<mp, Rational> content;
+  std::map<QuadraticNumber, QuadraticNumber> content;
   /** \brief From Galois Theory, multiplication acts as a linear transformation upon vector space where the square roots are basis elements.
    *  \param root2Index is an output parameter that assigns a row index to its corresponding square root.
    *  \param index2Root is an output parameter that assigns to each row index its corresponding square root.
    */
-  Matrix<Rational> getMultiplicationMatrix(std::map<mp, int>& root2Index, std::map<int, mp>& index2Root) const;
+  Matrix<QuadraticNumber> getMultiplicationMatrix(std::map<QuadraticNumber, int>& root2Index, std::map<int, QuadraticNumber>& index2Root) const;
 
 public:
   BiquadraticNumber(const Rational& number = Rational(0, 1));
+  BiquadraticNumber(const QuadraticNumber& number);
   virtual std::pair<double, double> get() const override;
 
   /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
   std::pair<BiquadraticNumber, mp> factorAsIntegral() const;
+  bool getAsQuadratic(QuadraticNumber& self) const; /**< \return `true` iff the number is actually quadratic. Only then is self redefined. */
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static BiquadraticNumber sqrt(const Rational& radicand);
