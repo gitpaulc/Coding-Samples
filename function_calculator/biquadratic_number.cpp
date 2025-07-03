@@ -214,23 +214,23 @@ namespace FunctionalCalculator
 
   BiquadraticNumber BiquadraticNumber::operator+(const BiquadraticNumber& rhs) const
   {
-    std::set<mp> added;
+    std::set<QuadraticNumber> added;
     BiquadraticNumber sum;
     for (const auto& iter : content)
     {
       auto radicand = iter.first;
-      Rational coeff = iter.second;
+      QuadraticNumber coeff = iter.second;
       auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
-          auto& factor = jter.first;
-          if (factor == -1) { continue; }
-          auto& power = jter.second;
-          if (power <= 1) { continue; }
-          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
-          Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
-          coeff = coeff * sqrtRational;
-          radicand = radicand / (sqrtRational * sqrtRational).numerator();
+        auto& factor = jter.first;
+        if (factor == QuadraticNumber(Rational(-1))) { continue; }
+        auto& power = jter.second;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        auto sqrtRational = factor.pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand = radicand / (sqrtRational * sqrtRational);
       }
       if (rhs.content.find(radicand) != rhs.content.end())
       {
@@ -246,18 +246,18 @@ namespace FunctionalCalculator
     for (const auto& iter : rhs.content)
     {
       auto radicand = iter.first;
-      Rational coeff = iter.second;
+      QuadraticNumber coeff = iter.second;
       auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;
-        if (factor == -1) { continue; }
+        if (factor == QuadraticNumber(Rational(-1))) { continue; }
         auto& power = jter.second;
         if (power <= 1) { continue; }
         int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
-        Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+        auto sqrtRational = factor.pow(coeffPow);
         coeff = coeff * sqrtRational;
-        radicand = radicand / (sqrtRational * sqrtRational).numerator();
+        radicand = radicand / (sqrtRational * sqrtRational);
       }
       if (added.find(radicand) != added.end()) { continue; }
       sum.content[radicand] = coeff;
@@ -277,7 +277,7 @@ namespace FunctionalCalculator
     {
       for (const auto& jter : rhs.content)
       {
-        auto summand = sqrt(Rational(iter.first, mp(1)) * Rational(jter.first, mp(1)));
+        auto summand = sqrt(iter.first * jter.first);
         auto factor = iter.second * jter.second;
         for (auto& kter : summand.content)
         {
@@ -297,17 +297,18 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       return BiquadraticNumber();
     }
-    std::map<int, mp> index2Root;
-    std::map<mp, int> root2Index;
+    std::map<int, QuadraticNumber> index2Root;
+    std::map<QuadraticNumber, int> root2Index;
     auto multMatrix = rhs.getMultiplicationMatrix(root2Index, index2Root);
     bool success = false;
     auto multInverse = multMatrix.inverse(success);
     if (!success) { throw std::logic_error("Division failed."); return BiquadraticNumber(); }
     auto dim = multMatrix.numRows();
-    Matrix<Rational> multVector;
+    Matrix<QuadraticNumber> multVector;
     {
-      std::vector<Rational> row(dim, 0);
-      row[root2Index[1]] = 1; // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
+      std::vector<QuadraticNumber> row(dim, Rational());
+      QuadraticNumber one_(Rational(1));
+      row[root2Index[one_]] = one_; // root2Index guaranteed to have 1 as a key since sqrt(A)^2 = A * sqrt(1)
       multVector.addRow(row);
       multVector = multVector.transpose();
     }
