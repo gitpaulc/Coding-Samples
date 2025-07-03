@@ -242,7 +242,7 @@ public class mp : IComparable<mp> // : IEquatable<mp?>
     {
       if ((iter.Value % 2) == 1)
       {
-        if (answerFirst < zero_)
+        if (iter.Value < 0)
         {
           answerSecond = answerSecond * iter.Key;
           continue;
@@ -251,7 +251,7 @@ public class mp : IComparable<mp> // : IEquatable<mp?>
         answerSecond = answerSecond * iter.Key;
         continue;
       }
-      if (answerFirst < zero_) { continue; }
+      if (iter.Value < 0) { continue; }
       answerFirst = answerFirst * iter.Key.pow(iter.Value / 2);
     }
     return new KeyValuePair<mp, mp>(answerFirst, answerSecond);

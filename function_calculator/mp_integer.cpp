@@ -166,7 +166,7 @@ namespace FunctionalCalculator
     {
       if ((iter.second % 2) == 1)
       {
-        if (answer.first < 0)
+        if (iter.first < 0)
         {
           answer.second = answer.second * iter.first;
           continue;
@@ -175,7 +175,7 @@ namespace FunctionalCalculator
         answer.second = answer.second * iter.first;
         continue;
       }
-      if (answer.first < 0) { continue; }
+      if (iter.first < 0) { continue; }
       answer.first = answer.first * iter.first.pow(iter.second / 2);
     }
     return answer;

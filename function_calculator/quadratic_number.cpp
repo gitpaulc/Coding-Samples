@@ -329,6 +329,37 @@ namespace FunctionalCalculator
     return ((*this) < QuadraticNumber(0)) ? (-(*this)) : (*this);
   }
 
+  std::pair<QuadraticNumber, QuadraticNumber> QuadraticNumber::separateSquaredPart() const
+  {
+    std::pair<QuadraticNumber, QuadraticNumber> answer;
+    if ((*this) == QuadraticNumber())
+    {
+      answer.first = QuadraticNumber();
+      answer.second = QuadraticNumber();
+      return answer;
+    }
+    answer.first = QuadraticNumber(Rational(1));
+    answer.second = QuadraticNumber(Rational(1));
+    auto factors = primeFactorization();
+    for (const auto& iter : factors)
+    {
+      if ((iter.second % 2) == 1)
+      {
+        ///if (iter.first < 0)
+        {
+          answer.second = answer.second * iter.first;
+          continue;
+        }
+        answer.first = answer.first * iter.first.pow((iter.second - 1) / 2);
+        answer.second = answer.second * iter.first;
+        continue;
+      }
+      ///if (iter.first < 0) { continue; }
+      answer.first = answer.first * iter.first.pow(iter.second / 2);
+    }
+    return answer;
+  }
+
   QuadraticNumber QuadraticNumber::operator+() const
   {
     return *this;

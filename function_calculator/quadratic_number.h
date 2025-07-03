@@ -47,6 +47,8 @@ public:
   virtual std::string print(bool useParentheses = false) const override;
   static QuadraticNumber sqrt(const Rational& radicand);
   QuadraticNumber abs() const;
+  /** \return { a, b } where a is the maximal number such that this number == a * a * b */
+  std::pair<QuadraticNumber, QuadraticNumber> separateSquaredPart() const;
 
   QuadraticNumber operator+() const;
   QuadraticNumber operator-() const;
