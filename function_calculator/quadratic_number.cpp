@@ -345,16 +345,10 @@ namespace FunctionalCalculator
     {
       if ((iter.second % 2) == 1)
       {
-        ///if (iter.first < 0)
-        {
-          answer.second = answer.second * iter.first;
-          continue;
-        }
         answer.first = answer.first * iter.first.pow((iter.second - 1) / 2);
         answer.second = answer.second * iter.first;
         continue;
       }
-      ///if (iter.first < 0) { continue; }
       answer.first = answer.first * iter.first.pow(iter.second / 2);
     }
     return answer;
