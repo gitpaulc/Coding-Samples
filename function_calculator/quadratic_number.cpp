@@ -62,8 +62,9 @@ namespace FunctionalCalculator
   {
     if (content.size() == 0) { self = Rational(0, 1); return true; }
     if (content.size() > 1) { return false; }
-    if (content.find(1) == content.end()) { return false; }
-    self = content.at(1);
+    auto iter = content.find(1);
+    if (iter == content.end()) { return false; }
+    self = iter->second;
     return true;
   }
 
