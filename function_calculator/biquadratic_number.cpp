@@ -93,10 +93,10 @@ namespace FunctionalCalculator
 
   Matrix<QuadraticNumber> BiquadraticNumber::getMultiplicationMatrix(std::map<QuadraticNumber, int>& root2Index, std::map<int, QuadraticNumber>& index2Root) const
   {
-    root2Index = std::map<mp, int>();
-    index2Root = std::map<int, mp>();
+    root2Index = std::map<QuadraticNumber, int>();
+    index2Root = std::map<int, QuadraticNumber>();
     {
-      std::set<mp> rootsSoFar;
+      std::set<QuadraticNumber> rootsSoFar;
       const int NN = (int)content.size();
       auto current = *this;
       for (int II = 0; II < (NN + 1); ++II)
@@ -114,18 +114,18 @@ namespace FunctionalCalculator
       }
     }
     const int dimMatrix = (int)root2Index.size();
-    auto answer = Matrix<Rational>::zeroMatrix(dimMatrix);
+    auto answer = Matrix<QuadraticNumber>::zeroMatrix(dimMatrix);
     for (const auto& iter : content)
     {
-      Matrix<Rational> summand;
+      Matrix<QuadraticNumber> summand;
       const auto& radA = iter.first;
       for (int ii = 0; ii < dimMatrix; ++ii)
       {
-        std::vector<Rational> row(dimMatrix, 0);
+        std::vector<QuadraticNumber> row(dimMatrix, Rational(0));
         const auto& radB = index2Root[ii];
         auto root = radA * radB;
         auto sqrtSplit = root.separateSquaredPart();
-        row[root2Index[sqrtSplit.second]] = Rational(sqrtSplit.first, 1);
+        row[root2Index[sqrtSplit.second]] = sqrtSplit.first;
         summand.addRow(row);
       }
       answer = answer + summand.transpose() * iter.second;
@@ -136,34 +136,36 @@ namespace FunctionalCalculator
   std::string BiquadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
+    QuadraticNumber one_(Rational(1));
     int count = -1;
     if (useParentheses) { strm << "("; }
     if (content.size() == 0) { strm << "0"; }
     for (const auto& iter : content)
     {
       auto val = iter.second;
-      if (val == 0) { continue; }
+      if (val == QuadraticNumber()) { continue; }
       ++count;
       if (count > 0)
       {
-        if (val >= 0) { strm << " + "; }
+        if (val == QuadraticNumber()) { strm << " + "; }
+        else if (QuadraticNumber() < val) { strm << " + "; }
         else
         {
           val = -val;
           strm << " - ";
         }
       }
-      bool coeffIsOne = (val == 1);
+      bool coeffIsOne = (val == one_);
       auto radicand = iter.first;
-      bool printCoeffParents = (val.denominator() != 1) && (radicand != 1);
-      if ((radicand == 1) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
-      if (radicand == 1) { continue; }
+      bool printCoeffParents = (radicand != one_);
+      if ((radicand == one_) || (!coeffIsOne)) { strm << val.print(printCoeffParents); }
+      if (radicand == one_) { continue; }
       bool complex = false;
-      if (radicand < 0) { radicand = -radicand; complex = true; }
+      if (radicand < QuadraticNumber()) { radicand = -radicand; complex = true; }
       if (!coeffIsOne) { strm << " * "; }
       if (!complex || (radicand != 1))
       {
-        strm << "Sqrt(" << radicand << ")";
+        strm << "Sqrt(" << radicand.print() << ")";
         if (complex) { strm << " * "; }
       }
       if (complex) { strm << "i"; }
@@ -175,23 +177,21 @@ namespace FunctionalCalculator
   BiquadraticNumber BiquadraticNumber::sqrt(const Rational& radicand)
   {
     BiquadraticNumber answer;
-    if (radicand == Rational(0, 1)) { return answer; }
-    if (radicand < 0) { throw std::invalid_argument("Radicand should be nonnegative."); return answer; }
-    Rational coefficient(1, radicand.denominator());
-    mp key = radicand.numerator() * radicand.denominator();
-    auto primes = key.primeFactorization();
-    for (const auto& iter : primes)
+    auto sqrtNum = QuadraticNumber::sqrt(radicand);
+    answer.content[QuadraticNumber(Rational(1))] = sqrtNum;
+    return answer;
+  }
+
+  BiquadraticNumber BiquadraticNumber::sqrt(const QuadraticNumber& radicand)
+  {
     {
-      auto& factor = iter.first;
-      if (factor == -1) { continue; }
-      auto& power = iter.second;
-      if (power <= 1) { continue; }
-      int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
-      Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
-      coefficient = coefficient * sqrtRational;
-      key = key / (sqrtRational * sqrtRational).numerator();
+      Rational ratio;
+      bool radIsRational = radicand.getRational(ratio);
+      if (radIsRational) { return sqrt(ratio); }
     }
-    answer.content[key] = coefficient;
+    BiquadraticNumber answer;
+    auto squaredPart = radicand.separateSquaredPart();
+    answer.content[squaredPart.second] = squaredPart.first;
     return answer;
   }
 
