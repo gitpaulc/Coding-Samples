@@ -10,9 +10,9 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
-  BiquadraticNumber::BiquadraticNumber(const Rational& number)
+  BiquadraticNumber::BiquadraticNumber(const Rational& number) :
+    BiquadraticNumber(QuadraticNumber(number))
   {
-    BiquadraticNumber(QuadraticNumber(number));
   }
 
   BiquadraticNumber::BiquadraticNumber(const QuadraticNumber& number)
