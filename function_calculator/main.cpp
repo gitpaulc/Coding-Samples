@@ -39,9 +39,9 @@ bool test_biquadratic()
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-    auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
-    auto twoFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(2, 5)));
-    auto threeFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(3, 5)));
+    auto oneFifth = ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    auto twoFifths = ComplexQuadratic(BiquadraticNumber(Rational(2, 5)));
+    auto threeFifths = ComplexQuadratic(BiquadraticNumber(Rational(3, 5)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
@@ -187,9 +187,34 @@ bool test_biquadratic()
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
   std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
 
+  std::cout << "\n\nThe next part of this test is slow.";
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
+    std::cout << "\n\ncos(pi / 60) = " << result.print();
+    if (!success) { return false; }
+  }
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
+    std::cout << "\n\nsin(pi / 60) = " << result.print();
+    if (!success) { return false; }
+  }
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
   for (int lim_ = 7; lim_ < 10; ++lim_)
   {
     if (lim_ == 9)
