@@ -280,13 +280,31 @@ namespace FunctionalCalculator
     {
       for (const auto& jter : rhs.content)
       {
-        auto summand = sqrt(iter.first * jter.first);
-        auto factor = iter.second * jter.second;
-        for (auto& kter : summand.content)
+        std::pair<QuadraticNumber, QuadraticNumber> sqPart;
+        bool shouldComputeSqPart = true;
+        if ((iter.first != QuadraticNumber()) && (jter.first != QuadraticNumber()))
         {
-          kter.second = kter.second * factor;
+          auto quotient = jter.first / iter.first;
+          Rational ratio;
+          if (quotient.getRational(ratio))
+          {
+            shouldComputeSqPart = false;
+            sqPart.first = iter.first; // Setting sqPart to follow separateSquaredPart() method.
+            sqPart.second = QuadraticNumber(ratio); // See below.
+          }
         }
-        product = product + summand;
+        if (shouldComputeSqPart)
+        {
+          sqPart = (iter.first * jter.first).separateSquaredPart();
+        }
+        auto& key = sqPart.second;
+        auto kter = product.content.find(key);
+        if (kter == product.content.end())
+        {
+          product.content[key] = iter.second * jter.second * sqPart.first;
+          continue;
+        }
+        kter->second = kter->second + iter.second * jter.second * sqPart.first;
       }
     }
     return product;

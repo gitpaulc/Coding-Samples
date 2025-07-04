@@ -8,6 +8,11 @@ using namespace FunctionalCalculator;
 bool test_biquadratic()
 {
   {
+    auto sqrtSqrtFive = ComplexQuadratic(BiquadraticNumber::sqrt(QuadraticNumber::sqrt(5)));
+    std::cout << "\nSquare root of square root of 5 = " << sqrtSqrtFive.print();
+    std::cout << "\nSquare root of 5 = " << (sqrtSqrtFive * sqrtSqrtFive).print();
+  }
+  {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
@@ -16,8 +21,8 @@ bool test_biquadratic()
     bool success = fn.tryEvaluateAtX(oneFifth, result);
     std::cout << "\n\ncos(pi / 5) = " << result.print();
     if (!success) { return false; }
-    success = fn.tryEvaluateAtX(unit, result);
-    std::cout << "\ncos(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth + oneFifth, result);
+    std::cout << "\ncos(2 * pi / 5) = " << result.print();
     if (!success) { return false; }
   }
   {
@@ -27,10 +32,10 @@ bool test_biquadratic()
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
-    std::cout << "\nsin(pi / 5) = " << result.print();
+    std::cout << "\n\nsin(pi / 5) = " << result.print();
     if (!success) { return false; }
-    success = fn.tryEvaluateAtX(unit, result);
-    std::cout << "\nsin(pi) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth + oneFifth, result);
+    std::cout << "\nsin(2 * pi / 5) = " << result.print();
     if (!success) { return false; }
   }
   std::string prompt;
