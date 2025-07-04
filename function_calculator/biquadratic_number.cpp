@@ -442,10 +442,20 @@ namespace FunctionalCalculator
     return (rhs < (*this));
   }
 
+  namespace // anonymous
+  {
+    std::map<Rational, BiquadraticNumber> cosineValues;
+    std::map<Rational, BiquadraticNumber> sineValues;
+  }
+
   bool BiquadraticNumber::tryGetCosine(const Rational& input, BiquadraticNumber& output)
   {
     if (input < Rational()) { return tryGetCosine(-input, output); }
     if (input == Rational()) { output = BiquadraticNumber(Rational(1, 1)); return true; }
+    {
+      auto iter = cosineValues.find(input);
+      if (iter != cosineValues.end()) { output = iter->second; return true; }
+    }
     if ((mp(12) % (input.denominator())) == mp(0))
     {
       auto sqrt2 = BiquadraticNumber::sqrt(2);
@@ -455,6 +465,7 @@ namespace FunctionalCalculator
       unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
       output = powered.getRe();
+      cosineValues[input] = output;
       return true;
     }
     if ((mp(5) % (input.denominator())) == mp(0))
@@ -467,6 +478,7 @@ namespace FunctionalCalculator
       unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
       output = powered.getRe();
+      cosineValues[input] = output;
       return true;
     }
     return false;
@@ -483,6 +495,10 @@ namespace FunctionalCalculator
       return true;
     }
     if (input == Rational()) { output = BiquadraticNumber(); return true; }
+    {
+      auto iter = sineValues.find(input);
+      if (iter != sineValues.end()) { output = iter->second; return true; }
+    }
     if ((mp(12) % (input.denominator())) == mp(0))
     {
       auto sqrt2 = BiquadraticNumber::sqrt(2);
@@ -492,6 +508,7 @@ namespace FunctionalCalculator
       unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
       output = powered.getIm();
+      sineValues[input] = output;
       return true;
     }
     if ((mp(5) % (input.denominator())) == mp(0))
@@ -504,6 +521,7 @@ namespace FunctionalCalculator
       unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
       output = powered.getIm();
+      sineValues[input] = output;
       return true;
     }
     return false;
