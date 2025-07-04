@@ -344,13 +344,20 @@ namespace FunctionalCalculator
     auto factors = primeFactorization();
     for (const auto& iter : factors)
     {
-      if ((iter.second % 2) == 1)
+      auto prim = iter.first;
+      int expon = iter.second;
+      if (expon < 0)
       {
-        answer.first = answer.first * iter.first.pow((iter.second - 1) / 2);
-        answer.second = answer.second * iter.first;
+        prim = QuadraticNumber(Rational(1)) / prim;
+        expon = -expon;
+      }
+      if ((expon % 2) == 1)
+      {
+        answer.first = answer.first * prim.pow((expon - 1) / 2);
+        answer.second = answer.second * prim;
         continue;
       }
-      answer.first = answer.first * iter.first.pow(iter.second / 2);
+      answer.first = answer.first * prim.pow(expon / 2);
     }
     return answer;
   }
