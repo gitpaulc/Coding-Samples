@@ -5,6 +5,182 @@
 
 using namespace FunctionalCalculator;
 
+bool test_biquadratic()
+{
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneFifth, result);
+    std::cout << "\n\ncos(pi / 5) = " << result.print();
+    if (!success) { return false; }
+  }
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneFifth, result);
+    std::cout << "\nsin(pi / 5) = " << result.print();
+    if (!success) { return false; }
+  }
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto zero = BiquadraticNumber();
+  std::cout << "\nZero = " << zero.print();
+  zero = BiquadraticNumber::sqrt(9) - Rational(3);
+  std::cout << "\nZero = " << zero.print();
+  auto twoThirds = BiquadraticNumber(Rational(2, 3));
+  std::cout << "\nTwo-thirds = " << twoThirds.print();
+  auto one = BiquadraticNumber::sqrt(1);
+  std::cout << "\nSquare root of 1 = " << one.print();
+  auto sqrt2 = BiquadraticNumber::sqrt(2);
+  std::cout << "\nSquare root of 2 = " << sqrt2.print();
+  auto sqrt36 = BiquadraticNumber::sqrt(36);
+  std::cout << "\nSquare root of 36 = " << sqrt36.print();
+  auto sqrt12 = BiquadraticNumber::sqrt(12);
+  std::cout << "\nSquare root of 12 = " << sqrt12.print();
+  std::cout << "\nTwelve is " << (sqrt12 * sqrt12).print();
+  Rational rationalOut;
+  bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
+  if (!twoThirdsIsRational) { return false; }
+  std::cout << "\nSquare root of 2/3 = " << BiquadraticNumber::sqrt(rationalOut).print();
+  auto goldenRatio = BiquadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
+  std::cout << "\nThe golden ratio is " << goldenRatio.print();
+  auto oneOverGolden = BiquadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
+  std::cout << "\nOne = " << (goldenRatio * oneOverGolden).print();
+  oneOverGolden = BiquadraticNumber(1) / goldenRatio;
+  std::cout << "\nThe reciprocal golden ratio is " << oneOverGolden.print();
+  auto sumOfSquareRoots = BiquadraticNumber::sqrt(2) + BiquadraticNumber::sqrt(3) + Rational(1);
+  auto reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(5) - BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(5) + BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  auto recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 1) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  for (int lim_ = 7; lim_ < 9; ++lim_)
+  {
+    if (lim_ == 9)
+    {
+      std::cout << "\n\nThe next part of this test is slow.";
+      std::cout << "\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+    sumOfSquareRoots = BiquadraticNumber();
+    for (int ii = 0; ii < lim_; ++ii)
+    {
+      sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    }
+    reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+    std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+    recipIntegral = reciprocal.factorAsIntegral();
+    std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+    std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  }
+
+  return true;
+}
+
 bool test_evaluation()
 {
   auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
@@ -512,45 +688,45 @@ bool test_rational()
 
 bool test_quadratic()
 {
-  auto zero = BiquadraticNumber();
+  auto zero = QuadraticNumber();
   std::cout << "\nZero = " << zero.print();
-  zero = BiquadraticNumber::sqrt(9) - Rational(3);
+  zero = QuadraticNumber::sqrt(9) - Rational(3);
   std::cout << "\nZero = " << zero.print();
-  auto twoThirds = BiquadraticNumber(Rational(2, 3));
+  auto twoThirds = QuadraticNumber(Rational(2, 3));
   std::cout << "\nTwo-thirds = " << twoThirds.print();
-  auto one = BiquadraticNumber::sqrt(1);
+  auto one = QuadraticNumber::sqrt(1);
   std::cout << "\nSquare root of 1 = " << one.print();
-  auto sqrt2 = BiquadraticNumber::sqrt(2);
+  auto sqrt2 = QuadraticNumber::sqrt(2);
   std::cout << "\nSquare root of 2 = " << sqrt2.print();
-  auto sqrt36 = BiquadraticNumber::sqrt(36);
+  auto sqrt36 = QuadraticNumber::sqrt(36);
   std::cout << "\nSquare root of 36 = " << sqrt36.print();
-  auto sqrt12 = BiquadraticNumber::sqrt(12);
+  auto sqrt12 = QuadraticNumber::sqrt(12);
   std::cout << "\nSquare root of 12 = " << sqrt12.print();
   std::cout << "\nTwelve is " << (sqrt12 * sqrt12).print();
   Rational rationalOut;
   bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
   if (!twoThirdsIsRational) { return false; }
-  std::cout << "\nSquare root of 2/3 = " << BiquadraticNumber::sqrt(rationalOut).print();
-  auto goldenRatio = BiquadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
+  std::cout << "\nSquare root of 2/3 = " << QuadraticNumber::sqrt(rationalOut).print();
+  auto goldenRatio = QuadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
   std::cout << "\nThe golden ratio is " << goldenRatio.print();
-  auto oneOverGolden = BiquadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
+  auto oneOverGolden = QuadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
   std::cout << "\nOne = " << (goldenRatio * oneOverGolden).print();
-  oneOverGolden = BiquadraticNumber(1) / goldenRatio;
+  oneOverGolden = QuadraticNumber(1) / goldenRatio;
   std::cout << "\nThe reciprocal golden ratio is " << oneOverGolden.print();
-  auto sumOfSquareRoots = BiquadraticNumber::sqrt(2) + BiquadraticNumber::sqrt(3) + Rational(1);
-  auto reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  auto sumOfSquareRoots = QuadraticNumber::sqrt(2) + QuadraticNumber::sqrt(3) + Rational(1);
+  auto reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
-  sumOfSquareRoots = BiquadraticNumber::sqrt(5) - BiquadraticNumber::sqrt(3) + Rational(1);
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  sumOfSquareRoots = QuadraticNumber::sqrt(5) - QuadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
-  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(3) + Rational(1);
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  sumOfSquareRoots = QuadraticNumber::sqrt(7) + QuadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
-  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(5) + BiquadraticNumber::sqrt(3) + Rational(1);
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  sumOfSquareRoots = QuadraticNumber::sqrt(7) + QuadraticNumber::sqrt(5) + QuadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
 
@@ -558,78 +734,78 @@ bool test_quadratic()
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 5; ++ii)
   {
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    BiquadraticNumber coeff(-1);
+    QuadraticNumber coeff(-1);
     if ((ii % 2) == 0) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 5; ++ii)
   {
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   auto recipIntegral = reciprocal.factorAsIntegral();
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
   std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   recipIntegral = reciprocal.factorAsIntegral();
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
   std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
 
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    BiquadraticNumber coeff(-1);
+    QuadraticNumber coeff(-1);
     if ((ii % 2) == 0) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   recipIntegral = reciprocal.factorAsIntegral();
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
   std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
 
-  sumOfSquareRoots = BiquadraticNumber();
+  sumOfSquareRoots = QuadraticNumber();
   for (int ii = 0; ii < 6; ++ii)
   {
-    BiquadraticNumber coeff(-1);
+    QuadraticNumber coeff(-1);
     if ((ii % 2) == 1) { coeff = coeff * coeff; }
-    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+    sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii) * coeff;
   }
-  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
   recipIntegral = reciprocal.factorAsIntegral();
   std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
@@ -647,12 +823,12 @@ bool test_quadratic()
       std::cin >> prompt;
       if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
     }
-    sumOfSquareRoots = BiquadraticNumber();
+    sumOfSquareRoots = QuadraticNumber();
     for (int ii = 0; ii < lim_; ++ii)
     {
-      sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+      sumOfSquareRoots = sumOfSquareRoots + QuadraticNumber::sqrt(ii);
     }
-    reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+    reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
     std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
     recipIntegral = reciprocal.factorAsIntegral();
     std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
@@ -850,6 +1026,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTest biquadratic:\n";
+  test_biquadratic();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting function evaluation:\n";
   test_evaluation();
   std::cout << "\nContinue, or 'Q' to exit? ";
