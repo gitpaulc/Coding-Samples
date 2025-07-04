@@ -470,11 +470,22 @@ namespace FunctionalCalculator
     mp numeratorHalf2 = input.numerator() - numeratorHalf1;
     if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
     {
+      if (input.numerator() == mp(4))
+      {
+        isAdmissible = true;
+      }
       Rational input1(numeratorHalf1, input.denominator());
       Rational input2(numeratorHalf2, input.denominator());
       BiquadraticNumber cosInput1, cosInput2, sinInput1, sinInput2;
       auto success = tryGetCosine(input1, cosInput1);
       if (!success) { return false; }
+      if (numeratorHalf1 == numeratorHalf2)
+      {
+        output = cosInput1 * cosInput1 * BiquadraticNumber(QuadraticNumber(Rational(2)))
+          - BiquadraticNumber(QuadraticNumber(Rational(1)));
+        cosineValues[input] = output;
+        return true;
+      }
       success = tryGetCosine(input2, cosInput2);
       if (!success) { return false; }
       success = tryGetSine(input1, sinInput1);
@@ -547,9 +558,15 @@ namespace FunctionalCalculator
       BiquadraticNumber cosInput1, cosInput2, sinInput1, sinInput2;
       auto success = tryGetCosine(input1, cosInput1);
       if (!success) { return false; }
-      success = tryGetCosine(input2, cosInput2);
-      if (!success) { return false; }
       success = tryGetSine(input1, sinInput1);
+      if (!success) { return false; }
+      if (numeratorHalf1 == numeratorHalf2)
+      {
+        output = sinInput1 * cosInput1 * BiquadraticNumber(QuadraticNumber(Rational(2)));
+        sineValues[input] = output;
+        return true;
+      }
+      success = tryGetCosine(input2, cosInput2);
       if (!success) { return false; }
       success = tryGetSine(input2, sinInput2);
       if (!success) { return false; }
