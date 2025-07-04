@@ -157,7 +157,7 @@ bool test_biquadratic()
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  for (int lim_ = 7; lim_ < 9; ++lim_)
+  for (int lim_ = 7; lim_ < 10; ++lim_)
   {
     if (lim_ == 9)
     {
@@ -814,7 +814,7 @@ bool test_quadratic()
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  for (int lim_ = 7; lim_ < 9; ++lim_)
+  for (int lim_ = 7; lim_ < 10; ++lim_)
   {
     if (lim_ == 9)
     {
