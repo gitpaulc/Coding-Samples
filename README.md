@@ -168,7 +168,11 @@
 * For instance it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`. It computes that the reciprocal of `1 + sqrt(3) + sqrt(5) + sqrt(7)` is `(-7 + 5 * sqrt(3) + 3 * sqrt(5) - sqrt(7) - sqrt(15) + sqrt(21) + sqrt(35) - sqrt(105)) * (1/16)`.
 * It computes that `(d/dx)sin(pi * x) / pi = cos(pi * x)` and simplifies `sin^2(pi * x) + cos^2(pi * x) = 1`.
 * It computes that `e^(ax)sin(ax)` is not a harmonic function but `e^(ax)sin(ay)` is a harmonic function.
-* Also included is a C# version of the project in the `function_calculator_cs` folder. For now this involves multiprecision integers. A UI for the multiprecision integers is included, along with a Windows-compatible executable at `function_calculator_cs\bin\Release\net8.0-windows\function_calculator_cs.exe`
+* Recently added is **biquadratic number** functionality. These are square roots **of** square roots of rational numbers. They often arise as solutions to fourth-degree equations, and are useful for representing the sines of pi / 5 and the cosines and sines of pi / 8. A screenshot is shown below:
+
+<a href="#"><img alt="ComputationalGeometry" src="function_calculator/biquadratic_sines.png" width="100%"/></a>
+
+* Also included is a C# version of the project in the `function_calculator_cs` folder. For now this involves only multiprecision integers and square roots of rational numbers. A UI for the multiprecision integers is included, along with a Windows-compatible executable at `function_calculator_cs\bin\Release\net8.0-windows\function_calculator_cs.exe`
 * A screenshot is shown:
 
 <a href="#"><img alt="ComputationalGeometry" src="function_calculator_cs/FunctionCalculatorCSharp.png" width="100%"/></a>
