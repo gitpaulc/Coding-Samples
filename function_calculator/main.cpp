@@ -18,6 +18,7 @@ bool test_biquadratic()
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
     auto twoFifths = oneFifth + oneFifth;
     auto threeFifths = twoFifths + oneFifth;
+    auto oneEighth = ComplexQuadratic(BiquadraticNumber(Rational(1, 8)));
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
@@ -35,6 +36,9 @@ bool test_biquadratic()
     success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
     std::cout << "\ncos(pi) = " << result.print();
     if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneEighth, result);
+    std::cout << "\ncos(pi / 8) = " << result.print();
+    if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
@@ -42,6 +46,7 @@ bool test_biquadratic()
     auto oneFifth = ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
     auto twoFifths = ComplexQuadratic(BiquadraticNumber(Rational(2, 5)));
     auto threeFifths = ComplexQuadratic(BiquadraticNumber(Rational(3, 5)));
+    auto oneEighth = ComplexQuadratic(BiquadraticNumber(Rational(1, 8)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
@@ -58,6 +63,9 @@ bool test_biquadratic()
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
     std::cout << "\nsin(pi) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneEighth, result);
+    std::cout << "\nsin(pi / 8) = " << result.print();
     if (!success) { return false; }
   }
   std::string prompt;
