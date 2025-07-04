@@ -520,10 +520,10 @@ namespace FunctionalCalculator
     }
     if ((mp(5) % (input.denominator())) == mp(0))
     {
-      auto sqrt20 = QuadraticNumber::sqrt(20);
-      auto c2 = QuadraticNumber(Rational(1)) / (QuadraticNumber(Rational(6)) + sqrt20);
-      auto s2 = QuadraticNumber(Rational(1)) - c2;
-      BiquadraticNumber cosPiOver5 = BiquadraticNumber::sqrt(c2);
+      auto sqrt5 = QuadraticNumber::sqrt(5);
+      auto four = QuadraticNumber(Rational(4));
+      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
       BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
       unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
@@ -608,10 +608,10 @@ namespace FunctionalCalculator
     }
     if ((mp(5) % (input.denominator())) == mp(0))
     {
-      auto sqrt20 = QuadraticNumber::sqrt(20);
-      auto c2 = QuadraticNumber(Rational(1)) / (QuadraticNumber(Rational(6)) + sqrt20);
-      auto s2 = QuadraticNumber(Rational(1)) - c2;
-      BiquadraticNumber cosPiOver5 = BiquadraticNumber::sqrt(c2);
+      auto sqrt5 = QuadraticNumber::sqrt(5);
+      auto four = QuadraticNumber(Rational(4));
+      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
       BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
       unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
