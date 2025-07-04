@@ -42,7 +42,7 @@ public:
   virtual std::pair<double, double> get() const override;
 
   int getNumRootsInSum() const;
-  bool hasSameRootsAs(const QuadraticNumber& rhs) const;
+  std::set<mp> getSummandRoots() const;
   /** \return { a, b } where this number == a / b AND a has only integer coefficients. */
   std::pair<QuadraticNumber, mp> factorAsIntegral() const;
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */

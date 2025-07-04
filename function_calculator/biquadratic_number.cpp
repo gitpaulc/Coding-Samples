@@ -315,9 +315,21 @@ namespace FunctionalCalculator
     BiquadraticNumber answer;
     for (const auto& iter : product.content)
     {
-      if (iter.second.getNumRootsInSum() == 2)
+      if ((iter.first.getNumRootsInSum() == 2) && (iter.second.getNumRootsInSum() <= 2))
       {
-        if (iter.first.hasSameRootsAs(iter.second))
+        auto roots_1 = iter.first.getSummandRoots();
+        auto roots_2 = iter.second.getSummandRoots();
+        bool shouldChangeKey = false;
+        for (const auto& root : roots_1)
+        {
+          if (root == mp(1)) { shouldChangeKey = true; break; }
+        }
+        for (const auto& root : roots_2)
+        {
+          if (!shouldChangeKey) { break; }
+          if (roots_2.find(root) == roots_2.end()) { shouldChangeKey = false; }
+        }
+        if (shouldChangeKey)
         {
           auto newKey = iter.second * iter.second * iter.first;
           QuadraticNumber newVal(Rational(1));

@@ -16,26 +16,48 @@ bool test_biquadratic()
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    auto twoFifths = oneFifth + oneFifth;
+    auto threeFifths = twoFifths + oneFifth;
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
     std::cout << "\n\ncos(pi / 5) = " << result.print();
     if (!success) { return false; }
-    success = fn.tryEvaluateAtX(oneFifth + oneFifth, result);
+    success = fn.tryEvaluateAtX(twoFifths, result);
     std::cout << "\ncos(2 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths, result);
+    std::cout << "\ncos(3 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths + twoFifths, result);
+    std::cout << "\ncos(4 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
+    std::cout << "\ncos(pi) = " << result.print();
     if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    auto twoFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(2, 5)));
+    auto threeFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(3, 5)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
     std::cout << "\n\nsin(pi / 5) = " << result.print();
     if (!success) { return false; }
-    success = fn.tryEvaluateAtX(oneFifth + oneFifth, result);
+    success = fn.tryEvaluateAtX(twoFifths, result);
     std::cout << "\nsin(2 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths, result);
+    std::cout << "\nsin(3 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths + twoFifths, result);
+    std::cout << "\nsin(4 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
+    std::cout << "\nsin(pi) = " << result.print();
     if (!success) { return false; }
   }
   std::string prompt;

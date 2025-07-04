@@ -38,13 +38,11 @@ namespace FunctionalCalculator
     return (int)content.size();
   }
 
-  bool QuadraticNumber::hasSameRootsAs(const QuadraticNumber& rhs) const
+  std::set<mp> QuadraticNumber::getSummandRoots() const
   {
-    if (content.size() != rhs.content.size()) { return false; }
-    std::set<mp> roots, rhsRoots;
+    std::set<mp> roots;
     for (const auto& iter : content) { roots.insert(iter.first); }
-    for (const auto& iter : rhs.content) { rhsRoots.insert(iter.first); }
-    return (roots == rhsRoots);
+    return roots;
   }
 
   std::pair<QuadraticNumber, mp> QuadraticNumber::factorAsIntegral() const
