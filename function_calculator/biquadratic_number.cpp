@@ -48,10 +48,10 @@ namespace FunctionalCalculator
     {
       auto rr = iter.first.factorAsIntegral();
       auto qq = iter.second.factorAsIntegral();
-      keys.push_back(rr.first * QuadraticNumber(Rational(qq.second, mp(1))));
+      keys.push_back(rr.first * QuadraticNumber(Rational(rr.second, mp(1))));
       gammas.push_back(qq.first);
-      iotas.push_back(rr.second);
-      js.push_back(qq.second);
+      iotas.push_back(qq.second);
+      js.push_back(rr.second);
       bigDenom = bigDenom * (rr.second * qq.second);
     }
     std::vector<mp> coeffs(iotas.size() + 1);
