@@ -456,6 +456,35 @@ namespace FunctionalCalculator
       auto iter = cosineValues.find(input);
       if (iter != cosineValues.end()) { output = iter->second; return true; }
     }
+    std::set<mp> admissibles = { mp(5), mp(12) };
+    bool isAdmissible = false;
+    for (const auto& admissible : admissibles)
+    {
+      if ((admissible % (input.denominator())) == mp(0))
+      {
+        isAdmissible = true; break;
+      }
+    }
+    if (!isAdmissible) { return false; }
+    mp numeratorHalf1 = input.numerator() / 2;
+    mp numeratorHalf2 = input.numerator() - numeratorHalf1;
+    if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
+    {
+      Rational input1(numeratorHalf1, input.denominator());
+      Rational input2(numeratorHalf2, input.denominator());
+      BiquadraticNumber cosInput1, cosInput2, sinInput1, sinInput2;
+      auto success = tryGetCosine(input1, cosInput1);
+      if (!success) { return false; }
+      success = tryGetCosine(input2, cosInput2);
+      if (!success) { return false; }
+      success = tryGetSine(input1, sinInput1);
+      if (!success) { return false; }
+      success = tryGetSine(input2, sinInput2);
+      if (!success) { return false; }
+      output = cosInput1 * cosInput2 - sinInput1 * sinInput2;
+      cosineValues[input] = output;
+      return true;
+    }
     if ((mp(12) % (input.denominator())) == mp(0))
     {
       auto sqrt2 = BiquadraticNumber::sqrt(2);
@@ -498,6 +527,35 @@ namespace FunctionalCalculator
     {
       auto iter = sineValues.find(input);
       if (iter != sineValues.end()) { output = iter->second; return true; }
+    }
+    std::set<mp> admissibles = { mp(5), mp(12) };
+    bool isAdmissible = false;
+    for (const auto& admissible : admissibles)
+    {
+      if ((admissible % (input.denominator())) == mp(0))
+      {
+        isAdmissible = true; break;
+      }
+    }
+    if (!isAdmissible) { return false; }
+    mp numeratorHalf1 = input.numerator() / 2;
+    mp numeratorHalf2 = input.numerator() - numeratorHalf1;
+    if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
+    {
+      Rational input1(numeratorHalf1, input.denominator());
+      Rational input2(numeratorHalf2, input.denominator());
+      BiquadraticNumber cosInput1, cosInput2, sinInput1, sinInput2;
+      auto success = tryGetCosine(input1, cosInput1);
+      if (!success) { return false; }
+      success = tryGetCosine(input2, cosInput2);
+      if (!success) { return false; }
+      success = tryGetSine(input1, sinInput1);
+      if (!success) { return false; }
+      success = tryGetSine(input2, sinInput2);
+      if (!success) { return false; }
+      output = sinInput1 * cosInput2 + cosInput1 * sinInput2;
+      cosineValues[input] = output;
+      return true;
     }
     if ((mp(12) % (input.denominator())) == mp(0))
     {
