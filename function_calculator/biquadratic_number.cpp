@@ -466,6 +466,16 @@ namespace FunctionalCalculator
       }
     }
     if (!isAdmissible) { return false; }
+    if (input.numerator() > input.denominator() / 2)
+    {
+      Rational input1(input.denominator() - input.numerator(), input.denominator());
+      BiquadraticNumber cosInput1;
+      auto success = tryGetCosine(input1, cosInput1);
+      if (!success) { return false; }
+      output = -cosInput1;
+      cosineValues[input] = output;
+      return true;
+    }
     mp numeratorHalf1 = input.numerator() / 2;
     mp numeratorHalf2 = input.numerator() - numeratorHalf1;
     if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
@@ -549,6 +559,16 @@ namespace FunctionalCalculator
       }
     }
     if (!isAdmissible) { return false; }
+    if (input.numerator() > input.denominator() / 2)
+    {
+      Rational input1(input.denominator() - input.numerator(), input.denominator());
+      BiquadraticNumber sinInput1;
+      auto success = tryGetSine(input1, sinInput1);
+      if (!success) { return false; }
+      output = sinInput1;
+      sineValues[input] = output;
+      return true;
+    }
     mp numeratorHalf1 = input.numerator() / 2;
     mp numeratorHalf2 = input.numerator() - numeratorHalf1;
     if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
