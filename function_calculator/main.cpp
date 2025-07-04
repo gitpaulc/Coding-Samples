@@ -233,34 +233,34 @@ bool test_evaluation()
     std::cout << "\n\ncos(0) = " << result.print();
     success = fn.tryEvaluateAtX(half, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 2) = " << result.print();
+    std::cout << "\ncos(pi / 2) = " << result.print();
     success = fn.tryEvaluateAtX(oneThird, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 3) = " << result.print();
+    std::cout << "\ncos(pi / 3) = " << result.print();
     success = fn.tryEvaluateAtX(oneFourth, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 4) = " << result.print();
+    std::cout << "\ncos(pi / 4) = " << result.print();
     success = fn.tryEvaluateAtX(oneFifth, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 5) = " << result.print();
+    std::cout << "\ncos(pi / 5) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 6) = " << result.print();
+    std::cout << "\ncos(pi / 6) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi / 12) = " << result.print();
+    std::cout << "\ncos(pi / 12) = " << result.print();
     success = fn.tryEvaluateAtX(unit, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(pi) = " << result.print();
+    std::cout << "\ncos(pi) = " << result.print();
     success = fn.tryEvaluateAtX(unit + half, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(3 * pi / 2) = " << result.print();
+    std::cout << "\ncos(3 * pi / 2) = " << result.print();
     success = fn.tryEvaluateAtX(unit + unit, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(2 * pi) = " << result.print();
+    std::cout << "\ncos(2 * pi) = " << result.print();
     success = fn.tryEvaluateAtX(-oneSixth, result);
     if (!success) { return false; }
-    std::cout << "\n\ncos(-pi / 6) = " << result.print();
+    std::cout << "\ncos(-pi / 6) = " << result.print();
   }
 
   std::string prompt = "";
@@ -277,34 +277,34 @@ bool test_evaluation()
     std::cout << "\n\nsin(0) = " << result.print();
     success = fn.tryEvaluateAtX(half, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 2) = " << result.print();
+    std::cout << "\nsin(pi / 2) = " << result.print();
     success = fn.tryEvaluateAtX(oneThird, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 3) = " << result.print();
+    std::cout << "\nsin(pi / 3) = " << result.print();
     success = fn.tryEvaluateAtX(oneFourth, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 4) = " << result.print();
+    std::cout << "\nsin(pi / 4) = " << result.print();
     success = fn.tryEvaluateAtX(oneFifth, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 5) = " << result.print();
+    std::cout << "\nsin(pi / 5) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 6) = " << result.print();
+    std::cout << "\nsin(pi / 6) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi / 12) = " << result.print();
+    std::cout << "\nsin(pi / 12) = " << result.print();
     success = fn.tryEvaluateAtX(unit, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(pi) = " << result.print();
+    std::cout << "\nsin(pi) = " << result.print();
     success = fn.tryEvaluateAtX(unit + half, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(3 * pi / 2) = " << result.print();
+    std::cout << "\nsin(3 * pi / 2) = " << result.print();
     success = fn.tryEvaluateAtX(unit + unit, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(2 * pi) = " << result.print();
+    std::cout << "\nsin(2 * pi) = " << result.print();
     success = fn.tryEvaluateAtX(-oneSixth, result);
     if (!success) { return false; }
-    std::cout << "\n\nsin(-pi / 6) = " << result.print();
+    std::cout << "\nsin(-pi / 6) = " << result.print();
   }
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";
