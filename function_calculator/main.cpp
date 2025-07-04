@@ -5,14 +5,224 @@
 
 using namespace FunctionalCalculator;
 
+bool test_biquadratic()
+{
+  {
+    auto sqrtSqrtFive = ComplexQuadratic(BiquadraticNumber::sqrt(QuadraticNumber::sqrt(5)));
+    std::cout << "\nSquare root of square root of 5 = " << sqrtSqrtFive.print();
+    std::cout << "\nSquare root of 5 = " << (sqrtSqrtFive * sqrtSqrtFive).print();
+  }
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    auto twoFifths = oneFifth + oneFifth;
+    auto threeFifths = twoFifths + oneFifth;
+    FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneFifth, result);
+    std::cout << "\n\ncos(pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths, result);
+    std::cout << "\ncos(2 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths, result);
+    std::cout << "\ncos(3 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths + twoFifths, result);
+    std::cout << "\ncos(4 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
+    std::cout << "\ncos(pi) = " << result.print();
+    if (!success) { return false; }
+  }
+  {
+    PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
+    auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
+    auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+    auto twoFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(2, 5)));
+    auto threeFifths = unit * ComplexQuadratic(BiquadraticNumber(Rational(3, 5)));
+    FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
+    FnPolynomial result;
+    bool success = fn.tryEvaluateAtX(oneFifth, result);
+    std::cout << "\n\nsin(pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths, result);
+    std::cout << "\nsin(2 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths, result);
+    std::cout << "\nsin(3 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(twoFifths + twoFifths, result);
+    std::cout << "\nsin(4 * pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(threeFifths + twoFifths, result);
+    std::cout << "\nsin(pi) = " << result.print();
+    if (!success) { return false; }
+  }
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+  auto zero = BiquadraticNumber();
+  std::cout << "\nZero = " << zero.print();
+  zero = BiquadraticNumber::sqrt(9) - Rational(3);
+  std::cout << "\nZero = " << zero.print();
+  auto twoThirds = BiquadraticNumber(Rational(2, 3));
+  std::cout << "\nTwo-thirds = " << twoThirds.print();
+  auto one = BiquadraticNumber::sqrt(1);
+  std::cout << "\nSquare root of 1 = " << one.print();
+  auto sqrt2 = BiquadraticNumber::sqrt(2);
+  std::cout << "\nSquare root of 2 = " << sqrt2.print();
+  auto sqrt36 = BiquadraticNumber::sqrt(36);
+  std::cout << "\nSquare root of 36 = " << sqrt36.print();
+  auto sqrt12 = BiquadraticNumber::sqrt(12);
+  std::cout << "\nSquare root of 12 = " << sqrt12.print();
+  std::cout << "\nTwelve is " << (sqrt12 * sqrt12).print();
+  Rational rationalOut;
+  bool twoThirdsIsRational = twoThirds.getRational(rationalOut);
+  if (!twoThirdsIsRational) { return false; }
+  std::cout << "\nSquare root of 2/3 = " << BiquadraticNumber::sqrt(rationalOut).print();
+  auto goldenRatio = BiquadraticNumber::sqrt(Rational(5, 4)) + Rational(1, 2);
+  std::cout << "\nThe golden ratio is " << goldenRatio.print();
+  auto oneOverGolden = BiquadraticNumber::sqrt(Rational(5, 4)) - Rational(1, 2);
+  std::cout << "\nOne = " << (goldenRatio * oneOverGolden).print();
+  oneOverGolden = BiquadraticNumber(1) / goldenRatio;
+  std::cout << "\nThe reciprocal golden ratio is " << oneOverGolden.print();
+  auto sumOfSquareRoots = BiquadraticNumber::sqrt(2) + BiquadraticNumber::sqrt(3) + Rational(1);
+  auto reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(5) - BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  sumOfSquareRoots = BiquadraticNumber::sqrt(7) + BiquadraticNumber::sqrt(5) + BiquadraticNumber::sqrt(3) + Rational(1);
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 5; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  auto recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 0) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  sumOfSquareRoots = BiquadraticNumber();
+  for (int ii = 0; ii < 6; ++ii)
+  {
+    BiquadraticNumber coeff(-1);
+    if ((ii % 2) == 1) { coeff = coeff * coeff; }
+    sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii) * coeff;
+  }
+  reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+  std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+  recipIntegral = reciprocal.factorAsIntegral();
+  std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+  std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  for (int lim_ = 7; lim_ < 10; ++lim_)
+  {
+    if (lim_ == 9)
+    {
+      std::cout << "\n\nThe next part of this test is slow.";
+      std::cout << "\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+    sumOfSquareRoots = BiquadraticNumber();
+    for (int ii = 0; ii < lim_; ++ii)
+    {
+      sumOfSquareRoots = sumOfSquareRoots + BiquadraticNumber::sqrt(ii);
+    }
+    reciprocal = BiquadraticNumber(1) / sumOfSquareRoots;
+    std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+    recipIntegral = reciprocal.factorAsIntegral();
+    std::cout << "\nThis equals " << recipIntegral.first.print(true) << " / " << recipIntegral.second;
+    std::cout << "\nOne = " << (sumOfSquareRoots * recipIntegral.first * Rational(1, recipIntegral.second)).print() << std::endl;
+  }
+
+  return true;
+}
+
 bool test_evaluation()
 {
   auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-  auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
-  auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
-  auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
-  auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
-  auto half = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 2)));
+  auto oneTwelfth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 12)));
+  auto oneSixth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 6)));
+  auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
+  auto oneFourth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 4)));
+  auto oneThird = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 3)));
+  auto half = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 2)));
   PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
   {
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
@@ -30,6 +240,9 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneFourth, result);
     if (!success) { return false; }
     std::cout << "\n\ncos(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 5) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\n\ncos(pi / 6) = " << result.print();
@@ -71,6 +284,9 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneFourth, result);
     if (!success) { return false; }
     std::cout << "\n\nsin(pi / 4) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 5) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\n\nsin(pi / 6) = " << result.print();
@@ -202,7 +418,7 @@ bool test_composition()
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
   {
-    ComplexQuadratic unit = ComplexQuadratic(QuadraticNumber(1));
+    ComplexQuadratic unit = ComplexQuadratic(BiquadraticNumber(1));
     auto zippo = unit - unit;
     Matrix<ComplexQuadratic> ninetyDegreeX;
     ninetyDegreeX.addRow({ unit, zippo, zippo });
@@ -234,17 +450,17 @@ bool test_composition()
 bool test_matrix()
 {
   {
-    Matrix<QuadraticNumber> rot2PiOver3;
-    rot2PiOver3.addRow({ Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
-    rot2PiOver3.addRow({ QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
-    QuadraticNumber det; bool linInd = true;
+    Matrix<BiquadraticNumber> rot2PiOver3;
+    rot2PiOver3.addRow({ Rational(-1, 2), BiquadraticNumber::sqrt(3) * Rational(-1, 2) });
+    rot2PiOver3.addRow({ BiquadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+    BiquadraticNumber det; bool linInd = true;
     auto rref = rot2PiOver3.rref(det, linInd);
     std::cout << "\nRotation by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
     std::cout << "\nIts determinant = " << det.print();
 
-    Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
+    Matrix<BiquadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 4 * pi / 3:\n" << rot2.print(true);
-    Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
+    Matrix<BiquadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
     std::cout << "\n\nRotation by angle 6 * pi / 3:\n" << id.print(true);
     std::cout << "\n\nIdentity matrix = \n" << rref.print(true);
   }
@@ -254,10 +470,10 @@ bool test_matrix()
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-  Matrix<QuadraticNumber> rot2PiOver3;
+  Matrix<BiquadraticNumber> rot2PiOver3;
   rot2PiOver3.addRow({ Rational(1), Rational(0), Rational(0) });
-  rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), QuadraticNumber::sqrt(3) * Rational(-1, 2) });
-  rot2PiOver3.addRow({ Rational(0), QuadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
+  rot2PiOver3.addRow({ Rational(0), Rational(-1, 2), BiquadraticNumber::sqrt(3) * Rational(-1, 2) });
+  rot2PiOver3.addRow({ Rational(0), BiquadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
 
   // Elementary row operations test. These should ultimately leave the matrix unchanged:
   rot2PiOver3.swapRows(0, 1); rot2PiOver3.swapRows(1, 0);
@@ -267,23 +483,23 @@ bool test_matrix()
 
   std::cout << "\n\nRotation (R) by angle 2 * pi / 3:\n" << rot2PiOver3.print(true);
 
-  Matrix<QuadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
+  Matrix<BiquadraticNumber> rot2 = rot2PiOver3 * rot2PiOver3;
   std::cout << "\n\nRotation (R^2) by angle 4 * pi / 3:\n" << rot2.print(true);
   std::cout << "\n\nR^2 == R^T:\n" << rot2PiOver3.transpose().print(true);
-  Matrix<QuadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
+  Matrix<BiquadraticNumber> id = rot2PiOver3 * rot2PiOver3 * rot2PiOver3;
   std::cout << "\n\nRotation (R^3) by angle 6 * pi / 3:\n" << id.print(true);
 
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-  Matrix<QuadraticNumber> otherRot2PiOver3;
-  otherRot2PiOver3.addRow({ Rational(-1, 3), QuadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
-  otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2, 3)), Rational(-1, 2) , QuadraticNumber::sqrt(Rational(1, 3)) * Rational(1, 2) });
-  otherRot2PiOver3.addRow({ QuadraticNumber::sqrt(Rational(2)) * Rational(-1, 3), QuadraticNumber::sqrt(Rational(1, 3)) * Rational(-1, 2), Rational(5, 6)});
+  Matrix<BiquadraticNumber> otherRot2PiOver3;
+  otherRot2PiOver3.addRow({ Rational(-1, 3), BiquadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), BiquadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
+  otherRot2PiOver3.addRow({ BiquadraticNumber::sqrt(Rational(2, 3)), Rational(-1, 2) , BiquadraticNumber::sqrt(Rational(1, 3)) * Rational(1, 2) });
+  otherRot2PiOver3.addRow({ BiquadraticNumber::sqrt(Rational(2)) * Rational(-1, 3), BiquadraticNumber::sqrt(Rational(1, 3)) * Rational(-1, 2), Rational(5, 6)});
   std::cout << "\n\nRotation (P) by angle 2 * pi / 3:\n" << otherRot2PiOver3.print(true);
 
-  Matrix<QuadraticNumber> other2 = otherRot2PiOver3 * otherRot2PiOver3;
+  Matrix<BiquadraticNumber> other2 = otherRot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (P^2) by angle 4 * pi / 3:\n" << other2.print(true);
   {
     bool success = false;
@@ -298,7 +514,7 @@ bool test_matrix()
 
   auto rTimesP = rot2PiOver3 * otherRot2PiOver3;
   std::cout << "\n\nRotation (R * P) by angle 2 * pi / 3:\n" << rTimesP.print(true);
-  Matrix<QuadraticNumber> rTimesP_2 = rTimesP * rTimesP;
+  Matrix<BiquadraticNumber> rTimesP_2 = rTimesP * rTimesP;
   std::cout << "\n\nRotation ((R * P)^2) by angle 4 * pi / 3:\n" << rTimesP_2.print(true);
   id = rTimesP * rTimesP * rTimesP;
   std::cout << "\n\nRotation ((R * P)^3) by angle 6 * pi / 3:\n" << id.print(true);
@@ -309,7 +525,7 @@ bool test_matrix()
 
   auto pTimesR = otherRot2PiOver3 * rot2PiOver3;
   std::cout << "\n\nRotation (P * R) by angle 2 * pi / 3:\n" << pTimesR.print(true);
-  Matrix<QuadraticNumber> pTimesR_2 = pTimesR * pTimesR;
+  Matrix<BiquadraticNumber> pTimesR_2 = pTimesR * pTimesR;
   std::cout << "\n\nRotation ((P * R)^2) by angle 4 * pi / 3:\n" << pTimesR_2.print(true);
   id = pTimesR * pTimesR * pTimesR;
   std::cout << "\n\nRotation ((P * R)^3) by angle 6 * pi / 3:\n" << id.print(true);
@@ -351,7 +567,7 @@ bool test_matrix()
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-  std::set<Matrix<QuadraticNumber> > tetrahedralSymmetries;
+  std::set<Matrix<BiquadraticNumber> > tetrahedralSymmetries;
   tetrahedralSymmetries.insert(id);
   tetrahedralSymmetries.insert(rot2PiOver3);
   tetrahedralSymmetries.insert(rot2);
@@ -368,7 +584,7 @@ bool test_matrix()
   bool passedClosedness = true;
   for (const auto& sym0 : tetrahedralSymmetries)
   {
-    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    std::set<Matrix<BiquadraticNumber> > newSymmetries;
     for (const auto& sym : tetrahedralSymmetries)
     {
       newSymmetries.insert(sym0 * sym);
@@ -383,7 +599,7 @@ bool test_matrix()
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
   {
-    std::set<Matrix<QuadraticNumber> > newSymmetries;
+    std::set<Matrix<BiquadraticNumber> > newSymmetries;
     for (const auto& sym : tetrahedralSymmetries)
     {
       bool success = false;
@@ -401,10 +617,10 @@ bool test_matrix()
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
   {
-    Matrix<QuadraticNumber> vec0;
-    vec0.addRow({ QuadraticNumber::sqrt(6) * Rational(1, 4), Rational(0), Rational(0) });
+    Matrix<BiquadraticNumber> vec0;
+    vec0.addRow({ BiquadraticNumber::sqrt(6) * Rational(1, 4), Rational(0), Rational(0) });
     vec0 = vec0.transpose();
-    std::set<Matrix<QuadraticNumber> > tetrahedron;
+    std::set<Matrix<BiquadraticNumber> > tetrahedron;
     for (const auto& sym : tetrahedralSymmetries) { tetrahedron.insert((sym * vec0).transpose()); }
     std::cout << "\nNumber of vertices in a tetrahedron = " << tetrahedron.size() << "\nWe can choose them to be:";
     for (const auto& vertex : tetrahedron)
@@ -631,7 +847,7 @@ bool test_quadratic()
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-  for (int lim_ = 7; lim_ < 11; ++lim_)
+  for (int lim_ = 7; lim_ < 10; ++lim_)
   {
     if (lim_ == 9)
     {
@@ -655,6 +871,38 @@ bool test_quadratic()
   return true;
 }
 
+bool test_quad_factor()
+{
+  auto unit = QuadraticNumber(Rational(1));
+  std::cout << "\nPrime factorization of " << unit.print() << " is:\n";
+  std::cout << unit.printFactors();
+  auto number = QuadraticNumber(Rational(24));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = QuadraticNumber(Rational(4)) + QuadraticNumber::sqrt(Rational(3));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = -QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  number = (QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4))) * QuadraticNumber(Rational(1, 3));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  std::string prompt = "";
+  std::cout << "\n\nThe next part of this test is slow.";
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  number = QuadraticNumber::sqrt(Rational(8)) + QuadraticNumber(Rational(78));
+  number = number + QuadraticNumber::sqrt(Rational(300)) + QuadraticNumber::sqrt(Rational(600));
+  std::cout << "\nPrime factorization of " << number.print() << " is:\n";
+  std::cout << number.printFactors();
+  return true;
+}
+
 bool test_complex()
 {
   auto ii = ComplexQuadratic::sqrt(-1);
@@ -667,7 +915,7 @@ bool test_complex()
   auto sqrtMinus36 = ComplexQuadratic::sqrt(-36);
   std::cout << "\nSquare root of -36 = " << sqrtMinus36.print();
   std::cout << "\nThe reciprocal of i is " << (ComplexQuadratic::sqrt(-1).pow(-1)).print();
-  auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + QuadraticNumber(1)) / QuadraticNumber(2);
+  auto rootThreeNum = (ComplexQuadratic::sqrt(-3) + BiquadraticNumber(1)) / BiquadraticNumber(2);
   std::cout << "\nThe following equation holds:\n" << rootThreeNum.print(true) << " * " << rootThreeNum.conjugate().print(true);
   std::cout << " = " << (rootThreeNum * rootThreeNum.conjugate()).print() << std::endl;
   return true;
@@ -769,10 +1017,10 @@ bool test_function()
     std::cout << "\ntan(pi * x) = " << tan.print();
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto zippo = unit - unit;
-    auto oneTwelfth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 12)));
-    auto oneSixth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 6)));
-    auto oneFourth = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 4)));
-    auto oneThird = unit * ComplexQuadratic(QuadraticNumber(Rational(1, 3)));
+    auto oneTwelfth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 12)));
+    auto oneSixth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 6)));
+    auto oneFourth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 4)));
+    auto oneThird = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 3)));
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     PiRational expression;
     tan.tryEvaluateAtXYZ(unit, zippo, zippo, expression);
@@ -811,6 +1059,11 @@ bool test_function()
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTest biquadratic:\n";
+  test_biquadratic();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting function evaluation:\n";
   test_evaluation();
   std::cout << "\nContinue, or 'Q' to exit? ";
@@ -843,6 +1096,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest quadratic:\n";
   test_quadratic();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTesting quadratic number factorization:\n";
+  test_quad_factor();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }

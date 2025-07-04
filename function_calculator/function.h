@@ -85,7 +85,7 @@ public:
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a complex number and (a)^p is attempted for nonnegative integers p, it should always succeed.
    *  \remark Currently when a is a real number and e^a is attempted, evaluation only succeeds for a == 0. This is because e polynomials are unsupported.
-   *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
+   *  \remark Currently when a is a real BiquadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
   bool tryEvaluateAtX(const ComplexQuadratic& xVal, Function& output) const;
@@ -93,7 +93,7 @@ public:
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a complex number and (a)^p is attempted for nonnegative integers p, it should always succeed.
    *  \remark Currently when a is a real number and e^a is attempted, evaluation only succeeds for a == 0. This is because e polynomials are unsupported.
-   *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
+   *  \remark Currently when a is a real BiquadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
   bool tryEvaluateAtY(const ComplexQuadratic& yVal, Function& output) const;
@@ -101,7 +101,7 @@ public:
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a complex number and (a)^p is attempted for nonnegative integers p, it should always succeed.
    *  \remark Currently when a is a real number and e^a is attempted, evaluation only succeeds for a == 0. This is because e polynomials are unsupported.
-   *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
+   *  \remark Currently when a is a real BiquadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
   bool tryEvaluateAtZ(const ComplexQuadratic& zVal, Function& output) const;
@@ -109,7 +109,7 @@ public:
   /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
    *  \remark Currently when a is a complex number and (a)^p is attempted for nonnegative integers p, it should always succeed.
    *  \remark Currently when a is a real number and e^a is attempted, evaluation only succeeds for a == 0. This is because e polynomials are unsupported.
-   *  \remark Currently when a is a real QuadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
+   *  \remark Currently when a is a real BiquadraticNumber and cos(pi * a) or sin(pi * a) are attempted, they should only succeed for well-known trig values.
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
   bool tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const;

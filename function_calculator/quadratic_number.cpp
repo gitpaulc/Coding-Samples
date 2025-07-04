@@ -33,6 +33,18 @@ namespace FunctionalCalculator
     return { answer, 0.0 };
   }
 
+  int QuadraticNumber::getNumRootsInSum() const
+  {
+    return (int)content.size();
+  }
+
+  std::set<mp> QuadraticNumber::getSummandRoots() const
+  {
+    std::set<mp> roots;
+    for (const auto& iter : content) { roots.insert(iter.first); }
+    return roots;
+  }
+
   std::pair<QuadraticNumber, mp> QuadraticNumber::factorAsIntegral() const
   {
     std::pair<QuadraticNumber, mp> answer;
@@ -62,9 +74,33 @@ namespace FunctionalCalculator
   {
     if (content.size() == 0) { self = Rational(0, 1); return true; }
     if (content.size() > 1) { return false; }
-    if (content.find(1) == content.end()) { return false; }
-    self = content.at(1);
+    auto iter = content.find(1);
+    if (iter == content.end()) { return false; }
+    self = iter->second;
     return true;
+  }
+
+  void QuadraticNumber::clean()
+  {
+    QuadraticNumber answer;
+    for (const auto& iter : content)
+    {
+      if (iter.first == mp(0)) { continue; }
+      if (iter.second == Rational(0)) { continue; }
+      answer.content[iter.first] = iter.second;
+    }
+    content = answer.content;
+  }
+
+  QuadraticNumber QuadraticNumber::coeffsAbs() const
+  {
+    QuadraticNumber answer = *this;
+    for (auto& iter : answer.content)
+    {
+      if (iter.second > Rational(0)) { continue; }
+      iter.second = -iter.second;
+    }
+    return answer;
   }
 
   Matrix<Rational> QuadraticNumber::getMultiplicationMatrix(std::map<mp, int>& root2Index, std::map<int, mp>& index2Root) const
@@ -109,11 +145,139 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  std::set<QuadraticNumber> QuadraticNumber::getIterates0() const
+  {
+    static std::map<QuadraticNumber, std::set<QuadraticNumber> > sIterates;
+    std::set<QuadraticNumber> answer;
+    if (content.empty()) { return answer; }
+    {
+      auto iter = sIterates.find(*this);
+      if (iter != sIterates.end())
+      {
+        return iter->second;
+      }
+    }
+    auto iter = content.begin();
+    if (iter == content.end()) { sIterates[*this] = answer; return answer; }
+    if (!(iter->second.isInt())) { throw std::logic_error("Use integral quadratic number for intermediate prime factorization."); return answer; }
+    mp lim = iter->second.numerator();
+    bool isNegative_ = (lim < mp(0));
+    mp absLim = lim.abs();
+    if (content.size() == 1)
+    {
+      for (mp ind = mp(0); ind <= absLim; ind = ind + mp(1))
+      {
+        QuadraticNumber quad;
+        auto coeff = (isNegative_ ? (-ind) : (ind));
+        quad.content[iter->first] = Rational(coeff, mp(1));
+        answer.insert(quad);
+      }
+      sIterates[*this] = answer;
+      return answer;
+    }
+    std::set<QuadraticNumber> smaller;
+    {
+      QuadraticNumber other;
+      for (const auto& jter : content)
+      {
+        if (iter->first == jter.first) { continue; }
+        other.content[jter.first] = jter.second;
+      }
+      smaller = other.getIterates0();
+    }
+    for (mp ind = mp(0); ind <= absLim; ind = ind + mp(1))
+    {
+      for (const auto& remaining : smaller)
+      {
+        QuadraticNumber quad;
+        auto coeff = (isNegative_ ? (-ind) : (ind));
+        quad.content[iter->first] = Rational(coeff, mp(1));
+        for (const auto& jter : remaining.content)
+        {
+          quad.content[jter.first] = jter.second;
+        }
+        answer.insert(quad);
+      }
+    }
+    sIterates[*this] = answer;
+    return answer;
+  }
+
+  std::set<QuadraticNumber> QuadraticNumber::getIterates() const
+  {
+    auto iterates0 = getIterates0();
+    std::set<QuadraticNumber> iterates;
+    for (const auto& iterate0 : iterates0)
+    {
+      auto iterate = iterate0;
+      iterate.clean();
+      if (iterate == QuadraticNumber()) { continue; }
+      Rational rationalVal;
+      if (iterate.getRational(rationalVal)) { continue; }
+      {
+        std::vector<mp> coeffs(iterate.content.size());
+        int ii = -1;
+        for (const auto& iter : iterate.content)
+        {
+          ++ii;
+          coeffs[ii] = iter.second.numerator();
+        }
+        if ((mp::gcd(coeffs) != mp(1)) && (mp::gcd(coeffs) != mp(-1))) { continue; } // Sieve out multiples of primes.
+      }
+      iterates.insert(iterate);
+    }
+    return iterates;
+  }
+
+  std::map<QuadraticNumber, int> QuadraticNumber::primeFacIntegral() const
+  {
+    auto input = *this;
+    std::map<QuadraticNumber, int> answer;
+    auto lim = input.coeffsAbs();
+    std::set<QuadraticNumber> sieved;
+    auto iterates = input.getIterates();
+    bool foundFactor = false;
+    for (const auto& init : iterates)
+    {
+      for (QuadraticNumber factor = init; factor.coeffsAbs() < lim; factor = factor + init)
+      {
+        if (sieved.find(factor) != sieved.end()) { continue; }
+        sieved.insert(factor);
+        auto quotient = input / factor;
+        // Is factor a true factor?
+        if (iterates.find(quotient) == iterates.end()) { continue; }
+        if (factor == input) { continue; }
+        foundFactor = true;
+        if (answer.find(factor) == answer.end())
+        {
+          answer[factor] = 1;
+        }
+        else { answer[factor] = answer[factor] + 1; }
+        auto others = quotient.primeFacIntegral();
+        for (auto& iter : others)
+        {
+          if (answer.find(iter.first) == answer.end())
+          {
+            answer[iter.first] = iter.second;
+            continue;
+          }
+          answer[iter.first] += iter.second;
+        }
+        break;
+      }
+      if (foundFactor) { break; }
+    }
+    if (!foundFactor)
+    {
+      answer[input] = 1;
+    }
+    return answer;
+  }
+
   std::string QuadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
     int count = -1;
-    if (useParentheses) { strm << "("; }
     if (content.size() == 0) { strm << "0"; }
     for (const auto& iter : content)
     {
@@ -144,8 +308,10 @@ namespace FunctionalCalculator
       }
       if (complex) { strm << "i"; }
     }
-    if (useParentheses) { strm << ")"; }
-    return strm.str();
+    auto returnStr = strm.str();
+    if (returnStr.empty()) { returnStr = "0"; }
+    if (useParentheses) { returnStr = std::string("(") + returnStr + ")"; }
+    return returnStr;
   }
 
   QuadraticNumber QuadraticNumber::sqrt(const Rational& radicand)
@@ -176,6 +342,38 @@ namespace FunctionalCalculator
     return ((*this) < QuadraticNumber(0)) ? (-(*this)) : (*this);
   }
 
+  std::pair<QuadraticNumber, QuadraticNumber> QuadraticNumber::separateSquaredPart() const
+  {
+    std::pair<QuadraticNumber, QuadraticNumber> answer;
+    if ((*this) == QuadraticNumber())
+    {
+      answer.first = QuadraticNumber();
+      answer.second = QuadraticNumber();
+      return answer;
+    }
+    answer.first = QuadraticNumber(Rational(1));
+    answer.second = QuadraticNumber(Rational(1));
+    auto factors = primeFactorization();
+    for (const auto& iter : factors)
+    {
+      auto prim = iter.first;
+      int expon = iter.second;
+      if (expon < 0)
+      {
+        prim = QuadraticNumber(Rational(1)) / prim;
+        expon = -expon;
+      }
+      if ((expon % 2) == 1)
+      {
+        answer.first = answer.first * prim.pow((expon - 1) / 2);
+        answer.second = answer.second * prim;
+        continue;
+      }
+      answer.first = answer.first * prim.pow(expon / 2);
+    }
+    return answer;
+  }
+
   QuadraticNumber QuadraticNumber::operator+() const
   {
     return *this;
@@ -199,14 +397,14 @@ namespace FunctionalCalculator
       auto primes = radicand.primeFactorization();
       for (const auto& jter : primes)
       {
-          auto& factor = jter.first;
-          if (factor == -1) { continue; }
-          auto& power = jter.second;
-          if (power <= 1) { continue; }
-          int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
-          Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
-          coeff = coeff * sqrtRational;
-          radicand = radicand / (sqrtRational * sqrtRational).numerator();
+        auto& factor = jter.first;
+        if (factor == -1) { continue; }
+        auto& power = jter.second;
+        if (power <= 1) { continue; }
+        int coeffPow = (power % 2 == 0) ? (power / 2) : ((power - 1) / 2);
+        Rational sqrtRational = Rational(factor, 1).pow(coeffPow);
+        coeff = coeff * sqrtRational;
+        radicand = radicand / (sqrtRational * sqrtRational).numerator();
       }
       if (rhs.content.find(radicand) != rhs.content.end())
       {
@@ -352,40 +550,98 @@ namespace FunctionalCalculator
     return (rhs < (*this));
   }
 
+  std::map<QuadraticNumber, int> QuadraticNumber::primeFactorization() const
+  {
+    auto input = *this;
+    std::map<QuadraticNumber, int> answer;
+    {
+      Rational inputAsRational;
+      if (input.getRational(inputAsRational))
+      {
+        auto factors = inputAsRational.primeFactorization();
+        for (const auto& iter : factors)
+        {
+          answer[QuadraticNumber(Rational(iter.first, mp(1)))] = iter.second;
+        }
+        return answer;
+      }
+    }
+    if (input < QuadraticNumber()) { answer[QuadraticNumber(Rational(mp(-1), mp(1)))] = 1; input = -input; }
+    {
+      auto asIntegral = input.factorAsIntegral();
+      input = asIntegral.first;
+      mp gcd_ = mp(1);
+      bool factorWithGcd = false;
+      if (factorWithGcd)
+      {
+        std::vector<mp> coeffs;
+        for (const auto& iter : input.content)
+        {
+          coeffs.push_back(iter.second.numerator());
+        }
+        gcd_ = mp::gcd(coeffs);
+        input = input * QuadraticNumber(Rational(mp(1), gcd_));
+      }
+      auto factors = Rational(gcd_, asIntegral.second).primeFactorization();
+      for (const auto& iter : factors)
+      {
+        if (iter.first == mp(1)) { continue; }
+        answer[QuadraticNumber(Rational(iter.first, mp(1)))] = iter.second;
+      }
+    }
+    const auto fac = input.primeFacIntegral();
+    for (const auto& iter : fac)
+    {
+      auto jter = answer.find(iter.first);
+      if (jter == answer.end())
+      {
+        answer[iter.first] = iter.second;
+        continue;
+      }
+      jter->second = jter->second + iter.second;
+    }
+    return answer;
+  }
+
+  std::string QuadraticNumber::printFactors(bool useParentheses) const
+  {
+    std::stringstream strm;
+    if (useParentheses) { strm << "("; }
+    auto factors = primeFactorization();
+    int count = -1;
+    for (auto& iter : factors)
+    {
+      if (iter.second == 0) { continue; }
+      ++count;
+      if (count > 0) { strm << " * "; }
+      strm << iter.first.print(true);
+      strm << "^" << iter.second;
+    }
+    if (useParentheses) { strm << ")"; }
+    return strm.str();
+  }
+
   bool QuadraticNumber::tryGetCosine(const Rational& input, QuadraticNumber& output)
   {
-    if (input < Rational()) { return tryGetCosine(-input, output); }
-    if (input == Rational()) { output = QuadraticNumber(Rational(1, 1)); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = QuadraticNumber::sqrt(2);
-    auto sqrt6 = QuadraticNumber::sqrt(6);
-    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getRe();
+    BiquadraticNumber answer;
+    bool success = BiquadraticNumber::tryGetCosine(input, answer);
+    if (!success) { return false; }
+    QuadraticNumber answerQ;
+    success = answer.getAsQuadratic(answerQ);
+    if (!success) { return false; }
+    output = answerQ;
     return true;
   }
 
   bool QuadraticNumber::tryGetSine(const Rational& input, QuadraticNumber& output)
   {
-    if (input < Rational())
-    {
-      QuadraticNumber output0;
-      bool answer = tryGetSine(-input, output0);
-      if (!answer) { return answer; }
-      output = -output0;
-      return true;
-    }
-    if (input == Rational()) { output = QuadraticNumber(); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = QuadraticNumber::sqrt(2);
-    auto sqrt6 = QuadraticNumber::sqrt(6);
-    QuadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    QuadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getIm();
+    BiquadraticNumber answer;
+    bool success = BiquadraticNumber::tryGetSine(input, answer);
+    if (!success) { return false; }
+    QuadraticNumber answerQ;
+    success = answer.getAsQuadratic(answerQ);
+    if (!success) { return false; }
+    output = answerQ;
     return true;
   }
 }
