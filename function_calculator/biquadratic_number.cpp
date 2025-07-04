@@ -311,7 +311,35 @@ namespace FunctionalCalculator
         kter->second = kter->second + iter.second * jter.second * sqPart.first;
       }
     }
-    return product;
+
+    BiquadraticNumber answer;
+    for (const auto& iter : product.content)
+    {
+      if (iter.second.getNumRootsInSum() == 2)
+      {
+        if (iter.first.hasSameRootsAs(iter.second))
+        {
+          auto newKey = iter.second * iter.second * iter.first;
+          QuadraticNumber newVal(Rational(1));
+          if (iter.second < QuadraticNumber()) { newVal = -newVal; }
+          auto jter = answer.content.find(newKey);
+          if (jter == answer.content.end())
+          {
+            answer.content[newKey] = newVal;
+            continue;
+          }
+          jter->second = jter->second + newVal;
+          continue;
+        }
+      }
+      auto jter = answer.content.find(iter.first);
+      if (jter == answer.content.end())
+      {
+        answer.content[iter.first] = iter.second; continue;
+      }
+      jter->second = jter->second + iter.second;
+    }
+    return answer;
   }
 
   BiquadraticNumber BiquadraticNumber::operator/(const BiquadraticNumber& rhs) const

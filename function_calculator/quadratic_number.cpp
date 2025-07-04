@@ -33,6 +33,20 @@ namespace FunctionalCalculator
     return { answer, 0.0 };
   }
 
+  int QuadraticNumber::getNumRootsInSum() const
+  {
+    return (int)content.size();
+  }
+
+  bool QuadraticNumber::hasSameRootsAs(const QuadraticNumber& rhs) const
+  {
+    if (content.size() != rhs.content.size()) { return false; }
+    std::set<mp> roots, rhsRoots;
+    for (const auto& iter : content) { roots.insert(iter.first); }
+    for (const auto& iter : rhs.content) { rhsRoots.insert(iter.first); }
+    return (roots == rhsRoots);
+  }
+
   std::pair<QuadraticNumber, mp> QuadraticNumber::factorAsIntegral() const
   {
     std::pair<QuadraticNumber, mp> answer;
