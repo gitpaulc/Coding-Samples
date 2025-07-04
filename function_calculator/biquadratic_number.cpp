@@ -288,9 +288,13 @@ namespace FunctionalCalculator
           Rational ratio;
           if (quotient.getRational(ratio))
           {
-            shouldComputeSqPart = false;
-            sqPart.first = iter.first; // Setting sqPart to follow separateSquaredPart() method.
-            sqPart.second = QuadraticNumber(ratio); // See below.
+            if (ratio > Rational())
+            {
+              shouldComputeSqPart = false;
+              // Setting sqPart to follow separateSquaredPart() method.
+              sqPart.first = iter.first * QuadraticNumber::sqrt(ratio);
+              sqPart.second = QuadraticNumber(Rational(1)); // See below.
+            }
           }
         }
         if (shouldComputeSqPart)
