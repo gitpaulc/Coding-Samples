@@ -10,6 +10,7 @@ bool test_evaluation()
   auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
   auto oneTwelfth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 12)));
   auto oneSixth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 6)));
+  auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
   auto oneFourth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 4)));
   auto oneThird = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 3)));
   auto half = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 2)));
@@ -31,6 +32,9 @@ bool test_evaluation()
     if (!success) { return false; }
     std::cout << "\n\ncos(pi / 4) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\ncos(pi / 5) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth, result);
     if (!success) { return false; }
     std::cout << "\n\ncos(pi / 6) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
@@ -72,6 +76,9 @@ bool test_evaluation()
     if (!success) { return false; }
     std::cout << "\n\nsin(pi / 4) = " << result.print();
     success = fn.tryEvaluateAtX(oneSixth, result);
+    if (!success) { return false; }
+    std::cout << "\n\nsin(pi / 5) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth, result);
     if (!success) { return false; }
     std::cout << "\n\nsin(pi / 6) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);

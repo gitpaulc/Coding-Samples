@@ -381,15 +381,30 @@ namespace FunctionalCalculator
   {
     if (input < Rational()) { return tryGetCosine(-input, output); }
     if (input == Rational()) { output = BiquadraticNumber(Rational(1, 1)); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = BiquadraticNumber::sqrt(2);
-    auto sqrt6 = BiquadraticNumber::sqrt(6);
-    BiquadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    BiquadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getRe();
-    return true;
+    if ((mp(5) % (input.denominator())) == mp(0))
+    {
+      auto sqrt20 = QuadraticNumber::sqrt(20);
+      auto c2 = QuadraticNumber(Rational(1)) / (QuadraticNumber(Rational(6)) + sqrt20);
+      auto s2 = QuadraticNumber(Rational(1)) - c2;
+      BiquadraticNumber cosPiOver5 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
+      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      output = powered.getRe();
+      return true;
+    }
+    if ((mp(12) % (input.denominator())) == mp(0))
+    {
+      auto sqrt2 = BiquadraticNumber::sqrt(2);
+      auto sqrt6 = BiquadraticNumber::sqrt(6);
+      BiquadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+      BiquadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+      unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+      output = powered.getRe();
+      return true;
+    }
+    return false;
   }
 
   bool BiquadraticNumber::tryGetSine(const Rational& input, BiquadraticNumber& output)
@@ -403,14 +418,29 @@ namespace FunctionalCalculator
       return true;
     }
     if (input == Rational()) { output = BiquadraticNumber(); return true; }
-    if ((mp(12) % (input.denominator())) != mp(0)) { return false; }
-    auto sqrt2 = BiquadraticNumber::sqrt(2);
-    auto sqrt6 = BiquadraticNumber::sqrt(6);
-    BiquadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
-    BiquadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
-    unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
-    ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
-    output = powered.getIm();
-    return true;
+    if ((mp(5) % (input.denominator())) == mp(0))
+    {
+      auto sqrt20 = QuadraticNumber::sqrt(20);
+      auto c2 = QuadraticNumber(Rational(1)) / (QuadraticNumber(Rational(6)) + sqrt20);
+      auto s2 = QuadraticNumber(Rational(1)) - c2;
+      BiquadraticNumber cosPiOver5 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
+      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      output = powered.getIm();
+      return true;
+    }
+    if ((mp(12) % (input.denominator())) == mp(0))
+    {
+      auto sqrt2 = BiquadraticNumber::sqrt(2);
+      auto sqrt6 = BiquadraticNumber::sqrt(6);
+      BiquadraticNumber cosPiOver12 = (sqrt6 + sqrt2) * Rational(1, 4);
+      BiquadraticNumber sinPiOver12 = (sqrt6 - sqrt2) * Rational(1, 4);
+      unsigned int power_ = (input.numerator() * (mp(12) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver12, sinPiOver12).pow(power_);
+      output = powered.getIm();
+      return true;
+    }
+    return false;
   }
 }
