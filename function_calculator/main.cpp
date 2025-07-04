@@ -203,20 +203,28 @@ bool test_biquadratic()
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneSixtieth, result);
     std::cout << "\n\ncos(pi / 60) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneTwentyFourth, result);
+    std::cout << "\ncos(pi / 24) = " << result.print();
     if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneSixtieth, result);
-    std::cout << "\n\nsin(pi / 60) = " << result.print();
+    std::cout << "\nsin(pi / 60) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneTwentyFourth, result);
+    std::cout << "\nsin(pi / 24) = " << result.print();
     if (!success) { return false; }
   }
   std::cout << "\n\nMore... or 'T' to end current test?  ";
@@ -227,7 +235,7 @@ bool test_biquadratic()
   {
     if (lim_ == 9)
     {
-      std::cout << "\n\nThe next part of this test is slow.";
+      std::cout << "\n\nThe next part of this test is extremely slow.";
       std::cout << "\nMore... or 'T' to end current test?  ";
       std::cin >> prompt;
       if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }

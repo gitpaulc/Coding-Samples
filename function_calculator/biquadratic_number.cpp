@@ -456,7 +456,7 @@ namespace FunctionalCalculator
       auto iter = cosineValues.find(input);
       if (iter != cosineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(8), mp(60) };
+    std::set<mp> admissibles = { mp(24), mp(60) };
     bool isAdmissible = false;
     for (const auto& admissible : admissibles)
     {
@@ -480,10 +480,6 @@ namespace FunctionalCalculator
     mp numeratorHalf2 = input.numerator() - numeratorHalf1;
     if ((numeratorHalf1 < input.numerator()) && (numeratorHalf2 < input.numerator()))
     {
-      if (input.numerator() == mp(4))
-      {
-        isAdmissible = true;
-      }
       Rational input1(numeratorHalf1, input.denominator());
       Rational input2(numeratorHalf2, input.denominator());
       BiquadraticNumber cosInput1, cosInput2, sinInput1, sinInput2;
@@ -545,6 +541,21 @@ namespace FunctionalCalculator
       cosineValues[input] = output;
       return true;
     }
+    if ((mp(24) % (input.denominator())) == mp(0))
+    {
+      auto sqrt2 = QuadraticNumber::sqrt(2);
+      auto sqrt6 = QuadraticNumber::sqrt(6);
+      auto four = QuadraticNumber(Rational(4));
+      auto c2 = (four + sqrt2 + sqrt6) / (four + four);
+      auto s2 = (four - sqrt2 - sqrt6) / (four + four);
+      BiquadraticNumber cosPiOver24 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver24 = BiquadraticNumber::sqrt(s2);
+      unsigned int power_ = (input.numerator() * (mp(24) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver24, sinPiOver24).pow(power_);
+      output = powered.getRe();
+      cosineValues[input] = output;
+      return true;
+    }
     if ((mp(60) % (input.denominator())) == mp(0))
     {
       auto sqrt2 = QuadraticNumber::sqrt(2);
@@ -582,7 +593,7 @@ namespace FunctionalCalculator
       auto iter = sineValues.find(input);
       if (iter != sineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(8), mp(60) };
+    std::set<mp> admissibles = { mp(24), mp(60) };
     bool isAdmissible = false;
     for (const auto& admissible : admissibles)
     {
@@ -662,6 +673,21 @@ namespace FunctionalCalculator
       BiquadraticNumber sinPiOver8 = BiquadraticNumber::sqrt(s2);
       unsigned int power_ = (input.numerator() * (mp(8) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver8, sinPiOver8).pow(power_);
+      output = powered.getIm();
+      sineValues[input] = output;
+      return true;
+    }
+    if ((mp(24) % (input.denominator())) == mp(0))
+    {
+      auto sqrt2 = QuadraticNumber::sqrt(2);
+      auto sqrt6 = QuadraticNumber::sqrt(6);
+      auto four = QuadraticNumber(Rational(4));
+      auto c2 = (four + sqrt2 + sqrt6) / (four + four);
+      auto s2 = (four - sqrt2 - sqrt6) / (four + four);
+      BiquadraticNumber cosPiOver24 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver24 = BiquadraticNumber::sqrt(s2);
+      unsigned int power_ = (input.numerator() * (mp(24) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver24, sinPiOver24).pow(power_);
       output = powered.getIm();
       sineValues[input] = output;
       return true;
