@@ -176,10 +176,7 @@ namespace FunctionalCalculator
 
   BiquadraticNumber BiquadraticNumber::sqrt(const Rational& radicand)
   {
-    BiquadraticNumber answer;
-    auto sqrtNum = QuadraticNumber::sqrt(radicand);
-    answer.content[QuadraticNumber(Rational(1))] = sqrtNum;
-    return answer;
+    return sqrt(QuadraticNumber(radicand));
   }
 
   BiquadraticNumber BiquadraticNumber::sqrt(const QuadraticNumber& radicand)
@@ -187,7 +184,13 @@ namespace FunctionalCalculator
     {
       Rational ratio;
       bool radIsRational = radicand.getRational(ratio);
-      if (radIsRational) { return sqrt(ratio); }
+      if (radIsRational)
+      {
+        BiquadraticNumber answer;
+        auto sqrtNum = QuadraticNumber::sqrt(ratio);
+        answer.content[QuadraticNumber(Rational(1))] = sqrtNum;
+        return answer;
+      }
     }
     BiquadraticNumber answer;
     auto squaredPart = radicand.separateSquaredPart();
