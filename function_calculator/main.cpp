@@ -16,6 +16,9 @@ bool test_biquadratic()
     bool success = fn.tryEvaluateAtX(oneFifth, result);
     std::cout << "\n\ncos(pi / 5) = " << result.print();
     if (!success) { return false; }
+    success = fn.tryEvaluateAtX(unit, result);
+    std::cout << "\ncos(pi) = " << result.print();
+    if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
@@ -25,6 +28,9 @@ bool test_biquadratic()
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneFifth, result);
     std::cout << "\nsin(pi / 5) = " << result.print();
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(unit, result);
+    std::cout << "\nsin(pi) = " << result.print();
     if (!success) { return false; }
   }
   std::string prompt;
