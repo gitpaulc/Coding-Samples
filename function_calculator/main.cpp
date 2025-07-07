@@ -13,6 +13,32 @@ bool test_biquadratic()
     std::cout << "\nSquare root of 5 = " << (sqrtSqrtFive * sqrtSqrtFive).print();
   }
   {
+    auto oneFifth = Rational(1, 5);
+    BiquadraticNumber cosPiOver5, sinPiOver5;
+    bool success = BiquadraticNumber::tryGetCosine(oneFifth, cosPiOver5);
+    success = BiquadraticNumber::tryGetSine(oneFifth, sinPiOver5);
+
+    std::cout << "\ncos(pi / 5) = " << cosPiOver5.print();
+    std::cout << "\nsin(pi / 5) = " << sinPiOver5.print();
+    auto two = cosPiOver5 / cosPiOver5; two = two + two;
+    auto cos2PiOver5 = cosPiOver5 * cosPiOver5 - sinPiOver5 * sinPiOver5;
+    auto sin2PiOver5 = two * sinPiOver5 * cosPiOver5;
+    std::cout << "\ncos(2 * pi / 5) = " << cos2PiOver5.print();
+    std::cout << "\nsin(2 * pi / 5) = " << sin2PiOver5.print();
+    auto cos3PiOver5 = cos2PiOver5 * cosPiOver5 - sin2PiOver5 * sinPiOver5;
+    auto sin3PiOver5 = sin2PiOver5 * cosPiOver5 + cos2PiOver5 * sinPiOver5;
+    std::cout << "\ncos(3 * pi / 5) = " << cos3PiOver5.print();
+    std::cout << "\nsin(3 * pi / 5) = " << sin3PiOver5.print();
+    auto cos4PiOver5 = cos2PiOver5 * cos2PiOver5 - sin2PiOver5 * sin2PiOver5;
+    auto sin4PiOver5 = two * sin2PiOver5 * cos2PiOver5;
+    std::cout << "\ncos(4 * pi / 5) = " << cos4PiOver5.print();
+    std::cout << "\nsin(4 * pi / 5) = " << sin4PiOver5.print();
+    auto cosPi = cos4PiOver5 * cosPiOver5 - sin4PiOver5 * sinPiOver5;
+    auto sinPi = sin4PiOver5 * cosPiOver5 + cos4PiOver5 * sinPiOver5;
+    std::cout << "\ncos(5 * pi / 5) = " << cosPi.print();
+    std::cout << "\nsin(5 * pi / 5) = " << sinPi.print();
+  }
+  {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
