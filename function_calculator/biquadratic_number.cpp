@@ -522,15 +522,7 @@ namespace FunctionalCalculator
       auto iter = cosineValues.find(input);
       if (iter != cosineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(24), mp(60) };
-    bool isAdmissible = false;
-    for (const auto& admissible : admissibles)
-    {
-      if ((admissible % (input.denominator())) == mp(0))
-      {
-        isAdmissible = true; break;
-      }
-    }
+    bool isAdmissible = ((mp(120) % (input.denominator())) == mp(0));
     if (!isAdmissible) { return false; }
     if (input.numerator() > input.denominator() / 2)
     {
@@ -641,6 +633,25 @@ namespace FunctionalCalculator
       cosineValues[input] = output;
       return true;
     }
+    if ((mp(120) % (input.denominator())) == mp(0))
+    {
+      BiquadraticNumber cos8PiOver60, sin8PiOver60, cosPiOver8, sinPiOver8;
+      bool success = tryGetCosine(Rational(8, 60), cos8PiOver60);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(8, 60), sin8PiOver60);
+      if (!success) { return false; }
+      success = tryGetCosine(Rational(1, 8), cosPiOver8);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(1, 8), sinPiOver8);
+      if (!success) { return false; }
+      auto cosPiOver120 = cos8PiOver60 * cosPiOver8 + sin8PiOver60 * sinPiOver8;
+      auto sinPiOver120 = sin8PiOver60 * cosPiOver8 - cos8PiOver60 * sinPiOver8;
+      unsigned int power_ = (input.numerator() * (mp(120) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver120, sinPiOver120).pow(power_);
+      output = powered.getRe();
+      cosineValues[input] = output;
+      return true;
+    }
     return false;
   }
 
@@ -659,15 +670,7 @@ namespace FunctionalCalculator
       auto iter = sineValues.find(input);
       if (iter != sineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(24), mp(60) };
-    bool isAdmissible = false;
-    for (const auto& admissible : admissibles)
-    {
-      if ((admissible % (input.denominator())) == mp(0))
-      {
-        isAdmissible = true; break;
-      }
-    }
+    bool isAdmissible = ((mp(120) % (input.denominator())) == mp(0));
     if (!isAdmissible) { return false; }
     if (input.numerator() > input.denominator() / 2)
     {
@@ -773,6 +776,25 @@ namespace FunctionalCalculator
       auto sinPiOver60 = sin3PiOver5 * cos7PiOver12 - cos3PiOver5 * sin7PiOver12;
       unsigned int power_ = (input.numerator() * (mp(60) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver60, sinPiOver60).pow(power_);
+      output = powered.getIm();
+      sineValues[input] = output;
+      return true;
+    }
+    if ((mp(120) % (input.denominator())) == mp(0))
+    {
+      BiquadraticNumber cos8PiOver60, sin8PiOver60, cosPiOver8, sinPiOver8;
+      bool success = tryGetCosine(Rational(8, 60), cos8PiOver60);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(8, 60), sin8PiOver60);
+      if (!success) { return false; }
+      success = tryGetCosine(Rational(1, 8), cosPiOver8);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(1, 8), sinPiOver8);
+      if (!success) { return false; }
+      auto cosPiOver120 = cos8PiOver60 * cosPiOver8 + sin8PiOver60 * sinPiOver8;
+      auto sinPiOver120 = sin8PiOver60 * cosPiOver8 - cos8PiOver60 * sinPiOver8;
+      unsigned int power_ = (input.numerator() * (mp(120) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver120, sinPiOver120).pow(power_);
       output = powered.getIm();
       sineValues[input] = output;
       return true;
