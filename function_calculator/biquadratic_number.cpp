@@ -138,6 +138,18 @@ namespace FunctionalCalculator
     for (bool searchConjugate = true; searchConjugate; searchConjugate = !searchConjugate)
     {
       Rational ratio;
+      /*for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio))
+        {
+          if (ratio == Rational(1)) { continue; }
+          if (ratio == Rational(0))
+          {
+            break;
+          }
+          auto coeff = QuadraticNumber::sqrt(ratio) * iter.second;
+        }
+      }*/
       for (auto& iter : content)
       {
         if (iter.first.getRational(ratio)) { continue; }
@@ -147,19 +159,27 @@ namespace FunctionalCalculator
           if (iter.first == jter.first) { continue; }
           auto product = iter.first * jter.first;
           if (!(product.getRational(ratio))) { continue; }
-          if ((iter.second > QuadraticNumber()) && (jter.second < QuadraticNumber())) { continue; }
-          if ((iter.second < QuadraticNumber()) && (jter.second > QuadraticNumber())) { continue; }
           searchConjugate = false;
-          QuadraticNumber sgn(Rational(1));
-          QuadraticNumber two(Rational(2));
+          QuadraticNumber sgnA(Rational(1));
+          QuadraticNumber sgnB(Rational(1));
           auto aa = iter.second;
           auto bb = jter.second;
-          if (aa < QuadraticNumber())
+          bool aIsNeg = false;
+          bool bIsNeg = false;
+          if (aa < QuadraticNumber()) { sgnA = -sgnA; aa = -aa; aIsNeg = true; }
+          if (bb < QuadraticNumber()) { sgnB = -sgnB; bb = -bb; bIsNeg = true; }
+          bool onlyOneIsNeg = (aIsNeg && (!bIsNeg)) || (bIsNeg && (!aIsNeg));
+          QuadraticNumber diag(Rational(2));
+          QuadraticNumber sgn(Rational(1));
+          if (aIsNeg && bIsNeg) { sgn = -sgn; }
+          else if (onlyOneIsNeg)
           {
-            sgn = -sgn; aa = -aa; bb = -bb;
+            diag = -diag;
+            if (aIsNeg && (aa > bb)) { sgn = -sgn; }
+            else if (bIsNeg && (bb > aa)) { sgn = -sgn; }
           }
           auto radicand = iter.first * aa * aa + jter.first * bb * bb +
-            QuadraticNumber::sqrt(ratio) * two * aa * bb;
+            QuadraticNumber::sqrt(ratio) * diag * aa * bb;
           content.erase(iter.first);
           content.erase(jter.first);
           auto kter = content.find(radicand);
