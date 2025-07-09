@@ -133,6 +133,51 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  void BiquadraticNumber::clean()
+  {
+    for (bool searchConjugate = true; searchConjugate; searchConjugate = !searchConjugate)
+    {
+      Rational ratio;
+      for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio)) { continue; }
+        for (auto& jter : content)
+        {
+          if (jter.first.getRational(ratio)) { continue; }
+          if (iter.first == jter.first) { continue; }
+          auto product = iter.first * jter.first;
+          if (!(product.getRational(ratio))) { continue; }
+          if ((iter.second > QuadraticNumber()) && (jter.second < QuadraticNumber())) { continue; }
+          if ((iter.second < QuadraticNumber()) && (jter.second > QuadraticNumber())) { continue; }
+          searchConjugate = false;
+          QuadraticNumber sgn(Rational(1));
+          QuadraticNumber two(Rational(2));
+          auto aa = iter.second;
+          auto bb = jter.second;
+          if (aa < QuadraticNumber())
+          {
+            sgn = -sgn; aa = -aa; bb = -bb;
+          }
+          auto radicand = iter.first * aa * aa + jter.first * bb * bb +
+            QuadraticNumber::sqrt(ratio) * two * aa * bb;
+          content.erase(iter.first);
+          content.erase(jter.first);
+          auto kter = content.find(radicand);
+          if (kter == content.end())
+          {
+            content[radicand] = sgn;
+          }
+          else
+          {
+            kter->second = kter->second + sgn;
+          }
+          break;
+        }
+        if (!searchConjugate) { break; }
+      }
+    }
+  }
+
   std::string BiquadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
@@ -265,6 +310,7 @@ namespace FunctionalCalculator
       if (added.find(radicand) != added.end()) { continue; }
       sum.content[radicand] = coeff;
     }
+    sum.clean();
     return sum;
   }
 
@@ -351,6 +397,7 @@ namespace FunctionalCalculator
       }
       jter->second = jter->second + iter.second;
     }
+
     return answer;
   }
 

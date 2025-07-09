@@ -29,6 +29,7 @@ class BiquadraticNumber : public Number
    *  \param index2Root is an output parameter that assigns to each row index its corresponding square root.
    */
   Matrix<QuadraticNumber> getMultiplicationMatrix(std::map<QuadraticNumber, int>& root2Index, std::map<int, QuadraticNumber>& index2Root) const;
+  void clean();
 
 public:
   BiquadraticNumber(const Rational& number = Rational(0, 1));

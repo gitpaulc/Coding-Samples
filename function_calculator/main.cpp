@@ -39,6 +39,28 @@ bool test_biquadratic()
     std::cout << "\nsin(5 * pi / 5) = " << sinPi.print();
   }
   {
+    auto oneEighth = Rational(1, 8);
+    BiquadraticNumber cosPiOver8, sinPiOver8;
+    bool success = BiquadraticNumber::tryGetCosine(oneEighth, cosPiOver8);
+    success = BiquadraticNumber::tryGetSine(oneEighth, sinPiOver8);
+
+    std::cout << "\n\ncos(pi / 8) = " << cosPiOver8.print();
+    std::cout << "\nsin(pi / 8) = " << sinPiOver8.print();
+    auto cosKK = cosPiOver8; auto sinKK = sinPiOver8;
+    for (int kk = 1; kk < 8; ++kk)
+    {
+      auto cos_ = cosKK * cosPiOver8 - sinKK * sinPiOver8;
+      auto sin_ = sinKK * cosPiOver8 + cosKK * sinPiOver8;
+      cosKK = cos_; sinKK = sin_;
+      std::cout << "\ncos(" << (kk + 1) << " * pi / 8) = " << cosKK.print();
+      std::cout << "\nsin(" << (kk + 1) << " * pi / 8) = " << sinKK.print();
+    }
+  }
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
@@ -94,7 +116,6 @@ bool test_biquadratic()
     std::cout << "\nsin(pi / 8) = " << result.print();
     if (!success) { return false; }
   }
-  std::string prompt;
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -233,10 +254,10 @@ bool test_biquadratic()
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneSixtieth, result);
-    std::cout << "\n\ncos(pi / 60) = " << result.print();
+    std::cout << "\n\ncos(pi / 60) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
-    std::cout << "\ncos(pi / 24) = " << result.print();
+    std::cout << "cos(pi / 24) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
   {
@@ -247,13 +268,13 @@ bool test_biquadratic()
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
     bool success = fn.tryEvaluateAtX(oneSixtieth, result);
-    std::cout << "\nsin(pi / 60) = " << result.print();
+    std::cout << "\nsin(pi / 60) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
-    std::cout << "\nsin(pi / 24) = " << result.print();
+    std::cout << "sin(pi / 24) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
-  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
