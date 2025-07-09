@@ -138,18 +138,23 @@ namespace FunctionalCalculator
     for (bool searchConjugate = true; searchConjugate; searchConjugate = !searchConjugate)
     {
       Rational ratio;
-      /*for (auto& iter : content)
+      for (auto& iter : content)
       {
         if (iter.first.getRational(ratio))
         {
           if (ratio == Rational(1)) { continue; }
-          if (ratio == Rational(0))
-          {
-            break;
-          }
+          searchConjugate = false;
           auto coeff = QuadraticNumber::sqrt(ratio) * iter.second;
+          content.erase(iter.first);
+          if (ratio == Rational(0)) { break; }
+          QuadraticNumber one_(Rational(1));
+          auto jter = content.find(one_);
+          if (jter == content.end()) { content[one_] = coeff; }
+          else { jter->second = jter->second + coeff; }
+          break;
         }
-      }*/
+      }
+      if (!searchConjugate) { continue; }
       for (auto& iter : content)
       {
         if (iter.first.getRational(ratio)) { continue; }
@@ -183,14 +188,8 @@ namespace FunctionalCalculator
           content.erase(iter.first);
           content.erase(jter.first);
           auto kter = content.find(radicand);
-          if (kter == content.end())
-          {
-            content[radicand] = sgn;
-          }
-          else
-          {
-            kter->second = kter->second + sgn;
-          }
+          if (kter == content.end()) { content[radicand] = sgn; }
+          else { kter->second = kter->second + sgn; }
           break;
         }
         if (!searchConjugate) { break; }
