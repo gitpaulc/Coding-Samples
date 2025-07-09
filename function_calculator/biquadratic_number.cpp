@@ -287,7 +287,9 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       QuadraticNumber coeff = iter.second;
-      auto primes = radicand.primeFactorization();
+      //auto primes = radicand.primeFactorization();
+      std::map<QuadraticNumber, int> primes;
+      primes[radicand] = 1;
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;
@@ -314,7 +316,9 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       QuadraticNumber coeff = iter.second;
-      auto primes = radicand.primeFactorization();
+      //auto primes = radicand.primeFactorization();
+      std::map<QuadraticNumber, int> primes;
+      primes[radicand] = 1;
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;
@@ -364,7 +368,10 @@ namespace FunctionalCalculator
         }
         if (shouldComputeSqPart)
         {
-          sqPart = (iter.first * jter.first).separateSquaredPart();
+          // Setting sqPart to follow separateSquaredPart() method.
+          sqPart.first = QuadraticNumber(Rational(1));
+          sqPart.second = iter.first * jter.first; // See below.
+          //sqPart = (iter.first * jter.first).separateSquaredPart();
         }
         auto& key = sqPart.second;
         auto kter = product.content.find(key);

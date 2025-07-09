@@ -134,19 +134,34 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  namespace // anonymous
+  {
+    std::map<std::pair<ComplexQuadratic, int>, ComplexQuadratic> powerCache;
+  }
+
   ComplexQuadratic ComplexQuadratic::pow(int p) const
   {
-    bool isNeg = (p < 0);
-    if (isNeg) { p = -p; }
     ComplexQuadratic answer(Rational(1, 1));
+    if (p == 0) { return answer; }
+    if (p < 0) { return ComplexQuadratic(Rational(1, 1)) / pow(-p); }
+    {
+      auto iter = powerCache.find({*this, p});
+      if (iter != powerCache.end())
+      {
+        return iter->second;
+      }
+    }
+    auto p1 = p / 2;
+    auto p2 = p - p1;
+    if ((p1 < p) && (p2 < p))
+    {
+      return pow(p1) * pow(p2);
+    }
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
     }
-    if (isNeg)
-    {
-      return ComplexQuadratic(Rational(1, 1)) / answer;
-    }
+    powerCache[{*this, p}] = answer;
     return answer;
   }
 

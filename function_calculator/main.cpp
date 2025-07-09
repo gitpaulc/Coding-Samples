@@ -249,29 +249,43 @@ bool test_biquadratic()
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneOver120 = ComplexQuadratic(BiquadraticNumber(Rational(1, 120)));
+    auto oneThirtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 30)));
     auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
-    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
+    bool success = fn.tryEvaluateAtX(oneOver120 + oneOver120, result);
     std::cout << "\n\ncos(pi / 60) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneThirtieth, result);
+    std::cout << "cos(pi / 30) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
     std::cout << "cos(pi / 24) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneOver120, result);
+    std::cout << "\n\ncos(pi / 120) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneOver120 = ComplexQuadratic(BiquadraticNumber(Rational(1, 120)));
+    auto oneThirtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 30)));
     auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
-    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
+    bool success = fn.tryEvaluateAtX(oneOver120 + oneOver120, result);
     std::cout << "\nsin(pi / 60) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneThirtieth, result);
+    std::cout << "sin(pi / 30) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
     std::cout << "sin(pi / 24) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneOver120, result);
+    std::cout << "\nsin(pi / 120) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
   std::cout << "\nMore... or 'T' to end current test?  ";
