@@ -133,6 +133,90 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  void BiquadraticNumber::clean()
+  {
+    for (bool searchConjugate = true; searchConjugate; searchConjugate = !searchConjugate)
+    {
+      Rational ratio;
+      for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio))
+        {
+          if (ratio == Rational(1)) { continue; }
+          searchConjugate = false;
+          auto coeff = QuadraticNumber::sqrt(ratio) * iter.second;
+          content.erase(iter.first);
+          if (ratio == Rational(0)) { break; }
+          QuadraticNumber one_(Rational(1));
+          auto jter = content.find(one_);
+          if (jter == content.end()) { content[one_] = coeff; }
+          else { jter->second = jter->second + coeff; }
+          break;
+        }
+        else if (iter.second.getRational(ratio))
+        {
+          if (ratio.numerator() == mp(0)) { continue; }
+          if (ratio.numerator() == mp(1)) { continue; }
+          if (ratio.numerator() == mp(-1)) { continue; }
+          searchConjugate = false;
+          QuadraticNumber one_(Rational(1));
+          auto num2 = ratio.numerator() * ratio.numerator();
+          auto key = iter.first * QuadraticNumber(Rational(num2, mp(1)));
+          QuadraticNumber coeff;
+          {
+            QuadraticNumber den_(Rational(1, ratio.denominator()));
+            coeff = (ratio.numerator() < 0) ? (-den_) : (den_);
+          }
+          content.erase(iter.first);
+          auto jter = content.find(key);
+          if (jter == content.end()) { content[key] = coeff; }
+          else { jter->second = jter->second + coeff; }
+          break;
+        }
+      }
+      if (!searchConjugate) { continue; }
+      for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio)) { continue; }
+        for (auto& jter : content)
+        {
+          if (jter.first.getRational(ratio)) { continue; }
+          if (iter.first == jter.first) { continue; }
+          auto product = iter.first * jter.first;
+          if (!(product.getRational(ratio))) { continue; }
+          searchConjugate = false;
+          QuadraticNumber sgnA(Rational(1));
+          QuadraticNumber sgnB(Rational(1));
+          auto aa = iter.second;
+          auto bb = jter.second;
+          bool aIsNeg = false;
+          bool bIsNeg = false;
+          if (aa < QuadraticNumber()) { sgnA = -sgnA; aa = -aa; aIsNeg = true; }
+          if (bb < QuadraticNumber()) { sgnB = -sgnB; bb = -bb; bIsNeg = true; }
+          bool onlyOneIsNeg = (aIsNeg && (!bIsNeg)) || (bIsNeg && (!aIsNeg));
+          QuadraticNumber diag(Rational(2));
+          QuadraticNumber sgn(Rational(1));
+          if (aIsNeg && bIsNeg) { sgn = -sgn; }
+          else if (onlyOneIsNeg)
+          {
+            diag = -diag;
+            if (aIsNeg && (aa > bb)) { sgn = -sgn; }
+            else if (bIsNeg && (bb > aa)) { sgn = -sgn; }
+          }
+          auto radicand = iter.first * aa * aa + jter.first * bb * bb +
+            QuadraticNumber::sqrt(ratio) * diag * aa * bb;
+          content.erase(iter.first);
+          content.erase(jter.first);
+          auto kter = content.find(radicand);
+          if (kter == content.end()) { content[radicand] = sgn; }
+          else { kter->second = kter->second + sgn; }
+          break;
+        }
+        if (!searchConjugate) { break; }
+      }
+    }
+  }
+
   std::string BiquadraticNumber::print(bool useParentheses) const
   {
     std::stringstream strm;
@@ -223,7 +307,9 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       QuadraticNumber coeff = iter.second;
-      auto primes = radicand.primeFactorization();
+      //auto primes = radicand.primeFactorization();
+      std::map<QuadraticNumber, int> primes;
+      primes[radicand] = 1;
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;
@@ -250,7 +336,9 @@ namespace FunctionalCalculator
     {
       auto radicand = iter.first;
       QuadraticNumber coeff = iter.second;
-      auto primes = radicand.primeFactorization();
+      //auto primes = radicand.primeFactorization();
+      std::map<QuadraticNumber, int> primes;
+      primes[radicand] = 1;
       for (const auto& jter : primes)
       {
         auto& factor = jter.first;
@@ -265,6 +353,7 @@ namespace FunctionalCalculator
       if (added.find(radicand) != added.end()) { continue; }
       sum.content[radicand] = coeff;
     }
+    sum.clean();
     return sum;
   }
 
@@ -299,7 +388,10 @@ namespace FunctionalCalculator
         }
         if (shouldComputeSqPart)
         {
-          sqPart = (iter.first * jter.first).separateSquaredPart();
+          // Setting sqPart to follow separateSquaredPart() method.
+          sqPart.first = QuadraticNumber(Rational(1));
+          sqPart.second = iter.first * jter.first; // See below.
+          //sqPart = (iter.first * jter.first).separateSquaredPart();
         }
         auto& key = sqPart.second;
         auto kter = product.content.find(key);
@@ -351,6 +443,7 @@ namespace FunctionalCalculator
       }
       jter->second = jter->second + iter.second;
     }
+
     return answer;
   }
 
@@ -456,15 +549,7 @@ namespace FunctionalCalculator
       auto iter = cosineValues.find(input);
       if (iter != cosineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(24), mp(60) };
-    bool isAdmissible = false;
-    for (const auto& admissible : admissibles)
-    {
-      if ((admissible % (input.denominator())) == mp(0))
-      {
-        isAdmissible = true; break;
-      }
-    }
+    bool isAdmissible = ((mp(120) % (input.denominator())) == mp(0));
     if (!isAdmissible) { return false; }
     if (input.numerator() > input.denominator() / 2)
     {
@@ -514,15 +599,15 @@ namespace FunctionalCalculator
       cosineValues[input] = output;
       return true;
     }
-    if ((mp(5) % (input.denominator())) == mp(0))
+    if ((mp(10) % (input.denominator())) == mp(0))
     {
       auto sqrt5 = QuadraticNumber::sqrt(5);
       auto four = QuadraticNumber(Rational(4));
-      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
-      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
-      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
-      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
-      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      auto c2 = (QuadraticNumber(Rational(5)) + sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver10 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver10 = (sqrt5 - QuadraticNumber(Rational(1))) / four;
+      unsigned int power_ = (input.numerator() * (mp(10) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver10, sinPiOver10).pow(power_);
       output = powered.getRe();
       cosineValues[input] = output;
       return true;
@@ -575,6 +660,25 @@ namespace FunctionalCalculator
       cosineValues[input] = output;
       return true;
     }
+    if ((mp(120) % (input.denominator())) == mp(0))
+    {
+      BiquadraticNumber cos8PiOver60, sin8PiOver60, cosPiOver8, sinPiOver8;
+      bool success = tryGetCosine(Rational(8, 60), cos8PiOver60);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(8, 60), sin8PiOver60);
+      if (!success) { return false; }
+      success = tryGetCosine(Rational(1, 8), cosPiOver8);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(1, 8), sinPiOver8);
+      if (!success) { return false; }
+      auto cosPiOver120 = cos8PiOver60 * cosPiOver8 + sin8PiOver60 * sinPiOver8;
+      auto sinPiOver120 = sin8PiOver60 * cosPiOver8 - cos8PiOver60 * sinPiOver8;
+      unsigned int power_ = (input.numerator() * (mp(120) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver120, sinPiOver120).pow(power_);
+      output = powered.getRe();
+      cosineValues[input] = output;
+      return true;
+    }
     return false;
   }
 
@@ -593,15 +697,7 @@ namespace FunctionalCalculator
       auto iter = sineValues.find(input);
       if (iter != sineValues.end()) { output = iter->second; return true; }
     }
-    std::set<mp> admissibles = { mp(24), mp(60) };
-    bool isAdmissible = false;
-    for (const auto& admissible : admissibles)
-    {
-      if ((admissible % (input.denominator())) == mp(0))
-      {
-        isAdmissible = true; break;
-      }
-    }
+    bool isAdmissible = ((mp(120) % (input.denominator())) == mp(0));
     if (!isAdmissible) { return false; }
     if (input.numerator() > input.denominator() / 2)
     {
@@ -650,15 +746,15 @@ namespace FunctionalCalculator
       sineValues[input] = output;
       return true;
     }
-    if ((mp(5) % (input.denominator())) == mp(0))
+    if ((mp(10) % (input.denominator())) == mp(0))
     {
       auto sqrt5 = QuadraticNumber::sqrt(5);
       auto four = QuadraticNumber(Rational(4));
-      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
-      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
-      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
-      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
-      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      auto c2 = (QuadraticNumber(Rational(5)) + sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver10 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver10 = (sqrt5 - QuadraticNumber(Rational(1))) / four;
+      unsigned int power_ = (input.numerator() * (mp(10) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver10, sinPiOver10).pow(power_);
       output = powered.getIm();
       sineValues[input] = output;
       return true;
@@ -707,6 +803,25 @@ namespace FunctionalCalculator
       auto sinPiOver60 = sin3PiOver5 * cos7PiOver12 - cos3PiOver5 * sin7PiOver12;
       unsigned int power_ = (input.numerator() * (mp(60) / (input.denominator()))).toInt();
       ComplexQuadratic powered = ComplexQuadratic(cosPiOver60, sinPiOver60).pow(power_);
+      output = powered.getIm();
+      sineValues[input] = output;
+      return true;
+    }
+    if ((mp(120) % (input.denominator())) == mp(0))
+    {
+      BiquadraticNumber cos8PiOver60, sin8PiOver60, cosPiOver8, sinPiOver8;
+      bool success = tryGetCosine(Rational(8, 60), cos8PiOver60);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(8, 60), sin8PiOver60);
+      if (!success) { return false; }
+      success = tryGetCosine(Rational(1, 8), cosPiOver8);
+      if (!success) { return false; }
+      success = tryGetSine(Rational(1, 8), sinPiOver8);
+      if (!success) { return false; }
+      auto cosPiOver120 = cos8PiOver60 * cosPiOver8 + sin8PiOver60 * sinPiOver8;
+      auto sinPiOver120 = sin8PiOver60 * cosPiOver8 - cos8PiOver60 * sinPiOver8;
+      unsigned int power_ = (input.numerator() * (mp(120) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver120, sinPiOver120).pow(power_);
       output = powered.getIm();
       sineValues[input] = output;
       return true;

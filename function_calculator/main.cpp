@@ -13,6 +13,57 @@ bool test_biquadratic()
     std::cout << "\nSquare root of 5 = " << (sqrtSqrtFive * sqrtSqrtFive).print();
   }
   {
+    auto oneFifth = Rational(1, 5);
+    BiquadraticNumber cosPiOver5, sinPiOver5;
+    bool success = BiquadraticNumber::tryGetCosine(oneFifth, cosPiOver5);
+    success = BiquadraticNumber::tryGetSine(oneFifth, sinPiOver5);
+
+    std::cout << "\ncos(pi / 5) = " << cosPiOver5.print();
+    std::cout << "\nsin(pi / 5) = " << sinPiOver5.print();
+    auto two = cosPiOver5 / cosPiOver5; two = two + two;
+    auto cos2PiOver5 = cosPiOver5 * cosPiOver5 - sinPiOver5 * sinPiOver5;
+    auto sin2PiOver5 = two * sinPiOver5 * cosPiOver5;
+    std::cout << "\ncos(2 * pi / 5) = " << cos2PiOver5.print();
+    std::cout << "\nsin(2 * pi / 5) = " << sin2PiOver5.print();
+    auto cos3PiOver5 = cos2PiOver5 * cosPiOver5 - sin2PiOver5 * sinPiOver5;
+    auto sin3PiOver5 = sin2PiOver5 * cosPiOver5 + cos2PiOver5 * sinPiOver5;
+    std::cout << "\ncos(3 * pi / 5) = " << cos3PiOver5.print();
+    std::cout << "\nsin(3 * pi / 5) = " << sin3PiOver5.print();
+    auto cos4PiOver5 = cos2PiOver5 * cos2PiOver5 - sin2PiOver5 * sin2PiOver5;
+    auto sin4PiOver5 = two * sin2PiOver5 * cos2PiOver5;
+    std::cout << "\ncos(4 * pi / 5) = " << cos4PiOver5.print();
+    std::cout << "\nsin(4 * pi / 5) = " << sin4PiOver5.print();
+    auto cosPi = cos4PiOver5 * cosPiOver5 - sin4PiOver5 * sinPiOver5;
+    auto sinPi = sin4PiOver5 * cosPiOver5 + cos4PiOver5 * sinPiOver5;
+    std::cout << "\ncos(5 * pi / 5) = " << cosPi.print();
+    std::cout << "\nsin(5 * pi / 5) = " << sinPi.print();
+  }
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  {
+    auto oneEighth = Rational(1, 8);
+    BiquadraticNumber cosPiOver8, sinPiOver8;
+    bool success = BiquadraticNumber::tryGetCosine(oneEighth, cosPiOver8);
+    success = BiquadraticNumber::tryGetSine(oneEighth, sinPiOver8);
+
+    std::cout << "\n\ncos(pi / 8) = " << cosPiOver8.print();
+    std::cout << "\nsin(pi / 8) = " << sinPiOver8.print();
+    auto cosKK = cosPiOver8; auto sinKK = sinPiOver8;
+    for (int kk = 1; kk < 8; ++kk)
+    {
+      auto cos_ = cosKK * cosPiOver8 - sinKK * sinPiOver8;
+      auto sin_ = sinKK * cosPiOver8 + cosKK * sinPiOver8;
+      cosKK = cos_; sinKK = sin_;
+      std::cout << "\ncos(" << (kk + 1) << " * pi / 8) = " << cosKK.print();
+      std::cout << "\nsin(" << (kk + 1) << " * pi / 8) = " << sinKK.print();
+    }
+  }
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
     auto oneFifth = unit * ComplexQuadratic(BiquadraticNumber(Rational(1, 5)));
@@ -68,7 +119,6 @@ bool test_biquadratic()
     std::cout << "\nsin(pi / 8) = " << result.print();
     if (!success) { return false; }
   }
-  std::string prompt;
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -202,32 +252,40 @@ bool test_biquadratic()
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneOver120 = ComplexQuadratic(BiquadraticNumber(Rational(1, 120)));
+    auto oneThirtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 30)));
     auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::cosATimesPiX(one, unit);
     FnPolynomial result;
-    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
-    std::cout << "\n\ncos(pi / 60) = " << result.print();
+    bool success = fn.tryEvaluateAtX(oneOver120 + oneOver120, result);
+    std::cout << "\n\ncos(pi / 60) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneThirtieth, result);
+    std::cout << "cos(pi / 30) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
-    std::cout << "\ncos(pi / 24) = " << result.print();
+    std::cout << "cos(pi / 24) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
     auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
-    auto oneSixtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 60)));
+    auto oneOver120 = ComplexQuadratic(BiquadraticNumber(Rational(1, 120)));
+    auto oneThirtieth = ComplexQuadratic(BiquadraticNumber(Rational(1, 30)));
     auto oneTwentyFourth = ComplexQuadratic(BiquadraticNumber(Rational(1, 24)));
     FnPolynomial fn = FnPolynomial::sinATimesPiX(one, unit);
     FnPolynomial result;
-    bool success = fn.tryEvaluateAtX(oneSixtieth, result);
-    std::cout << "\nsin(pi / 60) = " << result.print();
+    bool success = fn.tryEvaluateAtX(oneOver120 + oneOver120, result);
+    std::cout << "\nsin(pi / 60) = " << result.print() << std::endl;
+    if (!success) { return false; }
+    success = fn.tryEvaluateAtX(oneThirtieth, result);
+    std::cout << "sin(pi / 30) = " << result.print() << std::endl;
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
-    std::cout << "\nsin(pi / 24) = " << result.print();
+    std::cout << "sin(pi / 24) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
-  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
@@ -287,6 +345,12 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\ncos(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth * half, result);
+    if (!success) { return false; }
+    std::cout << "\ncos(pi / 8) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth * half, result);
+    if (!success) { return false; }
+    std::cout << "\ncos(pi / 10) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
     std::cout << "\ncos(pi / 12) = " << result.print();
@@ -331,6 +395,12 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\nsin(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth * half, result);
+    if (!success) { return false; }
+    std::cout << "\nsin(pi / 8) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth * half, result);
+    if (!success) { return false; }
+    std::cout << "\nsin(pi / 10) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
     std::cout << "\nsin(pi / 12) = " << result.print();
