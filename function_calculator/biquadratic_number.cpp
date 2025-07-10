@@ -153,6 +153,26 @@ namespace FunctionalCalculator
           else { jter->second = jter->second + coeff; }
           break;
         }
+        else if (iter.second.getRational(ratio))
+        {
+          if (ratio.numerator() == mp(0)) { continue; }
+          if (ratio.numerator() == mp(1)) { continue; }
+          if (ratio.numerator() == mp(-1)) { continue; }
+          searchConjugate = false;
+          QuadraticNumber one_(Rational(1));
+          auto num2 = ratio.numerator() * ratio.numerator();
+          auto key = iter.first * QuadraticNumber(Rational(num2, mp(1)));
+          QuadraticNumber coeff;
+          {
+            QuadraticNumber den_(Rational(1, ratio.denominator()));
+            coeff = (ratio.numerator() < 0) ? (-den_) : (den_);
+          }
+          content.erase(iter.first);
+          auto jter = content.find(key);
+          if (jter == content.end()) { content[key] = coeff; }
+          else { jter->second = jter->second + coeff; }
+          break;
+        }
       }
       if (!searchConjugate) { continue; }
       for (auto& iter : content)
