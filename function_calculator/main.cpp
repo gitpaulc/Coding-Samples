@@ -345,6 +345,12 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\ncos(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth * half, result);
+    if (!success) { return false; }
+    std::cout << "\ncos(pi / 8) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth * half, result);
+    if (!success) { return false; }
+    std::cout << "\ncos(pi / 10) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
     std::cout << "\ncos(pi / 12) = " << result.print();
@@ -389,6 +395,12 @@ bool test_evaluation()
     success = fn.tryEvaluateAtX(oneSixth, result);
     if (!success) { return false; }
     std::cout << "\nsin(pi / 6) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFourth * half, result);
+    if (!success) { return false; }
+    std::cout << "\nsin(pi / 8) = " << result.print();
+    success = fn.tryEvaluateAtX(oneFifth * half, result);
+    if (!success) { return false; }
+    std::cout << "\nsin(pi / 10) = " << result.print();
     success = fn.tryEvaluateAtX(oneTwelfth, result);
     if (!success) { return false; }
     std::cout << "\nsin(pi / 12) = " << result.print();

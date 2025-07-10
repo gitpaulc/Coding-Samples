@@ -579,15 +579,15 @@ namespace FunctionalCalculator
       cosineValues[input] = output;
       return true;
     }
-    if ((mp(5) % (input.denominator())) == mp(0))
+    if ((mp(10) % (input.denominator())) == mp(0))
     {
       auto sqrt5 = QuadraticNumber::sqrt(5);
       auto four = QuadraticNumber(Rational(4));
-      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
-      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
-      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
-      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
-      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      auto c2 = (QuadraticNumber(Rational(5)) + sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver10 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver10 = (sqrt5 - QuadraticNumber(Rational(1))) / four;
+      unsigned int power_ = (input.numerator() * (mp(10) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver10, sinPiOver10).pow(power_);
       output = powered.getRe();
       cosineValues[input] = output;
       return true;
@@ -726,15 +726,15 @@ namespace FunctionalCalculator
       sineValues[input] = output;
       return true;
     }
-    if ((mp(5) % (input.denominator())) == mp(0))
+    if ((mp(10) % (input.denominator())) == mp(0))
     {
       auto sqrt5 = QuadraticNumber::sqrt(5);
       auto four = QuadraticNumber(Rational(4));
-      auto s2 = (QuadraticNumber(Rational(5)) - sqrt5) / (four + four);
-      BiquadraticNumber cosPiOver5 = (QuadraticNumber(Rational(1)) + sqrt5) / four;
-      BiquadraticNumber sinPiOver5 = BiquadraticNumber::sqrt(s2);
-      unsigned int power_ = (input.numerator() * (mp(5) / (input.denominator()))).toInt();
-      ComplexQuadratic powered = ComplexQuadratic(cosPiOver5, sinPiOver5).pow(power_);
+      auto c2 = (QuadraticNumber(Rational(5)) + sqrt5) / (four + four);
+      BiquadraticNumber cosPiOver10 = BiquadraticNumber::sqrt(c2);
+      BiquadraticNumber sinPiOver10 = (sqrt5 - QuadraticNumber(Rational(1))) / four;
+      unsigned int power_ = (input.numerator() * (mp(10) / (input.denominator()))).toInt();
+      ComplexQuadratic powered = ComplexQuadratic(cosPiOver10, sinPiOver10).pow(power_);
       output = powered.getIm();
       sineValues[input] = output;
       return true;
