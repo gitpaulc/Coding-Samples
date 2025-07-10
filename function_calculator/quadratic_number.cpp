@@ -540,9 +540,129 @@ namespace FunctionalCalculator
     return !((*this) == QuadraticNumber(rhs));
   }
 
+  void QuadraticNumber::getLowerUpperBounds(const Rational& radicand, const unsigned int& numIterations, Rational& lower, Rational& upper)
+  {
+    if (radicand < Rational())
+    {
+      throw std::invalid_argument("Radicand must be nonnegative.");
+    }
+    struct TableEntry
+    {
+      unsigned numIters = 0;
+      Rational lower, upper;
+    };
+    static std::map<Rational, TableEntry> cachedBounds;
+    {
+      auto iter = cachedBounds.find(radicand);
+      if (iter != cachedBounds.end())
+      {
+        auto& entry = iter->second;
+        if (entry.lower == entry.upper)
+        {
+          if (entry.numIters < numIterations)
+          {
+            entry.numIters = numIterations;
+          }
+          lower = entry.lower;
+          upper = entry.upper;
+          return;
+        }
+        if (entry.numIters >= numIterations)
+        {
+          lower = entry.lower;
+          upper = entry.upper;
+          return;
+        }
+      }
+    }
+    Rational one_(1);
+    if (radicand == one_)
+    {
+      lower = one_;
+      upper = one_;
+      return;
+    }
+    Rational lower_, upper_;
+    if (radicand > one_)
+    {
+      lower_ = one_;
+      upper_ = radicand;
+    }
+    else // if (radicand < one_)
+    {
+      lower_ = radicand;
+      upper_ = one_;
+    }
+    for (unsigned int nn = 1; nn < numIterations; ++nn)
+    {
+      auto bisection = (lower_ + upper_) * Rational(1, 2);
+      auto comparer = bisection * bisection;
+      if (comparer == radicand)
+      {
+        lower = bisection;
+        upper = bisection;
+        TableEntry entry;
+        entry.numIters = numIterations;
+        entry.lower = lower;
+        entry.upper = upper;
+        cachedBounds[radicand] = entry;
+        return;
+      }
+      if (comparer < radicand)
+      {
+        lower_ = bisection;
+        continue;
+      }
+      // if (comparer > radicand)
+      {
+        upper_ = bisection;
+        continue;
+      }
+    }
+    lower = lower_;
+    upper = upper_;
+    TableEntry entry;
+    entry.numIters = numIterations;
+    entry.lower = lower;
+    entry.upper = upper;
+    cachedBounds[radicand] = entry;
+  }
+
+  void QuadraticNumber::getLowerUpperBounds(const unsigned int& numIterations, Rational& lower, Rational& upper) const
+  {
+    Rational lower_, upper_;
+    Rational ll, uu;
+    mp one_(1);
+    for (const auto& iter : content)
+    {
+      getLowerUpperBounds(Rational(iter.first, one_), numIterations, ll, uu);
+      ll = ll * iter.second;
+      uu = uu * iter.second;
+      if (ll <= uu)
+      {
+        lower_ = lower_ + ll;
+        upper_ = upper_ + uu;
+        continue;
+      }
+      lower_ = lower_ + uu;
+      upper_ = upper_ + ll;
+    }
+    lower = lower_;
+    upper = upper_;
+  }
+
   bool QuadraticNumber::operator<(const QuadraticNumber& rhs) const
   {
-    return get() < rhs.get();
+    if ((*this) == rhs) { return false; }
+    Rational l0, u0, l1, u1;
+    for (unsigned nn = 5; true; nn += 5)
+    {
+      getLowerUpperBounds(nn, l0, u0);
+      rhs.getLowerUpperBounds(nn, l1, u1);
+      if (u0 < l1) { return true; }
+      if (u1 < l0) { return false; }
+    }
+    return false;
   }
 
   bool QuadraticNumber::operator>(const QuadraticNumber& rhs) const

@@ -1003,7 +1003,7 @@ bool test_quad_factor()
   std::cout << "\nPrime factorization of " << number.print() << " is:\n";
   std::cout << number.printFactors();
   std::string prompt = "";
-  std::cout << "\n\nThe next part of this test is slow.";
+  std::cout << "\n\nThe next part of this test is extremely slow.";
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -1011,6 +1011,35 @@ bool test_quad_factor()
   number = number + QuadraticNumber::sqrt(Rational(300)) + QuadraticNumber::sqrt(Rational(600));
   std::cout << "\nPrime factorization of " << number.print() << " is:\n";
   std::cout << number.printFactors();
+  return true;
+}
+
+bool test_quad_approx()
+{
+  QuadraticNumber num = QuadraticNumber::sqrt(1);
+  Rational ll, uu;
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(2);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(6);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(2) + QuadraticNumber::sqrt(5) + QuadraticNumber::sqrt(1);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(1) / num;
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
   return true;
 }
 
@@ -1212,6 +1241,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting quadratic number factorization:\n";
   test_quad_factor();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest approximation of quadratic numbers:\n";
+  test_quad_approx();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }

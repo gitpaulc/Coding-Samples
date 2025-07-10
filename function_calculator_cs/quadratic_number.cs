@@ -65,9 +65,112 @@ public class QuadraticNumber
     return answer;
   }
 
+  private struct TableEntry
+  {
+    public uint numIters = 0;
+    public Rational lower;
+    public Rational upper;
+    public TableEntry()
+    {
+      numIters = 0;
+      lower = new Rational();
+      upper = new Rational();
+    }
+  };
+  private static Dictionary<Rational, TableEntry> cachedBounds;
+
+  /** \brief Outputs `lower` and `upper` approximations to `radicand` after `numIterations` of bisection.
+   *
+   *  \remark The values are equal if and only if the radicand is rational.
+   *  \remark The bisection method is guaranteed to converge, unlike Newton's method.
+   *  \throw Throws an exception if the radicand is negative.
+   *  \remark Accuracy may exceed that given by number of iterations.
+   */
+  private static void getLowerUpperBounds(in Rational radicand, in uint numIterations, ref Rational lower, ref Rational upper)
+  {
+    if (radicand < Rational.zero())
+    {
+      throw new System.Exception("Radicand must be nonnegative.");
+    }
+    TableEntry entry = new TableEntry();
+    {
+      bool found = cachedBounds.TryGetValue(radicand, out entry);
+      if (found)
+      {
+        if (entry.lower == entry.upper)
+        {
+          if (entry.numIters < numIterations)
+          {
+            entry.numIters = numIterations;
+          }
+          lower = new Rational(entry.lower);
+          upper = new Rational(entry.upper);
+          return;
+        }
+        if (entry.numIters >= numIterations)
+        {
+          lower = new Rational(entry.lower);
+          upper = new Rational(entry.upper);
+          return;
+        }
+      }
+    }
+    Rational one_ = new Rational(1);
+    if (radicand == one_)
+    {
+      lower = new Rational(one_);
+      upper = new Rational(one_);
+      return;
+    }
+    Rational lower_ = new Rational();
+    Rational upper_ = new Rational();
+    if (radicand > one_)
+    {
+      lower_ = new Rational(one_);
+      upper_ = new Rational(radicand);
+    }
+    else // if (radicand < one_)
+    {
+      lower_ = new Rational(radicand);
+      upper_ = new Rational(one_);
+    }
+    for (uint nn = 1; nn < numIterations; ++nn)
+    {
+      var bisection = (lower_ + upper_) * new Rational(1, 2);
+      var comparer = bisection * bisection;
+      if (comparer == radicand)
+      {
+        lower = new Rational(bisection);
+        upper = new Rational(bisection);
+        entry.numIters = numIterations;
+        entry.lower = new Rational(lower);
+        entry.upper = new Rational(upper);
+        cachedBounds[radicand] = entry;
+        return;
+      }
+      if (comparer < radicand)
+      {
+        lower_ = new Rational(bisection);
+        continue;
+      }
+      // if (comparer > radicand)
+      {
+        upper_ = new Rational(bisection);
+        continue;
+      }
+    }
+    lower = new Rational(lower_);
+    upper = new Rational(upper_);
+    entry.numIters = numIterations;
+    entry.lower = new Rational(lower);
+    entry.upper = new Rational(upper);
+    cachedBounds[radicand] = entry;
+  }
+
   static QuadraticNumber()
   {
     divisionResults = new Dictionary<QuadraticNumber, QuadraticNumber>();
+    cachedBounds = new Dictionary<Rational, TableEntry>();
   }
 
   public QuadraticNumber()
@@ -521,10 +624,53 @@ public class QuadraticNumber
     return !(body == rhs);
   }
 
-  /** \remark Does not use algebra to determine < since it would be very inefficient. */
+  /** \brief Outputs `lower` and `upper` approximations to the number after `numIterations` of bisection.
+   *
+   *  \remark The values are equal if and only if the number is rational.
+   *  \remark The bisection method is guaranteed to converge, unlike Newton's method.
+   *  \throw Throws an exception if any radicand is negative.
+   *  \remark Accuracy may exceed that given by number of iterations.
+   */
+  public void getLowerUpperBounds(in uint numIterations, ref Rational lower, ref Rational upper)
+  {
+    Rational lower_ = new Rational();
+    Rational upper_ = new Rational();
+    Rational ll = new Rational();
+    Rational uu = new Rational();
+    mp one_ = new mp(1);
+    foreach (var iter in content)
+    {
+      getLowerUpperBounds(new Rational(iter.Key, one_), numIterations, ref ll, ref uu);
+      ll = ll * iter.Value;
+      uu = uu * iter.Value;
+      if (ll <= uu)
+      {
+        lower_ = lower_ + ll;
+        upper_ = upper_ + uu;
+        continue;
+      }
+      lower_ = lower_ + uu;
+      upper_ = upper_ + ll;
+    }
+    lower = new Rational(lower_);
+    upper = new Rational(upper_);
+  }
+
   public static Boolean operator<(in QuadraticNumber body, in QuadraticNumber rhs)
   {
-    return (body.toDouble() < rhs.toDouble());
+    if (body == rhs) { return false; }
+    Rational l0 = new Rational();
+    Rational u0 = new Rational();
+    Rational l1 = new Rational();
+    Rational u1 = new Rational();
+    for (uint nn = 5; true; nn += 5)
+    {
+      body.getLowerUpperBounds(nn, ref l0, ref u0);
+      rhs.getLowerUpperBounds(nn, ref l1, ref u1);
+      if (u0 < l1) { return true; }
+      if (u1 < l0) { return false; }
+    }
+    return false;
   }
 
   public static Boolean operator>(in QuadraticNumber body, in QuadraticNumber rhs)
