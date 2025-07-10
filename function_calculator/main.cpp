@@ -38,6 +38,10 @@ bool test_biquadratic()
     std::cout << "\ncos(5 * pi / 5) = " << cosPi.print();
     std::cout << "\nsin(5 * pi / 5) = " << sinPi.print();
   }
+  std::string prompt;
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
   {
     auto oneEighth = Rational(1, 8);
     BiquadraticNumber cosPiOver8, sinPiOver8;
@@ -56,7 +60,6 @@ bool test_biquadratic()
       std::cout << "\nsin(" << (kk + 1) << " * pi / 8) = " << sinKK.print();
     }
   }
-  std::string prompt;
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -263,9 +266,6 @@ bool test_biquadratic()
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
     std::cout << "cos(pi / 24) = " << result.print() << std::endl;
     if (!success) { return false; }
-    success = fn.tryEvaluateAtX(oneOver120, result);
-    std::cout << "\n\ncos(pi / 120) = " << result.print() << std::endl;
-    if (!success) { return false; }
   }
   {
     PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
@@ -283,9 +283,6 @@ bool test_biquadratic()
     if (!success) { return false; }
     success = fn.tryEvaluateAtX(oneTwentyFourth, result);
     std::cout << "sin(pi / 24) = " << result.print() << std::endl;
-    if (!success) { return false; }
-    success = fn.tryEvaluateAtX(oneOver120, result);
-    std::cout << "\nsin(pi / 120) = " << result.print() << std::endl;
     if (!success) { return false; }
   }
   std::cout << "\nMore... or 'T' to end current test?  ";

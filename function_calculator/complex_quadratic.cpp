@@ -141,8 +141,7 @@ namespace FunctionalCalculator
 
   ComplexQuadratic ComplexQuadratic::pow(int p) const
   {
-    ComplexQuadratic answer(Rational(1, 1));
-    if (p == 0) { return answer; }
+    if (p == 0) { return ComplexQuadratic(Rational(1, 1)); }
     if (p < 0) { return ComplexQuadratic(Rational(1, 1)) / pow(-p); }
     {
       auto iter = powerCache.find({*this, p});
@@ -157,6 +156,7 @@ namespace FunctionalCalculator
     {
       return pow(p1) * pow(p2);
     }
+    ComplexQuadratic answer(Rational(1, 1));
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
