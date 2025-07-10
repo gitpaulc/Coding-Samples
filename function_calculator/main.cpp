@@ -441,12 +441,18 @@ bool test_composition()
 {
   PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
   auto zero = one - one;
+  std::string prompt = "";
   {
     auto two = one + one;
     FnPolynomial fn = FnPolynomial::multinomial(one, two, two + one, two + two, one, 2);
     std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fn.print();
     auto fnOther = FnPolynomial::multinomial(one, one, zero, zero, one, 2);
     std::cout << "\n\n(1 + x)^2 = " << fnOther.print();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
     Matrix<ComplexQuadratic> transform;
     transform.addRow({ ComplexQuadratic::sqrt(Rational(4, 1)), ComplexQuadratic::sqrt(Rational(9, 1)), ComplexQuadratic::sqrt(Rational(16, 1)) });
     transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
@@ -464,7 +470,6 @@ bool test_composition()
   isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
 
-  std::string prompt = "";
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
