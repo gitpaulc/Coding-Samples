@@ -1192,11 +1192,10 @@ bool test_function()
     std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   {
-    auto numerator = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
-    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1) * FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
-    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
-    auto denominator = coshTerm - sinTerm;
-    auto harmonic = Function(numerator, denominator);
+    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
+    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
+    auto cosTerm = FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
+    auto harmonic = Function(cosTerm, coshTerm + sinTerm);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   return true;
