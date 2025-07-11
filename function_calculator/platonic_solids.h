@@ -41,6 +41,21 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections = false);
 
+  /** \return Set of vertices (x, y, z) making up an octahedron.
+   *  An octahedron is a shape in three-dimensional space consisting of eight tetrahedra,
+   *  each of whose edges coincides with the edge of another tetrahedron.
+   *  \param `edgeLength` the length of an edge of the cube.
+   */
+  std::set<Matrix<BiquadraticNumber> > getOctahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \return Set of rotations which preserve an octahedron. Reflections may also be included.
+   *  These transformations map (1, 0, 0) to the six vertices making up an octahedron.
+   *  They are the smallest set of rotations forming a group (so that compositions thereof remain in the set).
+   *  These symmetries also preserve the cube.
+   *  \param `includeReflectons` will also include reflections, doubling the size of the set.
+   */
+  std::set<Matrix<BiquadraticNumber> > getOctahedralSymmetries(bool includeReflections = false);
+
   bool test_platonic();
 }
 
