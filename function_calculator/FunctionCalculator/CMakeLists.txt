@@ -33,6 +33,7 @@ set(HEADER_FILES
   ../number.h
   ../pi_polynomial.h
   ../pi_rational.h
+  ../platonic_solids.h
   ../quadratic_number.h
   ../rational.h
 )
@@ -49,6 +50,7 @@ set(SOURCE_FILES
   ../number.cpp
   ../pi_polynomial.cpp
   ../pi_rational.cpp
+  ../platonic_solids.cpp
   ../quadratic_number.cpp
   ../rational.cpp
 )

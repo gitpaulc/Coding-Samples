@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "function.h"
+#include "platonic_solids.h"
 
 using namespace FunctionalCalculator;
 
@@ -441,12 +442,18 @@ bool test_composition()
 {
   PiRational one(PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 1))));
   auto zero = one - one;
+  std::string prompt = "";
   {
     auto two = one + one;
     FnPolynomial fn = FnPolynomial::multinomial(one, two, two + one, two + two, one, 2);
     std::cout << "\n\n(1 + 2x + 3y + 4z)^2 = " << fn.print();
     auto fnOther = FnPolynomial::multinomial(one, one, zero, zero, one, 2);
     std::cout << "\n\n(1 + x)^2 = " << fnOther.print();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
     Matrix<ComplexQuadratic> transform;
     transform.addRow({ ComplexQuadratic::sqrt(Rational(4, 1)), ComplexQuadratic::sqrt(Rational(9, 1)), ComplexQuadratic::sqrt(Rational(16, 1)) });
     transform.addRow({ ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)), ComplexQuadratic::sqrt(Rational(0, 1)) });
@@ -464,7 +471,6 @@ bool test_composition()
   isEigen = cosine.isLaplaceEigenfunction(eigen);
   if (isEigen) { std::cout << "\n\n" << cosine.print() << " is a Laplace eigenfunction with eigenvalue " << eigen.print(); }
 
-  std::string prompt = "";
   std::cout << "\n\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -1003,7 +1009,7 @@ bool test_quad_factor()
   std::cout << "\nPrime factorization of " << number.print() << " is:\n";
   std::cout << number.printFactors();
   std::string prompt = "";
-  std::cout << "\n\nThe next part of this test is slow.";
+  std::cout << "\n\nThe next part of this test is extremely slow.";
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
@@ -1011,6 +1017,35 @@ bool test_quad_factor()
   number = number + QuadraticNumber::sqrt(Rational(300)) + QuadraticNumber::sqrt(Rational(600));
   std::cout << "\nPrime factorization of " << number.print() << " is:\n";
   std::cout << number.printFactors();
+  return true;
+}
+
+bool test_quad_approx()
+{
+  QuadraticNumber num = QuadraticNumber::sqrt(1);
+  Rational ll, uu;
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(2);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(6);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(2) + QuadraticNumber::sqrt(5) + QuadraticNumber::sqrt(1);
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num = QuadraticNumber::sqrt(1) / num;
+  num.getLowerUpperBounds(10, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
+  num.getLowerUpperBounds(20, ll, uu);
+  std::cout << "\n" << ll.print() << " <= " << num.print() << " <= " << uu.print();
   return true;
 }
 
@@ -1200,6 +1235,11 @@ int main()
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest platonic solids:\n";
+  test_platonic();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\nTest rational:\n";
   test_rational();
   std::cout << "\nContinue, or 'Q' to exit? ";
@@ -1212,6 +1252,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTesting quadratic number factorization:\n";
   test_quad_factor();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest approximation of quadratic numbers:\n";
+  test_quad_approx();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }

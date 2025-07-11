@@ -36,6 +36,14 @@ class QuadraticNumber : public Number
   std::set<QuadraticNumber> getIterates() const; /**< \brief Helper for prime factorization. Number must be integral. */
   /** \brief The keys are the prime factors, the values are the number of occurrences. Number must be integral. */
   std::map<QuadraticNumber, int> primeFacIntegral() const;
+  /** \brief Outputs `lower` and `upper` approximations to `radicand` after `numIterations` of bisection.
+   *
+   *  \remark The values are equal if and only if the radicand is rational.
+   *  \remark The bisection method is guaranteed to converge, unlike Newton's method.
+   *  \throw Throws an exception if the radicand is negative.
+   *  \remark Accuracy may exceed that given by number of iterations.
+   */
+  static void getLowerUpperBounds(const Rational& radicand, const unsigned int& numIterations, Rational& lower, Rational& upper);
 
 public:
   QuadraticNumber(const Rational& number = Rational(0, 1));
@@ -63,7 +71,14 @@ public:
   bool operator==(const QuadraticNumber& rhs) const;
   bool operator!=(const QuadraticNumber& rhs) const;
   bool operator!=(int rhs) const;
-  /** \remark Does not use algebra to determine < since it would be very inefficient. */
+  /** \brief Outputs `lower` and `upper` approximations to the number after `numIterations` of bisection.
+   *
+   *  \remark The values are equal if and only if the number is rational.
+   *  \remark The bisection method is guaranteed to converge, unlike Newton's method.
+   *  \throw Throws an exception if any radicand is negative.
+   *  \remark Accuracy may exceed that given by number of iterations.
+   */
+  void getLowerUpperBounds(const unsigned int& numIterations, Rational& lower, Rational& upper) const;
   bool operator<(const QuadraticNumber& rhs) const;
   bool operator>(const QuadraticNumber& rhs) const;
   /** \brief The keys are the prime factors, the values are the number of occurrences. */

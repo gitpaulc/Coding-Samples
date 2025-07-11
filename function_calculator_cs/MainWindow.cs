@@ -329,6 +329,37 @@ namespace function_calculator_cs
       return true;
     }
 
+    bool test_quadratic6()
+    {
+      var unity = new QuadraticNumber(new Rational(1));
+      console.Text = "";
+      QuadraticNumber num = QuadraticNumber.sqrt(1);
+      Rational ll = new Rational();
+      Rational uu = new Rational();
+      num.getLowerUpperBounds(10, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num = QuadraticNumber.sqrt(2);
+      num.getLowerUpperBounds(10, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num.getLowerUpperBounds(20, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num = QuadraticNumber.sqrt(6);
+      num.getLowerUpperBounds(10, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num.getLowerUpperBounds(20, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num = QuadraticNumber.sqrt(2) + QuadraticNumber.sqrt(5) + QuadraticNumber.sqrt(1);
+      num.getLowerUpperBounds(10, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num.getLowerUpperBounds(20, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num = QuadraticNumber.sqrt(1) / num;
+      num.getLowerUpperBounds(10, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      num.getLowerUpperBounds(20, ref ll, ref uu);
+      console.Text += Environment.NewLine + ll + " <= " + num + " <= " + uu;
+      return true;
+    }
     private void endTests()
     {
       console.Text = "";
@@ -397,7 +428,8 @@ namespace function_calculator_cs
         else if (testState.testState == 2) { test_quadratic3(); }
         else if (testState.testState == 3) { test_quadratic4(); }
         else if (testState.testState == 4) { test_quadratic5(); }
-        else if (testState.testState == 5)
+        else if (testState.testState == 5) { test_quadratic6(); }
+        else if (testState.testState == 6)
         {
           console.Text = "Done.";
         }
