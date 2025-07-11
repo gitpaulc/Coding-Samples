@@ -36,9 +36,9 @@ namespace FunctionalCalculator
     R.addRow({ Rational(0), BiquadraticNumber::sqrt(3) * Rational(1, 2) , Rational(-1, 2) });
     tetrahedralSymmetries.insert(P);
     tetrahedralSymmetries.insert(R);
+    Matrix<BiquadraticNumber> A;
     if (includeReflections)
     {
-      Matrix<BiquadraticNumber> A;
       A.addRow({ Rational(1), Rational(0), Rational(0) });
       A.addRow({ Rational(0), Rational(-1), Rational(0) });
       A.addRow({ Rational(0), Rational(0) , Rational(1) });
@@ -54,10 +54,79 @@ namespace FunctionalCalculator
         others.insert(rot_);
         rot_ = R * rot;
         others.insert(rot_);
+        if (includeReflections)
+        {
+          rot_ = A * rot;
+          others.insert(rot_);
+        }
       }
       tetrahedralSymmetries = others;
     }
     return tetrahedralSymmetries;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getCube(const BiquadraticNumber& edgeLength)
+  {
+    Matrix<BiquadraticNumber> vec0;
+    vec0.addRow({ edgeLength * Rational(1), edgeLength * Rational(1), edgeLength * Rational(1) });
+    vec0 = vec0.transpose();
+    std::set<Matrix<BiquadraticNumber> > cube;
+    auto octahedralSymmetries = getSymmetriesOfACube();
+    for (const auto& sym : octahedralSymmetries)
+    {
+      cube.insert((sym * vec0).transpose());
+      if (cube.size() >= 8) { break; }
+    }
+    return cube;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections)
+  {
+    std::set<Matrix<BiquadraticNumber> > octahedralSymmetries;
+    Matrix<BiquadraticNumber> P;
+    P.addRow({ Rational(0), Rational(0), Rational(1) });
+    P.addRow({ Rational(0), Rational(1), Rational(0) });
+    P.addRow({ Rational(-1), Rational(0) , Rational(0) });
+    Matrix<BiquadraticNumber> R;
+    R.addRow({ Rational(1), Rational(0), Rational(0) });
+    R.addRow({ Rational(0), Rational(0), Rational(1) });
+    R.addRow({ Rational(0), Rational(-1) , Rational(0) });
+    Matrix<BiquadraticNumber> Q;
+    Q.addRow({ Rational(0), Rational(1), Rational(0) });
+    Q.addRow({ Rational(-1), Rational(0), Rational(0) });
+    Q.addRow({ Rational(0), Rational(0) , Rational(1) });
+    octahedralSymmetries.insert(P);
+    octahedralSymmetries.insert(R);
+    octahedralSymmetries.insert(Q);
+    Matrix<BiquadraticNumber> A;
+    if (includeReflections)
+    {
+      A.addRow({ Rational(-1), Rational(0), Rational(0) });
+      A.addRow({ Rational(0), Rational(-1), Rational(0) });
+      A.addRow({ Rational(0), Rational(0) , Rational(-1) });
+      octahedralSymmetries.insert(A);
+    }
+    int limit = includeReflections ? 48 : 24;
+    while (octahedralSymmetries.size() < limit)
+    {
+      auto others = octahedralSymmetries;
+      for (const auto& rot : octahedralSymmetries)
+      {
+        auto rot_ = P * rot;
+        others.insert(rot_);
+        rot_ = R * rot;
+        others.insert(rot_);
+        rot_ = Q * rot;
+        others.insert(rot_);
+        if (includeReflections)
+        {
+          rot_ = A * rot;
+          others.insert(rot_);
+        }
+      }
+      octahedralSymmetries = others;
+    }
+    return octahedralSymmetries;
   }
 
   bool test_platonic()
@@ -121,6 +190,27 @@ namespace FunctionalCalculator
           std::cout << "\nSquared distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
         }
       }
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+
+    {
+      auto octahedralSymmetries0 = getSymmetriesOfACube(true);
+      std::cout << "\nFull group of octahedral symmetries is:";
+      for (const auto& sym : octahedralSymmetries0)
+      {
+        std::cout << "\n" << sym.print(true);
+      }
+      std::cout << "\nSize of full group is: " << octahedralSymmetries0.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      std::set<Matrix<BiquadraticNumber> > cube = getCube();
+      std::cout << "\nVertex count of cube is: " << cube.size();
 
       std::cout << "\n\nMore... or 'T' to end current test?  ";
       std::cin >> prompt;

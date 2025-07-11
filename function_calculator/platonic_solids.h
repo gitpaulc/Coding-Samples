@@ -26,6 +26,21 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getTetrahedralSymmetries(bool includeReflections = false);
 
+  /** \return Set of vertices (x, y, z) making up a cube.
+   *  A cube is a shape in three-dimensional space consisting of six squares,
+   *  each of whose edges coincides with the edge of another square.
+   *  \param `edgeLength` the length of an edge of the cube.
+   */
+  std::set<Matrix<BiquadraticNumber> > getCube(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \return Set of rotations which preserve a cube. Reflections may also be included.
+   *  These transformations map (1, 1, 1) to the eight vertices making up a cube.
+   *  They are the smallest set of rotations forming a group (so that compositions thereof remain in the set).
+   *  These symmetries are called octahedral symmetries because they also preserve the octahedron.
+   *  \param `includeReflectons` will also include reflections, doubling the size of the set.
+   */
+  std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections = false);
+
   bool test_platonic();
 }
 
