@@ -379,4 +379,44 @@ namespace FunctionalCalculator
     std::cout << "\n";
     return true;
   }
+
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
+   *  Vertices are matrices with 3 rows and 1 column.
+   */
+  Matrix<BiquadraticNumber> completeEquilateralInDodeca(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w)
+  {
+    Matrix<BiquadraticNumber> XX;
+    if (u.numRows() != 3) { throw std::invalid_argument("Number of rows in u must == 3."); return XX; }
+    if (v.numRows() != 3) { throw std::invalid_argument("Number of rows in v must == 3."); return XX; }
+    if (w.numRows() != 3) { throw std::invalid_argument("Number of rows in w must == 3."); return XX; }
+    if (u.numCols() != 1) { throw std::invalid_argument("Number of columns in u must == 1."); return XX; }
+    if (v.numCols() != 1) { throw std::invalid_argument("Number of columns in v must == 1."); return XX; }
+    if (w.numCols() != 1) { throw std::invalid_argument("Number of columns in w must == 1."); return XX; }
+    BiquadraticNumber two(Rational(2));
+    auto AA = (u.at(0, 0) - v.at(0, 0)) * two;
+    auto BB = (u.at(1, 0) - v.at(1, 0)) * two;
+    auto CC = (u.at(2, 0) - v.at(2, 0)) * two;
+    auto DD = (u.at(0, 0) - w.at(0, 0)) * two;
+    auto EE = (u.at(1, 0) - w.at(1, 0)) * two;
+    auto FF = (u.at(2, 0) - w.at(2, 0)) * two;
+    auto GG = (v.at(0, 0) - w.at(0, 0)) * two;
+    auto HH = (v.at(1, 0) - w.at(1, 0)) * two;
+    auto II = (v.at(2, 0) - w.at(2, 0)) * two;
+    auto QQ = u.matrixSqNorm() - w.matrixSqNorm();
+    auto RR = u.matrixDot(v) * two - u.matrixDot(w) * two;
+    auto PP = QQ - RR;
+    XX.addRow({ PP, QQ, RR });
+    XX = XX.transpose();
+    Matrix<BiquadraticNumber> TT;
+    TT.addRow({ AA, BB, CC });
+    TT.addRow({ DD, EE, FF });
+    TT.addRow({ GG, HH, II });
+    bool success = true;
+    TT = TT.inverse(success);
+    if (!success) { throw std::invalid_argument("Improper configuration for u, v, w."); return Matrix<BiquadraticNumber>(); }
+    XX = TT * XX;
+    return XX;
+  }
 }
