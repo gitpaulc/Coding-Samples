@@ -469,11 +469,17 @@ namespace FunctionalCalculator
         break;
       }
       if (!found) { break; }
-      auto oldDodec = dodec;
-      dodec.clear();
-      dodec.insert(completeEquilateralInDodeca(neighbors[0], current, neighbors[1]));
-      for (const auto& vertex : oldDodec) { dodec.insert(vertex); }
-      if (dodec.size() == oldDodec.size()) { found = false; break; }
+      auto oldSize = dodec.size();
+      auto newVertex = completeEquilateralInDodeca(neighbors[0], current, neighbors[1]);
+      if (dodec.find(newVertex) != dodec.end())
+      {
+        found = false;
+        auto oldCountedSize = counted.size();
+        counted.insert(newVertex);
+        if (oldCountedSize == counted.size()) { break; }
+        continue;
+      }
+      dodec.insert(newVertex);
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     {
