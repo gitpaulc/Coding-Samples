@@ -31,7 +31,7 @@ namespace FunctionalCalculator
         polygon.insert(vec0);
         continue;
       }
-      Rational angle(2, nn);
+      Rational angle(2 * ii, nn);
       BiquadraticNumber cosAngle, sinAngle;
       bool success = BiquadraticNumber::tryGetCosine(angle, cosAngle);
       success = success && BiquadraticNumber::tryGetSine(angle, sinAngle);
@@ -439,10 +439,12 @@ namespace FunctionalCalculator
     {
       if (dodec.size() >= 20) { break; }
       bool found = false;
+      Matrix<BiquadraticNumber> current = *(dodec.begin());
+      std::vector<Matrix<BiquadraticNumber> > neighbors;
       for (const auto& vv : dodec)
       {
         if (counted.find(vv) != counted.end()) { continue; }
-        std::vector<Matrix<BiquadraticNumber> > neighbors;
+        neighbors.clear();
         for (const auto& ww : dodec)
         {
           if (vv == ww) { continue; }
@@ -463,13 +465,15 @@ namespace FunctionalCalculator
           found = true;
         }
         if (!found) { continue; }
-        auto oldDodec = dodec;
-        dodec.clear();
-        dodec.insert(completeEquilateralInDodeca(neighbors[0], vv, neighbors[1]));
-        for (const auto& vertex : oldDodec) { dodec.insert(vertex); }
-        if (dodec.size() == oldDodec.size()) { found = false; break; }
+        current = vv;
+        break;
       }
       if (!found) { break; }
+      auto oldDodec = dodec;
+      dodec.clear();
+      dodec.insert(completeEquilateralInDodeca(neighbors[0], current, neighbors[1]));
+      for (const auto& vertex : oldDodec) { dodec.insert(vertex); }
+      if (dodec.size() == oldDodec.size()) { found = false; break; }
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     {
