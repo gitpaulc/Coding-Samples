@@ -455,6 +455,19 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       return BiquadraticNumber();
     }
+    if (rhs.content.size() == 1)
+    {
+      auto iter = rhs.content.begin();
+      auto coeff = iter->second;
+      if (coeff == QuadraticNumber()) { return BiquadraticNumber(); }
+      QuadraticNumber one_(Rational(1, 1));
+      auto qq = iter->first;
+      qq = one_ / qq;
+      coeff = one_ / coeff;
+      auto quotient = BiquadraticNumber::sqrt(qq);
+      quotient = quotient * BiquadraticNumber(coeff);
+      return (*this) * quotient;
+    }
     std::map<int, QuadraticNumber> index2Root;
     std::map<QuadraticNumber, int> root2Index;
     auto multMatrix = rhs.getMultiplicationMatrix(root2Index, index2Root);
