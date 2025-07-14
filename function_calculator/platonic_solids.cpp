@@ -473,7 +473,7 @@ namespace FunctionalCalculator
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     {
-      Matrix<BiquadraticNumber> barycenter;
+      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
       const auto numVertices = (int)dodec.size();
       if (numVertices == 0) { return dodecahedron; }
       auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
