@@ -434,10 +434,6 @@ namespace FunctionalCalculator
       }
     }
     auto edgLengthSq = edgeLength * edgeLength;
-    //Matrix<BiquadraticNumber> half;
-    //Matrix<BiquadraticNumber> threeHalves;
-    //half.addRow({ Rational(1, 2) });
-    //threeHalves.addRow({ Rational(3, 2) });
     std::set<Matrix<BiquadraticNumber> > counted;
     for (int counting = 0; counting < 40; ++counting)
     {
