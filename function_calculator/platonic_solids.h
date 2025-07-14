@@ -54,9 +54,9 @@ namespace FunctionalCalculator
   std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections = false);
 
   /** \return Set of vertices (x, y, z) making up an octahedron.
-   *  An octahedron is a shape in three-dimensional space consisting of eight tetrahedra,
-   *  each of whose edges coincides with the edge of another tetrahedron.
-   *  \param `edgeLength` the length of an edge of the cube.
+   *  An octahedron is a shape in three-dimensional space consisting of eight equilateral triangles,
+   *  each of whose edges coincides with the edge of another equilateral triangle.
+   *  \param `edgeLength` the length of an edge of the octahedron.
    */
   std::set<Matrix<BiquadraticNumber> > getOctahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
@@ -67,6 +67,14 @@ namespace FunctionalCalculator
    *  \param `includeReflectons` will also include reflections, doubling the size of the set.
    */
   std::set<Matrix<BiquadraticNumber> > getOctahedralSymmetries(bool includeReflections = false);
+
+  /** \return Set of vertices (x, y, z) making up a regular dodecahedron.
+   *  A dodecahedron is a shape in three-dimensional space consisting of twelve pentagons,
+   *  each of whose edges coincides with the edge of another pentagon.
+   *  It is regular if the edge lengths of the pentagons are all equal.
+   *  \param `edgeLength` the length of an edge of the dodecahedron.
+   */
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
   bool test_platonic();
 }

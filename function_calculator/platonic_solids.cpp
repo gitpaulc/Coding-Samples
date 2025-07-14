@@ -383,6 +383,7 @@ namespace FunctionalCalculator
   /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
    *  Vertices are matrices with 3 rows and 1 column.
+   *  Interchanging u and w does not change the result.
    */
   Matrix<BiquadraticNumber> completeEquilateralInDodeca(const Matrix<BiquadraticNumber>& u,
     const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w)
@@ -418,5 +419,77 @@ namespace FunctionalCalculator
     if (!success) { throw std::invalid_argument("Improper configuration for u, v, w."); return Matrix<BiquadraticNumber>(); }
     XX = TT * XX;
     return XX;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  {
+    std::set<Matrix<BiquadraticNumber> > dodec;
+    {
+      auto initialPentagon = getRegularPolygon(5, edgeLength);
+      for (const auto& vertex : initialPentagon)
+      {
+        auto vert = vertex;
+        vert.addRow({ BiquadraticNumber() });
+        dodec.insert(vert);
+      }
+    }
+    auto edgLengthSq = edgeLength * edgeLength;
+    //Matrix<BiquadraticNumber> half;
+    //Matrix<BiquadraticNumber> threeHalves;
+    //half.addRow({ Rational(1, 2) });
+    //threeHalves.addRow({ Rational(3, 2) });
+    std::set<Matrix<BiquadraticNumber> > counted;
+    for (int counting = 0; counting < 40; ++counting)
+    {
+      if (dodec.size() >= 20) { break; }
+      bool found = false;
+      for (const auto& vv : dodec)
+      {
+        if (counted.find(vv) != counted.end()) { continue; }
+        std::vector<Matrix<BiquadraticNumber> > neighbors;
+        for (const auto& ww : dodec)
+        {
+          if (vv == ww) { continue; }
+          if (neighbors.size() >= 2)
+          {
+            counted.insert(vv);
+            found = true;
+            break;
+          }
+          if ((vv - ww).matrixSqNorm() == edgLengthSq)
+          {
+            neighbors.push_back(ww);
+          }
+        }
+        if (neighbors.size() >= 2)
+        {
+          counted.insert(vv);
+          found = true;
+        }
+        if (!found) { continue; }
+        auto oldDodec = dodec;
+        dodec.clear();
+        dodec.insert(completeEquilateralInDodeca(neighbors[0], vv, neighbors[1]));
+        for (const auto& vertex : oldDodec) { dodec.insert(vertex); }
+        if (dodec.size() == oldDodec.size()) { found = false; break; }
+      }
+      if (!found) { break; }
+    }
+    std::set<Matrix<BiquadraticNumber> > dodecahedron;
+    {
+      Matrix<BiquadraticNumber> barycenter;
+      const auto numVertices = (int)dodec.size();
+      if (numVertices == 0) { return dodecahedron; }
+      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
+      for (const auto& vertex : dodec)
+      {
+        barycenter = barycenter + (vertex * coeff);
+      }
+      for (const auto& vertex : dodec)
+      {
+        dodecahedron.insert(vertex - barycenter);
+      }
+    }
+    return dodecahedron;
   }
 }
