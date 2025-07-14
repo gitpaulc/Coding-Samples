@@ -7,6 +7,47 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  std::set<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+    const BiquadraticNumber& edgeLength, Matrix<BiquadraticNumber>* generator)
+  {
+    std::set<Matrix<BiquadraticNumber> > polygon;
+    if (nn <= 2) { throw std::invalid_argument("The number of edges in the polygon must be greater than 2."); return polygon; }
+    auto radius = edgeLength;
+    Matrix<BiquadraticNumber> vec0;
+    {
+      Rational angle(1, nn);
+      BiquadraticNumber half(Rational(1, 2));
+      BiquadraticNumber sinAngle;
+      bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success) { throw std::exception("Unsupported angle."); return polygon; }
+      radius = half * radius / sinAngle;
+    }
+    vec0.addRow({ radius, BiquadraticNumber() });
+    vec0 = vec0.transpose();
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      if (ii == 0)
+      {
+        polygon.insert(vec0);
+        continue;
+      }
+      Rational angle(2, nn);
+      BiquadraticNumber cosAngle, sinAngle;
+      bool success = BiquadraticNumber::tryGetCosine(angle, cosAngle);
+      success = success && BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success) { throw std::exception("Unsupported angle."); break; }
+      Matrix<BiquadraticNumber> R;
+      R.addRow({ cosAngle, sinAngle });
+      R.addRow({ -sinAngle, cosAngle });
+      polygon.insert(R * vec0);
+      if ((generator != nullptr) && (ii == 1))
+      {
+        *generator = R;
+      }
+    }
+    return polygon;
+  }
+
   std::set<Matrix<BiquadraticNumber> > getTetrahedron(const BiquadraticNumber& edgeLength)
   {
     Matrix<BiquadraticNumber> vec0;

@@ -11,6 +11,18 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  /** \return Set of vertices (x, y) making up a regular polygon with nn edges.
+   *  \remark A regular polygon is a polygon where all the edges have equal length.
+   *  \throw  Throws an invalid argument exception if the number of edges is less than or equal to 2.
+   *  \throw  Throws an exception if calculating the sine or cosine of (2 * pi / nn) is unsupported.
+   *  \param `edgeLength` the length of an edge of the polygon. This is set to 1 by default.
+   *  \param `generator` This is an optional output parameter. If it is not the null pointer, outputs a generator for the
+   *          group of nn rotations which are symmetries of the polygon. The output is only set if no exception is thrown.
+   */
+  std::set<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+    const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)),
+    Matrix<BiquadraticNumber>* generator = nullptr);
+
   /** \return Set of vertices (x, y, z) making up a tetrahedron.
    *  A (regular) tetrahedron is a shape in three-dimensional space consisting of
    *  four points of equal distance from one another.
