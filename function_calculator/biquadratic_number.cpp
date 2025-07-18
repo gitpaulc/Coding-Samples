@@ -444,6 +444,8 @@ namespace FunctionalCalculator
       jter->second = jter->second + iter.second;
     }
 
+    answer.clean();
+
     return answer;
   }
 
