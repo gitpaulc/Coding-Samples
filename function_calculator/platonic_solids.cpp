@@ -7,12 +7,13 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
-  std::set<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+  std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
     const BiquadraticNumber& edgeLength, Matrix<BiquadraticNumber>* generator)
   {
-    std::set<Matrix<BiquadraticNumber> > polygon;
+    std::vector<Matrix<BiquadraticNumber> > polygon;
     if (nn <= 2) { throw std::invalid_argument("The number of edges in the polygon must be greater than 2."); return polygon; }
     auto radius = edgeLength;
+    polygon.reserve(nn);
     Matrix<BiquadraticNumber> vec0;
     {
       Rational angle(1, nn);
@@ -28,7 +29,7 @@ namespace FunctionalCalculator
     {
       if (ii == 0)
       {
-        polygon.insert(vec0);
+        polygon.push_back(vec0);
         continue;
       }
       Rational angle(2 * ii, nn);
@@ -36,14 +37,16 @@ namespace FunctionalCalculator
       bool success = BiquadraticNumber::tryGetCosine(angle, cosAngle);
       success = success && BiquadraticNumber::tryGetSine(angle, sinAngle);
       if (!success) { throw std::exception("Unsupported angle."); break; }
-      Matrix<BiquadraticNumber> R;
-      R.addRow({ cosAngle, sinAngle });
-      R.addRow({ -sinAngle, cosAngle });
-      polygon.insert(R * vec0);
       if ((generator != nullptr) && (ii == 1))
       {
+        Matrix<BiquadraticNumber> R;
+        R.addRow({ cosAngle, sinAngle });
+        R.addRow({ -sinAngle, cosAngle });
         *generator = R;
       }
+      Matrix<BiquadraticNumber> vec;
+      vec.addRow({ cosAngle, -sinAngle });
+      polygon.push_back(vec.transpose());
     }
     return polygon;
   }

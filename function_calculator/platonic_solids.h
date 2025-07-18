@@ -19,7 +19,7 @@ namespace FunctionalCalculator
    *  \param `generator` This is an optional output parameter. If it is not the null pointer, outputs a generator for the
    *          group of nn rotations which are symmetries of the polygon. The output is only set if no exception is thrown.
    */
-  std::set<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+  std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
     const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)),
     Matrix<BiquadraticNumber>* generator = nullptr);
 
