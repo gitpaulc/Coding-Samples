@@ -14,7 +14,6 @@ namespace FunctionalCalculator
     if (nn <= 2) { throw std::invalid_argument("The number of edges in the polygon must be greater than 2."); return polygon; }
     auto radius = edgeLength;
     polygon.reserve(nn);
-    Matrix<BiquadraticNumber> vec0;
     {
       Rational angle(1, nn);
       BiquadraticNumber half(Rational(1, 2));
@@ -23,12 +22,13 @@ namespace FunctionalCalculator
       if (!success) { throw std::exception("Unsupported angle."); return polygon; }
       radius = half * radius / sinAngle;
     }
-    vec0.addRow({ radius, BiquadraticNumber() });
-    vec0 = vec0.transpose();
     for (int ii = 0; ii < nn; ++ii)
     {
       if (ii == 0)
       {
+        Matrix<BiquadraticNumber> vec0;
+        vec0.addRow({ radius, BiquadraticNumber() });
+        vec0 = vec0.transpose();
         polygon.push_back(vec0);
         continue;
       }
@@ -45,7 +45,7 @@ namespace FunctionalCalculator
         *generator = R;
       }
       Matrix<BiquadraticNumber> vec;
-      vec.addRow({ cosAngle, -sinAngle });
+      vec.addRow({ cosAngle * radius, -sinAngle * radius });
       polygon.push_back(vec.transpose());
     }
     return polygon;
