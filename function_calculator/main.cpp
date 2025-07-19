@@ -9,6 +9,17 @@ using namespace FunctionalCalculator;
 bool test_biquadratic()
 {
   {
+    auto dodec = getDodecahedron();
+    std::cout << "\nDodecahedron:";
+    int ii = -1;
+    for (const auto& vertex : dodec)
+    {
+      ++ii;
+      std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
+    }
+    std::cout << "\n";
+  } ////
+  {
     auto sqrtSqrtFive = ComplexQuadratic(BiquadraticNumber::sqrt(QuadraticNumber::sqrt(5)));
     std::cout << "\nSquare root of square root of 5 = " << sqrtSqrtFive.print();
     std::cout << "\nSquare root of 5 = " << (sqrtSqrtFive * sqrtSqrtFive).print();
