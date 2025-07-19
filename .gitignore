@@ -81,6 +81,7 @@ graphing_math/GraphingMath/freeglut
 mesh_renderer/*.exe
 mesh_renderer/MeshRenderer/.vs
 mesh_renderer/latex/
+mesh_renderer/obj/*Out.obj
 
 mesh_renderer/MeshRenderer/CMakeCache.txt
 mesh_renderer/MeshRenderer/CMakeFiles/
