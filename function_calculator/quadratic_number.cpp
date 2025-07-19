@@ -424,12 +424,16 @@ namespace FunctionalCalculator
     aa = QuadraticNumber::sqrt(a2);
     auto bb = QuadraticNumber(vv) / (aa + aa);
     auto sqrtDD = QuadraticNumber::sqrt(dd);
-    sqrt1 = aa + bb * sqrtDD;
+    auto sqrt1_ = aa + bb * sqrtDD;
+    //if (sqrt1_ * sqrt1_ != (*this)) { return 0; }
+    sqrt1 = sqrt1_;
     if (numRoots >= 2)
     {
       aa_other = QuadraticNumber::sqrt(a2_other);
       auto bb_other = QuadraticNumber(vv) / (aa_other + aa_other);
-      sqrt2 = aa_other + bb_other * sqrtDD;
+      auto sqrt2_ = aa_other + bb_other * sqrtDD;
+      //if (sqrt2_ * sqrt2_ != (*this)) { return 1; }
+      sqrt2 = sqrt2_;
     }
     return numRoots;
   }

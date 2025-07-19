@@ -178,6 +178,21 @@ namespace FunctionalCalculator
       for (auto& iter : content)
       {
         if (iter.first.getRational(ratio)) { continue; }
+        QuadraticNumber sqrt1, sqrt2;
+        if (iter.first.simpleSquareRoot(sqrt1, sqrt2) == 0) { continue; }
+        searchConjugate = false;
+        auto coeff = iter.second * sqrt1;
+        content.erase(iter.first);
+        QuadraticNumber one_(Rational(1));
+        auto jter = content.find(one_);
+        if (jter == content.end()) { content[one_] = coeff; }
+        else { jter->second = jter->second + coeff; }
+        break;
+      }
+      if (!searchConjugate) { continue; }
+      for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio)) { continue; }
         for (auto& jter : content)
         {
           if (jter.first.getRational(ratio)) { continue; }
