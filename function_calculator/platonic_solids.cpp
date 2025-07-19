@@ -383,13 +383,14 @@ namespace FunctionalCalculator
     return true;
   }
 
-  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+  /** Given vertices u, v, w all having z-coordinate zero, and 
+   *  proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
    *  Vertices are matrices with 3 rows and 1 column.
    *  Interchanging u and w does not change the result.
    */
-  Matrix<BiquadraticNumber> completeEquilateralInDodeca(const Matrix<BiquadraticNumber>& u,
-    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w)
+  Matrix<BiquadraticNumber> completeEquilateralInDodeca_(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w, bool usePlusSign)
   {
     Matrix<BiquadraticNumber> XX;
     if (u.numRows() != 3) { throw std::invalid_argument("Number of rows in u must == 3."); return XX; }
@@ -401,27 +402,64 @@ namespace FunctionalCalculator
     BiquadraticNumber two(Rational(2));
     auto AA = (u.at(0, 0) - v.at(0, 0)) * two;
     auto BB = (u.at(1, 0) - v.at(1, 0)) * two;
-    auto CC = (u.at(2, 0) - v.at(2, 0)) * two;
-    auto DD = (u.at(0, 0) - w.at(0, 0)) * two;
-    auto EE = (u.at(1, 0) - w.at(1, 0)) * two;
-    auto FF = (u.at(2, 0) - w.at(2, 0)) * two;
-    auto GG = (v.at(0, 0) - w.at(0, 0)) * two;
-    auto HH = (v.at(1, 0) - w.at(1, 0)) * two;
-    auto II = (v.at(2, 0) - w.at(2, 0)) * two;
+    auto CC = (u.at(0, 0) - w.at(0, 0)) * two;
+    auto DD = (u.at(1, 0) - w.at(1, 0)) * two;
     auto QQ = u.matrixSqNorm() - w.matrixSqNorm();
     auto RR = u.matrixDot(v) * two - u.matrixDot(w) * two;
     auto PP = QQ - RR;
-    XX.addRow({ PP, QQ, RR });
+    XX.addRow({ PP, QQ });
     XX = XX.transpose();
     Matrix<BiquadraticNumber> TT;
-    TT.addRow({ AA, BB, CC });
-    TT.addRow({ DD, EE, FF });
-    TT.addRow({ GG, HH, II });
+    TT.addRow({ AA, BB });
+    TT.addRow({ CC, DD });
     bool success = true;
     TT = TT.inverse(success);
     if (!success) { throw std::invalid_argument("Improper configuration for u, v, w."); return Matrix<BiquadraticNumber>(); }
     XX = TT * XX;
-    return XX;
+    auto xx = XX.at(0, 0);
+    auto yy = XX.at(1, 0);
+    auto radicand = u.matrixSqNorm() - u.matrixDot(v) * two +
+      xx * v.at(0, 0) * two + yy * v.at(1, 0) * two - xx * xx - yy * yy;
+    QuadraticNumber quad;
+    if (!radicand.getAsQuadratic(quad))
+    {
+      throw std::exception("The z component is not the square root of a quadratic number.");
+      Matrix<BiquadraticNumber> answer;
+      return answer;
+    }
+    auto zz = BiquadraticNumber::sqrt(quad);
+    if (!usePlusSign) { zz = -zz; }
+    Matrix<BiquadraticNumber> answer;
+    answer.addRow({ xx, yy, zz });
+    answer = answer.transpose();
+    return answer;
+  }
+
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
+   *  Vertices are matrices with 3 rows and 1 column.
+   *  Interchanging u and w does not change the result.
+   *  \param `rotToZ_EqualsZero` is the rotation that maps the vertices to the plane { z == 0 }.
+   *  \param `dodecIsNonnegative` is true if, and only if, the dodecahedron so far (which is convex and always lies
+   *  on one side of the plane) lies on the nonnegative side.
+   */
+  Matrix<BiquadraticNumber> completeEquilateralInDodeca(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const Matrix<BiquadraticNumber>& rotToZ_EqualsZero, bool dodecIsNonnegative)
+  {
+    bool success = true;
+    auto R_inv = rotToZ_EqualsZero.inverse(success);
+  }
+
+  /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the rotation R that maps them to the plane { z == 0 }.
+   *  \param Outputs dodecIsNonnegative if and only if the dodecahedron so far (which is convex and always lies
+   *  on one side of the plane) lies on the nonnegative side.
+   */
+  Matrix<BiquadraticNumber> getRotationToPlane(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const std::set<Matrix<BiquadraticNumber> >& dodecSoFar, bool& dodecIsNonnegative)
+  {
   }
 
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
@@ -473,7 +511,9 @@ namespace FunctionalCalculator
       }
       if (!found) { break; }
       auto oldSize = dodec.size();
-      auto newVertex = completeEquilateralInDodeca(neighbors[0], current, neighbors[1]);
+      bool dodecIsNonnegative = false;
+      auto rot = getRotationToPlane(neighbors[0], current, neighbors[1], dodec, dodecIsNonnegative);
+      auto newVertex = completeEquilateralInDodeca(neighbors[0], current, neighbors[1], rot, dodecIsNonnegative);
       if (dodec.find(newVertex) != dodec.end())
       {
         found = false;
