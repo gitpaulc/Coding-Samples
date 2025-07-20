@@ -408,12 +408,6 @@ namespace FunctionalCalculator
     auto xx = (v.at(1, 0) - u.at(1, 0)) * factor;
     auto yy = (u.at(0, 0) - v.at(0, 0)) * factor;
 
-    if ((xx * u.at(0, 0) + yy * u.at(1, 0)) * two == -uSqNorm)
-    {
-      xx = -xx; // TODO: This happens sometimes because a square root is taken without the minus sign.
-      yy = -yy; // Resolve this later.
-    }
-    
     auto radicand = uSqNorm - xx * xx - yy * yy;
     QuadraticNumber quad;
     if (!radicand.getAsQuadratic(quad))
@@ -427,10 +421,9 @@ namespace FunctionalCalculator
     Matrix<BiquadraticNumber> answer;
     answer.addRow({ xx, yy, zz });
     answer = answer.transpose();
-    if (answer.matrixDot(u) * two != uSqNorm) { throw std::invalid_argument("2 u * answer must == |u|^2."); }
-    if (answer.matrixDot(v) * two != uSqNorm) { throw std::invalid_argument("2 v * answer must == |u|^2."); }
-    if (answer.matrixSqNorm() != uSqNorm) { throw std::invalid_argument("|u| must == |answer|."); }
-    if ((u - answer).matrixSqNorm() != uSqNorm) { throw std::invalid_argument("|u| must == |u - answer|."); }
+    auto answerSq = answer.matrixSqNorm();
+    if (answerSq != uSqNorm) { throw std::invalid_argument("|u| must == |answer|."); }
+    if ((u - answer).matrixSqNorm() != answerSq) { throw std::invalid_argument("|answer| must == |u - answer|."); }
     if ((v - answer).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|v| must == |v - answer|."); }
     return answer;
   }
