@@ -452,7 +452,7 @@ namespace FunctionalCalculator
   }
 
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
-   *  returns the rotation R that maps them to the plane { z == 0 }.
+   *  returns the rotation R that maps (u - w) and (v - w) to the plane { z == 0 }.
    *  \param Outputs dodecIsNonnegative if and only if the dodecahedron so far (which is convex and always lies
    *  on one side of the plane) lies on the nonnegative side.
    */
@@ -460,6 +460,71 @@ namespace FunctionalCalculator
     const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
     const std::set<Matrix<BiquadraticNumber> >& dodecSoFar, bool& dodecIsNonnegative)
   {
+    BiquadraticNumber zero_(Rational(0));
+    BiquadraticNumber one_(Rational(1));
+    Matrix<BiquadraticNumber> RR;
+    RR.addRow({ one_, zero_, zero_ });
+    RR.addRow({ zero_, one_, zero_ });
+    RR.addRow({ zero_, zero_, one_ });
+    if ((u.at(2, 0) == w.at(2, 0)) && (v.at(2, 0) == w.at(2, 0)))
+    {
+      dodecIsNonnegative = true;
+      for (const auto& vert : dodecSoFar)
+      {
+        if (vert.at(2, 0) > w.at(2, 0)) { break; }
+        if (vert.at(2, 0) < w.at(2, 0)) { dodecIsNonnegative = false; break; }
+      }
+      return RR;
+    }
+    BiquadraticNumber two(Rational(2));
+    auto uu = u - w;
+    auto vv = v - w;
+    BiquadraticNumber crossProdNorm, uuNormTimesVvNorm, uvCrossNorm;
+    {
+      crossProdNorm = (uu.at(0, 0) * uu.at(0, 0)) * (vv.at(2, 0) * vv.at(2, 0));
+      crossProdNorm = crossProdNorm + (uu.at(2, 0) * uu.at(2, 0)) * (vv.at(0, 0) * vv.at(0, 0));
+      crossProdNorm = crossProdNorm + (vv.at(2, 0) * vv.at(2, 0)) * (uu.at(1, 0) * uu.at(1, 0));
+      crossProdNorm = crossProdNorm + (uu.at(2, 0) * uu.at(2, 0)) * (vv.at(1, 0) * vv.at(1, 0));
+      crossProdNorm = crossProdNorm - two * uu.at(0, 0) * uu.at(2, 0) * vv.at(0, 0) * vv.at(2, 0);
+      crossProdNorm = crossProdNorm - two * uu.at(1, 0) * uu.at(2, 0) * vv.at(1, 0) * vv.at(2, 0);
+      QuadraticNumber quad;
+      bool success = crossProdNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("Cross product squared norm cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      crossProdNorm = BiquadraticNumber::sqrt(quad);
+      uuNormTimesVvNorm = uu.matrixSqNorm() * vv.matrixSqNorm();
+      success = uuNormTimesVvNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|u - w|^2 * |v - w|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      uuNormTimesVvNorm = BiquadraticNumber::sqrt(quad);
+      auto uvCross_0 = uu.at(1, 0) * vv.at(2, 0) - vv.at(1, 0) * uu.at(2, 0);
+      auto uvCross_1 = uu.at(0, 0) * vv.at(2, 0) - vv.at(0, 0) * uu.at(2, 0);
+      auto uvCross_2 = uu.at(0, 0) * vv.at(1, 0) - vv.at(0, 0) * uu.at(1, 0);
+      success = (uvCross_0 * uvCross_0 + uvCross_1 * uvCross_1 + uvCross_2 * uvCross_2).getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      uvCrossNorm = BiquadraticNumber::sqrt(quad);
+    }
+    Matrix<BiquadraticNumber> KK; // Cross product matrix.
+    {
+      auto k0 = vv.at(0, 0) * uu.at(2, 0) - uu.at(0, 0) * vv.at(2, 0);
+      auto k1 = vv.at(1, 0) * uu.at(2, 0) - uu.at(1, 0) * vv.at(2, 0);
+      KK.addRow({ zero_, zero_, k1 });
+      KK.addRow({ zero_, zero_, -k0 });
+      KK.addRow({ -k1, k0, zero_ });
+    }
+    RR = RR + KK * (uvCrossNorm / uuNormTimesVvNorm);
+    RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+    return RR;
   }
 
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
