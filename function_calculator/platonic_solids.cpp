@@ -383,45 +383,30 @@ namespace FunctionalCalculator
     return true;
   }
 
-  /** Given vertices u, v, w all having z-coordinate zero, and 
+  /** Given vertices u and v having z-coordinate zero along with the origin w, and 
    *  proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
    *  Vertices are matrices with 3 rows and 1 column.
    *  Interchanging u and w does not change the result.
    */
   Matrix<BiquadraticNumber> completeEquilateralInDodeca_(const Matrix<BiquadraticNumber>& u,
-    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w, bool usePlusSign)
+    const Matrix<BiquadraticNumber>& v, bool usePlusSign)
   {
     Matrix<BiquadraticNumber> XX;
     if (u.numRows() != 3) { throw std::invalid_argument("Number of rows in u must == 3."); return XX; }
     if (v.numRows() != 3) { throw std::invalid_argument("Number of rows in v must == 3."); return XX; }
-    if (w.numRows() != 3) { throw std::invalid_argument("Number of rows in w must == 3."); return XX; }
     if (u.numCols() != 1) { throw std::invalid_argument("Number of columns in u must == 1."); return XX; }
     if (v.numCols() != 1) { throw std::invalid_argument("Number of columns in v must == 1."); return XX; }
-    if (w.numCols() != 1) { throw std::invalid_argument("Number of columns in w must == 1."); return XX; }
+    if (u.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("u.z must == 0."); return XX; }
+    if (v.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("v.z must == 0."); return XX; }
     BiquadraticNumber two(Rational(2));
-    auto AA = (u.at(0, 0) - v.at(0, 0)) * two;
-    auto BB = (u.at(1, 0) - v.at(1, 0)) * two;
-    auto CC = (u.at(0, 0) - w.at(0, 0)) * two;
-    auto DD = (u.at(1, 0) - w.at(1, 0)) * two;
-    auto QQ = u.matrixSqNorm() - w.matrixSqNorm();
-    auto RR = u.matrixDot(v) * two - u.matrixDot(w) * two;
-    auto PP = QQ - RR;
-    XX.addRow({ PP, QQ });
-    XX = XX.transpose();
-    // Inverse of [AA BB | CC DD]
-    Matrix<BiquadraticNumber> TT;
-    {
-      auto det = (AA * DD - BB * CC);
-      auto oneOverDet = BiquadraticNumber(Rational(1)) / det;
-      TT.addRow({ DD * oneOverDet, -BB * oneOverDet });
-      TT.addRow({ -CC * oneOverDet, AA * oneOverDet });
-    }
-    XX = TT * XX;
-    auto xx = XX.at(0, 0);
-    auto yy = XX.at(1, 0);
-    auto radicand = u.matrixSqNorm() - u.matrixDot(v) * two +
-      xx * v.at(0, 0) * two + yy * v.at(1, 0) * two - xx * xx - yy * yy;
+    auto uSqNorm = u.matrixSqNorm();
+    auto factor = uSqNorm / (two * (u.at(0, 0) * v.at(1, 0) - u.at(1, 0) * v.at(0, 0)));
+
+    auto xx = (v.at(1, 0) - u.at(1, 0)) * factor;
+    auto yy = (u.at(0, 0) - v.at(0, 0)) * factor;
+    
+    auto radicand = uSqNorm - xx * xx - yy * yy;
     QuadraticNumber quad;
     if (!radicand.getAsQuadratic(quad))
     {
@@ -452,8 +437,8 @@ namespace FunctionalCalculator
     auto R_inv = rotToZ_EqualsZero.transpose();
     auto uu = rotToZ_EqualsZero * (u - w);
     auto vv = rotToZ_EqualsZero * (v - w);
-    auto answer = completeEquilateralInDodeca_(uu, vv, w - w, dodecIsNonnegative);
-    return R_inv * answer;
+    auto answer = completeEquilateralInDodeca_(uu, vv, dodecIsNonnegative);
+    return (R_inv * answer) + w;
   }
 
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
