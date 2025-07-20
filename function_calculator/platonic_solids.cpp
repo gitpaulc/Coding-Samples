@@ -447,8 +447,7 @@ namespace FunctionalCalculator
     const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
     const Matrix<BiquadraticNumber>& rotToZ_EqualsZero, bool dodecIsNonnegative)
   {
-    bool success = true;
-    auto R_inv = rotToZ_EqualsZero.inverse(success);
+    auto R_inv = rotToZ_EqualsZero.transpose();
   }
 
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
@@ -462,10 +461,10 @@ namespace FunctionalCalculator
   {
     BiquadraticNumber zero_(Rational(0));
     BiquadraticNumber one_(Rational(1));
-    Matrix<BiquadraticNumber> RR;
-    RR.addRow({ one_, zero_, zero_ });
-    RR.addRow({ zero_, one_, zero_ });
-    RR.addRow({ zero_, zero_, one_ });
+    Matrix<BiquadraticNumber> II;
+    II.addRow({ one_, zero_, zero_ });
+    II.addRow({ zero_, one_, zero_ });
+    II.addRow({ zero_, zero_, one_ });
     if ((u.at(2, 0) == w.at(2, 0)) && (v.at(2, 0) == w.at(2, 0)))
     {
       dodecIsNonnegative = true;
@@ -474,8 +473,9 @@ namespace FunctionalCalculator
         if (vert.at(2, 0) > w.at(2, 0)) { break; }
         if (vert.at(2, 0) < w.at(2, 0)) { dodecIsNonnegative = false; break; }
       }
-      return RR;
+      return II;
     }
+    Matrix<BiquadraticNumber> RR = II;
     BiquadraticNumber two(Rational(2));
     auto uu = u - w;
     auto vv = v - w;
@@ -524,6 +524,18 @@ namespace FunctionalCalculator
     }
     RR = RR + KK * (uvCrossNorm / uuNormTimesVvNorm);
     RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+    if (RR * RR.transpose() != II)
+    {
+      throw std::logic_error("Did not define a true rotation matrix.");
+    }
+    dodecIsNonnegative = true;
+    auto R_ww = RR * w;
+    for (const auto& vert : dodecSoFar)
+    {
+      auto R_vert = RR * vert;
+      if (R_vert.at(2, 0) > R_ww.at(2, 0)) { break; }
+      if (R_vert.at(2, 0) < R_ww.at(2, 0)) { dodecIsNonnegative = false; break; }
+    }
     return RR;
   }
 
