@@ -109,7 +109,8 @@ void vertex2color(const float& xIn, const float& yIn, const float& zIn,
 {
   ComputationalGeometry::point3d rgbMax(1, 1, 1);
   ComputationalGeometry::point3d rgbMin(0, 0, 1);
-  auto MM = (float)MeshRenderer::gBoundingMax.z;
+  float margin = (float)(0.25 * (MeshRenderer::gBoundingMax.z - MeshRenderer::gBoundingMin.z));
+  auto MM = (float)MeshRenderer::gBoundingMax.z + margin;
   if (zIn >= MM)
   {
     rOut = (float)rgbMax.x;
@@ -117,7 +118,7 @@ void vertex2color(const float& xIn, const float& yIn, const float& zIn,
     bOut = (float)rgbMax.z;
     return;
   }
-  auto mm = (float)MeshRenderer::gBoundingMin.z;
+  auto mm = (float)MeshRenderer::gBoundingMin.z - margin;
   if (zIn <= mm)
   {
     rOut = (float)rgbMin.x;
