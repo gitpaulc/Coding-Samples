@@ -399,13 +399,20 @@ namespace FunctionalCalculator
     if (v.numCols() != 1) { throw std::invalid_argument("Number of columns in v must == 1."); return XX; }
     if (u.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("u.z must == 0."); return XX; }
     if (v.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("v.z must == 0."); return XX; }
-    if ((u - v).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|u - v| must == |v|."); return XX; }
+    //if ((u - v).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|u - v| must == |v|."); return XX; }
     BiquadraticNumber two(Rational(2));
     auto uSqNorm = u.matrixSqNorm();
-    auto factor = uSqNorm / (two * (u.at(0, 0) * v.at(1, 0) - u.at(1, 0) * v.at(0, 0)));
+    auto det = (u.at(0, 0) * v.at(1, 0) - u.at(1, 0) * v.at(0, 0));
+    auto factor = uSqNorm / (two * det);
 
     auto xx = (v.at(1, 0) - u.at(1, 0)) * factor;
     auto yy = (u.at(0, 0) - v.at(0, 0)) * factor;
+
+    if ((xx * u.at(0, 0) + yy * u.at(1, 0)) * two == -uSqNorm)
+    {
+      xx = -xx; // TODO: This happens sometimes because a square root is taken without the minus sign.
+      yy = -yy; // Resolve this later.
+    }
     
     auto radicand = uSqNorm - xx * xx - yy * yy;
     QuadraticNumber quad;
@@ -420,6 +427,8 @@ namespace FunctionalCalculator
     Matrix<BiquadraticNumber> answer;
     answer.addRow({ xx, yy, zz });
     answer = answer.transpose();
+    if (answer.matrixDot(u) * two != uSqNorm) { throw std::invalid_argument("2 u * answer must == |u|^2."); }
+    if (answer.matrixDot(v) * two != uSqNorm) { throw std::invalid_argument("2 v * answer must == |u|^2."); }
     if (answer.matrixSqNorm() != uSqNorm) { throw std::invalid_argument("|u| must == |answer|."); }
     if ((u - answer).matrixSqNorm() != uSqNorm) { throw std::invalid_argument("|u| must == |u - answer|."); }
     if ((v - answer).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|v| must == |v - answer|."); }
