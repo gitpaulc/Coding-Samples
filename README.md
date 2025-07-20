@@ -18,6 +18,9 @@
   <button>
   <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/mesh_renderer" alt="Mesh Renderer"><img alt="MeshRenderer" src="ui/meshing.png" height="20%" width="10%"/></a>
   </button>
+  <button>
+  <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/function_calculator" alt="Function Calculator"><img alt="Function Calculator" src="ui/math.png" height="20%" width="10%"/></a>
+  </button>
 </p>
 
 ---
