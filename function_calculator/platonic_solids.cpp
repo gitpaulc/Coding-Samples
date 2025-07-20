@@ -409,12 +409,14 @@ namespace FunctionalCalculator
     auto PP = QQ - RR;
     XX.addRow({ PP, QQ });
     XX = XX.transpose();
+    // Inverse of [AA BB | CC DD]
     Matrix<BiquadraticNumber> TT;
-    TT.addRow({ AA, BB });
-    TT.addRow({ CC, DD });
-    bool success = true;
-    TT = TT.inverse(success);
-    if (!success) { throw std::invalid_argument("Improper configuration for u, v, w."); return Matrix<BiquadraticNumber>(); }
+    {
+      auto det = (AA * DD - BB * CC);
+      auto oneOverDet = BiquadraticNumber(Rational(1)) / det;
+      TT.addRow({ DD * oneOverDet, -BB * oneOverDet });
+      TT.addRow({ -CC * oneOverDet, AA * oneOverDet });
+    }
     XX = TT * XX;
     auto xx = XX.at(0, 0);
     auto yy = XX.at(1, 0);

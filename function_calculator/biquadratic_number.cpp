@@ -485,6 +485,43 @@ namespace FunctionalCalculator
       quotient = quotient * BiquadraticNumber(coeff);
       return (*this) * quotient;
     }
+    if (rhs.content.size() == 2)
+    {
+      QuadraticNumber aa, bb, cc, dd;
+      {
+        int ii = -1;
+        for (const auto& iter : rhs.content)
+        {
+          ++ii;
+          if (ii == 0)
+          {
+            aa = iter.first;
+            cc = iter.second;
+            continue;
+          }
+          bb = iter.first;
+          dd = iter.second;
+          break;
+        }
+      }
+      auto den = aa * cc * cc - bb * dd * dd;
+      auto quotient = rhs;
+      {
+        int ii = -1;
+        for (auto& iter : quotient.content)
+        {
+          ++ii;
+          if (ii == 0)
+          {
+            iter.second = cc / den;
+            continue;
+          }
+          iter.second = -dd / den;
+          break;
+        }
+      }
+      return (*this) * quotient;
+    }
     std::map<int, QuadraticNumber> index2Root;
     std::map<QuadraticNumber, int> root2Index;
     auto multMatrix = rhs.getMultiplicationMatrix(root2Index, index2Root);
