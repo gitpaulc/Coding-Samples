@@ -140,6 +140,8 @@
 
 ## **Mesh Renderer.**
 
+<a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/TeapotFull.png" width="100%"/></a>
+
 * This is a utility for rendering **.obj** files located in the `mesh_renderer` folder.
 * If you are using Mac, `cd` to `graphing_math`.
   * Run `bash compile_and_run_mesh_renderer.sh` to run the utility.  By default the utility will prompt you for an obj file. The sample file `obj/cube.obj` is included.
@@ -153,6 +155,8 @@
 * Rotation: R = rotate clockwise, T = rotate counter-clockwise. W, A, S, and D to rotate the screen.
 * `MeshRenderer.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder. The homepage is `index.html`.
  
+<a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/Cow.png" width="100%"/></a>
+
 [Back to Table of Contents.](##table-of-contents)
 
 ---
