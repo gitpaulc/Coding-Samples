@@ -656,23 +656,35 @@ namespace MeshRenderer
       bool addFace = (faceIt.second.vertices.size() >= 3);
       if (!addFace) { continue; }
       int i = 0;
-      Triangle3d tri;
-      for (const point3d& target : faceIt.second.vertices)
+      std::vector<Triangle3d> triangles;
       {
-        if (i >= 3) { break; }
-        if (i == 0) { tri.a = point3d(target.x, target.y, target.z); }
-        else if (i == 1) { tri.b = point3d(target.x, target.y, target.z); }
-        else if (i == 2) { tri.c = point3d(target.x, target.y, target.z); }
-        ++i;
+        Triangle3d tri;
+        for (const point3d& target : faceIt.second.vertices)
+        {
+          if (i == 0) { tri.a = point3d(target.x, target.y, target.z); }
+          else if (i == 1) { tri.b = point3d(target.x, target.y, target.z); }
+          else if (i == 2) { tri.c = point3d(target.x, target.y, target.z); }
+          else if (i >= 3)
+          {
+            triangles.push_back(tri);
+            tri.b = tri.c;
+            tri.c = point3d(target.x, target.y, target.z);
+          }
+          ++i;
+        }
+        triangles.push_back(tri);
       }
-      auto edgeSet = tri.getEdges();
-      if (edgeSet.size() < 3) { continue; }
-      i = 0;
-      for (const auto& edg : edgeSet)
+      for (const auto& tri : triangles)
       {
-        if (i >= 3) { break; }
-        meshOut.push_back(edg);
-        ++i;
+        auto edgeSet = tri.getEdges();
+        if (edgeSet.size() < 3) { continue; }
+        i = 0;
+        for (const auto& edg : edgeSet)
+        {
+          if (i >= 3) { break; }
+          meshOut.push_back(edg);
+          ++i;
+        }
       }
     }
     return true;

@@ -26,7 +26,9 @@ namespace MeshRenderer
   static std::vector<GLfloat> gMvMatrix(16, 0.0f);
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
+  static bool gUseShaders = false;
   static GLint gPosLocation, gMvLocation, gProjLocation;
+  static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
 
 void recalculate();
@@ -51,7 +53,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::GetWindowWidthHeight(ww, hh);
   glutInitWindowSize(ww, hh);
 
-  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'Z' zoom in, 'q' to exit.");
+  GetWindowId() = glutCreateWindow("Mesh Renderer - Paul Cernea - 'E' to export, 'Y' zoom out, 'Z' zoom in, 'U' toggle wireframe, 'q' to exit.");
 
 #ifdef __GLEW_H__
   {
@@ -99,6 +101,35 @@ void recalculate()
   {
     mesh.getSkeleton(MeshRenderer::gWireframe);
   }
+  mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
+}
+
+void vertex2color(const float& xIn, const float& yIn, const float& zIn,
+  float& rOut, float& gOut, float& bOut)
+{
+  ComputationalGeometry::point3d rgbMax(1, 1, 1);
+  ComputationalGeometry::point3d rgbMin(0, 0, 1);
+  float margin = (float)(0.25 * (MeshRenderer::gBoundingMax.z - MeshRenderer::gBoundingMin.z));
+  auto MM = (float)MeshRenderer::gBoundingMax.z + margin;
+  if (zIn >= MM)
+  {
+    rOut = (float)rgbMax.x;
+    gOut = (float)rgbMax.y;
+    bOut = (float)rgbMax.z;
+    return;
+  }
+  auto mm = (float)MeshRenderer::gBoundingMin.z - margin;
+  if (zIn <= mm)
+  {
+    rOut = (float)rgbMin.x;
+    gOut = (float)rgbMin.y;
+    bOut = (float)rgbMin.z;
+    return;
+  }
+  auto tt = (zIn - mm) / ((float)(MM - mm));
+  rOut = (float)(rgbMax.x * tt + rgbMin.x * (1.0f - tt));
+  gOut = (float)(rgbMax.y * tt + rgbMin.y * (1.0f - tt));
+  bOut = (float)(rgbMax.z * tt + rgbMin.z * (1.0f - tt));
 }
 
 void updateView()
@@ -270,7 +301,7 @@ void render()
   toVertex3dData(gWireframe, vertexData, !gWireframeOn);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
-  else if (!gWireframeOn)
+  else if (!gWireframeOn && gUseShaders)
   {
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
@@ -285,6 +316,47 @@ void render()
 
     glDisableVertexAttribArray(gPosLocation);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glutSwapBuffers();
+    return;
+  }
+  else if (!gWireframeOn)
+  {
+    glUseProgram(0);
+    glPointSize(3.0f);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+
+    int stride = 0;
+    glVertexPointer(3, GL_FLOAT, stride, NULL);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    {
+      auto numTriangles = (GLsizei)vertexData.size() / 9;
+      for (GLsizei ii = 0; ii < numTriangles; ++ii)
+      {
+        glBegin(GL_TRIANGLES);
+        float rr = 0; float gg = 0; float bb = 0;
+        float xx = vertexData[9 * ii]; float yy = vertexData[9 * ii + 1]; float zz = vertexData[9 * ii + 2];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
+        xx = vertexData[9 * ii + 3]; yy = vertexData[9 * ii + 4]; zz = vertexData[9 * ii + 5];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
+        xx = vertexData[9 * ii + 6]; yy = vertexData[9 * ii + 7]; zz = vertexData[9 * ii + 8];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
+        glEnd();
+      }
+    }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     glutSwapBuffers();
     return;
   }
