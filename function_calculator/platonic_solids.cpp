@@ -447,6 +447,34 @@ namespace FunctionalCalculator
     return (R_inv * answer) + w;
   }
 
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  adds the remaining two vertices to the dodecahedron if not already present.
+   *  \throw Throws an exception if the dodecahedron doesn't have the length of its edges equal to `sideLength`
+   */
+  void completePentagonalFace(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const BiquadraticNumber& sideLength,
+    std::set<Matrix<BiquadraticNumber> >& dodec)
+  {
+    bool dodecIsNonnegative = false;
+    auto rot = getRotationToPlane(u, v, w, dodec, dodecIsNonnegative);
+    auto uu = rot * (u - w);
+    auto vv = rot * (v - w);
+    auto sideLenSq = sideLength * sideLength;
+    if ((uu - vv).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if (vv.matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    Matrix<BiquadraticNumber> planarRot5;
+    std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
+    // TODO: Complete this later.
+    auto rotInv = rot.transpose();
+  }
+
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the rotation R that maps (u - w) and (v - w) to the plane { z == 0 }.
    *  \param Outputs dodecIsNonnegative if and only if the dodecahedron so far (which is convex and always lies
@@ -608,6 +636,7 @@ namespace FunctionalCalculator
         continue;
       }
       dodec.insert(newVertex);
+      completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     {
