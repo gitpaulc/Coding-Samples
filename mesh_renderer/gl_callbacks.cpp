@@ -301,9 +301,21 @@ void render()
     glVertexPointer(3, GL_FLOAT, stride, NULL);
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    int whichArray = 0;
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
+    glClear(GL_COLOR_BUFFER_BIT);
+    {
+      auto numTriangles = (GLsizei)vertexData.size() / 9;
+      for (GLsizei ii = 0; ii < numTriangles; ++ii)
+      {
+        glBegin(GL_TRIANGLES);
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(vertexData[9 * ii], vertexData[9 * ii + 1], vertexData[9 * ii + 2]);
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(vertexData[9 * ii + 3], vertexData[9 * ii + 4], vertexData[9 * ii + 5]);
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(vertexData[9 * ii + 6], vertexData[9 * ii + 7], vertexData[9 * ii + 8]);
+        glEnd();
+      }
+    }
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
