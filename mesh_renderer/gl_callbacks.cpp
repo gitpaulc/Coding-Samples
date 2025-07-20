@@ -26,6 +26,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gMvMatrix(16, 0.0f);
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
+  static bool gUseShaders = false;
   static GLint gPosLocation, gMvLocation, gProjLocation;
 }
 
@@ -270,7 +271,7 @@ void render()
   toVertex3dData(gWireframe, vertexData, !gWireframeOn);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
-  else if (!gWireframeOn)
+  else if (!gWireframeOn && gUseShaders)
   {
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
@@ -285,6 +286,28 @@ void render()
 
     glDisableVertexAttribArray(gPosLocation);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glutSwapBuffers();
+    return;
+  }
+  else if (!gWireframeOn)
+  {
+    glUseProgram(0);
+    glPointSize(3.0f);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+
+    int stride = 0;
+    glVertexPointer(3, GL_FLOAT, stride, NULL);
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    int whichArray = 0;
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     glutSwapBuffers();
     return;
   }
