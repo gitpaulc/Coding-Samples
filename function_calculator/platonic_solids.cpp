@@ -448,6 +448,10 @@ namespace FunctionalCalculator
     const Matrix<BiquadraticNumber>& rotToZ_EqualsZero, bool dodecIsNonnegative)
   {
     auto R_inv = rotToZ_EqualsZero.transpose();
+    auto uu = rotToZ_EqualsZero * (u - w);
+    auto vv = rotToZ_EqualsZero * (v - w);
+    auto answer = completeEquilateralInDodeca_(uu, vv, w - w, dodecIsNonnegative);
+    return R_inv * answer;
   }
 
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
