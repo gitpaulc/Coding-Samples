@@ -399,7 +399,7 @@ namespace FunctionalCalculator
     if (v.numCols() != 1) { throw std::invalid_argument("Number of columns in v must == 1."); return XX; }
     if (u.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("u.z must == 0."); return XX; }
     if (v.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("v.z must == 0."); return XX; }
-    //if ((u - v).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|u - v| must == |v|."); return XX; }
+    if ((u - v).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|u - v| must == |v|."); return XX; }
     BiquadraticNumber two(Rational(2));
     auto uSqNorm = u.matrixSqNorm();
     auto det = (u.at(0, 0) * v.at(1, 0) - u.at(1, 0) * v.at(0, 0));

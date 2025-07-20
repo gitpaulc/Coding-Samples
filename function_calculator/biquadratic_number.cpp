@@ -211,14 +211,16 @@ namespace FunctionalCalculator
           bool onlyOneIsNeg = (aIsNeg && (!bIsNeg)) || (bIsNeg && (!aIsNeg));
           QuadraticNumber diag(Rational(2));
           QuadraticNumber sgn(Rational(1));
+          auto a2_times_iFirst = aa * aa * iter.first;
+          auto b2_times_jFirst = bb * bb * jter.first;
           if (aIsNeg && bIsNeg) { sgn = -sgn; }
           else if (onlyOneIsNeg)
           {
             diag = -diag;
-            if (aIsNeg && (aa > bb)) { sgn = -sgn; }
-            else if (bIsNeg && (bb > aa)) { sgn = -sgn; }
+            if (aIsNeg && (a2_times_iFirst > b2_times_jFirst)) { sgn = -sgn; }
+            else if (bIsNeg && (b2_times_jFirst > a2_times_iFirst)) { sgn = -sgn; }
           }
-          auto radicand = iter.first * aa * aa + jter.first * bb * bb +
+          auto radicand = a2_times_iFirst + b2_times_jFirst +
             QuadraticNumber::sqrt(ratio) * diag * aa * bb;
           content.erase(iter.first);
           content.erase(jter.first);
