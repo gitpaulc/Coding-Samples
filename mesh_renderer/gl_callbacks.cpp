@@ -28,6 +28,7 @@ namespace MeshRenderer
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = false;
   static GLint gPosLocation, gMvLocation, gProjLocation;
+  static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
 
 void recalculate();
@@ -100,6 +101,34 @@ void recalculate()
   {
     mesh.getSkeleton(MeshRenderer::gWireframe);
   }
+  mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
+}
+
+void vertex2color(const float& xIn, const float& yIn, const float& zIn,
+  float& rOut, float& gOut, float& bOut)
+{
+  ComputationalGeometry::point3d rgbMax(1, 1, 1);
+  ComputationalGeometry::point3d rgbMin(0, 0, 1);
+  auto MM = (float)MeshRenderer::gBoundingMax.z;
+  if (zIn >= MM)
+  {
+    rOut = (float)rgbMax.x;
+    gOut = (float)rgbMax.y;
+    bOut = (float)rgbMax.z;
+    return;
+  }
+  auto mm = (float)MeshRenderer::gBoundingMin.z;
+  if (zIn <= mm)
+  {
+    rOut = (float)rgbMin.x;
+    gOut = (float)rgbMin.y;
+    bOut = (float)rgbMin.z;
+    return;
+  }
+  auto tt = (zIn - mm) / ((float)(MM - mm));
+  rOut = (float)(rgbMax.x * tt + rgbMin.x * (1.0f - tt));
+  gOut = (float)(rgbMax.y * tt + rgbMin.y * (1.0f - tt));
+  bOut = (float)(rgbMax.z * tt + rgbMin.z * (1.0f - tt));
 }
 
 void updateView()
@@ -307,12 +336,19 @@ void render()
       for (GLsizei ii = 0; ii < numTriangles; ++ii)
       {
         glBegin(GL_TRIANGLES);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(vertexData[9 * ii], vertexData[9 * ii + 1], vertexData[9 * ii + 2]);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(vertexData[9 * ii + 3], vertexData[9 * ii + 4], vertexData[9 * ii + 5]);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(vertexData[9 * ii + 6], vertexData[9 * ii + 7], vertexData[9 * ii + 8]);
+        float rr = 0; float gg = 0; float bb = 0;
+        float xx = vertexData[9 * ii]; float yy = vertexData[9 * ii + 1]; float zz = vertexData[9 * ii + 2];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
+        xx = vertexData[9 * ii + 3]; yy = vertexData[9 * ii + 4]; zz = vertexData[9 * ii + 5];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
+        xx = vertexData[9 * ii + 6]; yy = vertexData[9 * ii + 7]; zz = vertexData[9 * ii + 8];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
         glEnd();
       }
     }
