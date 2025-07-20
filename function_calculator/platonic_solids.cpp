@@ -615,36 +615,6 @@ namespace FunctionalCalculator
         continue;
       }
       dodec.insert(newVertex);
-      if (false)
-      {
-        std::cout << "\nDEBUG: DODECAHEDRON so far = ";
-        for (const auto& vert : dodec)
-        {
-          std::cout << "\n" << vert.transpose().print(true);
-        }
-        std::cout << "\n\n|X - u|^2 == " << (neighbors[0] - newVertex).matrixSqNorm().print();
-        std::cout << "\n|X - w|^2 == " << (neighbors[1] - newVertex).matrixSqNorm().print();
-        std::cout << "\n|u - w|^2 == " << (neighbors[0] - neighbors[1]).matrixSqNorm().print();
-        std::cout << "\n\n|X - v|^2 == " << (current - newVertex).matrixSqNorm().print();
-        std::cout << "\n|u - v|^2 == " << (neighbors[0] - current).matrixSqNorm().print();
-        std::cout << "\n|w - v|^2 == " << (neighbors[1] - current).matrixSqNorm().print();
-        Matrix<BiquadraticNumber> II;
-        {
-          BiquadraticNumber zero_;
-          BiquadraticNumber one_(Rational(1));
-          II.addRow({ one_, zero_, zero_ });
-          II.addRow({ zero_, one_, zero_ });
-          II.addRow({ zero_, zero_, one_ });
-        }
-        if (rot == II)
-        {
-          std::cout << "\nMatrix was identity.\n";
-        }
-        else
-        {
-          std::cout << "\nMatrix was not identity.\n";
-        }
-      }
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     {
