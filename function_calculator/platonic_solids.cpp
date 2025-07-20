@@ -533,8 +533,18 @@ namespace FunctionalCalculator
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
   {
     std::set<Matrix<BiquadraticNumber> > dodec;
+    BiquadraticNumber sideLength;
     {
-      auto initialPentagon = getRegularPolygon(5, edgeLength);
+      {
+        Rational angle(1, 5);
+        BiquadraticNumber half(Rational(1, 2));
+        BiquadraticNumber sinAngle;
+        bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+        if (!success) { throw std::exception("Unsupported angle."); return dodec; }
+        sideLength = sinAngle + sinAngle;
+      }
+      // sideLength = edgeLength;
+      auto initialPentagon = getRegularPolygon(5, sideLength);
       for (const auto& vertex : initialPentagon)
       {
         auto vert = vertex;
@@ -542,7 +552,8 @@ namespace FunctionalCalculator
         dodec.insert(vert);
       }
     }
-    auto edgLengthSq = edgeLength * edgeLength;
+    auto scaleFactor = edgeLength / sideLength;
+    auto sideLengthSq = sideLength * sideLength;
     std::set<Matrix<BiquadraticNumber> > counted;
     for (int counting = 0; counting < 40; ++counting)
     {
@@ -563,7 +574,7 @@ namespace FunctionalCalculator
             found = true;
             break;
           }
-          if ((vv - ww).matrixSqNorm() == edgLengthSq)
+          if ((vv - ww).matrixSqNorm() == sideLengthSq)
           {
             neighbors.push_back(ww);
           }
@@ -604,7 +615,7 @@ namespace FunctionalCalculator
       }
       for (const auto& vertex : dodec)
       {
-        dodecahedron.insert(vertex - barycenter);
+        dodecahedron.insert((vertex - barycenter) * scaleFactor);
       }
     }
     return dodecahedron;
