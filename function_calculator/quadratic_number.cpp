@@ -374,6 +374,70 @@ namespace FunctionalCalculator
     return answer;
   }
 
+  int QuadraticNumber::simpleSquareRoot(QuadraticNumber& sqrt1, QuadraticNumber& sqrt2) const
+  {
+    int numRoots = 0;
+    if (content.size() > 2) { return numRoots; } // Restrict attention to simple expressions.
+    auto iter = content.find(mp(1));
+    if (iter == content.end()) { return numRoots; }
+    if (content.size() == 1)
+    {
+      if ((iter->second) < Rational()) { return numRoots; }
+      sqrt1 = QuadraticNumber::sqrt(iter->second);
+      numRoots = 1;
+      if (iter->second != 0)
+      {
+        sqrt2 = -sqrt1;
+        numRoots = 2;
+      }
+      return numRoots;
+    }
+    auto& uu = iter->second;
+    auto vv = uu;
+    Rational dd;
+    for (const auto& jter : content)
+    {
+      if (iter->first == jter.first) { continue; }
+      vv = jter.second;
+      dd = Rational(jter.first, mp(1));
+      break;
+    }
+    Rational two(2);
+    Rational a2, a2_other;
+    {
+      Rational radical;
+      Rational radicand = uu * uu - vv * vv * dd;
+      if (radicand < Rational()) { return false; }
+      auto rad = QuadraticNumber::sqrt(radicand);
+      bool radIsRational = rad.getRational(radical);
+      if (!radIsRational) { return numRoots; }
+      a2 = (uu + radical) / two;
+      if (a2 < Rational()) { return numRoots; }
+      numRoots = 1;
+      if (radical <= uu)
+      {
+        a2_other = (uu - radical) / two;
+        numRoots = 2;
+      }
+    }
+    QuadraticNumber aa, aa_other;
+    aa = QuadraticNumber::sqrt(a2);
+    auto bb = QuadraticNumber(vv) / (aa + aa);
+    auto sqrtDD = QuadraticNumber::sqrt(dd);
+    auto sqrt1_ = aa + bb * sqrtDD;
+    //if (sqrt1_ * sqrt1_ != (*this)) { return 0; }
+    sqrt1 = sqrt1_;
+    if (numRoots >= 2)
+    {
+      aa_other = QuadraticNumber::sqrt(a2_other);
+      auto bb_other = QuadraticNumber(vv) / (aa_other + aa_other);
+      auto sqrt2_ = aa_other + bb_other * sqrtDD;
+      //if (sqrt2_ * sqrt2_ != (*this)) { return 1; }
+      sqrt2 = sqrt2_;
+    }
+    return numRoots;
+  }
+
   QuadraticNumber QuadraticNumber::operator+() const
   {
     return *this;

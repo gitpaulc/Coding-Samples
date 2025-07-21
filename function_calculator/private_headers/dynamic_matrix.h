@@ -328,7 +328,7 @@ public:
   {
     Matrix answer;
     answer.rows = rows;
-    for (auto& row : rows) { for (auto& item : row) { item = -item; } }
+    for (auto& answerRow : answer.rows) { for (auto& item : answerRow) { item = -item; } }
     return answer;
   }
 

@@ -11,6 +11,18 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  /** \return Set of vertices (x, y) making up a regular polygon with nn edges.
+   *  \remark A regular polygon is a polygon where all the edges have equal length.
+   *  \throw  Throws an invalid argument exception if the number of edges is less than or equal to 2.
+   *  \throw  Throws an exception if calculating the sine or cosine of (2 * pi / nn) is unsupported.
+   *  \param `edgeLength` the length of an edge of the polygon. This is set to 1 by default.
+   *  \param `generator` This is an optional output parameter. If it is not the null pointer, outputs a generator for the
+   *          group of nn rotations which are symmetries of the polygon. The output is only set if no exception is thrown.
+   */
+  std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+    const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)),
+    Matrix<BiquadraticNumber>* generator = nullptr);
+
   /** \return Set of vertices (x, y, z) making up a tetrahedron.
    *  A (regular) tetrahedron is a shape in three-dimensional space consisting of
    *  four points of equal distance from one another.
@@ -42,9 +54,9 @@ namespace FunctionalCalculator
   std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections = false);
 
   /** \return Set of vertices (x, y, z) making up an octahedron.
-   *  An octahedron is a shape in three-dimensional space consisting of eight tetrahedra,
-   *  each of whose edges coincides with the edge of another tetrahedron.
-   *  \param `edgeLength` the length of an edge of the cube.
+   *  An octahedron is a shape in three-dimensional space consisting of eight equilateral triangles,
+   *  each of whose edges coincides with the edge of another equilateral triangle.
+   *  \param `edgeLength` the length of an edge of the octahedron.
    */
   std::set<Matrix<BiquadraticNumber> > getOctahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
@@ -55,6 +67,14 @@ namespace FunctionalCalculator
    *  \param `includeReflectons` will also include reflections, doubling the size of the set.
    */
   std::set<Matrix<BiquadraticNumber> > getOctahedralSymmetries(bool includeReflections = false);
+
+  /** \return Set of vertices (x, y, z) making up a regular dodecahedron.
+   *  A dodecahedron is a shape in three-dimensional space consisting of twelve pentagons,
+   *  each of whose edges coincides with the edge of another pentagon.
+   *  It is regular if the edge lengths of the pentagons are all equal.
+   *  \param `edgeLength` the length of an edge of the dodecahedron.
+   */
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
   bool test_platonic();
 }

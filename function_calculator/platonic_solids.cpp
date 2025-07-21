@@ -7,6 +7,50 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
+    const BiquadraticNumber& edgeLength, Matrix<BiquadraticNumber>* generator)
+  {
+    std::vector<Matrix<BiquadraticNumber> > polygon;
+    if (nn <= 2) { throw std::invalid_argument("The number of edges in the polygon must be greater than 2."); return polygon; }
+    auto radius = edgeLength;
+    polygon.reserve(nn);
+    {
+      Rational angle(1, nn);
+      BiquadraticNumber half(Rational(1, 2));
+      BiquadraticNumber sinAngle;
+      bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success) { throw std::exception("Unsupported angle."); return polygon; }
+      radius = half * radius / sinAngle;
+    }
+    for (int ii = 0; ii < nn; ++ii)
+    {
+      if (ii == 0)
+      {
+        Matrix<BiquadraticNumber> vec0;
+        vec0.addRow({ radius, BiquadraticNumber() });
+        vec0 = vec0.transpose();
+        polygon.push_back(vec0);
+        continue;
+      }
+      Rational angle(2 * ii, nn);
+      BiquadraticNumber cosAngle, sinAngle;
+      bool success = BiquadraticNumber::tryGetCosine(angle, cosAngle);
+      success = success && BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success) { throw std::exception("Unsupported angle."); break; }
+      if ((generator != nullptr) && (ii == 1))
+      {
+        Matrix<BiquadraticNumber> R;
+        R.addRow({ cosAngle, sinAngle });
+        R.addRow({ -sinAngle, cosAngle });
+        *generator = R;
+      }
+      Matrix<BiquadraticNumber> vec;
+      vec.addRow({ cosAngle * radius, -sinAngle * radius });
+      polygon.push_back(vec.transpose());
+    }
+    return polygon;
+  }
+
   std::set<Matrix<BiquadraticNumber> > getTetrahedron(const BiquadraticNumber& edgeLength)
   {
     Matrix<BiquadraticNumber> vec0;
@@ -337,5 +381,362 @@ namespace FunctionalCalculator
 
     std::cout << "\n";
     return true;
+  }
+
+  /** Given vertices u and v having z-coordinate zero along with the origin w, and 
+   *  proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
+   *  Vertices are matrices with 3 rows and 1 column.
+   *  Interchanging u and w does not change the result.
+   */
+  Matrix<BiquadraticNumber> completeEquilateralInDodeca_(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, bool usePlusSign)
+  {
+    Matrix<BiquadraticNumber> XX;
+    if (u.numRows() != 3) { throw std::invalid_argument("Number of rows in u must == 3."); return XX; }
+    if (v.numRows() != 3) { throw std::invalid_argument("Number of rows in v must == 3."); return XX; }
+    if (u.numCols() != 1) { throw std::invalid_argument("Number of columns in u must == 1."); return XX; }
+    if (v.numCols() != 1) { throw std::invalid_argument("Number of columns in v must == 1."); return XX; }
+    if (u.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("u.z must == 0."); return XX; }
+    if (v.at(2, 0) != BiquadraticNumber()) { throw std::invalid_argument("v.z must == 0."); return XX; }
+    if ((u - v).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|u - v| must == |v|."); return XX; }
+    BiquadraticNumber two(Rational(2));
+    auto uSqNorm = u.matrixSqNorm();
+    auto det = (u.at(0, 0) * v.at(1, 0) - u.at(1, 0) * v.at(0, 0));
+    auto factor = uSqNorm / (two * det);
+
+    auto xx = (v.at(1, 0) - u.at(1, 0)) * factor;
+    auto yy = (u.at(0, 0) - v.at(0, 0)) * factor;
+
+    auto radicand = uSqNorm - xx * xx - yy * yy;
+    QuadraticNumber quad;
+    if (!radicand.getAsQuadratic(quad))
+    {
+      throw std::exception("The z component is not the square root of a quadratic number.");
+      Matrix<BiquadraticNumber> answer;
+      return answer;
+    }
+    auto zz = BiquadraticNumber::sqrt(quad);
+    if (!usePlusSign) { zz = -zz; }
+    Matrix<BiquadraticNumber> answer;
+    answer.addRow({ xx, yy, zz });
+    answer = answer.transpose();
+    auto answerSq = answer.matrixSqNorm();
+    if (answerSq != uSqNorm) { throw std::invalid_argument("|u| must == |answer|."); }
+    if ((u - answer).matrixSqNorm() != answerSq) { throw std::invalid_argument("|answer| must == |u - answer|."); }
+    if ((v - answer).matrixSqNorm() != v.matrixSqNorm()) { throw std::invalid_argument("|v| must == |v - answer|."); }
+    return answer;
+  }
+
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
+   *  Vertices are matrices with 3 rows and 1 column.
+   *  Interchanging u and w does not change the result.
+   *  \param `rotToZ_EqualsZero` is the rotation that maps the vertices to the plane { z == 0 }.
+   *  \param `dodecIsNonnegative` is true if, and only if, the dodecahedron so far (which is convex and always lies
+   *  on one side of the plane) lies on the nonnegative side.
+   */
+  Matrix<BiquadraticNumber> completeEquilateralInDodeca(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const Matrix<BiquadraticNumber>& rotToZ_EqualsZero, bool dodecIsNonnegative)
+  {
+    auto R_inv = rotToZ_EqualsZero.transpose();
+    auto uu = rotToZ_EqualsZero * (u - w);
+    auto vv = rotToZ_EqualsZero * (v - w);
+    auto answer = completeEquilateralInDodeca_(uu, vv, dodecIsNonnegative);
+    return (R_inv * answer) + w;
+  }
+
+  /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  returns the rotation R that maps (u - w) and (v - w) to the plane { z == 0 }.
+   *  \param Outputs dodecIsNonnegative if and only if the dodecahedron so far (which is convex and always lies
+   *  on one side of the plane) lies on the nonnegative side.
+   */
+  Matrix<BiquadraticNumber> getRotationToPlane(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const std::set<Matrix<BiquadraticNumber> >& dodecSoFar, bool& dodecIsNonnegative)
+  {
+    BiquadraticNumber zero_(Rational(0));
+    BiquadraticNumber one_(Rational(1));
+    Matrix<BiquadraticNumber> II;
+    II.addRow({ one_, zero_, zero_ });
+    II.addRow({ zero_, one_, zero_ });
+    II.addRow({ zero_, zero_, one_ });
+    if ((u.at(2, 0) == w.at(2, 0)) && (v.at(2, 0) == w.at(2, 0)))
+    {
+      dodecIsNonnegative = true;
+      for (const auto& vert : dodecSoFar)
+      {
+        if (vert.at(2, 0) > w.at(2, 0)) { break; }
+        if (vert.at(2, 0) < w.at(2, 0)) { dodecIsNonnegative = false; break; }
+      }
+      return II;
+    }
+    Matrix<BiquadraticNumber> RR = II;
+    BiquadraticNumber two(Rational(2));
+    auto uu = u - w;
+    auto vv = v - w;
+    Matrix<BiquadraticNumber> uuCrossVv;
+    uuCrossVv.addRow({ uu.at(1, 0) * vv.at(2, 0) - vv.at(1, 0) * uu.at(2, 0),
+                       uu.at(2, 0) * vv.at(0, 0) - vv.at(2, 0) * uu.at(0, 0),
+                       uu.at(0, 0) * vv.at(1, 0) - vv.at(0, 0) * uu.at(1, 0) });
+    uuCrossVv = uuCrossVv.transpose();
+    Matrix<BiquadraticNumber> kVec; // == (uu x vv) x (0, 0, 1)
+    kVec.addRow({ uuCrossVv.at(1, 0), -uuCrossVv.at(0, 0), BiquadraticNumber() });
+    kVec = kVec.transpose();
+    BiquadraticNumber kNorm, uuNormTimesVvNorm, uuCrossVvNorm;
+    {
+      kNorm = kVec.at(0, 0) * kVec.at(0, 0) + kVec.at(1, 0) * kVec.at(1, 0);
+      uuCrossVvNorm = kNorm + uuCrossVv.at(2, 0) * uuCrossVv.at(2, 0);
+      QuadraticNumber quad;
+      bool success = kNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|((u - w) x (v - w)) x (0, 0, 1)|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      kNorm = BiquadraticNumber::sqrt(quad);
+      success = uuCrossVvNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      uuCrossVvNorm = BiquadraticNumber::sqrt(quad);
+      uuNormTimesVvNorm = uu.matrixSqNorm() * vv.matrixSqNorm();
+      success = uuNormTimesVvNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|u - w|^2 * |v - w|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      uuNormTimesVvNorm = BiquadraticNumber::sqrt(quad);
+    }
+    kVec = kVec * (one_ / kNorm);
+    if (kVec.matrixSqNorm() != one_)
+    {
+      throw std::logic_error("Bad unit vector computation.");
+    }
+    if (kVec.matrixDot(uuCrossVv) != zero_)
+    {
+      throw std::logic_error("Bad orthogonality computation.");
+    }
+    if (kVec.at(2, 0) != zero_)
+    {
+      throw std::logic_error("Bad orthogonality computation.");
+    }
+    Matrix<BiquadraticNumber> KK; // Matrix that maps X to kVec cross X.
+    KK.addRow({ zero_, -kVec.at(2, 0), kVec.at(1, 0) });
+    KK.addRow({ kVec.at(2, 0), zero_, -kVec.at(0, 0) });
+    KK.addRow({ -kVec.at(1, 0), kVec.at(0, 0), zero_ });
+
+    auto absSinTheta = kNorm / uuCrossVvNorm;
+    auto cosTheta = uuCrossVv.at(2, 0) / uuCrossVvNorm;
+    if ((absSinTheta * absSinTheta + cosTheta * cosTheta) != one_)
+    {
+      throw std::logic_error("Bad trigonometric computation.");
+    }
+    RR = II;
+    RR = RR + KK * absSinTheta;
+    RR = RR + (KK * KK) * (one_ - cosTheta);
+    auto rotCrossProduct = RR * uuCrossVv;
+    if (RR * RR.transpose() != II)
+    {
+      RR = II;
+      RR = RR - KK * absSinTheta;
+      RR = RR + (KK * KK) * (one_ - cosTheta);
+      rotCrossProduct = RR * uuCrossVv;
+    }
+    else if ((rotCrossProduct.at(0, 0) != zero_) || (rotCrossProduct.at(1, 0) != zero_))
+    {
+      RR = II;
+      RR = RR - KK * absSinTheta;
+      RR = RR + (KK * KK) * (one_ - cosTheta);
+      rotCrossProduct = RR * uuCrossVv;
+    }
+    if (RR * RR.transpose() != II)
+    {
+      throw std::logic_error("Did not define a true rotation matrix.");
+    }
+    dodecIsNonnegative = true;
+    auto R_ww = RR * w;
+    for (const auto& vert : dodecSoFar)
+    {
+      auto R_vert = RR * vert;
+      if (R_vert.at(2, 0) > R_ww.at(2, 0)) { break; }
+      if (R_vert.at(2, 0) < R_ww.at(2, 0)) { dodecIsNonnegative = false; break; }
+    }
+    if ((rotCrossProduct.at(0, 0) != zero_) || (rotCrossProduct.at(1, 0) != zero_))
+    {
+      throw std::logic_error("(u - w) and (v - w) did not get mapped to { z == 0 } by the rotation.");
+    }
+    return RR;
+  }
+
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  adds the remaining two vertices to the dodecahedron if not already present.
+   *  \throw Throws an exception if the dodecahedron doesn't have the length of its edges equal to `sideLength`
+   */
+  void completePentagonalFace(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const BiquadraticNumber& sideLength,
+    std::set<Matrix<BiquadraticNumber> >& dodec)
+  {
+    bool dodecIsNonnegative = false;
+    auto rot = getRotationToPlane(u, v, w, dodec, dodecIsNonnegative);
+    auto uu = rot * (u - w);
+    auto vv = rot * (v - w);
+    auto sideLenSq = sideLength * sideLength;
+    if ((uu - vv).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if (vv.matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    Matrix<BiquadraticNumber> planarRot5;
+    std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
+    if ((pentagon[1] - pentagon[0]).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if ((pentagon[2] - pentagon[1]).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if ((pentagon[2] - pentagon[0]).matrixSqNorm() != uu.matrixSqNorm())
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+
+    // Unique matrix P such that P^{-1} * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
+    Matrix<BiquadraticNumber> isometryInv;
+    {
+      const auto& p = pentagon;
+      Matrix<BiquadraticNumber> uvCols;
+      uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
+      uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
+      Matrix<BiquadraticNumber> pentaColsInv;
+      auto aa = p[0].at(0, 0) - p[2].at(0, 0);
+      auto bb = p[1].at(0, 0) - p[2].at(0, 0);
+      auto cc = p[0].at(1, 0) - p[2].at(1, 0);
+      auto dd = p[1].at(1, 0) - p[2].at(1, 0);
+      auto determ = aa * dd - bb * cc;
+      BiquadraticNumber zero_(Rational(0));
+      BiquadraticNumber one_(Rational(1));
+      auto factor = one_ / determ;
+      pentaColsInv.addRow({ dd * factor, -bb * factor });
+      pentaColsInv.addRow({ -cc * factor, aa * factor });
+      isometryInv = uvCols * pentaColsInv;
+      Matrix<BiquadraticNumber> II;
+      II.addRow({ one_, zero_ });
+      II.addRow({ zero_, one_ });
+      auto iden = isometryInv * (isometryInv.transpose());
+      if (iden != II)
+      {
+        throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
+      }
+    }
+    auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
+    auto vv4 = isometryInv * (pentagon[4] - pentagon[2]);
+
+    auto rotInv = rot.transpose();
+    auto v3 = rotInv * vv3 + w;
+    auto v4 = rotInv * vv4 + w;
+    dodec.insert(v3);
+    dodec.insert(v4);
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  {
+    std::set<Matrix<BiquadraticNumber> > dodec;
+    BiquadraticNumber sideLength;
+    {
+      {
+        Rational angle(1, 5);
+        BiquadraticNumber half(Rational(1, 2));
+        BiquadraticNumber sinAngle;
+        bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+        if (!success) { throw std::exception("Unsupported angle."); return dodec; }
+        sideLength = sinAngle + sinAngle;
+      }
+      // sideLength = edgeLength;
+      auto initialPentagon = getRegularPolygon(5, sideLength);
+      for (const auto& vertex : initialPentagon)
+      {
+        auto vert = vertex;
+        vert.addRow({ BiquadraticNumber() });
+        dodec.insert(vert);
+      }
+    }
+    auto scaleFactor = edgeLength / sideLength;
+    auto sideLengthSq = sideLength * sideLength;
+    std::set<Matrix<BiquadraticNumber> > counted;
+    for (int counting = 0; counting < 40; ++counting)
+    {
+      if (dodec.size() >= 20) { break; }
+      bool found = false;
+      Matrix<BiquadraticNumber> current = *(dodec.begin());
+      std::vector<Matrix<BiquadraticNumber> > neighbors;
+      for (const auto& vv : dodec)
+      {
+        if (counted.find(vv) != counted.end()) { continue; }
+        neighbors.clear();
+        for (const auto& ww : dodec)
+        {
+          if (vv == ww) { continue; }
+          if (neighbors.size() >= 2)
+          {
+            counted.insert(vv);
+            found = true;
+            break;
+          }
+          if ((vv - ww).matrixSqNorm() == sideLengthSq)
+          {
+            neighbors.push_back(ww);
+          }
+        }
+        if (neighbors.size() >= 2)
+        {
+          counted.insert(vv);
+          found = true;
+        }
+        if (!found) { continue; }
+        current = vv;
+        break;
+      }
+      if (!found) { break; }
+      auto oldSize = dodec.size();
+      bool dodecIsNonnegative = false;
+      auto rot = getRotationToPlane(neighbors[0], current, neighbors[1], dodec, dodecIsNonnegative);
+      auto newVertex = completeEquilateralInDodeca(neighbors[0], current, neighbors[1], rot, dodecIsNonnegative);
+      if (dodec.find(newVertex) != dodec.end())
+      {
+        found = false;
+        auto oldCountedSize = counted.size();
+        counted.insert(newVertex);
+        if (oldCountedSize == counted.size()) { break; }
+        continue;
+      }
+      dodec.insert(newVertex);
+      completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
+    }
+    std::set<Matrix<BiquadraticNumber> > dodecahedron;
+    {
+      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
+      const auto numVertices = (int)dodec.size();
+      if (numVertices == 0) { return dodecahedron; }
+      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
+      for (const auto& vertex : dodec)
+      {
+        barycenter = barycenter + (vertex * coeff);
+      }
+      for (const auto& vertex : dodec)
+      {
+        dodecahedron.insert((vertex - barycenter) * scaleFactor);
+      }
+    }
+    return dodecahedron;
   }
 }

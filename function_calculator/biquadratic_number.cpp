@@ -178,6 +178,21 @@ namespace FunctionalCalculator
       for (auto& iter : content)
       {
         if (iter.first.getRational(ratio)) { continue; }
+        QuadraticNumber sqrt1, sqrt2;
+        if (iter.first.simpleSquareRoot(sqrt1, sqrt2) == 0) { continue; }
+        searchConjugate = false;
+        auto coeff = iter.second * sqrt1;
+        content.erase(iter.first);
+        QuadraticNumber one_(Rational(1));
+        auto jter = content.find(one_);
+        if (jter == content.end()) { content[one_] = coeff; }
+        else { jter->second = jter->second + coeff; }
+        break;
+      }
+      if (!searchConjugate) { continue; }
+      for (auto& iter : content)
+      {
+        if (iter.first.getRational(ratio)) { continue; }
         for (auto& jter : content)
         {
           if (jter.first.getRational(ratio)) { continue; }
@@ -196,14 +211,16 @@ namespace FunctionalCalculator
           bool onlyOneIsNeg = (aIsNeg && (!bIsNeg)) || (bIsNeg && (!aIsNeg));
           QuadraticNumber diag(Rational(2));
           QuadraticNumber sgn(Rational(1));
+          auto a2_times_iFirst = aa * aa * iter.first;
+          auto b2_times_jFirst = bb * bb * jter.first;
           if (aIsNeg && bIsNeg) { sgn = -sgn; }
           else if (onlyOneIsNeg)
           {
             diag = -diag;
-            if (aIsNeg && (aa > bb)) { sgn = -sgn; }
-            else if (bIsNeg && (bb > aa)) { sgn = -sgn; }
+            if (aIsNeg && (a2_times_iFirst > b2_times_jFirst)) { sgn = -sgn; }
+            else if (bIsNeg && (b2_times_jFirst > a2_times_iFirst)) { sgn = -sgn; }
           }
-          auto radicand = iter.first * aa * aa + jter.first * bb * bb +
+          auto radicand = a2_times_iFirst + b2_times_jFirst +
             QuadraticNumber::sqrt(ratio) * diag * aa * bb;
           content.erase(iter.first);
           content.erase(jter.first);
@@ -444,6 +461,8 @@ namespace FunctionalCalculator
       jter->second = jter->second + iter.second;
     }
 
+    answer.clean();
+
     return answer;
   }
 
@@ -454,6 +473,56 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Division by zero.");
       return BiquadraticNumber();
+    }
+    if (rhs.content.size() == 1)
+    {
+      auto iter = rhs.content.begin();
+      auto coeff = iter->second;
+      if (coeff == QuadraticNumber()) { return BiquadraticNumber(); }
+      QuadraticNumber one_(Rational(1, 1));
+      auto qq = iter->first;
+      qq = one_ / qq;
+      coeff = one_ / coeff;
+      auto quotient = BiquadraticNumber::sqrt(qq);
+      quotient = quotient * BiquadraticNumber(coeff);
+      return (*this) * quotient;
+    }
+    if (rhs.content.size() == 2)
+    {
+      QuadraticNumber aa, bb, cc, dd;
+      {
+        int ii = -1;
+        for (const auto& iter : rhs.content)
+        {
+          ++ii;
+          if (ii == 0)
+          {
+            aa = iter.first;
+            cc = iter.second;
+            continue;
+          }
+          bb = iter.first;
+          dd = iter.second;
+          break;
+        }
+      }
+      auto den = aa * cc * cc - bb * dd * dd;
+      auto quotient = rhs;
+      {
+        int ii = -1;
+        for (auto& iter : quotient.content)
+        {
+          ++ii;
+          if (ii == 0)
+          {
+            iter.second = cc / den;
+            continue;
+          }
+          iter.second = -dd / den;
+          break;
+        }
+      }
+      return (*this) * quotient;
     }
     std::map<int, QuadraticNumber> index2Root;
     std::map<QuadraticNumber, int> root2Index;

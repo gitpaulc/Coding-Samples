@@ -314,6 +314,29 @@ bool test_biquadratic()
   return true;
 }
 
+bool test_polygon()
+{
+  auto pentagon = getRegularPolygon(5, BiquadraticNumber::sqrt(QuadraticNumber::sqrt(1)));
+  std::cout << "\nPentagon:";
+  std::vector<Matrix<BiquadraticNumber> > verts;
+  for (const auto& vertex : pentagon)
+  {
+    auto vert = vertex;
+    vert.addRow({ BiquadraticNumber() });
+    std::cout << "\n" << vert.transpose().print(true);
+    verts.push_back(vert);
+  }
+  int ii = -1;
+  for (const auto& vertex : verts)
+  {
+    ++ii;
+    auto vert = (ii == 0) ? verts[verts.size() - 1] : verts[ii - 1];
+    std::cout << "\n\nSq. distance " << ii << " = " << (vert - vertex).matrixSqNorm().print();
+  }
+  std::cout << "\n";
+  return true;
+}
+
 bool test_evaluation()
 {
   auto unit = ComplexQuadratic::sqrt(Rational(1, 1));
@@ -1192,11 +1215,10 @@ bool test_function()
     std::cout << "\nThe function " << notHarmonic.print() << " is " << (notHarmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   {
-    auto numerator = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
-    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1) * FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
-    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1) * FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
-    auto denominator = coshTerm - sinTerm;
-    auto harmonic = Function(numerator, denominator);
+    auto sinTerm = FnPolynomial::sinATimesPiX(PiPolynomial(1), 1);
+    auto coshTerm = FnPolynomial::coshATimesPiY(PiPolynomial(1), 1);
+    auto cosTerm = FnPolynomial::cosATimesPiX(PiPolynomial(1), 1);
+    auto harmonic = Function(cosTerm, coshTerm + sinTerm);
     std::cout << "\nThe function " << harmonic.print() << " is " << (harmonic.isHarmonic() ? "" : "not ") << "harmonic.";
   }
   return true;
@@ -1232,6 +1254,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest polygons:\n";
+  test_polygon();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
