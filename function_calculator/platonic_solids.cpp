@@ -597,6 +597,18 @@ namespace FunctionalCalculator
     }
     Matrix<BiquadraticNumber> planarRot5;
     std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
+    if ((pentagon[1] - pentagon[0]).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if ((pentagon[2] - pentagon[1]).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if ((pentagon[2] - pentagon[0]).matrixSqNorm() != uu.matrixSqNorm())
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
 
     // Unique matrix P such that P^{-1} * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
     Matrix<BiquadraticNumber> isometryInv;
@@ -620,7 +632,8 @@ namespace FunctionalCalculator
       Matrix<BiquadraticNumber> II;
       II.addRow({ one_, zero_ });
       II.addRow({ zero_, one_ });
-      if (isometryInv * (isometryInv.transpose()) != II)
+      auto iden = isometryInv * (isometryInv.transpose());
+      if (iden != II)
       {
         throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
       }
