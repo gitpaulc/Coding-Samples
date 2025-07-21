@@ -688,9 +688,17 @@ namespace FunctionalCalculator
     auto scaleFactor = edgeLength / sideLength;
     auto sideLengthSq = sideLength * sideLength;
     std::set<Matrix<BiquadraticNumber> > counted;
-    for (int counting = 0; counting < 40; ++counting)
+    auto oldCountedSize = counted.size();
+    auto oldDodecSize = dodec.size();
+    for (bool started = false; true; started = true)
     {
-      if (dodec.size() >= 20) { break; }
+      if (started)
+      {
+        if ((oldCountedSize == counted.size()) && 
+            (oldDodecSize == dodec.size())) { break; }
+        oldCountedSize = counted.size();
+        oldDodecSize = dodec.size();
+      }
       bool found = false;
       Matrix<BiquadraticNumber> current = *(dodec.begin());
       std::vector<Matrix<BiquadraticNumber> > neighbors;
