@@ -609,37 +609,52 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Improper side lengths for dodecahedron.");
     }
+    if ((pentagon[0] - pentagon[2]).matrixDot(pentagon[1] - pentagon[2]) != uu.matrixDot(vv))
+    {
+      throw std::invalid_argument("Improper angles for dodecahedron.");
+    }
 
     // Unique matrix P such that P^{-1} * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
-    Matrix<BiquadraticNumber> isometryInv;
+    Matrix<BiquadraticNumber> isometry;
     {
-      const auto& p = pentagon;
-      Matrix<BiquadraticNumber> uvCols;
-      uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
-      uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
-      Matrix<BiquadraticNumber> pentaColsInv;
-      auto aa = p[0].at(0, 0) - p[2].at(0, 0);
-      auto bb = p[1].at(0, 0) - p[2].at(0, 0);
-      auto cc = p[0].at(1, 0) - p[2].at(1, 0);
-      auto dd = p[1].at(1, 0) - p[2].at(1, 0);
-      auto determ = aa * dd - bb * cc;
       BiquadraticNumber zero_(Rational(0));
       BiquadraticNumber one_(Rational(1));
-      auto factor = one_ / determ;
-      pentaColsInv.addRow({ dd * factor, -bb * factor });
-      pentaColsInv.addRow({ -cc * factor, aa * factor });
-      isometryInv = uvCols * pentaColsInv;
+      try
+      {
+        BiquadraticNumber::setExtraSimplification(true);
+        const auto& p = pentagon;
+        Matrix<BiquadraticNumber> uvCols;
+        uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
+        uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
+        Matrix<BiquadraticNumber> pentaColsInv;
+        auto aa = p[0].at(0, 0) - p[2].at(0, 0);
+        auto bb = p[1].at(0, 0) - p[2].at(0, 0);
+        auto cc = p[0].at(1, 0) - p[2].at(1, 0);
+        auto dd = p[1].at(1, 0) - p[2].at(1, 0);
+        auto determ = aa * dd - bb * cc;
+        auto factor = one_ / determ;
+        pentaColsInv.addRow({ dd * factor, -bb * factor });
+        pentaColsInv.addRow({ -cc * factor, aa * factor });
+        isometry = uvCols * pentaColsInv;
+        BiquadraticNumber::setExtraSimplification(false);
+      }
+      catch (...)
+      {
+        BiquadraticNumber::setExtraSimplification(false);
+      }
       Matrix<BiquadraticNumber> II;
       II.addRow({ one_, zero_ });
       II.addRow({ zero_, one_ });
-      auto iden = isometryInv * (isometryInv.transpose());
-      if (iden != II)
+      auto identity = isometry * (isometry.transpose());
+      if (identity != II)
       {
         throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
       }
     }
-    auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
-    auto vv4 = isometryInv * (pentagon[4] - pentagon[2]);
+    auto vv3 = isometry * (pentagon[3] - pentagon[2]);
+    auto vv4 = isometry * (pentagon[4] - pentagon[2]);
+    vv3.addRow({ BiquadraticNumber() });
+    vv4.addRow({ BiquadraticNumber() });
 
     auto rotInv = rot.transpose();
     auto v3 = rotInv * vv3 + w;
