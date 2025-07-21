@@ -447,66 +447,6 @@ namespace FunctionalCalculator
     return (R_inv * answer) + w;
   }
 
-  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
-   *  adds the remaining two vertices to the dodecahedron if not already present.
-   *  \throw Throws an exception if the dodecahedron doesn't have the length of its edges equal to `sideLength`
-   */
-  void completePentagonalFace(const Matrix<BiquadraticNumber>& u,
-    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
-    const BiquadraticNumber& sideLength,
-    std::set<Matrix<BiquadraticNumber> >& dodec)
-  {
-    bool dodecIsNonnegative = false;
-    auto rot = getRotationToPlane(u, v, w, dodec, dodecIsNonnegative);
-    auto uu = rot * (u - w);
-    auto vv = rot * (v - w);
-    auto sideLenSq = sideLength * sideLength;
-    if ((uu - vv).matrixSqNorm() != sideLenSq)
-    {
-      throw std::invalid_argument("Improper side lengths for dodecahedron.");
-    }
-    if (vv.matrixSqNorm() != sideLenSq)
-    {
-      throw std::invalid_argument("Improper side lengths for dodecahedron.");
-    }
-    Matrix<BiquadraticNumber> planarRot5;
-    std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
-
-    // Unique matrix P such that P * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
-    Matrix<BiquadraticNumber> isometryTo5gon;
-    Matrix<BiquadraticNumber> isometryInv;
-    {
-      const auto& p = pentagon;
-      Matrix<BiquadraticNumber> pentaColsMat;
-      pentaColsMat.addRow({ p[0].at(0, 0) - p[2].at(0, 0), p[1].at(0, 0) - p[2].at(0, 0) });
-      pentaColsMat.addRow({ p[0].at(1, 0) - p[2].at(1, 0), p[1].at(1, 0) - p[2].at(1, 0) });
-      Matrix<BiquadraticNumber> uvColsInv;
-      auto determ = uu.at(0, 0) * vv.at(1, 0) - uu.at(1, 0) * vv.at(0, 0);
-      auto factor = BiquadraticNumber(Rational(1)) / determ;
-      uvColsInv.addRow({ vv.at(1, 0) * factor, -vv.at(0, 0) * factor });
-      uvColsInv.addRow({ -uu.at(1, 0) * factor, uu.at(0, 0) * factor });
-      isometryTo5gon = pentaColsMat * uvColsInv;
-      isometryInv = isometryTo5gon.transpose();
-      BiquadraticNumber zero_(Rational(0));
-      BiquadraticNumber one_(Rational(1));
-      Matrix<BiquadraticNumber> II;
-      II.addRow({ one_, zero_ });
-      II.addRow({ zero_, one_ });
-      if (isometryTo5gon * isometryInv != II)
-      {
-        throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
-      }
-    }
-    auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
-    auto vv4 = isometryInv * (pentagon[4] - pentagon[2]);
-
-    auto rotInv = rot.transpose();
-    auto v3 = rotInv * vv3 + w;
-    auto v4 = rotInv * vv4 + w;
-    dodec.insert(v3);
-    dodec.insert(v4);
-  }
-
   /** \brief Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the rotation R that maps (u - w) and (v - w) to the plane { z == 0 }.
    *  \param Outputs dodecIsNonnegative if and only if the dodecahedron so far (which is convex and always lies
@@ -594,6 +534,66 @@ namespace FunctionalCalculator
       if (R_vert.at(2, 0) < R_ww.at(2, 0)) { dodecIsNonnegative = false; break; }
     }
     return RR;
+  }
+
+  /** Given vertices u, v, w proceeding clockwise along a pentagonal face of a regular dodecahedron,
+   *  adds the remaining two vertices to the dodecahedron if not already present.
+   *  \throw Throws an exception if the dodecahedron doesn't have the length of its edges equal to `sideLength`
+   */
+  void completePentagonalFace(const Matrix<BiquadraticNumber>& u,
+    const Matrix<BiquadraticNumber>& v, const Matrix<BiquadraticNumber>& w,
+    const BiquadraticNumber& sideLength,
+    std::set<Matrix<BiquadraticNumber> >& dodec)
+  {
+    bool dodecIsNonnegative = false;
+    auto rot = getRotationToPlane(u, v, w, dodec, dodecIsNonnegative);
+    auto uu = rot * (u - w);
+    auto vv = rot * (v - w);
+    auto sideLenSq = sideLength * sideLength;
+    if ((uu - vv).matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    if (vv.matrixSqNorm() != sideLenSq)
+    {
+      throw std::invalid_argument("Improper side lengths for dodecahedron.");
+    }
+    Matrix<BiquadraticNumber> planarRot5;
+    std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
+
+    // Unique matrix P such that P * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
+    Matrix<BiquadraticNumber> isometryTo5gon;
+    Matrix<BiquadraticNumber> isometryInv;
+    {
+      const auto& p = pentagon;
+      Matrix<BiquadraticNumber> pentaColsMat;
+      pentaColsMat.addRow({ p[0].at(0, 0) - p[2].at(0, 0), p[1].at(0, 0) - p[2].at(0, 0) });
+      pentaColsMat.addRow({ p[0].at(1, 0) - p[2].at(1, 0), p[1].at(1, 0) - p[2].at(1, 0) });
+      Matrix<BiquadraticNumber> uvColsInv;
+      auto determ = uu.at(0, 0) * vv.at(1, 0) - uu.at(1, 0) * vv.at(0, 0);
+      auto factor = BiquadraticNumber(Rational(1)) / determ;
+      uvColsInv.addRow({ vv.at(1, 0) * factor, -vv.at(0, 0) * factor });
+      uvColsInv.addRow({ -uu.at(1, 0) * factor, uu.at(0, 0) * factor });
+      isometryTo5gon = pentaColsMat * uvColsInv;
+      isometryInv = isometryTo5gon.transpose();
+      BiquadraticNumber zero_(Rational(0));
+      BiquadraticNumber one_(Rational(1));
+      Matrix<BiquadraticNumber> II;
+      II.addRow({ one_, zero_ });
+      II.addRow({ zero_, one_ });
+      if (isometryTo5gon * isometryInv != II)
+      {
+        throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
+      }
+    }
+    auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
+    auto vv4 = isometryInv * (pentagon[4] - pentagon[2]);
+
+    auto rotInv = rot.transpose();
+    auto v3 = rotInv * vv3 + w;
+    auto v4 = rotInv * vv4 + w;
+    dodec.insert(v3);
+    dodec.insert(v4);
   }
 
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
