@@ -476,22 +476,33 @@ namespace FunctionalCalculator
     BiquadraticNumber two(Rational(2));
     auto uu = u - w;
     auto vv = v - w;
-    BiquadraticNumber crossProdNorm, uuNormTimesVvNorm, uvCrossNorm;
+    Matrix<BiquadraticNumber> uuCrossVv;
+    uuCrossVv.addRow({ uu.at(1, 0) * vv.at(2, 0) - vv.at(1, 0) * uu.at(2, 0),
+                       uu.at(2, 0) * vv.at(0, 0) - vv.at(2, 0) * uu.at(0, 0),
+                       uu.at(0, 0) * vv.at(1, 0) - vv.at(0, 0) * uu.at(1, 0) });
+    uuCrossVv = uuCrossVv.transpose();
+    Matrix<BiquadraticNumber> kVec; // == (uu x vv) x (0, 0, 1)
+    kVec.addRow({ uuCrossVv.at(1, 0), -uuCrossVv.at(0, 0), BiquadraticNumber() });
+    kVec = kVec.transpose();
+    BiquadraticNumber kNorm, uuNormTimesVvNorm, uuCrossVvNorm;
     {
-      crossProdNorm = (uu.at(0, 0) * uu.at(0, 0)) * (vv.at(2, 0) * vv.at(2, 0));
-      crossProdNorm = crossProdNorm + (uu.at(2, 0) * uu.at(2, 0)) * (vv.at(0, 0) * vv.at(0, 0));
-      crossProdNorm = crossProdNorm + (vv.at(2, 0) * vv.at(2, 0)) * (uu.at(1, 0) * uu.at(1, 0));
-      crossProdNorm = crossProdNorm + (uu.at(2, 0) * uu.at(2, 0)) * (vv.at(1, 0) * vv.at(1, 0));
-      crossProdNorm = crossProdNorm - two * uu.at(0, 0) * uu.at(2, 0) * vv.at(0, 0) * vv.at(2, 0);
-      crossProdNorm = crossProdNorm - two * uu.at(1, 0) * uu.at(2, 0) * vv.at(1, 0) * vv.at(2, 0);
+      kNorm = kVec.at(0, 0) * kVec.at(0, 0) + kVec.at(1, 0) * kVec.at(1, 0);
+      uuCrossVvNorm = kNorm + uuCrossVv.at(2, 0) * uuCrossVv.at(2, 0);
       QuadraticNumber quad;
-      bool success = crossProdNorm.getAsQuadratic(quad);
+      bool success = kNorm.getAsQuadratic(quad);
       if (!success)
       {
-        throw std::exception("Cross product squared norm cannot be written in terms of quadratic numbers.");
+        throw std::exception("|((u - w) x (v - w)) x (0, 0, 1)|^2 cannot be written in terms of quadratic numbers.");
         return RR;
       }
-      crossProdNorm = BiquadraticNumber::sqrt(quad);
+      kNorm = BiquadraticNumber::sqrt(quad);
+      success = uuCrossVvNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      uuCrossVvNorm = BiquadraticNumber::sqrt(quad);
       uuNormTimesVvNorm = uu.matrixSqNorm() * vv.matrixSqNorm();
       success = uuNormTimesVvNorm.getAsQuadratic(quad);
       if (!success)
@@ -500,46 +511,18 @@ namespace FunctionalCalculator
         return RR;
       }
       uuNormTimesVvNorm = BiquadraticNumber::sqrt(quad);
-      auto uvCross_0 = uu.at(1, 0) * vv.at(2, 0) - vv.at(1, 0) * uu.at(2, 0);
-      auto uvCross_1 = uu.at(0, 0) * vv.at(2, 0) - vv.at(0, 0) * uu.at(2, 0);
-      auto uvCross_2 = uu.at(0, 0) * vv.at(1, 0) - vv.at(0, 0) * uu.at(1, 0);
-      auto bigCross = uvCross_0 * uvCross_0 + uvCross_1 * uvCross_1 + uvCross_2 * uvCross_2;
-      success = bigCross.getAsQuadratic(quad);
-      if (!success)
-      {
-        throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
-        return RR;
-      }
-      uvCrossNorm = BiquadraticNumber::sqrt(quad);
     }
-    Matrix<BiquadraticNumber> KK; // Cross product matrix.
+    kVec = kVec * (one_ / kNorm);
+    if (kVec.matrixSqNorm() != one_)
     {
-      auto k0 = vv.at(0, 0) * uu.at(2, 0) - uu.at(0, 0) * vv.at(2, 0);
-      auto k1 = vv.at(1, 0) * uu.at(2, 0) - uu.at(1, 0) * vv.at(2, 0);
-      auto kNorm = k0 * k0 + k1 * k1;
-      QuadraticNumber quad;
-      bool success = kNorm.getAsQuadratic(quad);
-      if (!success)
-      {
-        throw std::exception("Cross product vector square norm cannot be written in terms of quadratic numbers.");
-        return RR;
-      }
-      kNorm = BiquadraticNumber::sqrt(quad);
-      if (kNorm == zero_)
-      {
-        throw std::logic_error("Bad unit vector computation: vector vanishes.");
-      }
-      k0 = k0 / kNorm;
-      k1 = k1 / kNorm;
-      if ((k0 * k0 + k1 * k1) != one_)
-      {
-        throw std::logic_error("Bad unit vector computation.");
-      }
-      KK.addRow({ zero_, zero_, k1 });
-      KK.addRow({ zero_, zero_, -k0 });
-      KK.addRow({ -k1, k0, zero_ });
+      throw std::logic_error("Bad unit vector computation.");
     }
-    auto absSinTheta = uvCrossNorm / uuNormTimesVvNorm;
+    Matrix<BiquadraticNumber> KK; // Matrix that maps X to kVec cross X.
+    KK.addRow({ zero_, -kVec.at(2, 0), kVec.at(1, 0) });
+    KK.addRow({ kVec.at(2, 0), zero_, -kVec.at(0, 0) });
+    KK.addRow({ -kVec.at(1, 0), kVec.at(0, 0), zero_ });
+
+    auto absSinTheta = uuCrossVvNorm / uuNormTimesVvNorm;
     auto cosTheta = uu.matrixDot(vv) / uuNormTimesVvNorm;
     if ((absSinTheta * absSinTheta + cosTheta * cosTheta) != one_)
     {
