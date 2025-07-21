@@ -517,24 +517,42 @@ namespace FunctionalCalculator
     {
       throw std::logic_error("Bad unit vector computation.");
     }
+    if (kVec.matrixDot(uuCrossVv) != zero_)
+    {
+      throw std::logic_error("Bad orthogonality computation.");
+    }
+    if (kVec.at(2, 0) != zero_)
+    {
+      throw std::logic_error("Bad orthogonality computation.");
+    }
     Matrix<BiquadraticNumber> KK; // Matrix that maps X to kVec cross X.
     KK.addRow({ zero_, -kVec.at(2, 0), kVec.at(1, 0) });
     KK.addRow({ kVec.at(2, 0), zero_, -kVec.at(0, 0) });
     KK.addRow({ -kVec.at(1, 0), kVec.at(0, 0), zero_ });
 
-    auto absSinTheta = uuCrossVvNorm / uuNormTimesVvNorm;
-    auto cosTheta = uu.matrixDot(vv) / uuNormTimesVvNorm;
+    auto absSinTheta = kNorm / uuCrossVvNorm;
+    auto cosTheta = uuCrossVv.at(2, 0) / uuCrossVvNorm;
     if ((absSinTheta * absSinTheta + cosTheta * cosTheta) != one_)
     {
       throw std::logic_error("Bad trigonometric computation.");
     }
+    RR = II;
     RR = RR + KK * absSinTheta;
     RR = RR + (KK * KK) * (one_ - cosTheta);
+    auto rotCrossProduct = RR * uuCrossVv;
     if (RR * RR.transpose() != II)
     {
       RR = II;
       RR = RR - KK * absSinTheta;
       RR = RR + (KK * KK) * (one_ - cosTheta);
+      rotCrossProduct = RR * uuCrossVv;
+    }
+    else if ((rotCrossProduct.at(0, 0) != zero_) || (rotCrossProduct.at(1, 0) != zero_))
+    {
+      RR = II;
+      RR = RR - KK * absSinTheta;
+      RR = RR + (KK * KK) * (one_ - cosTheta);
+      rotCrossProduct = RR * uuCrossVv;
     }
     if (RR * RR.transpose() != II)
     {
@@ -547,6 +565,10 @@ namespace FunctionalCalculator
       auto R_vert = RR * vert;
       if (R_vert.at(2, 0) > R_ww.at(2, 0)) { break; }
       if (R_vert.at(2, 0) < R_ww.at(2, 0)) { dodecIsNonnegative = false; break; }
+    }
+    if ((rotCrossProduct.at(0, 0) != zero_) || (rotCrossProduct.at(1, 0) != zero_))
+    {
+      throw std::logic_error("(u - w) and (v - w) did not get mapped to { z == 0 } by the rotation.");
     }
     return RR;
   }
@@ -595,12 +617,12 @@ namespace FunctionalCalculator
       pentaColsInv.addRow({ dd * factor, -bb * factor });
       pentaColsInv.addRow({ -cc * factor, aa * factor });
       isometryInv = uvCols * pentaColsInv;
-      //Matrix<BiquadraticNumber> II;
-      //II.addRow({ one_, zero_ });
-      //II.addRow({ zero_, one_ });
-      //if (isometryInv * (isometryInv.transpose()) != II)
+      Matrix<BiquadraticNumber> II;
+      II.addRow({ one_, zero_ });
+      II.addRow({ zero_, one_ });
+      if (isometryInv * (isometryInv.transpose()) != II)
       {
-        //throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
+        throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
       }
     }
     auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
