@@ -619,9 +619,7 @@ namespace FunctionalCalculator
     {
       BiquadraticNumber zero_(Rational(0));
       BiquadraticNumber one_(Rational(1));
-      try
       {
-        BiquadraticNumber::setExtraSimplification(true);
         const auto& p = pentagon;
         Matrix<BiquadraticNumber> uvCols;
         uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
@@ -636,11 +634,6 @@ namespace FunctionalCalculator
         pentaColsInv.addRow({ dd * factor, -bb * factor });
         pentaColsInv.addRow({ -cc * factor, aa * factor });
         isometry = uvCols * pentaColsInv;
-        BiquadraticNumber::setExtraSimplification(false);
-      }
-      catch (...)
-      {
-        BiquadraticNumber::setExtraSimplification(false);
       }
       Matrix<BiquadraticNumber> II;
       II.addRow({ one_, zero_ });
@@ -665,6 +658,7 @@ namespace FunctionalCalculator
 
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
   {
+    BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > dodec;
     BiquadraticNumber sideLength;
     {
@@ -673,7 +667,12 @@ namespace FunctionalCalculator
         BiquadraticNumber half(Rational(1, 2));
         BiquadraticNumber sinAngle;
         bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
-        if (!success) { throw std::exception("Unsupported angle."); return dodec; }
+        if (!success)
+        {
+          BiquadraticNumber::setExtraSimplification(false);
+          throw std::exception("Unsupported angle.");
+          return dodec;
+        }
         sideLength = sinAngle + sinAngle;
       }
       // sideLength = edgeLength;
@@ -746,10 +745,11 @@ namespace FunctionalCalculator
       completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
     }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
+    for (bool done = false; !done; done = true)
     {
       Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
       const auto numVertices = (int)dodec.size();
-      if (numVertices == 0) { return dodecahedron; }
+      if (numVertices == 0) { break; }
       auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
       for (const auto& vertex : dodec)
       {
@@ -760,6 +760,7 @@ namespace FunctionalCalculator
         dodecahedron.insert((vertex - barycenter) * scaleFactor);
       }
     }
+    BiquadraticNumber::setExtraSimplification(false);
     return dodecahedron;
   }
 }
