@@ -503,7 +503,8 @@ namespace FunctionalCalculator
       auto uvCross_0 = uu.at(1, 0) * vv.at(2, 0) - vv.at(1, 0) * uu.at(2, 0);
       auto uvCross_1 = uu.at(0, 0) * vv.at(2, 0) - vv.at(0, 0) * uu.at(2, 0);
       auto uvCross_2 = uu.at(0, 0) * vv.at(1, 0) - vv.at(0, 0) * uu.at(1, 0);
-      success = (uvCross_0 * uvCross_0 + uvCross_1 * uvCross_1 + uvCross_2 * uvCross_2).getAsQuadratic(quad);
+      auto bigCross = uvCross_0 * uvCross_0 + uvCross_1 * uvCross_1 + uvCross_2 * uvCross_2;
+      success = bigCross.getAsQuadratic(quad);
       if (!success)
       {
         throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
@@ -521,6 +522,12 @@ namespace FunctionalCalculator
     }
     RR = RR + KK * (uvCrossNorm / uuNormTimesVvNorm);
     RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+    if (RR * RR.transpose() != II)
+    {
+      RR = II;
+      RR = RR - KK * (uvCrossNorm / uuNormTimesVvNorm);
+      RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+    }
     if (RR * RR.transpose() != II)
     {
       throw std::logic_error("Did not define a true rotation matrix.");
