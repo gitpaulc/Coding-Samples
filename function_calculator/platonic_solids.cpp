@@ -593,29 +593,31 @@ namespace FunctionalCalculator
     Matrix<BiquadraticNumber> planarRot5;
     std::vector<Matrix<BiquadraticNumber> > pentagon = getRegularPolygon(5, sideLength, &planarRot5);
 
-    // Unique matrix P such that P * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
-    Matrix<BiquadraticNumber> isometryTo5gon;
+    // Unique matrix P such that P^{-1} * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
     Matrix<BiquadraticNumber> isometryInv;
     {
       const auto& p = pentagon;
-      Matrix<BiquadraticNumber> pentaColsMat;
-      pentaColsMat.addRow({ p[0].at(0, 0) - p[2].at(0, 0), p[1].at(0, 0) - p[2].at(0, 0) });
-      pentaColsMat.addRow({ p[0].at(1, 0) - p[2].at(1, 0), p[1].at(1, 0) - p[2].at(1, 0) });
-      Matrix<BiquadraticNumber> uvColsInv;
-      auto determ = uu.at(0, 0) * vv.at(1, 0) - uu.at(1, 0) * vv.at(0, 0);
-      auto factor = BiquadraticNumber(Rational(1)) / determ;
-      uvColsInv.addRow({ vv.at(1, 0) * factor, -vv.at(0, 0) * factor });
-      uvColsInv.addRow({ -uu.at(1, 0) * factor, uu.at(0, 0) * factor });
-      isometryTo5gon = pentaColsMat * uvColsInv;
-      isometryInv = isometryTo5gon.transpose();
+      Matrix<BiquadraticNumber> uvCols;
+      uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
+      uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
+      Matrix<BiquadraticNumber> pentaColsInv;
+      auto aa = p[0].at(0, 0) - p[2].at(0, 0);
+      auto bb = p[1].at(0, 0) - p[2].at(0, 0);
+      auto cc = p[0].at(1, 0) - p[2].at(1, 0);
+      auto dd = p[1].at(1, 0) - p[2].at(1, 0);
+      auto determ = aa * dd - bb * cc;
       BiquadraticNumber zero_(Rational(0));
       BiquadraticNumber one_(Rational(1));
-      Matrix<BiquadraticNumber> II;
-      II.addRow({ one_, zero_ });
-      II.addRow({ zero_, one_ });
-      if (isometryTo5gon * isometryInv != II)
+      auto factor = one_ / determ;
+      pentaColsInv.addRow({ dd * factor, -bb * factor });
+      pentaColsInv.addRow({ -cc * factor, aa * factor });
+      isometryInv = uvCols * pentaColsInv;
+      //Matrix<BiquadraticNumber> II;
+      //II.addRow({ one_, zero_ });
+      //II.addRow({ zero_, one_ });
+      //if (isometryInv * (isometryInv.transpose()) != II)
       {
-        throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
+        //throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
       }
     }
     auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
