@@ -516,17 +516,42 @@ namespace FunctionalCalculator
     {
       auto k0 = vv.at(0, 0) * uu.at(2, 0) - uu.at(0, 0) * vv.at(2, 0);
       auto k1 = vv.at(1, 0) * uu.at(2, 0) - uu.at(1, 0) * vv.at(2, 0);
+      auto kNorm = k0 * k0 + k1 * k1;
+      QuadraticNumber quad;
+      bool success = kNorm.getAsQuadratic(quad);
+      if (!success)
+      {
+        throw std::exception("Cross product vector square norm cannot be written in terms of quadratic numbers.");
+        return RR;
+      }
+      kNorm = BiquadraticNumber::sqrt(quad);
+      if (kNorm == zero_)
+      {
+        throw std::logic_error("Bad unit vector computation: vector vanishes.");
+      }
+      k0 = k0 / kNorm;
+      k1 = k1 / kNorm;
+      if ((k0 * k0 + k1 * k1) != one_)
+      {
+        throw std::logic_error("Bad unit vector computation.");
+      }
       KK.addRow({ zero_, zero_, k1 });
       KK.addRow({ zero_, zero_, -k0 });
       KK.addRow({ -k1, k0, zero_ });
     }
-    RR = RR + KK * (uvCrossNorm / uuNormTimesVvNorm);
-    RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+    auto absSinTheta = uvCrossNorm / uuNormTimesVvNorm;
+    auto cosTheta = uu.matrixDot(vv) / uuNormTimesVvNorm;
+    if ((absSinTheta * absSinTheta + cosTheta * cosTheta) != one_)
+    {
+      throw std::logic_error("Bad trigonometric computation.");
+    }
+    RR = RR + KK * absSinTheta;
+    RR = RR + (KK * KK) * (one_ - cosTheta);
     if (RR * RR.transpose() != II)
     {
       RR = II;
-      RR = RR - KK * (uvCrossNorm / uuNormTimesVvNorm);
-      RR = RR + (KK * KK) * (one_ - uu.matrixDot(vv) / uuNormTimesVvNorm);
+      RR = RR - KK * absSinTheta;
+      RR = RR + (KK * KK) * (one_ - cosTheta);
     }
     if (RR * RR.transpose() != II)
     {
