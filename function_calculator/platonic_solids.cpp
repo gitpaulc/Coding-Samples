@@ -989,30 +989,30 @@ namespace FunctionalCalculator
     /*
 
    ICOSAHEDRON centered at (0, 0, 0) whose dual dodecahedron has all vertex lengths == 1:
-   Vertex 0 =
-   ((-1) * Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 1 =
-   ((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 2 =
-   ((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
-   Vertex 3 =
-   (Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 4 =
-   (Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 5 =
-   (, 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
-   Vertex 6 =
-   ((-1) * Sqrt(1 / 30 - (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 - (8 / 375) * Sqrt(5)) + Sqrt(1 / 150 + (1 / 750) * Sqrt(5)), 0, Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
-   Vertex 7 =
-   (Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 8 =
-   (Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-   Vertex 9 =
-   (Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
-   Vertex 10 =
-   (Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
-   Vertex 11 =
-   (Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) + Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
+Vertex 0 =
+((-1) * Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 1 =
+((-1) * Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), -1 / 2 - (1 / 2) * Sqrt(5), Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 2 =
+((-1) * Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5), Sqrt(1 + (2 / 5) * Sqrt(5)))
+Vertex 3 =
+(Sqrt(1 / 10 - (1 / 50) * Sqrt(5)) - Sqrt(1 + (2 / 25) * Sqrt(5)), -3 / 2 - (1 / 2) * Sqrt(5), (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 4 =
+(Sqrt(1 / 10 - (1 / 50) * Sqrt(5)) - Sqrt(1 + (2 / 25) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5), (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 5 =
+(, 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
+Vertex 6 =
+((-1) * Sqrt(1 / 2 - (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 - (8 / 25) * Sqrt(5)) + Sqrt(1 / 10 + (1 / 50) * Sqrt(5)), 0, Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
+Vertex 7 =
+(Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), -3 / 2 - (1 / 2) * Sqrt(5), Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 8 =
+(Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5), Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+Vertex 9 =
+(Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) + Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), -1 / 2 - (1 / 2) * Sqrt(5), Sqrt(1 / 5 - (2 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)))
+Vertex 10 =
+(Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) + Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5), Sqrt(1 / 5 - (2 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)))
+Vertex 11 =
+(Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) + Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, Sqrt(1 + (2 / 5) * Sqrt(5)))
 
        */
     return icosa;
