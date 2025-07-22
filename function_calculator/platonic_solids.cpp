@@ -1095,11 +1095,12 @@ namespace FunctionalCalculator
       vertex.addRow({ s5 + s1, golden, s10 - s2 });
       icosa.insert(vertex.transpose());
     }
-    /*
-Vertex 11 =
-(Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) + Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, Sqrt(1 + (2 / 5) * Sqrt(5)))
-
-       */
+    {
+      // 11: (Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) + Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, Sqrt(1 + (2 / 5) * Sqrt(5)))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ s1 + s2, zero_, s6 });
+      icosa.insert(vertex.transpose());
+    }
     return icosa;
   }
 
