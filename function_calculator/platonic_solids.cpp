@@ -656,6 +656,25 @@ namespace FunctionalCalculator
     dodec.insert(v4);
   }
 
+  std::set<Matrix<BiquadraticNumber> > recenterToOriginAndScale(const std::set<Matrix<BiquadraticNumber> >& shape,
+    const BiquadraticNumber& scaleFactor)
+  {
+    std::set<Matrix<BiquadraticNumber> > answer;
+    Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
+    const auto numVertices = (int)shape.size();
+    if (numVertices == 0) { return answer; }
+    auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
+    for (const auto& vertex : shape)
+    {
+      barycenter = barycenter + (vertex * coeff);
+    }
+    for (const auto& vertex : shape)
+    {
+      answer.insert((vertex - barycenter) * scaleFactor);
+    }
+    return answer;
+  }
+
   std::set<Matrix<BiquadraticNumber> > growDodecahedron(const BiquadraticNumber& edgeLength)
   {
     BiquadraticNumber::setExtraSimplification(true);
@@ -746,22 +765,7 @@ namespace FunctionalCalculator
       completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
     }
 
-    std::set<Matrix<BiquadraticNumber> > dodecahedron;
-    for (bool done = false; !done; done = true)
-    {
-      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
-      const auto numVertices = (int)dodec.size();
-      if (numVertices == 0) { break; }
-      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
-      for (const auto& vertex : dodec)
-      {
-        barycenter = barycenter + (vertex * coeff);
-      }
-      for (const auto& vertex : dodec)
-      {
-        dodecahedron.insert((vertex - barycenter) * scaleFactor);
-      }
-    }
+    auto dodecahedron = recenterToOriginAndScale(dodec, scaleFactor);
     BiquadraticNumber::setExtraSimplification(false);
     return dodecahedron;
   }
@@ -921,22 +925,7 @@ namespace FunctionalCalculator
       vertex.addRow({ golden, zero_, one_ });
       dodec.insert(vertex.transpose());
     }
-    std::set<Matrix<BiquadraticNumber> > dodecahedron;
-    for (bool done = false; !done; done = true)
-    {
-      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
-      const auto numVertices = (int)dodec.size();
-      if (numVertices == 0) { break; }
-      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
-      for (const auto& vertex : dodec)
-      {
-        barycenter = barycenter + (vertex * coeff);
-      }
-      for (const auto& vertex : dodec)
-      {
-        dodecahedron.insert((vertex - barycenter) * scaleFactor);
-      }
-    }
+    auto dodecahedron = recenterToOriginAndScale(dodec, scaleFactor);
     BiquadraticNumber::setExtraSimplification(false);
     return dodecahedron;
   }
@@ -950,7 +939,10 @@ namespace FunctionalCalculator
     std::map<int, Matrix<BiquadraticNumber> > dodec;
     {
       int ii = -1;
-      auto dodecSet = getDodecahedron();
+      // Grows the dodecahedron "organically" with minimal "understanding" and no hardcoded values but is slow.
+      //auto dodecSet = growDodecahedron();
+
+      auto dodecSet = getDodecahedron(); // Uses cached values after running growDodecahedron().
       for (const auto& vertex : dodecSet)
       {
         ++ii;
