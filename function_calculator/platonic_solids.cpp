@@ -1031,7 +1031,7 @@ namespace FunctionalCalculator
       // Grows the dodecahedron "organically" with minimal "understanding" and no hardcoded values but is slow.
       //auto dodecSet = growDodecahedron(edgeLength);
 
-      auto dodecSet = getDodecahedron(edgeLength); // Uses cached values after running growDodecahedron().
+      auto dodecSet = getDodecahedron(edgeLength); // Uses cached values from a call to growDodecahedron().
       for (const auto& vertex : dodecSet)
       {
         ++ii;
@@ -1193,8 +1193,8 @@ namespace FunctionalCalculator
     {
       int ii = -1;
       // Creates an icosahedron from a dual dodecahedron.
-      auto icosaSet = getIcosahedron(edgeLength);
-      //auto icosaSet = getIcosahedron(edgeLength); // Uses cached values after running getIcosahedronViaDual().
+      auto icosaSet = getIcosahedron(edgeLength);  // Uses cached values from a call to getIcosahedronViaDual().
+      //auto icosaSet = getIcosahedronViaDual(edgeLength);
       for (const auto& vertex : icosaSet)
       {
         ++ii;
