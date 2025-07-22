@@ -1005,14 +1005,18 @@ namespace FunctionalCalculator
     QuadraticNumber q_11_50(Rational(11, 50));
     auto qSqrt5 = QuadraticNumber::sqrt(5);
     auto golden = half + half * BiquadraticNumber::sqrt(5);
-    BiquadraticNumber s1 = BiquadraticNumber::sqrt(q_4_5 + q_8_25 * qSqrt5);
-    BiquadraticNumber s2 = BiquadraticNumber::sqrt(q_8_5 + q_8_25 * qSqrt5);
     BiquadraticNumber s3 = BiquadraticNumber::sqrt(q_1_5 + q_2_25 * qSqrt5);
+    BiquadraticNumber s10 = BiquadraticNumber::sqrt(q_1_5 - q_2_25 * qSqrt5);
     BiquadraticNumber s4 = BiquadraticNumber::sqrt(q_2_5 + q_2_25 * qSqrt5);
+    BiquadraticNumber s1 = s3 + s3; //BiquadraticNumber::sqrt(q_4_5 + q_8_25 * qSqrt5);
+    BiquadraticNumber s2 = s4 + s4; //BiquadraticNumber::sqrt(q_8_5 + q_8_25 * qSqrt5);
     BiquadraticNumber s5 = BiquadraticNumber::sqrt(q_1_2 + q_11_50 * qSqrt5);
+    BiquadraticNumber s9 = BiquadraticNumber::sqrt(q_1_2 - q_11_50 * qSqrt5);
     BiquadraticNumber s6 = BiquadraticNumber::sqrt(q_1 + q_2_5 * qSqrt5);
     BiquadraticNumber s7 = BiquadraticNumber::sqrt(q_1_10 - q_1_50 * qSqrt5);
+    BiquadraticNumber s12 = BiquadraticNumber::sqrt(q_1_10 + q_1_50 * qSqrt5);
     BiquadraticNumber s8 = BiquadraticNumber::sqrt(q_1 + q_2_25 * qSqrt5);
+    BiquadraticNumber s11 = s10 + s10; //BiquadraticNumber::sqrt(q_4_5 - q_8_25 * qSqrt5);
     {
       // 0: ((-1) * Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0,
       //     (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
@@ -1054,9 +1058,15 @@ namespace FunctionalCalculator
       vertex.addRow({ zero_, zero_, -s3 * five });
       icosa.insert(vertex.transpose());
     }
+    {
+      // 6: ((-1) * Sqrt(1 / 2 - (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 - (8 / 25) * Sqrt(5))
+      //     + Sqrt(1 / 10 + (1 / 50) * Sqrt(5)),
+      //     0, Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -s9 - s11 + s12, zero_, s3 * five });
+      icosa.insert(vertex.transpose());
+    }
     /*
-Vertex 6 =
-((-1) * Sqrt(1 / 2 - (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 - (8 / 25) * Sqrt(5)) + Sqrt(1 / 10 + (1 / 50) * Sqrt(5)), 0, Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
 Vertex 7 =
 (Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), -3 / 2 - (1 / 2) * Sqrt(5), Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
 Vertex 8 =
