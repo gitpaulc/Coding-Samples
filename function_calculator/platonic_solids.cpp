@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #include "platonic_solids.h"
 
 #include <iostream>
+#include <fstream>
 
 namespace FunctionalCalculator
 {
@@ -831,9 +832,9 @@ namespace FunctionalCalculator
     }
     {
       // 4: (-1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
-      Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ -quarter - quarter * sqrt5, -s2, zero_ });
-      dodec.insert(vertex.transpose());
+Matrix<BiquadraticNumber> vertex;
+vertex.addRow({ -quarter - quarter * sqrt5, -s2, zero_ });
+dodec.insert(vertex.transpose());
     }
     {
       // 5: (-1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
@@ -928,6 +929,126 @@ namespace FunctionalCalculator
     auto dodecahedron = recenterToOriginAndScale(dodec, scaleFactor);
     BiquadraticNumber::setExtraSimplification(false);
     return dodecahedron;
+  }
+
+  bool exportDodecahedronObj(const std::string& filename)
+  {
+    BiquadraticNumber edgeLengthSq(Rational(1, 1));
+    int facetSize = 5;
+    int expectedNumVertices = 20;
+    int expectedNumNeighbors = 3;
+    int expectedNumFaces = 12;
+    std::map<int, Matrix<BiquadraticNumber> > dodec;
+    {
+      int ii = -1;
+      auto dodecSet = getDodecahedron();
+      for (const auto& vertex : dodecSet)
+      {
+        ++ii;
+        dodec[ii] = vertex;
+      }
+    }
+    if ((int)dodec.size() != expectedNumVertices) { return false; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+    for (const auto& iter : dodec)
+    {
+      std::vector<int> neighbors;
+      for (const auto& jter : dodec)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == edgeLengthSq)
+        {
+          neighbors.push_back(jter.first);
+        }
+      }
+      if ((int)neighbors.size() != expectedNumNeighbors) { return false; }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      auto verticesRemain = (int)(facetSize - facesFrom[0].size());
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < verticesRemain; ++verticesRemaining)
+        {
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
+              < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+    if ((int)faces.size() != expectedNumFaces) { return false; }
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : dodec)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
   }
 
   bool test_dodecahedron()
@@ -1077,6 +1198,18 @@ namespace FunctionalCalculator
 
     std::cout << "\n\nEuler characteristic ==\nNum. vertices - num. edges + num. faces == " <<
       dodec.size() - halfEdges.size() / 2 + faces.size() << "\n";
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\nExporting dodecahedron to .obj format. Continue, Y or N?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+    std::cout << "\nWriting..." << std::endl;
+    bool wrote = exportDodecahedronObj("dodecahedron.obj");
+    std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
 
     return true;
   }

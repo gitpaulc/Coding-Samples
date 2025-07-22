@@ -91,6 +91,12 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  /** \brief Exports a regular dodecahedron as an .obj file. It has unit edges and is centered at the origin.
+   *  \return `true` if and only if the export succeeds.
+   *  \param `filename` is the name of the file the user wishes to export the shape to.
+   */
+  bool exportDodecahedronObj(const std::string& filename);
+
   bool test_dodecahedron();
   bool test_platonic();
 }
