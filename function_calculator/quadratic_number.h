@@ -59,12 +59,11 @@ public:
   QuadraticNumber abs() const;
   /** \return { a, b } where a is the maximal number such that this number == a * a * b */
   std::pair<QuadraticNumber, QuadraticNumber> separateSquaredPart() const;
-  /** \return numRoots > 0 only if the number can be written as a^2.
-   *  \remark For complicated expressions, might return 0 even though a QuadraticNumber square root exists.
-   *  If a QuadraticNumber square root is found: returns 2 if there are two, 1 if there is one.
-   *  If numRoots == 1, then sqrt1 is set. If numRoots == 2, then sqrt2 is also set.
+  /** \return `true` only if the number can be written as a^2 for a QuadraticNumber a >= 0.
+   *  \remark For complicated expressions, might return `false` even though a QuadraticNumber square root exists.
+   *  \param `quadSqrt` is set to a >= 0 provided such an a is provided. 
    */
-  int simpleSquareRoot(QuadraticNumber& sqrt1, QuadraticNumber& sqrt2) const;
+  bool simpleSquareRoot(QuadraticNumber& quadSqrt) const;
 
   QuadraticNumber operator+() const;
   QuadraticNumber operator-() const;

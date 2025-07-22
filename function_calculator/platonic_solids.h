@@ -73,9 +73,31 @@ namespace FunctionalCalculator
    *  each of whose edges coincides with the edge of another pentagon.
    *  It is regular if the edge lengths of the pentagons are all equal.
    *  \param `edgeLength` the length of an edge of the dodecahedron.
+   * 
+   *  \remark This method grows the dodecahedron organically. 
+   *  It starts with a pentagon in the plane { z == 0 } and grows
+   *  additional pentagonal faces from there, until any further growing results in no new vertices.
+   *  \remark This method is fairly slow, and if efficiency is important, use getDodecahedron.
+   */
+  std::set<Matrix<BiquadraticNumber> > growDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \return Set of vertices (x, y, z) making up a regular dodecahedron.
+   *  A dodecahedron is a shape in three-dimensional space consisting of twelve pentagons,
+   *  each of whose edges coincides with the edge of another pentagon.
+   *  It is regular if the edge lengths of the pentagons are all equal.
+   *  \param `edgeLength` the length of an edge of the dodecahedron.
+   *
+   *  \remark This method uses values cached from an initial run of growDodecahedron and is fast.
    */
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  /** \brief Exports a regular dodecahedron as an .obj file. It has unit edges and is centered at the origin.
+   *  \return `true` if and only if the export succeeds.
+   *  \param `filename` is the name of the file the user wishes to export the shape to.
+   */
+  bool exportDodecahedronObj(const std::string& filename);
+
+  bool test_dodecahedron();
   bool test_platonic();
 }
 

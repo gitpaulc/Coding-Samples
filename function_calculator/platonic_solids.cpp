@@ -4,6 +4,7 @@ All Rights Reserved.*/
 #include "platonic_solids.h"
 
 #include <iostream>
+#include <fstream>
 
 namespace FunctionalCalculator
 {
@@ -609,37 +610,45 @@ namespace FunctionalCalculator
     {
       throw std::invalid_argument("Improper side lengths for dodecahedron.");
     }
+    if ((pentagon[0] - pentagon[2]).matrixDot(pentagon[1] - pentagon[2]) != uu.matrixDot(vv))
+    {
+      throw std::invalid_argument("Improper angles for dodecahedron.");
+    }
 
     // Unique matrix P such that P^{-1} * x + p[2] takes (uu, vv, 0) to (p[0], p[1], p[2]) where p is vector `pentagon`.
-    Matrix<BiquadraticNumber> isometryInv;
+    Matrix<BiquadraticNumber> isometry;
     {
-      const auto& p = pentagon;
-      Matrix<BiquadraticNumber> uvCols;
-      uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
-      uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
-      Matrix<BiquadraticNumber> pentaColsInv;
-      auto aa = p[0].at(0, 0) - p[2].at(0, 0);
-      auto bb = p[1].at(0, 0) - p[2].at(0, 0);
-      auto cc = p[0].at(1, 0) - p[2].at(1, 0);
-      auto dd = p[1].at(1, 0) - p[2].at(1, 0);
-      auto determ = aa * dd - bb * cc;
       BiquadraticNumber zero_(Rational(0));
       BiquadraticNumber one_(Rational(1));
-      auto factor = one_ / determ;
-      pentaColsInv.addRow({ dd * factor, -bb * factor });
-      pentaColsInv.addRow({ -cc * factor, aa * factor });
-      isometryInv = uvCols * pentaColsInv;
+      {
+        const auto& p = pentagon;
+        Matrix<BiquadraticNumber> uvCols;
+        uvCols.addRow({ uu.at(0, 0), vv.at(0, 0) });
+        uvCols.addRow({ uu.at(1, 0), vv.at(1, 0) });
+        Matrix<BiquadraticNumber> pentaColsInv;
+        auto aa = p[0].at(0, 0) - p[2].at(0, 0);
+        auto bb = p[1].at(0, 0) - p[2].at(0, 0);
+        auto cc = p[0].at(1, 0) - p[2].at(1, 0);
+        auto dd = p[1].at(1, 0) - p[2].at(1, 0);
+        auto determ = aa * dd - bb * cc;
+        auto factor = one_ / determ;
+        pentaColsInv.addRow({ dd * factor, -bb * factor });
+        pentaColsInv.addRow({ -cc * factor, aa * factor });
+        isometry = uvCols * pentaColsInv;
+      }
       Matrix<BiquadraticNumber> II;
       II.addRow({ one_, zero_ });
       II.addRow({ zero_, one_ });
-      auto iden = isometryInv * (isometryInv.transpose());
-      if (iden != II)
+      auto identity = isometry * (isometry.transpose());
+      if (identity != II)
       {
         throw std::logic_error("Pentagonal isometry did not define a true planar rotation matrix.");
       }
     }
-    auto vv3 = isometryInv * (pentagon[3] - pentagon[2]);
-    auto vv4 = isometryInv * (pentagon[4] - pentagon[2]);
+    auto vv3 = isometry * (pentagon[3] - pentagon[2]);
+    auto vv4 = isometry * (pentagon[4] - pentagon[2]);
+    vv3.addRow({ BiquadraticNumber() });
+    vv4.addRow({ BiquadraticNumber() });
 
     auto rotInv = rot.transpose();
     auto v3 = rotInv * vv3 + w;
@@ -648,8 +657,28 @@ namespace FunctionalCalculator
     dodec.insert(v4);
   }
 
-  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  std::set<Matrix<BiquadraticNumber> > recenterToOriginAndScale(const std::set<Matrix<BiquadraticNumber> >& shape,
+    const BiquadraticNumber& scaleFactor)
   {
+    std::set<Matrix<BiquadraticNumber> > answer;
+    Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
+    const auto numVertices = (int)shape.size();
+    if (numVertices == 0) { return answer; }
+    auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
+    for (const auto& vertex : shape)
+    {
+      barycenter = barycenter + (vertex * coeff);
+    }
+    for (const auto& vertex : shape)
+    {
+      answer.insert((vertex - barycenter) * scaleFactor);
+    }
+    return answer;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > growDodecahedron(const BiquadraticNumber& edgeLength)
+  {
+    BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > dodec;
     BiquadraticNumber sideLength;
     {
@@ -658,10 +687,14 @@ namespace FunctionalCalculator
         BiquadraticNumber half(Rational(1, 2));
         BiquadraticNumber sinAngle;
         bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
-        if (!success) { throw std::exception("Unsupported angle."); return dodec; }
+        if (!success)
+        {
+          BiquadraticNumber::setExtraSimplification(false);
+          throw std::exception("Unsupported angle.");
+          return dodec;
+        }
         sideLength = sinAngle + sinAngle;
       }
-      // sideLength = edgeLength;
       auto initialPentagon = getRegularPolygon(5, sideLength);
       for (const auto& vertex : initialPentagon)
       {
@@ -673,9 +706,19 @@ namespace FunctionalCalculator
     auto scaleFactor = edgeLength / sideLength;
     auto sideLengthSq = sideLength * sideLength;
     std::set<Matrix<BiquadraticNumber> > counted;
-    for (int counting = 0; counting < 40; ++counting)
+    auto oldCountedSize = counted.size();
+    auto oldDodecSize = dodec.size();
+    for (bool started = false; true; started = true)
     {
-      if (dodec.size() >= 20) { break; }
+      if (started)
+      {
+        if ((oldCountedSize == counted.size()) &&
+          (oldDodecSize == dodec.size())) {
+          break;
+        }
+        oldCountedSize = counted.size();
+        oldDodecSize = dodec.size();
+      }
       bool found = false;
       Matrix<BiquadraticNumber> current = *(dodec.begin());
       std::vector<Matrix<BiquadraticNumber> > neighbors;
@@ -722,21 +765,452 @@ namespace FunctionalCalculator
       dodec.insert(newVertex);
       completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
     }
-    std::set<Matrix<BiquadraticNumber> > dodecahedron;
+
+    auto dodecahedron = recenterToOriginAndScale(dodec, scaleFactor);
+    BiquadraticNumber::setExtraSimplification(false);
+    return dodecahedron;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  {
+    BiquadraticNumber::setExtraSimplification(true);
+    std::set<Matrix<BiquadraticNumber> > dodec;
+    BiquadraticNumber sideLength;
     {
-      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
-      const auto numVertices = (int)dodec.size();
-      if (numVertices == 0) { return dodecahedron; }
-      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
-      for (const auto& vertex : dodec)
+      Rational angle(1, 5);
+      BiquadraticNumber half(Rational(1, 2));
+      BiquadraticNumber sinAngle;
+      bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success)
       {
-        barycenter = barycenter + (vertex * coeff);
+        BiquadraticNumber::setExtraSimplification(false);
+        throw std::exception("Unsupported angle.");
+        return dodec;
       }
-      for (const auto& vertex : dodec)
+      sideLength = sinAngle + sinAngle;
+    }
+    auto zero_ = BiquadraticNumber();
+    BiquadraticNumber one_(Rational(1));
+    auto scaleFactor = edgeLength / sideLength;
+    BiquadraticNumber half(Rational(1, 2));
+    BiquadraticNumber threeHalves(Rational(3, 2));
+    BiquadraticNumber quarter(Rational(1, 4));
+    BiquadraticNumber eighth(Rational(1, 8));
+    BiquadraticNumber threeFourths(Rational(3, 4));
+    BiquadraticNumber fiveEighths(Rational(5, 8));
+    BiquadraticNumber s1 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
+      + QuadraticNumber(Rational(1, 8)) * QuadraticNumber::sqrt(5));
+    BiquadraticNumber s2 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
+      - QuadraticNumber(Rational(1, 8)) * QuadraticNumber::sqrt(5));
+    BiquadraticNumber s3 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 4))
+      + QuadraticNumber(Rational(1, 2)) * QuadraticNumber::sqrt(5));
+    auto sqrt5 = BiquadraticNumber::sqrt(Rational(5));
+    auto golden = half + half * sqrt5;
+    {
+      // 0: (-1 / 2 - (1 / 2) * Sqrt(5), 0, 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -golden, zero_, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 1: (-3 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -threeFourths - quarter * sqrt5, -s1, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 2: (-3 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -threeFourths - quarter * sqrt5, s1, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 3: (-1, 0, 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -one_, zero_, threeHalves + half * sqrt5 });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 4: (-1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
+Matrix<BiquadraticNumber> vertex;
+vertex.addRow({ -quarter - quarter * sqrt5, -s2, zero_ });
+dodec.insert(vertex.transpose());
+    }
+    {
+      // 5: (-1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -quarter - quarter * sqrt5, s2, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 6: (-1 / 2, (-1) * Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -half, -s3, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 7: (-1 / 2, Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -half, s3, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 8: (1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ quarter - quarter * sqrt5, -s1, one_ + golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 9: (1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ quarter - quarter * sqrt5, s1, one_ + golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 10: (-1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -quarter + quarter * sqrt5, -s1, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 11: (-1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -quarter + quarter * sqrt5, s1, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 12: (1 / 2, (-1) * Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ half, -s3, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 13: (1 / 2, Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ half, s3, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 14: (1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ half * golden, -s2, one_ + golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 15: (1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ half * golden, s2, one_ + golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 16: (1, 0, 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ one_, zero_, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 17: (3 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ threeFourths + quarter * sqrt5, -s1, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 18: (3 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ threeFourths + quarter * sqrt5, s1, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 19: (1 / 2 + (1 / 2) * Sqrt(5), 0, 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ golden, zero_, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    auto dodecahedron = recenterToOriginAndScale(dodec, scaleFactor);
+    BiquadraticNumber::setExtraSimplification(false);
+    return dodecahedron;
+  }
+
+  bool exportDodecahedronObj(const std::string& filename)
+  {
+    BiquadraticNumber edgeLengthSq(Rational(1, 1));
+    int facetSize = 5;
+    int expectedNumVertices = 20;
+    int expectedNumNeighbors = 3;
+    int expectedNumFaces = 12;
+    std::map<int, Matrix<BiquadraticNumber> > dodec;
+    {
+      int ii = -1;
+      auto dodecSet = getDodecahedron();
+      for (const auto& vertex : dodecSet)
       {
-        dodecahedron.insert((vertex - barycenter) * scaleFactor);
+        ++ii;
+        dodec[ii] = vertex;
       }
     }
-    return dodecahedron;
+    if ((int)dodec.size() != expectedNumVertices) { return false; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+    for (const auto& iter : dodec)
+    {
+      std::vector<int> neighbors;
+      for (const auto& jter : dodec)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == edgeLengthSq)
+        {
+          neighbors.push_back(jter.first);
+        }
+      }
+      if ((int)neighbors.size() != expectedNumNeighbors) { return false; }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      auto verticesRemain = (int)(facetSize - facesFrom[0].size());
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < verticesRemain; ++verticesRemaining)
+        {
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
+              < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+    if ((int)faces.size() != expectedNumFaces) { return false; }
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : dodec)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
+  }
+
+  bool test_dodecahedron()
+  {
+    std::string prompt;
+    BiquadraticNumber one_(Rational(1, 1));
+
+    std::cout << "\nDODECAHEDRON centered at (0, 0, 0) with all edge lengths == 1:";
+    std::map<int, Matrix<BiquadraticNumber> > dodec;
+    {
+      int ii = -1;
+      // Grows the dodecahedron "organically" with minimal "understanding" and no hardcoded values but is slow.
+      //auto dodecSet = growDodecahedron();
+
+      auto dodecSet = getDodecahedron(); // Uses cached values after running growDodecahedron().
+      for (const auto& vertex : dodecSet)
+      {
+        ++ii;
+        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
+        dodec[ii] = vertex;
+      }
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " neighbors:";
+      std::vector<int> neighbors;
+      for (const auto& jter : dodec)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == one_)
+        {
+          neighbors.push_back(jter.first);
+          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
+        }
+      }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::set<std::pair<int, int> > halfEdges;
+
+    for (const auto& iter : adjacencyGraph)
+    {
+      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
+    }
+
+    for (const auto& halfEdge : halfEdges)
+    {
+      std::cout << "\nHalf-edge: " << halfEdge.first << " --> " << halfEdge.second;
+    }
+    std::cout << "\n\nNum. half-edges == " << halfEdges.size();
+    std::cout << "\nNum. edges == " << halfEdges.size() / 2;
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < 2; ++verticesRemaining)
+        {
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
+              < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+
+    for (const auto& face : faces)
+    {
+      std::cout << "\nFace: (";
+      int ii = -1;
+      for (const auto& vert : face)
+      {
+        ++ii;
+        if (ii > 0) { std::cout << ", "; }
+        std::cout << vert;
+      }
+      std::cout << ")";
+    }
+    std::cout << "\n\nNum. faces == " << faces.size();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\n\nEuler characteristic ==\nNum. vertices - num. edges + num. faces == " <<
+      dodec.size() - halfEdges.size() / 2 + faces.size() << "\n";
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\nExporting dodecahedron to .obj format. Continue, Y or N?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+    std::cout << "\nWriting..." << std::endl;
+    bool wrote = exportDodecahedronObj("dodecahedron.obj");
+    std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
+
+    return true;
   }
 }

@@ -2,7 +2,8 @@
 # **Coding Samples by Paul Cernea.**
 
 <h1>
-  <a href="#"><img alt="ComputationalGeometry" src="computational_geometry/hundred_points_from_mac_2.png" width="100%"/></a>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronEdges.png" width="48%"/></a>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronSolid.png" width="48%"/></a>
 </h1>
 
 <p>
@@ -36,6 +37,10 @@
 ---
 
 ## **Computational Geometry.**
+
+<h1>
+  <a href="#"><img alt="ComputationalGeometry" src="computational_geometry/hundred_points_from_mac_2.png" width="100%"/></a>
+</h1>
 
 * This is a computational geometry suite written using the [C++](https://isocpp.org) programming language.
 * To build and run the program, navigate to the `computational_geometry` folder.
@@ -150,12 +155,20 @@
   * Download [glew](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download) in order to enable function calls like `glGenBuffers` in Windows.
   * Copy the `glew-2.1.0` folder to `Coding-Samples\mesh_renderer\MeshRenderer` or configure CMake to point to the relevant include, lib, and binary paths.
 * Usage: mesh_renderer.exe <path to .obj file>
-* Press E to export the loaded mesh if desired, Q to exit the app.
+* Press E to export the loaded mesh if desired, U to toggle wireframe mode, Q to exit the app.
 * Navigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Zoom In = Z, Zoom Out = Y.
 * Rotation: R = rotate clockwise, T = rotate counter-clockwise. W, A, S, and D to rotate the screen.
 * `MeshRenderer.doxy` is a template for generating Doxygen documentation. Sample output is generated in the `html` folder. The homepage is `index.html`.
+* Here is an example screenshot of a cow mesh in wireframe mode:
  
 <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/Cow.png" width="100%"/></a>
+
+* Here is a **dodecahedron** generated using the [Function Calculator](##function-calculator):
+
+<h1>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronEdges.png" width="48%"/></a>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronSolid.png" width="48%"/></a>
+</h1>
 
 [Back to Table of Contents.](##table-of-contents)
 
@@ -163,13 +176,16 @@
 
 ## **Function Calculator.**
 
-<a href="#"><img alt="ComputationalGeometry" src="function_calculator/matrixRotations.png" width="100%"/></a>
+<a href="#"><img alt="ComputationalGeometry" src="function_calculator/dodecahedron.png" width="100%"/></a>
 
-* This is a utility written in C++ for calculating with functions.
-* It is located in the `function_calculator` directory.
-* It can be built like the [graphing calculator](##graphing-math) and does not require extra libraries.
+* This is a utility written in C++ for calculating with functions. Above we see example output of vertices defining a **dodecahedron** as illustrated at the top using [Mesh Renderer](##mesh-renderer). The (regular) dodecahedron is a **Platonic solid** whose 12 faces are each pentagons with the same side length. The Function Calculator is notable because it can deduce and express the vertices of the dodecahedron exactly, and this involves not only square roots, but **square roots of square roots**!
+* The Function Calculator is located in the `function_calculator` directory.
+* It is built in a manner similar to the [graphing calculator](##graphing-math) and does not require extra libraries.
 * The **Function Calculator** is notable in that it mostly uses combinations of integers, square roots, and pi instead of floating-point arithmetic (doubles).
 * This allows for the manipulation of exact expressions which often come up in mathematical work, such as `cos(pi / 6) = sqrt(3) / 2`.
+
+<a href="#"><img alt="ComputationalGeometry" src="function_calculator/matrixRotations.png" width="100%"/></a>
+
 * It demonstrates the practical application of the irrationality of `sqrt(2), sqrt(3)` and the transcendental nature of `pi`: We can check, for instance, whether `A == 0` if we can write finite sums `A = a + b(pi) + c(pi)^2 + ...` and each of the `a, b, c... = 0`.
 * The calculator is useful for checking long tedious calculations involving square roots, polynomials, and exponentials.
 * For instance it computes that the reciprocal of `1 + sqrt(2) + sqrt(3)` is `1/2 + (1/4)sqrt(2) - (1/4)sqrt(6)`. It computes that the reciprocal of `1 + sqrt(3) + sqrt(5) + sqrt(7)` is `(-7 + 5 * sqrt(3) + 3 * sqrt(5) - sqrt(7) - sqrt(15) + sqrt(21) + sqrt(35) - sqrt(105)) * (1/16)`.

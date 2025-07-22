@@ -178,10 +178,10 @@ namespace FunctionalCalculator
       for (auto& iter : content)
       {
         if (iter.first.getRational(ratio)) { continue; }
-        QuadraticNumber sqrt1, sqrt2;
-        if (iter.first.simpleSquareRoot(sqrt1, sqrt2) == 0) { continue; }
+        QuadraticNumber quadSqrt;
+        if (!(iter.first.simpleSquareRoot(quadSqrt))) { continue; }
         searchConjugate = false;
-        auto coeff = iter.second * sqrt1;
+        auto coeff = iter.second * quadSqrt;
         content.erase(iter.first);
         QuadraticNumber one_(Rational(1));
         auto jter = content.find(one_);
@@ -222,6 +222,53 @@ namespace FunctionalCalculator
           }
           auto radicand = a2_times_iFirst + b2_times_jFirst +
             QuadraticNumber::sqrt(ratio) * diag * aa * bb;
+          content.erase(iter.first);
+          content.erase(jter.first);
+          auto kter = content.find(radicand);
+          if (kter == content.end()) { content[radicand] = sgn; }
+          else { kter->second = kter->second + sgn; }
+          break;
+        }
+        if (!searchConjugate) { break; }
+      }
+      if (!searchConjugate) { continue; }
+      for (auto& iter : content)
+      {
+        if (!isExtraSimplificationOn()) { break; }
+        if (iter.first.getRational(ratio)) { continue; }
+        bool coeff1_isNeg = (iter.second < QuadraticNumber());
+        auto qq1 = iter.second * iter.second * iter.first;
+        for (auto& jter : content)
+        {
+          if (jter.first.getRational(ratio)) { continue; }
+          if (iter.first == jter.first) { continue; }
+          bool coeff2_isNeg = (jter.second < QuadraticNumber());
+          auto qq2 = jter.second * jter.second * jter.first;
+          QuadraticNumber radicand;
+          if (!((qq1 * qq2 * QuadraticNumber(Rational(4))).simpleSquareRoot(radicand))) { continue; }
+          searchConjugate = false;
+          bool bothAreNeg = coeff1_isNeg && coeff2_isNeg;
+          bool onlyOneIsNeg = false;
+          if ((coeff1_isNeg || coeff2_isNeg) && !bothAreNeg) { onlyOneIsNeg = true; radicand = -radicand; }
+          radicand = radicand + qq1 + qq2; 
+          QuadraticNumber sgn = QuadraticNumber(Rational(1, 1));
+          if (coeff1_isNeg || coeff2_isNeg)
+          {
+            if (bothAreNeg) { sgn = -sgn; }
+            else if (coeff1_isNeg)
+            {
+              if (qq1 > qq2) { sgn = -sgn; }
+            }
+            else // if (coeff2_isNeg)
+            {
+              if (qq2 > qq1) { sgn = -sgn; }
+            }
+          }
+          if (radicand.getRational(ratio))
+          {
+            sgn = sgn * QuadraticNumber::sqrt(ratio);
+            radicand = QuadraticNumber(Rational(1, 1));
+          }
           content.erase(iter.first);
           content.erase(jter.first);
           auto kter = content.find(radicand);
@@ -608,6 +655,17 @@ namespace FunctionalCalculator
   {
     std::map<Rational, BiquadraticNumber> cosineValues;
     std::map<Rational, BiquadraticNumber> sineValues;
+    bool extraSimplificationOn = false;
+  }
+
+  bool BiquadraticNumber::isExtraSimplificationOn()
+  {
+    return extraSimplificationOn;
+  }
+
+  void BiquadraticNumber::setExtraSimplification(bool on)
+  {
+    extraSimplificationOn = on;
   }
 
   bool BiquadraticNumber::tryGetCosine(const Rational& input, BiquadraticNumber& output)
