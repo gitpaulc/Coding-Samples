@@ -102,6 +102,16 @@ namespace FunctionalCalculator
    *  each of whose edges coincides with the edge of another triangle.
    *  The icosahedron is regular if all the triangles are equilateral, i.e. have the same edge length.
    *  \param `edgeLength` the length of an edge of the icosahedron.
+   *  \remark This method uses a dual dodecahedron to obtain the vertices of the icosahedron, and is slow.
+   */
+  std::set<Matrix<BiquadraticNumber> > getIcosahedronViaDual(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \return Set of vertices (x, y, z) making up a regular icosahedron.
+   *  An icosahedron is a shape in three-dimensional space consisting of twenty triangles,
+   *  each of whose edges coincides with the edge of another triangle.
+   *  The icosahedron is regular if all the triangles are equilateral, i.e. have the same edge length.
+   *  \param `edgeLength` the length of an edge of the icosahedron.
+   *  \remark This method uses cached vertex values and is fast.
    */
   std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 

@@ -195,414 +195,6 @@ namespace FunctionalCalculator
     return getSymmetriesOfACube(includeReflections);
   }
 
-  bool test_dodecahedron()
-  {
-    std::string prompt;
-    BiquadraticNumber edgeLength(Rational(1, 1));
-    auto edgeLengthSq = edgeLength * edgeLength;
-
-    std::cout << "\nDODECAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() << ":";
-    std::map<int, Matrix<BiquadraticNumber> > dodec;
-    {
-      int ii = -1;
-      // Grows the dodecahedron "organically" with minimal "understanding" and no hardcoded values but is slow.
-      //auto dodecSet = growDodecahedron(edgeLength);
-
-      auto dodecSet = getDodecahedron(edgeLength); // Uses cached values after running growDodecahedron().
-      for (const auto& vertex : dodecSet)
-      {
-        ++ii;
-        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
-        dodec[ii] = vertex;
-      }
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    for (const auto& iter : dodec)
-    {
-      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    std::map<int, std::vector<int> > adjacencyGraph;
-
-    for (const auto& iter : dodec)
-    {
-      std::cout << "\nVertex " << iter.first << " neighbors:";
-      std::vector<int> neighbors;
-      for (const auto& jter : dodec)
-      {
-        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
-        if (neighborSqDist == edgeLengthSq)
-        {
-          neighbors.push_back(jter.first);
-          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
-        }
-      }
-      adjacencyGraph[iter.first] = neighbors;
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    std::set<std::pair<int, int> > halfEdges;
-
-    for (const auto& iter : adjacencyGraph)
-    {
-      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
-    }
-
-    for (const auto& halfEdge : halfEdges)
-    {
-      std::cout << "\nHalf-edge: " << halfEdge.first << " --> " << halfEdge.second;
-    }
-    std::cout << "\n\nNum. half-edges == " << halfEdges.size();
-    std::cout << "\nNum. edges == " << halfEdges.size() / 2;
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
-    std::set<std::vector<int>, CompareFaces> faces;
-    for (const auto& iter : adjacencyGraph)
-    {
-      std::vector<std::vector<int> > facesFrom;
-      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
-      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
-      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
-      for (const auto& faceFrom : facesFrom)
-      {
-        auto current = faceFrom;
-        for (int verticesRemaining = 0; verticesRemaining < 2; ++verticesRemaining)
-        {
-          int nextOne = -1;
-          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
-          {
-            bool doNotAdd = false;
-            for (int ii = 0; ii < (int)current.size(); ++ii)
-            {
-              if (subsequent != current[ii]) { continue; }
-              doNotAdd = true; break;
-            }
-            if (doNotAdd) { continue; }
-            if (nextOne == -1) { nextOne = subsequent; continue; }
-            if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
-              < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
-            {
-              nextOne = subsequent; continue;
-            }
-          }
-          current.push_back(nextOne);
-        }
-        faces.insert(current);
-      }
-    }
-
-    for (const auto& face : faces)
-    {
-      std::cout << "\nFace: (";
-      int ii = -1;
-      for (const auto& vert : face)
-      {
-        ++ii;
-        if (ii > 0) { std::cout << ", "; }
-        std::cout << vert;
-      }
-      std::cout << ")";
-    }
-    std::cout << "\n\nNum. faces == " << faces.size();
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    std::cout << "\n\nEuler characteristic ==\nNum. vertices - num. edges + num. faces == " <<
-      dodec.size() - halfEdges.size() / 2 + faces.size() << "\n";
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    std::cout << "\nExporting dodecahedron to .obj format. Continue, Y or N?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
-
-    std::cout << "\nWriting..." << std::endl;
-    bool wrote = exportDodecahedronObj("dodecahedron.obj");
-    std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
-
-    return true;
-  }
-
-  bool test_icosahedron()
-  {
-    std::string prompt;
-    BiquadraticNumber edgeLength(Rational(1, 1));
-    auto edgeLengthSq = edgeLength * edgeLength;
-
-    std::cout << "\nICOSAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() <<":";
-    std::map<int, Matrix<BiquadraticNumber> > icosa;
-    {
-      int ii = -1;
-      // Creates an icosahedron from a dual dodecahedron.
-      auto icosaSet = getIcosahedron(edgeLength);
-      //auto icosaSet = getIcosahedron(edgeLength); // Uses cached values after running getIcosahedronViaDual().
-      for (const auto& vertex : icosaSet)
-      {
-        ++ii;
-        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
-        icosa[ii] = vertex;
-      }
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    for (const auto& iter : icosa)
-    {
-      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    std::map<int, std::vector<int> > adjacencyGraph;
-
-    for (const auto& iter : icosa)
-    {
-      std::cout << "\nVertex " << iter.first << " neighbors:";
-      std::vector<int> neighbors;
-      for (const auto& jter : icosa)
-      {
-        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
-        if (neighborSqDist == edgeLengthSq)
-        {
-          neighbors.push_back(jter.first);
-          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
-        }
-      }
-      adjacencyGraph[iter.first] = neighbors;
-    }
-
-    return true;
-  }
-
-  bool test_platonic()
-  {
-    std::string prompt;
-    auto tetrahedralSymmetries = getTetrahedralSymmetries();
-    std::cout << "\nTetrahedral (orientation-preserving) symmetries are:";
-    int ind = -1;
-    for (const auto& sym : tetrahedralSymmetries)
-    {
-      ++ind;
-      if ((ind % 5 == 0) && (ind > 0))
-      {
-        std::cout << "\n\nContinue... or 'E' to end printout?  ";
-        std::cin >> prompt;
-        if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
-      }
-      std::cout << "\n" << sym.print(true);
-    }
-    std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << tetrahedralSymmetries.size();
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    {
-      auto tetrahedralSymmetries0 = getTetrahedralSymmetries(true);
-      std::cout << "\nFull group of tetrahedral symmetries is:";
-      ind = -1;
-      for (const auto& sym : tetrahedralSymmetries0)
-      {
-        ++ind;
-        if ((ind % 5 == 0) && (ind > 0))
-        {
-          std::cout << "\n\nContinue... or 'E' to end printout?  ";
-          std::cin >> prompt;
-          if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
-        }
-        std::cout << "\n" << sym.print(true);
-      }
-      std::cout << "\nSize of full group is: " << tetrahedralSymmetries0.size();
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-      Matrix<BiquadraticNumber> vec0;
-      vec0.addRow({ BiquadraticNumber::sqrt(6) * Rational(1, 4),
-        Rational(0), Rational(0) });
-      vec0 = vec0.transpose();
-      std::set<Matrix<BiquadraticNumber> > tetrahedron;
-      for (const auto& sym : tetrahedralSymmetries0)
-      {
-        tetrahedron.insert((sym * vec0).transpose());
-      }
-      std::cout << "\nVertex count of tetrahedron generated by these is: " << tetrahedron.size();
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-    }
-
-    {
-      auto edgeLength = BiquadraticNumber::sqrt(Rational(5));
-      auto tetrahedron = getTetrahedron(edgeLength);
-      std::cout << "\nVertices of tetrahedron of edge length " << edgeLength.print() << " are:";
-      for (const auto& vec : tetrahedron)
-      {
-        std::cout << "\n" << vec.print(true);
-      }
-      std::cout << "\n";
-      for (const auto& vertexA : tetrahedron)
-      {
-        for (const auto& vertexB : tetrahedron)
-        {
-          if (vertexA == vertexB) { continue; }
-          std::cout << "\nSquared distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
-        }
-      }
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-    }
-
-    {
-      auto octahedralSymmetries0 = getSymmetriesOfACube(true);
-      std::cout << "\nFull group of octahedral symmetries is:";
-      ind = -1;
-      for (const auto& sym : octahedralSymmetries0)
-      {
-        ++ind;
-        if ((ind % 5 == 0) && (ind > 0))
-        {
-          std::cout << "\n\nContinue... or 'E' to end printout?  ";
-          std::cin >> prompt;
-          if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
-        }
-        std::cout << "\n" << sym.print(true);
-      }
-      std::cout << "\nSize of full group is: " << octahedralSymmetries0.size();
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-      std::set<Matrix<BiquadraticNumber> > cube = getCube();
-      for (const auto& vertex : cube)
-      {
-        std::cout << "\nCube vertex: " << vertex.print(true);
-      }
-      std::cout << "\nVertex count of cube is: " << cube.size();
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-      std::set<Matrix<BiquadraticNumber> > octahedron = getOctahedron();
-      for (const auto& vertex : octahedron)
-      {
-        std::cout << "\nOctahedron vertex: " << vertex.print(true);
-      }
-      std::cout << "\nVertex count of octahedron is: " << octahedron.size();
-
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-    }
-
-    ind = -1;
-    bool passedClosedness = true;
-    for (const auto& sym0 : tetrahedralSymmetries)
-    {
-      std::set<Matrix<BiquadraticNumber> > newSymmetries;
-      for (const auto& sym : tetrahedralSymmetries)
-      {
-        newSymmetries.insert(sym0 * sym);
-      }
-      if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nThe set of tetrahedral symmetries is closed under multiplication by " << sym0.print(true); }
-      else { passedClosedness = false; }
-    }
-    if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    {
-      std::set<Matrix<BiquadraticNumber> > newSymmetries;
-      for (const auto& sym : tetrahedralSymmetries)
-      {
-        bool success = false;
-        auto symInv = sym.inverse(success);
-        if (!success) { std::cout << "\nInverse failed!"; continue; }
-        auto det = symInv.determinant();
-        std::cout << "\n" << symInv.print(true) << "\nIts determinant is " << det.print() << " since it's a rotation.";
-        newSymmetries.insert(sym);
-      }
-      std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << newSymmetries.size();
-    }
-
-    std::cout << "\n\nMore... or 'T' to end current test?  ";
-    std::cin >> prompt;
-    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
-
-    {
-      Matrix<BiquadraticNumber> vec0;
-      vec0.addRow({ BiquadraticNumber::sqrt(6) * Rational(1, 4), Rational(0), Rational(0) });
-      vec0 = vec0.transpose();
-      std::set<Matrix<BiquadraticNumber> > tetrahedron;
-      for (const auto& sym : tetrahedralSymmetries) { tetrahedron.insert((sym * vec0).transpose()); }
-      std::cout << "\nNumber of vertices in a tetrahedron = " << tetrahedron.size() << "\nWe can choose them to be:";
-      for (const auto& vertex : tetrahedron)
-      {
-        std::cout << "\n" << vertex.print(true);
-      }
-      for (const auto& vertexA : tetrahedron)
-      {
-        std::cout << "\n\nSquared length of " << vertexA.print(true) << " = " << vertexA.matrixSqNorm().print();
-        for (const auto& vertexB : tetrahedron)
-        {
-          if (vertexA == vertexB) { continue; }
-          std::cout << "\n  Distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
-        }
-      }
-    }
-
-    std::cout << "\n";
-    return true;
-  }
-
   /** Given vertices u and v having z-coordinate zero along with the origin w, and 
    *  proceeding clockwise along a pentagonal face of a regular dodecahedron,
    *  returns the unique vertex X in the dodecahedron such that |X - u| == |X - w| and |X - v| == |u - v|.
@@ -1270,37 +862,8 @@ dodec.insert(vertex.transpose());
     return success;
   }
 
-  std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength)
+  std::set<Matrix<BiquadraticNumber> > getIcosahedronViaDual(const BiquadraticNumber& edgeLength)
   {
-    /*
- 
-ICOSAHEDRON centered at (0, 0, 0) whose dual dodecahedron has all vertex lengths == 1:
-Vertex 0 =
-((-1) * Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 1 =
-((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 2 =
-((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
-Vertex 3 =
-(Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 4 =
-(Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 5 =
-(, 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
-Vertex 6 =
-((-1) * Sqrt(1 / 30 - (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 - (8 / 375) * Sqrt(5)) + Sqrt(1 / 150 + (1 / 750) * Sqrt(5)), 0, Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
-Vertex 7 =
-(Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 8 =
-(Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
-Vertex 9 =
-(Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
-Vertex 10 =
-(Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
-Vertex 11 =
-(Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) + Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
-
-    */
     std::set<Matrix<BiquadraticNumber> > icosa;
     BiquadraticNumber edgeLengthSq = edgeLength * edgeLength;
     auto defaultRadius = QuadraticNumber(Rational(9, 8)) + QuadraticNumber::sqrt(Rational(45, 64));
@@ -1416,5 +979,449 @@ Vertex 11 =
       icosa.insert(barycenter);
     }
     return icosa;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength)
+  {
+    std::set<Matrix<BiquadraticNumber> > icosa;
+    BiquadraticNumber edgeLengthSq = edgeLength * edgeLength;
+    /*
+
+   ICOSAHEDRON centered at (0, 0, 0) whose dual dodecahedron has all vertex lengths == 1:
+   Vertex 0 =
+   ((-1) * Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 1 =
+   ((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 2 =
+   ((-1) * Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
+   Vertex 3 =
+   (Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 4 =
+   (Sqrt(1 / 150 - (1 / 750) * Sqrt(5)) - Sqrt(1 / 15 + (2 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 5 =
+   (, 0, (-1) * Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) - Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
+   Vertex 6 =
+   ((-1) * Sqrt(1 / 30 - (11 / 750) * Sqrt(5)) - Sqrt(4 / 75 - (8 / 375) * Sqrt(5)) + Sqrt(1 / 150 + (1 / 750) * Sqrt(5)), 0, Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(16 / 75 + (32 / 375) * Sqrt(5)))
+   Vertex 7 =
+   (Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 8 =
+   (Sqrt(1 / 30 + (1 / 150) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 10) * Sqrt(15), Sqrt(1 / 75 + (2 / 375) * Sqrt(5)) + Sqrt(2 / 75 + (2 / 375) * Sqrt(5)))
+   Vertex 9 =
+   (Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (-1 / 6) * Sqrt(3) - (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
+   Vertex 10 =
+   (Sqrt(1 / 30 + (11 / 750) * Sqrt(5)) + Sqrt(4 / 75 + (8 / 375) * Sqrt(5)), (1 / 6) * Sqrt(3) + (1 / 30) * Sqrt(15), Sqrt(1 / 75 - (2 / 375) * Sqrt(5)) - Sqrt(8 / 75 + (8 / 375) * Sqrt(5)))
+   Vertex 11 =
+   (Sqrt(4 / 75 + (8 / 375) * Sqrt(5)) + Sqrt(8 / 75 + (8 / 375) * Sqrt(5)), 0, Sqrt(1 / 15 + (2 / 75) * Sqrt(5)))
+
+       */
+    return icosa;
+  }
+
+  bool test_dodecahedron()
+  {
+    std::string prompt;
+    BiquadraticNumber edgeLength(Rational(1, 1));
+    auto edgeLengthSq = edgeLength * edgeLength;
+
+    std::cout << "\nDODECAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() << ":";
+    std::map<int, Matrix<BiquadraticNumber> > dodec;
+    {
+      int ii = -1;
+      // Grows the dodecahedron "organically" with minimal "understanding" and no hardcoded values but is slow.
+      //auto dodecSet = growDodecahedron(edgeLength);
+
+      auto dodecSet = getDodecahedron(edgeLength); // Uses cached values after running growDodecahedron().
+      for (const auto& vertex : dodecSet)
+      {
+        ++ii;
+        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
+        dodec[ii] = vertex;
+      }
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " neighbors:";
+      std::vector<int> neighbors;
+      for (const auto& jter : dodec)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == edgeLengthSq)
+        {
+          neighbors.push_back(jter.first);
+          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
+        }
+      }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::set<std::pair<int, int> > halfEdges;
+
+    for (const auto& iter : adjacencyGraph)
+    {
+      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
+    }
+
+    for (const auto& halfEdge : halfEdges)
+    {
+      std::cout << "\nHalf-edge: " << halfEdge.first << " --> " << halfEdge.second;
+    }
+    std::cout << "\n\nNum. half-edges == " << halfEdges.size();
+    std::cout << "\nNum. edges == " << halfEdges.size() / 2;
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < 2; ++verticesRemaining)
+        {
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
+              < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+
+    for (const auto& face : faces)
+    {
+      std::cout << "\nFace: (";
+      int ii = -1;
+      for (const auto& vert : face)
+      {
+        ++ii;
+        if (ii > 0) { std::cout << ", "; }
+        std::cout << vert;
+      }
+      std::cout << ")";
+    }
+    std::cout << "\n\nNum. faces == " << faces.size();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\n\nEuler characteristic ==\nNum. vertices - num. edges + num. faces == " <<
+      dodec.size() - halfEdges.size() / 2 + faces.size() << "\n";
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\nExporting dodecahedron to .obj format. Continue, Y or N?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+    std::cout << "\nWriting..." << std::endl;
+    bool wrote = exportDodecahedronObj("dodecahedron.obj");
+    std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
+
+    return true;
+  }
+
+  bool test_icosahedron()
+  {
+    std::string prompt;
+    BiquadraticNumber edgeLength(Rational(1, 1));
+    auto edgeLengthSq = edgeLength * edgeLength;
+
+    std::cout << "\nICOSAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() << ":";
+    std::map<int, Matrix<BiquadraticNumber> > icosa;
+    {
+      int ii = -1;
+      // Creates an icosahedron from a dual dodecahedron.
+      auto icosaSet = getIcosahedron(edgeLength);
+      //auto icosaSet = getIcosahedron(edgeLength); // Uses cached values after running getIcosahedronViaDual().
+      for (const auto& vertex : icosaSet)
+      {
+        ++ii;
+        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
+        icosa[ii] = vertex;
+      }
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    for (const auto& iter : icosa)
+    {
+      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+
+    for (const auto& iter : icosa)
+    {
+      std::cout << "\nVertex " << iter.first << " neighbors:";
+      std::vector<int> neighbors;
+      for (const auto& jter : icosa)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == edgeLengthSq)
+        {
+          neighbors.push_back(jter.first);
+          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
+        }
+      }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    return true;
+  }
+
+  bool test_platonic()
+  {
+    std::string prompt;
+    auto tetrahedralSymmetries = getTetrahedralSymmetries();
+    std::cout << "\nTetrahedral (orientation-preserving) symmetries are:";
+    int ind = -1;
+    for (const auto& sym : tetrahedralSymmetries)
+    {
+      ++ind;
+      if ((ind % 5 == 0) && (ind > 0))
+      {
+        std::cout << "\n\nContinue... or 'E' to end printout?  ";
+        std::cin >> prompt;
+        if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
+      }
+      std::cout << "\n" << sym.print(true);
+    }
+    std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << tetrahedralSymmetries.size();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    {
+      auto tetrahedralSymmetries0 = getTetrahedralSymmetries(true);
+      std::cout << "\nFull group of tetrahedral symmetries is:";
+      ind = -1;
+      for (const auto& sym : tetrahedralSymmetries0)
+      {
+        ++ind;
+        if ((ind % 5 == 0) && (ind > 0))
+        {
+          std::cout << "\n\nContinue... or 'E' to end printout?  ";
+          std::cin >> prompt;
+          if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
+        }
+        std::cout << "\n" << sym.print(true);
+      }
+      std::cout << "\nSize of full group is: " << tetrahedralSymmetries0.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      Matrix<BiquadraticNumber> vec0;
+      vec0.addRow({ BiquadraticNumber::sqrt(6) * Rational(1, 4),
+        Rational(0), Rational(0) });
+      vec0 = vec0.transpose();
+      std::set<Matrix<BiquadraticNumber> > tetrahedron;
+      for (const auto& sym : tetrahedralSymmetries0)
+      {
+        tetrahedron.insert((sym * vec0).transpose());
+      }
+      std::cout << "\nVertex count of tetrahedron generated by these is: " << tetrahedron.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+
+    {
+      auto edgeLength = BiquadraticNumber::sqrt(Rational(5));
+      auto tetrahedron = getTetrahedron(edgeLength);
+      std::cout << "\nVertices of tetrahedron of edge length " << edgeLength.print() << " are:";
+      for (const auto& vec : tetrahedron)
+      {
+        std::cout << "\n" << vec.print(true);
+      }
+      std::cout << "\n";
+      for (const auto& vertexA : tetrahedron)
+      {
+        for (const auto& vertexB : tetrahedron)
+        {
+          if (vertexA == vertexB) { continue; }
+          std::cout << "\nSquared distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
+        }
+      }
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+
+    {
+      auto octahedralSymmetries0 = getSymmetriesOfACube(true);
+      std::cout << "\nFull group of octahedral symmetries is:";
+      ind = -1;
+      for (const auto& sym : octahedralSymmetries0)
+      {
+        ++ind;
+        if ((ind % 5 == 0) && (ind > 0))
+        {
+          std::cout << "\n\nContinue... or 'E' to end printout?  ";
+          std::cin >> prompt;
+          if ((prompt.compare("E") == 0) || (prompt.compare("e") == 0)) { break; }
+        }
+        std::cout << "\n" << sym.print(true);
+      }
+      std::cout << "\nSize of full group is: " << octahedralSymmetries0.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      std::set<Matrix<BiquadraticNumber> > cube = getCube();
+      for (const auto& vertex : cube)
+      {
+        std::cout << "\nCube vertex: " << vertex.print(true);
+      }
+      std::cout << "\nVertex count of cube is: " << cube.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      std::set<Matrix<BiquadraticNumber> > octahedron = getOctahedron();
+      for (const auto& vertex : octahedron)
+      {
+        std::cout << "\nOctahedron vertex: " << vertex.print(true);
+      }
+      std::cout << "\nVertex count of octahedron is: " << octahedron.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+
+    ind = -1;
+    bool passedClosedness = true;
+    for (const auto& sym0 : tetrahedralSymmetries)
+    {
+      std::set<Matrix<BiquadraticNumber> > newSymmetries;
+      for (const auto& sym : tetrahedralSymmetries)
+      {
+        newSymmetries.insert(sym0 * sym);
+      }
+      if (newSymmetries == tetrahedralSymmetries) { std::cout << "\n\nThe set of tetrahedral symmetries is closed under multiplication by " << sym0.print(true); }
+      else { passedClosedness = false; }
+    }
+    if (passedClosedness) { std::cout << "\nThe set of tetrahedral symmetries truly forms a group."; }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    {
+      std::set<Matrix<BiquadraticNumber> > newSymmetries;
+      for (const auto& sym : tetrahedralSymmetries)
+      {
+        bool success = false;
+        auto symInv = sym.inverse(success);
+        if (!success) { std::cout << "\nInverse failed!"; continue; }
+        auto det = symInv.determinant();
+        std::cout << "\n" << symInv.print(true) << "\nIts determinant is " << det.print() << " since it's a rotation.";
+        newSymmetries.insert(sym);
+      }
+      std::cout << "\nNumber of tetrahedral (orientation-preserving) symmetries: " << newSymmetries.size();
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    {
+      Matrix<BiquadraticNumber> vec0;
+      vec0.addRow({ BiquadraticNumber::sqrt(6) * Rational(1, 4), Rational(0), Rational(0) });
+      vec0 = vec0.transpose();
+      std::set<Matrix<BiquadraticNumber> > tetrahedron;
+      for (const auto& sym : tetrahedralSymmetries) { tetrahedron.insert((sym * vec0).transpose()); }
+      std::cout << "\nNumber of vertices in a tetrahedron = " << tetrahedron.size() << "\nWe can choose them to be:";
+      for (const auto& vertex : tetrahedron)
+      {
+        std::cout << "\n" << vertex.print(true);
+      }
+      for (const auto& vertexA : tetrahedron)
+      {
+        std::cout << "\n\nSquared length of " << vertexA.print(true) << " = " << vertexA.matrixSqNorm().print();
+        for (const auto& vertexB : tetrahedron)
+        {
+          if (vertexA == vertexB) { continue; }
+          std::cout << "\n  Distance to" << vertexB.print(true) << " = " << (vertexA.matrixSqNorm() - vertexA.matrixDot(vertexB) - vertexA.matrixDot(vertexB) + vertexB.matrixSqNorm()).print();
+        }
+      }
+    }
+
+    std::cout << "\n";
+    return true;
   }
 }
