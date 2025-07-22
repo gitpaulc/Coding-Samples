@@ -986,6 +986,7 @@ namespace FunctionalCalculator
 
     auto zero_ = BiquadraticNumber();
     BiquadraticNumber one_(Rational(1));
+    BiquadraticNumber five(Rational(5));
     BiquadraticNumber sideLength = one_;
     auto scaleFactor = edgeLength / sideLength;
     BiquadraticNumber half(Rational(1, 2));
@@ -1047,9 +1048,13 @@ namespace FunctionalCalculator
       vertex.addRow({ s7 - s8, one_ + golden, -s3 - s4 });
       icosa.insert(vertex.transpose());
     }
+    {
+      // 5: (, 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ zero_, zero_, -s3 * five });
+      icosa.insert(vertex.transpose());
+    }
     /*
-Vertex 5 =
-(, 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
 Vertex 6 =
 ((-1) * Sqrt(1 / 2 - (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 - (8 / 25) * Sqrt(5)) + Sqrt(1 / 10 + (1 / 50) * Sqrt(5)), 0, Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
 Vertex 7 =
