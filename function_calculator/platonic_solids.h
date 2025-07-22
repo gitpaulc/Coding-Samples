@@ -78,6 +78,7 @@ namespace FunctionalCalculator
    *  cache the result and return it that way. It starts with a pentagon in the plane { z == 0 } and grows
    *  additional pentagonal faces from there, until any further growing results in no new vertices.
    */
+  std::set<Matrix<BiquadraticNumber> > growDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
   bool test_dodecahedron();

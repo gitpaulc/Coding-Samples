@@ -656,7 +656,7 @@ namespace FunctionalCalculator
     dodec.insert(v4);
   }
 
-  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  std::set<Matrix<BiquadraticNumber> > growDodecahedron(const BiquadraticNumber& edgeLength)
   {
     BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > dodec;
@@ -675,7 +675,6 @@ namespace FunctionalCalculator
         }
         sideLength = sinAngle + sinAngle;
       }
-      // sideLength = edgeLength;
       auto initialPentagon = getRegularPolygon(5, sideLength);
       for (const auto& vertex : initialPentagon)
       {
@@ -693,8 +692,10 @@ namespace FunctionalCalculator
     {
       if (started)
       {
-        if ((oldCountedSize == counted.size()) && 
-            (oldDodecSize == dodec.size())) { break; }
+        if ((oldCountedSize == counted.size()) &&
+          (oldDodecSize == dodec.size())) {
+          break;
+        }
         oldCountedSize = counted.size();
         oldDodecSize = dodec.size();
       }
@@ -744,6 +745,181 @@ namespace FunctionalCalculator
       dodec.insert(newVertex);
       completePentagonalFace(neighbors[0], current, newVertex, sideLength, dodec);
     }
+
+    std::set<Matrix<BiquadraticNumber> > dodecahedron;
+    for (bool done = false; !done; done = true)
+    {
+      Matrix<BiquadraticNumber> barycenter = Matrix<BiquadraticNumber>::zeroMatrix(3, 1);
+      const auto numVertices = (int)dodec.size();
+      if (numVertices == 0) { break; }
+      auto coeff = Matrix<BiquadraticNumber>({ Rational(1, numVertices) });
+      for (const auto& vertex : dodec)
+      {
+        barycenter = barycenter + (vertex * coeff);
+      }
+      for (const auto& vertex : dodec)
+      {
+        dodecahedron.insert((vertex - barycenter) * scaleFactor);
+      }
+    }
+    BiquadraticNumber::setExtraSimplification(false);
+    return dodecahedron;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength)
+  {
+    /*
+Dodecahedron:
+Vertex 0 =
+((-1) * Sqrt(1 + (2 / 5) * Sqrt(5)), 0, Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 1 =
+((-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)), -1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 2 =
+((-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)), 1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 3 =
+((-1) * Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), 0, Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 4 =
+((-1) * Sqrt(1 / 4 + (1 / 10) * Sqrt(5)), -1 / 2, (-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 5 =
+((-1) * Sqrt(1 / 4 + (1 / 10) * Sqrt(5)), 1 / 2, (-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 6 =
+((-1) * Sqrt(1 / 8 + (1 / 40) * Sqrt(5)), -3 / 4 - (1 / 4) * Sqrt(5), Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 7 =
+((-1) * Sqrt(1 / 8 + (1 / 40) * Sqrt(5)), 3 / 4 + (1 / 4) * Sqrt(5), Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 8 =
+((-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)), -1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 9 =
+((-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)), 1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 10 =
+(Sqrt(1 / 8 - (1 / 40) * Sqrt(5)), -1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 11 =
+(Sqrt(1 / 8 - (1 / 40) * Sqrt(5)), 1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 12 =
+(Sqrt(1 / 8 + (1 / 40) * Sqrt(5)), -3 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 13 =
+(Sqrt(1 / 8 + (1 / 40) * Sqrt(5)), 3 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 14 =
+(Sqrt(1 / 4 + (1 / 10) * Sqrt(5)), -1 / 2, Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 15 =
+(Sqrt(1 / 4 + (1 / 10) * Sqrt(5)), 1 / 2, Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 16 =
+(Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), 0, (-1) * Sqrt(5 / 8 + (11 / 40) * Sqrt(5)))
+Vertex 17 =
+(Sqrt(5 / 8 + (11 / 40) * Sqrt(5)), -1 / 4 - (1 / 4) * Sqrt(5), Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 18 =
+(Sqrt(5 / 8 + (11 / 40) * Sqrt(5)), 1 / 4 + (1 / 4) * Sqrt(5), Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+Vertex 19 =
+(Sqrt(1 + (2 / 5) * Sqrt(5)), 0, (-1) * Sqrt(1 / 8 - (1 / 40) * Sqrt(5)))
+    */
+
+
+    BiquadraticNumber::setExtraSimplification(true);
+    std::set<Matrix<BiquadraticNumber> > dodec;
+    /*BiquadraticNumber sideLength;
+    {
+      {
+        Rational angle(1, 5);
+        BiquadraticNumber half(Rational(1, 2));
+        BiquadraticNumber sinAngle;
+        bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+        if (!success)
+        {
+          BiquadraticNumber::setExtraSimplification(false);
+          throw std::exception("Unsupported angle.");
+          return dodec;
+        }
+        sideLength = sinAngle + sinAngle;
+      }
+    }*/
+    auto zero_ = BiquadraticNumber();
+    BiquadraticNumber one_(Rational(1));
+    BiquadraticNumber sideLength = one_;
+    auto scaleFactor = edgeLength / sideLength;
+    BiquadraticNumber half(Rational(1, 2));
+    BiquadraticNumber threeHalves(Rational(3, 2));
+    BiquadraticNumber quarter(Rational(1, 4));
+    BiquadraticNumber eighth(Rational(1, 8));
+    BiquadraticNumber threeFourths(Rational(3, 4));
+    BiquadraticNumber fiveEighths(Rational(5, 8));
+    BiquadraticNumber s1 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
+      + QuadraticNumber(Rational(1, 8)) * QuadraticNumber::sqrt(5));
+    BiquadraticNumber s2 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
+      - QuadraticNumber(Rational(1, 8)) * QuadraticNumber::sqrt(5));
+    BiquadraticNumber s3 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 4))
+      + QuadraticNumber(Rational(1, 2)) * QuadraticNumber::sqrt(5));
+    auto sqrt5 = BiquadraticNumber::sqrt(Rational(5));
+    auto golden = half + half * sqrt5;
+    {
+      // 0: (-1 / 2 - (1 / 2) * Sqrt(5), 0, 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -golden, zero_, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 1: (-3 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -threeFourths - quarter * sqrt5, -s1, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 2: (-3 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -threeFourths - quarter * sqrt5, s1, one_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 3: (-1, 0, 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -one_, zero_, threeHalves + half * sqrt5 });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 4: (-1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -quarter - quarter * sqrt5, -s2, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 5: (-1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -quarter - quarter * sqrt5, s2, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 6: (-1 / 2, (-1) * Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -half, -s3, golden });
+      dodec.insert(vertex.transpose());
+    }
+    /*
+ 
+Vertex 7 =
+(-1 / 2, Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+Vertex 8 =
+(1 / 4 - (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+Vertex 9 =
+(1 / 4 - (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+Vertex 10 =
+(-1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 0)
+Vertex 11 =
+(-1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 0)
+Vertex 12 =
+(1 / 2, (-1) * Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1)
+Vertex 13 =
+(1 / 2, Sqrt(5 / 4 + (1 / 2) * Sqrt(5)), 1)
+Vertex 14 =
+(1 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+Vertex 15 =
+(1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+Vertex 16 =
+(1, 0, 0)
+Vertex 17 =
+(3 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+Vertex 18 =
+(3 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+Vertex 19 =
+(1 / 2 + (1 / 2) * Sqrt(5), 0, 1)
+   */
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     for (bool done = false; !done; done = true)
     {
