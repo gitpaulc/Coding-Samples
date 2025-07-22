@@ -73,6 +73,10 @@ namespace FunctionalCalculator
    *  each of whose edges coincides with the edge of another pentagon.
    *  It is regular if the edge lengths of the pentagons are all equal.
    *  \param `edgeLength` the length of an edge of the dodecahedron.
+   * 
+   *  \remark This method grows the dodecahedron organically. Once the result is known, it is faster to
+   *  cache the result and return it that way. It starts with a pentagon in the plane { z == 0 } and grows
+   *  additional pentagonal faces from there, until any further growing results in no new vertices.
    */
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 

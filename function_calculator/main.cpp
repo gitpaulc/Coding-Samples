@@ -1013,6 +1013,30 @@ bool test_quadratic()
 
 bool test_quad_factor()
 {
+  std::string prompt = "";
+  {
+    auto sqrt5 = QuadraticNumber::sqrt(5);
+    QuadraticNumber qq(Rational(15, 200));
+    qq = qq - QuadraticNumber::sqrt(Rational(1, 1600)) * sqrt5;
+    QuadraticNumber quadSqrt;
+    bool hasSimpleSqrt = qq.simpleSquareRoot(quadSqrt);
+    std::cout << "\nqq == " << qq.print() << "\n";
+    if (hasSimpleSqrt)
+    {
+      std::cout << "sqrt(qq) == " << quadSqrt.print() << "\n";
+    }
+    BiquadraticNumber::setExtraSimplification(true);
+    auto xx = BiquadraticNumber::sqrt(QuadraticNumber(Rational(1, 4)) - QuadraticNumber(Rational(1, 10)) * sqrt5);
+    auto yy = BiquadraticNumber::sqrt(QuadraticNumber(Rational(1, 8)) - QuadraticNumber(Rational(1, 40)) * sqrt5);
+    std::cout << "\n" << xx.print() << " + " << yy.print() << " == " << (xx + yy).print() << "\n";
+    auto XX = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 4)) + QuadraticNumber(Rational(1, 2)) * sqrt5);
+    auto YY = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8)) + QuadraticNumber(Rational(1, 8)) * sqrt5);
+    std::cout << "\n" << XX.print() << " - " << YY.print() << " == " << (XX - YY).print() << "\n";
+    BiquadraticNumber::setExtraSimplification(false);
+    std::cout << "\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  }
   auto unit = QuadraticNumber(Rational(1));
   std::cout << "\nPrime factorization of " << unit.print() << " is:\n";
   std::cout << unit.printFactors();
@@ -1031,7 +1055,6 @@ bool test_quad_factor()
   number = (QuadraticNumber::sqrt(Rational(12)) + QuadraticNumber(Rational(4))) * QuadraticNumber(Rational(1, 3));
   std::cout << "\nPrime factorization of " << number.print() << " is:\n";
   std::cout << number.printFactors();
-  std::string prompt = "";
   std::cout << "\n\nThe next part of this test is extremely slow.";
   std::cout << "\nMore... or 'T' to end current test?  ";
   std::cin >> prompt;
