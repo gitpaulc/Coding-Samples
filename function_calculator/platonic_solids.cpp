@@ -606,9 +606,7 @@ namespace FunctionalCalculator
     BiquadraticNumber half(Rational(1, 2));
     BiquadraticNumber threeHalves(Rational(3, 2));
     BiquadraticNumber quarter(Rational(1, 4));
-    BiquadraticNumber eighth(Rational(1, 8));
     BiquadraticNumber threeFourths(Rational(3, 4));
-    BiquadraticNumber fiveEighths(Rational(5, 8));
     BiquadraticNumber s1 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
       + QuadraticNumber(Rational(1, 8)) * QuadraticNumber::sqrt(5));
     BiquadraticNumber s2 = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5, 8))
