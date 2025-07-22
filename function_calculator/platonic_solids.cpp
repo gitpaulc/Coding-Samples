@@ -935,7 +935,7 @@ namespace FunctionalCalculator
     std::string prompt;
     BiquadraticNumber one_(Rational(1, 1));
 
-    std::cout << "\nDodecahedron:";
+    std::cout << "\nDODECAHEDRON centered at (0, 0, 0) with all edge lengths == 1:";
     std::map<int, Matrix<BiquadraticNumber> > dodec;
     {
       int ii = -1;
@@ -981,6 +981,24 @@ namespace FunctionalCalculator
       }
       adjacencyGraph[iter.first] = neighbors;
     }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::set<std::pair<int, int> > halfEdges;
+
+    for (const auto& iter : adjacencyGraph)
+    {
+      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
+    }
+
+    for (const auto& halfEdge : halfEdges)
+    {
+      std::cout << "\nHalf-edge: " << halfEdge.first << " --> " << halfEdge.second;
+    }
+    std::cout << "\n\nNum. half-edges == " << halfEdges.size();
+    std::cout << "\nNum. edges == " << halfEdges.size() / 2;
 
     return true;
   }
