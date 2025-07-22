@@ -770,25 +770,22 @@ namespace FunctionalCalculator
   {
     BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > dodec;
-    /*BiquadraticNumber sideLength;
+    BiquadraticNumber sideLength;
     {
+      Rational angle(1, 5);
+      BiquadraticNumber half(Rational(1, 2));
+      BiquadraticNumber sinAngle;
+      bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
+      if (!success)
       {
-        Rational angle(1, 5);
-        BiquadraticNumber half(Rational(1, 2));
-        BiquadraticNumber sinAngle;
-        bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
-        if (!success)
-        {
-          BiquadraticNumber::setExtraSimplification(false);
-          throw std::exception("Unsupported angle.");
-          return dodec;
-        }
-        sideLength = sinAngle + sinAngle;
+        BiquadraticNumber::setExtraSimplification(false);
+        throw std::exception("Unsupported angle.");
+        return dodec;
       }
-    }*/
+      sideLength = sinAngle + sinAngle;
+    }
     auto zero_ = BiquadraticNumber();
     BiquadraticNumber one_(Rational(1));
-    BiquadraticNumber sideLength = one_;
     auto scaleFactor = edgeLength / sideLength;
     BiquadraticNumber half(Rational(1, 2));
     BiquadraticNumber threeHalves(Rational(3, 2));
