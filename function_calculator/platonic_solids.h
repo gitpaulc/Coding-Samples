@@ -97,7 +97,16 @@ namespace FunctionalCalculator
    */
   bool exportDodecahedronObj(const std::string& filename);
 
+  /** \return Set of vertices (x, y, z) making up a regular icosahedron.
+   *  An icosahedron is a shape in three-dimensional space consisting of twenty triangles,
+   *  each of whose edges coincides with the edge of another triangle.
+   *  The icosahedron is regular if all the triangles are equilateral, i.e. have the same edge length.
+   *  \param `edgeLength` the length of an edge of the icosahedron.
+   */
+  std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
   bool test_dodecahedron();
+  bool test_icosahedron();
   bool test_platonic();
 }
 
