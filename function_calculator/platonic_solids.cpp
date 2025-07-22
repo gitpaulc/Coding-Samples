@@ -986,11 +986,28 @@ namespace FunctionalCalculator
     std::set<Matrix<BiquadraticNumber> > icosa;
     BiquadraticNumber edgeLengthSq = edgeLength * edgeLength;
 
+    auto zero_ = BiquadraticNumber();
+    BiquadraticNumber one_(Rational(1));
+    BiquadraticNumber sideLength = one_;
+    auto scaleFactor = edgeLength / sideLength;
+    QuadraticNumber q_1_5(Rational(1, 5));
+    QuadraticNumber q_4_5(Rational(4, 5));
+    QuadraticNumber q_2_25(Rational(2, 25));
+    QuadraticNumber q_8_25(Rational(8, 25));
+    auto qSqrt5 = QuadraticNumber::sqrt(5);
+    BiquadraticNumber s1 = BiquadraticNumber::sqrt(q_4_5 + q_8_25 * qSqrt5);
+    BiquadraticNumber s2 = BiquadraticNumber::sqrt(q_4_5 + q_4_5 + q_8_25 * qSqrt5);
+    BiquadraticNumber s3 = BiquadraticNumber::sqrt(q_1_5 + q_2_25 * qSqrt5);
+    BiquadraticNumber s4 = BiquadraticNumber::sqrt(q_1_5 + q_1_5 + q_2_25 * qSqrt5);
+    {
+      // 0: ((-1) * Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0,
+      //     (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ -s1 - s2, zero_, -s3 - s4 });
+      icosa.insert(vertex.transpose());
+    }
     /*
 
-   ICOSAHEDRON centered at (0, 0, 0) whose dual dodecahedron has all vertex lengths == 1:
-Vertex 0 =
-((-1) * Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
 Vertex 1 =
 ((-1) * Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), -1 / 2 - (1 / 2) * Sqrt(5), Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
 Vertex 2 =
