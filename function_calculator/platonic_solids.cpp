@@ -894,18 +894,36 @@ namespace FunctionalCalculator
       vertex.addRow({ half * golden, -s2, one_ + golden });
       dodec.insert(vertex.transpose());
     }
-    /*
-Vertex 15 =
-(1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
-Vertex 16 =
-(1, 0, 0)
-Vertex 17 =
-(3 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
-Vertex 18 =
-(3 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
-Vertex 19 =
-(1 / 2 + (1 / 2) * Sqrt(5), 0, 1)
-   */
+    {
+      // 15: (1 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 - (1 / 8) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ half * golden, s2, one_ + golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 16: (1, 0, 0)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ one_, zero_, zero_ });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 17: (3 / 4 + (1 / 4) * Sqrt(5), (-1) * Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ threeFourths + quarter * sqrt5, -s1, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 18: (3 / 4 + (1 / 4) * Sqrt(5), Sqrt(5 / 8 + (1 / 8) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5))
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ threeFourths + quarter * sqrt5, s1, golden });
+      dodec.insert(vertex.transpose());
+    }
+    {
+      // 19: (1 / 2 + (1 / 2) * Sqrt(5), 0, 1)
+      Matrix<BiquadraticNumber> vertex;
+      vertex.addRow({ golden, zero_, one_ });
+      dodec.insert(vertex.transpose());
+    }
     std::set<Matrix<BiquadraticNumber> > dodecahedron;
     for (bool done = false; !done; done = true)
     {
