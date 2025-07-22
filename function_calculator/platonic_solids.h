@@ -80,6 +80,7 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getDodecahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  bool test_dodecahedron();
   bool test_platonic();
 }
 

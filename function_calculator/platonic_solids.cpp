@@ -763,4 +763,56 @@ namespace FunctionalCalculator
     BiquadraticNumber::setExtraSimplification(false);
     return dodecahedron;
   }
+
+  bool test_dodecahedron()
+  {
+    std::string prompt;
+    BiquadraticNumber one_(Rational(1, 1));
+
+    std::cout << "\nDodecahedron:";
+    std::map<int, Matrix<BiquadraticNumber> > dodec;
+    {
+      int ii = -1;
+      auto dodecSet = getDodecahedron();
+      for (const auto& vertex : dodecSet)
+      {
+        ++ii;
+        std::cout << "\nVertex " << ii << " = " << vertex.transpose().print(true);
+        dodec[ii] = vertex;
+      }
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " sq. length = " << iter.second.matrixSqNorm().print();
+    }
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+
+    for (const auto& iter : dodec)
+    {
+      std::cout << "\nVertex " << iter.first << " neighbors:";
+      std::vector<int> neighbors;
+      for (const auto& jter : dodec)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == one_)
+        {
+          neighbors.push_back(jter.first);
+          std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
+        }
+      }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    return true;
+  }
 }
