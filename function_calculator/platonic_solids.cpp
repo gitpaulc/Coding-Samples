@@ -1255,7 +1255,6 @@ namespace FunctionalCalculator
     std::string prompt;
     BiquadraticNumber edgeLength(Rational(1, 1));
     auto edgeLengthSq = edgeLength * edgeLength;
-    int numExpectedVtxNbors = 5;
 
     std::cout << "\nICOSAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() << ":";
     std::map<int, Matrix<BiquadraticNumber> > icosa;
@@ -1299,10 +1298,117 @@ namespace FunctionalCalculator
           neighbors.push_back(jter.first);
           std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
         }
-        if ((int)(neighbors.size()) >= numExpectedVtxNbors) { break; }
       }
       adjacencyGraph[iter.first] = neighbors;
     }
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::set<std::pair<int, int> > halfEdges;
+
+    for (const auto& iter : adjacencyGraph)
+    {
+      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
+    }
+
+    for (const auto& halfEdge : halfEdges)
+    {
+      std::cout << "\nHalf-edge: " << halfEdge.first << " --> " << halfEdge.second;
+    }
+    std::cout << "\n\nNum. half-edges == " << halfEdges.size();
+    std::cout << "\nNum. edges == " << halfEdges.size() / 2;
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < 2; ++verticesRemaining)
+        {
+          break;
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((icosa[current[0]] - icosa[subsequent]).matrixSqNorm()
+              < (icosa[current[0]] - icosa[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+
+    for (const auto& face : faces)
+    {
+      std::cout << "\nFace: (";
+      int ii = -1;
+      for (const auto& vert : face)
+      {
+        ++ii;
+        if (ii > 0) { std::cout << ", "; }
+        std::cout << vert;
+      }
+      std::cout << ")";
+    }
+    std::cout << "\n\nNum. faces == " << faces.size();
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\n\nEuler characteristic ==\nNum. vertices - num. edges + num. faces == " <<
+      icosa.size() - halfEdges.size() / 2 + faces.size() << "\n";
+
+    std::cout << "\n\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    std::cout << "\nExporting icosahedron to .obj format. Continue, Y or N?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+    std::cout << "\nWriting..." << std::endl;
+    bool wrote = exportIcosahedronObj("icosahedron.obj");
+    std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
 
     return true;
   }
