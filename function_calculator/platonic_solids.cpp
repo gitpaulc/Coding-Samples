@@ -1091,6 +1091,7 @@ namespace FunctionalCalculator
     BiquadraticNumber edgeLengthSq(Rational(1, 1));
     int facetSize = 3;
     int expectedNumVertices = 12;
+    int expectedNumEdges = 30;
     int expectedNumNeighbors = 5;
     int expectedNumFaces = 20;
     std::map<int, Matrix<BiquadraticNumber> > icosa;
@@ -1121,6 +1122,13 @@ namespace FunctionalCalculator
       adjacencyGraph[iter.first] = neighbors;
     }
 
+    std::set<std::pair<int, int> > halfEdges;
+    for (const auto& iter : adjacencyGraph)
+    {
+      for (const auto& index : iter.second) { halfEdges.insert({ iter.first, index }); }
+    }
+    if ((int)halfEdges.size() != expectedNumEdges * 2) { return false; }
+
     struct CompareFaces
     {
       bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
@@ -1142,36 +1150,16 @@ namespace FunctionalCalculator
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
-      std::vector<std::vector<int> > facesFrom;
-      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
-      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
-      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
-      auto verticesRemain = (int)(facetSize - facesFrom[0].size());
-      for (const auto& faceFrom : facesFrom)
+      for (int ii = 0; ii < expectedNumNeighbors; ++ii)
       {
-        auto current = faceFrom;
-        for (int verticesRemaining = 0; verticesRemaining < verticesRemain; ++verticesRemaining)
+        int jj = (ii == expectedNumNeighbors - 1) ? 0 : (ii + 1);
+        auto aa = iter.second[ii];
+        auto bb = iter.second[jj];
+        if ((halfEdges.find({ aa, bb }) == halfEdges.end()) && (halfEdges.find({ bb, aa }) == halfEdges.end()))
         {
-          int nextOne = -1;
-          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
-          {
-            bool doNotAdd = false;
-            for (int ii = 0; ii < (int)current.size(); ++ii)
-            {
-              if (subsequent != current[ii]) { continue; }
-              doNotAdd = true; break;
-            }
-            if (doNotAdd) { continue; }
-            if (nextOne == -1) { nextOne = subsequent; continue; }
-            if ((icosa[current[0]] - icosa[subsequent]).matrixSqNorm()
-              < (icosa[current[0]] - icosa[nextOne]).matrixSqNorm())
-            {
-              nextOne = subsequent; continue;
-            }
-          }
-          current.push_back(nextOne);
+          continue;
         }
-        faces.insert(current);
+        faces.insert({ iter.second[ii], iter.first, iter.second[jj] });
       }
     }
     if ((int)faces.size() != expectedNumFaces) { return false; }
@@ -1464,36 +1452,17 @@ namespace FunctionalCalculator
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
-      std::vector<std::vector<int> > facesFrom;
-      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
-      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
-      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
-      for (const auto& faceFrom : facesFrom)
+      int faceLim = 5;
+      for (int ii = 0; ii < faceLim; ++ii)
       {
-        auto current = faceFrom;
-        for (int verticesRemaining = 0; verticesRemaining < 2; ++verticesRemaining)
+        int jj = (ii == faceLim - 1) ? 0 : (ii + 1);
+        auto aa = iter.second[ii];
+        auto bb = iter.second[jj];
+        if ((halfEdges.find({ aa, bb }) == halfEdges.end()) && (halfEdges.find({ bb, aa }) == halfEdges.end()))
         {
-          break;
-          int nextOne = -1;
-          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
-          {
-            bool doNotAdd = false;
-            for (int ii = 0; ii < (int)current.size(); ++ii)
-            {
-              if (subsequent != current[ii]) { continue; }
-              doNotAdd = true; break;
-            }
-            if (doNotAdd) { continue; }
-            if (nextOne == -1) { nextOne = subsequent; continue; }
-            if ((icosa[current[0]] - icosa[subsequent]).matrixSqNorm()
-              < (icosa[current[0]] - icosa[nextOne]).matrixSqNorm())
-            {
-              nextOne = subsequent; continue;
-            }
-          }
-          current.push_back(nextOne);
+          continue;
         }
-        faces.insert(current);
+        faces.insert({ iter.second[ii], iter.first, iter.second[jj] });
       }
     }
 
