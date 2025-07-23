@@ -115,6 +115,12 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  /** \brief Exports a regular icosahedron as an .obj file. It has unit edges and is centered at the origin.
+   *  \return `true` if and only if the export succeeds.
+   *  \param `filename` is the name of the file the user wishes to export the shape to.
+   */
+  bool exportIcosahedronObj(const std::string& filename);
+
   bool test_dodecahedron();
   bool test_icosahedron();
   bool test_platonic();

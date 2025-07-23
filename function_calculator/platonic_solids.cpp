@@ -1086,6 +1086,126 @@ namespace FunctionalCalculator
     return icosaOut;
   }
 
+  bool exportIcosahedronObj(const std::string& filename)
+  {
+    BiquadraticNumber edgeLengthSq(Rational(1, 1));
+    int facetSize = 3;
+    int expectedNumVertices = 12;
+    int expectedNumNeighbors = 5;
+    int expectedNumFaces = 20;
+    std::map<int, Matrix<BiquadraticNumber> > icosa;
+    {
+      int ii = -1;
+      auto dodecSet = getDodecahedron();
+      for (const auto& vertex : dodecSet)
+      {
+        ++ii;
+        icosa[ii] = vertex;
+      }
+    }
+    if ((int)icosa.size() != expectedNumVertices) { return false; }
+
+    std::map<int, std::vector<int> > adjacencyGraph;
+    for (const auto& iter : icosa)
+    {
+      std::vector<int> neighbors;
+      for (const auto& jter : icosa)
+      {
+        auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+        if (neighborSqDist == edgeLengthSq)
+        {
+          neighbors.push_back(jter.first);
+        }
+      }
+      if ((int)neighbors.size() != expectedNumNeighbors) { return false; }
+      adjacencyGraph[iter.first] = neighbors;
+    }
+
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    std::set<std::vector<int>, CompareFaces> faces;
+    for (const auto& iter : adjacencyGraph)
+    {
+      std::vector<std::vector<int> > facesFrom;
+      facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+      facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+      facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+      auto verticesRemain = (int)(facetSize - facesFrom[0].size());
+      for (const auto& faceFrom : facesFrom)
+      {
+        auto current = faceFrom;
+        for (int verticesRemaining = 0; verticesRemaining < verticesRemain; ++verticesRemaining)
+        {
+          int nextOne = -1;
+          for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+          {
+            bool doNotAdd = false;
+            for (int ii = 0; ii < (int)current.size(); ++ii)
+            {
+              if (subsequent != current[ii]) { continue; }
+              doNotAdd = true; break;
+            }
+            if (doNotAdd) { continue; }
+            if (nextOne == -1) { nextOne = subsequent; continue; }
+            if ((icosa[current[0]] - icosa[subsequent]).matrixSqNorm()
+              < (icosa[current[0]] - icosa[nextOne]).matrixSqNorm())
+            {
+              nextOne = subsequent; continue;
+            }
+          }
+          current.push_back(nextOne);
+        }
+        faces.insert(current);
+      }
+    }
+    if ((int)faces.size() != expectedNumFaces) { return false; }
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : icosa)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
+  }
+
   bool test_dodecahedron()
   {
     std::string prompt;
