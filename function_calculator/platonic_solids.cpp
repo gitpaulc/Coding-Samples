@@ -1132,7 +1132,11 @@ Vertex 10 =
       icosa.insert(vertex.transpose());
     }
 
+    // Normalize to unit length:
     auto factor = one_ / fiveS3;
+    // edge lengths if vertices are unit length:
+    auto dist = BiquadraticNumber::sqrt(q_1 + q_1 - q_2_5 * qSqrt5, true);
+    factor = factor * edgeLength / dist;
     std::set<Matrix<BiquadraticNumber> > icosaOut;
     for (const auto& vv : icosa)
     {
@@ -1311,6 +1315,7 @@ Vertex 10 =
     std::string prompt;
     BiquadraticNumber edgeLength(Rational(1, 1));
     auto edgeLengthSq = edgeLength * edgeLength;
+    int numExpectedVtxNbors = 5;
 
     std::cout << "\nICOSAHEDRON centered at (0, 0, 0) with all edge lengths == " << edgeLength.print() << ":";
     std::map<int, Matrix<BiquadraticNumber> > icosa;
@@ -1354,6 +1359,7 @@ Vertex 10 =
           neighbors.push_back(jter.first);
           std::cout << "\n  Vertex " << jter.first << " at sq. distance " << neighborSqDist.print();
         }
+        if ((int)(neighbors.size()) >= numExpectedVtxNbors) { break; }
       }
       adjacencyGraph[iter.first] = neighbors;
     }
