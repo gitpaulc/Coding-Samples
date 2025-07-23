@@ -1097,8 +1097,8 @@ namespace FunctionalCalculator
     std::map<int, Matrix<BiquadraticNumber> > icosa;
     {
       int ii = -1;
-      auto dodecSet = getDodecahedron();
-      for (const auto& vertex : dodecSet)
+      auto icosaSet = getIcosahedron();
+      for (const auto& vertex : icosaSet)
       {
         ++ii;
         icosa[ii] = vertex;
