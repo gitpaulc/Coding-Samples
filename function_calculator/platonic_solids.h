@@ -97,7 +97,32 @@ namespace FunctionalCalculator
    */
   bool exportDodecahedronObj(const std::string& filename);
 
+  /** \return Set of vertices (x, y, z) making up a regular icosahedron.
+   *  An icosahedron is a shape in three-dimensional space consisting of twenty triangles,
+   *  each of whose edges coincides with the edge of another triangle.
+   *  The icosahedron is regular if all the triangles are equilateral, i.e. have the same edge length.
+   *  \param `edgeLength` the length of an edge of the icosahedron.
+   *  \remark This method uses a dual dodecahedron to obtain the vertices of the icosahedron, and is slow.
+   */
+  std::set<Matrix<BiquadraticNumber> > getIcosahedronViaDual(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \return Set of vertices (x, y, z) making up a regular icosahedron.
+   *  An icosahedron is a shape in three-dimensional space consisting of twenty triangles,
+   *  each of whose edges coincides with the edge of another triangle.
+   *  The icosahedron is regular if all the triangles are equilateral, i.e. have the same edge length.
+   *  \param `edgeLength` the length of an edge of the icosahedron.
+   *  \remark This method uses cached vertex values and is fast.
+   */
+  std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
+
+  /** \brief Exports a regular icosahedron as an .obj file. It has unit edges and is centered at the origin.
+   *  \return `true` if and only if the export succeeds.
+   *  \param `filename` is the name of the file the user wishes to export the shape to.
+   */
+  bool exportIcosahedronObj(const std::string& filename);
+
   bool test_dodecahedron();
+  bool test_icosahedron();
   bool test_platonic();
 }
 

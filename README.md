@@ -170,6 +170,13 @@
   <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronSolid.png" width="48%"/></a>
 </h1>
 
+* Here is an **icosahedron** (20-sided shape in three dimensions whose faces are equilateral triangles) generated using the [Function Calculator](##function-calculator):
+
+<h1>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/icosahedronEdges.png" width="48%"/></a>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/icosahedronSolid.png" width="48%"/></a>
+</h1>
+
 [Back to Table of Contents.](##table-of-contents)
 
 ---
