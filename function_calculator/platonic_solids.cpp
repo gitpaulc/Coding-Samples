@@ -994,7 +994,9 @@ namespace FunctionalCalculator
     BiquadraticNumber fifth(Rational(1, 5));
     BiquadraticNumber tenth(Rational(1, 10));
     BiquadraticNumber twoFifths(Rational(2, 5));
+    QuadraticNumber q_1(Rational(1));
     QuadraticNumber q_1_2(Rational(1, 2));
+    QuadraticNumber q_2_5(Rational(2, 5));
     QuadraticNumber q_1_10(Rational(1, 10));
     auto qSqrt5 = QuadraticNumber::sqrt(5);
     auto sqrt5 = BiquadraticNumber::sqrt(5);
@@ -1069,15 +1071,15 @@ namespace FunctionalCalculator
       icosa.insert(vertex.transpose());
     }
     {
-      // 11: (Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) + Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0, Sqrt(1 + (2 / 5) * Sqrt(5)))
+      // 11: (, 0, 1)
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s1_plus_s2, zero_, s6 });
+      vertex.addRow({ zero_, zero_, one_ });
       icosa.insert(vertex.transpose());
     }
 
     // edge lengths if vertices are unit length:
     auto dist = BiquadraticNumber::sqrt(q_1 + q_1 - q_2_5 * qSqrt5, true);
-    factor = factor * edgeLength / dist;
+    auto factor = edgeLength / dist;
     std::set<Matrix<BiquadraticNumber> > icosaOut;
     for (const auto& vv : icosa)
     {
