@@ -42,7 +42,7 @@ public:
   bool getRational(Rational& self) const; /**< \return `true` iff the number is actually rational. Only then is self redefined. */
   virtual std::string print(bool useParentheses = false) const override;
   static BiquadraticNumber sqrt(const Rational& radicand);
-  static BiquadraticNumber sqrt(const QuadraticNumber& radicand, bool trySimpleOnly = false);
+  static BiquadraticNumber sqrt(const QuadraticNumber& radicand);
   BiquadraticNumber abs() const;
 
   BiquadraticNumber operator+() const;

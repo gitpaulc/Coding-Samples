@@ -982,11 +982,9 @@ namespace FunctionalCalculator
   std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength)
   {
     std::set<Matrix<BiquadraticNumber> > icosa;
-    BiquadraticNumber edgeLengthSq = edgeLength * edgeLength;
 
     auto zero_ = BiquadraticNumber();
     BiquadraticNumber one_(Rational(1));
-    //BiquadraticNumber five(Rational(5));
     BiquadraticNumber sideLength = one_;
     auto scaleFactor = edgeLength / sideLength;
     BiquadraticNumber half(Rational(1, 2));
@@ -1000,7 +998,6 @@ namespace FunctionalCalculator
     QuadraticNumber q_1_10(Rational(1, 10));
     auto qSqrt5 = QuadraticNumber::sqrt(5);
     auto sqrt5 = BiquadraticNumber::sqrt(5);
-    //BiquadraticNumber s3 = BiquadraticNumber::sqrt(q_1_5 + q_2_25 * qSqrt5);
     BiquadraticNumber sPlus = BiquadraticNumber::sqrt(q_1_2 + q_1_10 * qSqrt5);
     BiquadraticNumber sMinus = BiquadraticNumber::sqrt(q_1_2 - q_1_10 * qSqrt5);
  
@@ -1078,7 +1075,7 @@ namespace FunctionalCalculator
     }
 
     // edge lengths if vertices are unit length:
-    auto dist = BiquadraticNumber::sqrt(q_1 + q_1 - q_2_5 * qSqrt5, true);
+    auto dist = BiquadraticNumber::sqrt(q_1 + q_1 - q_2_5 * qSqrt5);
     auto factor = edgeLength / dist;
     std::set<Matrix<BiquadraticNumber> > icosaOut;
     for (const auto& vv : icosa)
