@@ -863,9 +863,9 @@ namespace FunctionalCalculator
   std::set<Matrix<BiquadraticNumber> > getIcosahedronViaDual(const BiquadraticNumber& edgeLength)
   {
     std::set<Matrix<BiquadraticNumber> > icosa;
-    BiquadraticNumber edgeLengthSq = edgeLength * edgeLength;
     auto defaultRadius = QuadraticNumber(Rational(9, 8)) + QuadraticNumber::sqrt(Rational(45, 64));
-    auto dodecEdgeLength = BiquadraticNumber(Rational(1, 1)) / BiquadraticNumber::sqrt(defaultRadius);
+    //auto dodecEdgeLength = BiquadraticNumber(Rational(1, 1)) / BiquadraticNumber::sqrt(defaultRadius);
+    auto dodecEdgeLength = BiquadraticNumber::sqrt(QuadraticNumber(Rational(5)) + QuadraticNumber::sqrt(Rational(20)));
     BiquadraticNumber dodecEdgeLengthSq = dodecEdgeLength * dodecEdgeLength;
     int dodecFaceSize = 5;
     int dodecNumVertices = 20;
@@ -976,7 +976,18 @@ namespace FunctionalCalculator
       }
       icosa.insert(barycenter);
     }
-    return icosa;
+    std::set<Matrix<BiquadraticNumber> > icosaOut;
+
+    QuadraticNumber two(Rational(2));
+    QuadraticNumber five(Rational(5));
+    auto sqrt5 = QuadraticNumber::sqrt(5);
+    auto factor = edgeLength * BiquadraticNumber::sqrt(five + two * sqrt5) /
+      (BiquadraticNumber(QuadraticNumber(Rational(7, 4)) + QuadraticNumber(Rational(3, 4)) * sqrt5));
+    for (const auto& vv : icosa)
+    {
+      icosaOut.insert(vv * factor);
+    }
+    return icosaOut;
   }
 
   std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength)
