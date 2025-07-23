@@ -986,143 +986,86 @@ namespace FunctionalCalculator
 
     auto zero_ = BiquadraticNumber();
     BiquadraticNumber one_(Rational(1));
-    BiquadraticNumber five(Rational(5));
+    //BiquadraticNumber five(Rational(5));
     BiquadraticNumber sideLength = one_;
     auto scaleFactor = edgeLength / sideLength;
     BiquadraticNumber half(Rational(1, 2));
     BiquadraticNumber threeHalves(Rational(3, 2));
-    QuadraticNumber q_1(Rational(1, 1));
+    BiquadraticNumber fifth(Rational(1, 5));
+    BiquadraticNumber tenth(Rational(1, 10));
+    BiquadraticNumber twoFifths(Rational(2, 5));
     QuadraticNumber q_1_2(Rational(1, 2));
-    QuadraticNumber q_3_2(Rational(3, 2));
-    QuadraticNumber q_1_5(Rational(1, 5));
-    QuadraticNumber q_2_5(Rational(2, 5));
-    QuadraticNumber q_4_5(Rational(4, 5));
-    QuadraticNumber q_8_5(Rational(8, 5));
     QuadraticNumber q_1_10(Rational(1, 10));
-    QuadraticNumber q_2_25(Rational(2, 25));
-    QuadraticNumber q_8_25(Rational(8, 25));
-    QuadraticNumber q_1_50(Rational(1, 50));
-    QuadraticNumber q_11_50(Rational(11, 50));
     auto qSqrt5 = QuadraticNumber::sqrt(5);
-    auto golden = half + half * BiquadraticNumber::sqrt(5);
-    BiquadraticNumber s3 = BiquadraticNumber::sqrt(q_1_5 + q_2_25 * qSqrt5);
-    BiquadraticNumber s10 = BiquadraticNumber::sqrt(q_1_5 - q_2_25 * qSqrt5);
-    BiquadraticNumber s4 = BiquadraticNumber::sqrt(q_2_5 + q_2_25 * qSqrt5);
-    BiquadraticNumber s1 = s3 + s3; //BiquadraticNumber::sqrt(q_4_5 + q_8_25 * qSqrt5);
-    BiquadraticNumber s2 = s4 + s4; //BiquadraticNumber::sqrt(q_8_5 + q_8_25 * qSqrt5);
-    BiquadraticNumber s5 = BiquadraticNumber::sqrt(q_1_2 + q_11_50 * qSqrt5, true);
-    BiquadraticNumber s9 = BiquadraticNumber::sqrt(q_1_2 - q_11_50 * qSqrt5, true);
-    BiquadraticNumber s6 = BiquadraticNumber::sqrt(q_1 + q_2_5 * qSqrt5);
-    BiquadraticNumber s7 = BiquadraticNumber::sqrt(q_1_10 - q_1_50 * qSqrt5);
-    BiquadraticNumber s12 = BiquadraticNumber::sqrt(q_1_10 + q_1_50 * qSqrt5);
-    BiquadraticNumber s8 = BiquadraticNumber::sqrt(q_1 + q_2_25 * qSqrt5, true);
-    BiquadraticNumber s11 = s10 + s10; //BiquadraticNumber::sqrt(q_4_5 - q_8_25 * qSqrt5);
-    BiquadraticNumber s13 = BiquadraticNumber::sqrt(q_1_2 + q_1_10 * qSqrt5);
-    auto s3_plus_s4 = s3 + s4;
-    auto s1_plus_s2 = s3_plus_s4 + s3_plus_s4;
-    auto s5_plus_s1 = s5 + s1;
-    auto s7_minus_s8 = s7 - s8;
-    auto s10_minus_s2 = s10 - s2;
-    auto fiveS3 = five * s3;
-/*
-Vertex 0 =
-((-2 / 5) * Sqrt(5), 0, (-1 / 5) * Sqrt(5))
-Vertex 1 =
-(-1 / 2 - (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
-Vertex 2 =
-(-1 / 2 - (1 / 10) * Sqrt(5), Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
-Vertex 3 =
-(-1 / 2 + (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
-Vertex 4 =
-(-1 / 2 + (1 / 10) * Sqrt(5), Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
-Vertex 5 =
-(0, 0, -1)
-Vertex 6 =
-(1 / 2 - (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
-Vertex 7 =
-(1 / 2 - (1 / 10) * Sqrt(5), Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
-Vertex 8 =
-(1 / 2 + (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
-Vertex 9 =
-(1 / 2 + (1 / 10) * Sqrt(5), Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
-Vertex 10 =
-((2 / 5) * Sqrt(5), 0, (1 / 5) * Sqrt(5))
-*/
+    auto sqrt5 = BiquadraticNumber::sqrt(5);
+    //BiquadraticNumber s3 = BiquadraticNumber::sqrt(q_1_5 + q_2_25 * qSqrt5);
+    BiquadraticNumber sPlus = BiquadraticNumber::sqrt(q_1_2 + q_1_10 * qSqrt5);
+    BiquadraticNumber sMinus = BiquadraticNumber::sqrt(q_1_2 - q_1_10 * qSqrt5);
+ 
     {
-      // 0: ((-1) * Sqrt(4 / 5 + (8 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)), 0,
-      //     (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 0: ((-2 / 5) * Sqrt(5), 0, (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ -s1_plus_s2, zero_, -s3_plus_s4 });
+      vertex.addRow({ -twoFifths * sqrt5, zero_, -fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 1: ((-1) * Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), -1 / 2 - (1 / 2) * Sqrt(5),
-      //     Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 1: (-1 / 2 - (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ -s5_plus_s1, -golden, s3_plus_s4 });
+      vertex.addRow({ -half - tenth * sqrt5, -sMinus, fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 2: ((-1) * Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5),
-      //     Sqrt(1 + (2 / 5) * Sqrt(5)))
+      // 2: (-1 / 2 - (1 / 10) * Sqrt(5), Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ -s5_plus_s1, golden, s6 });
+      vertex.addRow({ -half - tenth * sqrt5, sMinus, fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 3: (Sqrt(1 / 10 - (1 / 50) * Sqrt(5)) - Sqrt(1 + (2 / 25) * Sqrt(5)), -3 / 2 - (1 / 2) * Sqrt(5),
-      //     (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 3: (-1 / 2 + (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s7_minus_s8, -one_ - golden, -s3_plus_s4 });
+      vertex.addRow({ -half + tenth * sqrt5, -sPlus, -fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 4: (Sqrt(1 / 10 - (1 / 50) * Sqrt(5)) - Sqrt(1 + (2 / 25) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5),
-      //     (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 4: (-1 / 2 + (1 / 10) * Sqrt(5), Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s7_minus_s8, one_ + golden, -s3_plus_s4 });
+      vertex.addRow({ -half + tenth * sqrt5, sPlus, -fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
       // 5: (0, 0, (-1) * Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) - Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ zero_, zero_, -fiveS3 });
+      vertex.addRow({ zero_, zero_, -one_ });
       icosa.insert(vertex.transpose());
     }
     {
-      // 6: ((-1) * Sqrt(1 / 2 - (11 / 50) * Sqrt(5)) - Sqrt(4 / 5 - (8 / 25) * Sqrt(5))
-      //     + Sqrt(1 / 10 + (1 / 50) * Sqrt(5)),
-      //     0, Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(16 / 5 + (32 / 25) * Sqrt(5)))
+      // 6: (1 / 2 - (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ -s9 - s11 + s12, zero_, fiveS3 });
+      vertex.addRow({ half - tenth * sqrt5, -sPlus, fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 7: (Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), -3 / 2 - (1 / 2) * Sqrt(5),
-      //     Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 7: (1 / 2 - (1 / 10) * Sqrt(5), Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), (1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s13, -one_ - golden, s3_plus_s4 });
+      vertex.addRow({ half - tenth * sqrt5, sPlus, fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 8: (Sqrt(1 / 2 + (1 / 10) * Sqrt(5)), 3 / 2 + (1 / 2) * Sqrt(5),
-      //     Sqrt(1 / 5 + (2 / 25) * Sqrt(5)) + Sqrt(2 / 5 + (2 / 25) * Sqrt(5)))
+      // 8: (1 / 2 + (1 / 10) * Sqrt(5), (-1) * Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s13, one_ + golden, s3_plus_s4 });
+      vertex.addRow({ half + tenth * sqrt5, -sMinus, -fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 9: (Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) + Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), -1 / 2 - (1 / 2) * Sqrt(5),
-      //     Sqrt(1 / 5 - (2 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)))
+      // 9: (1 / 2 + (1 / 10) * Sqrt(5), Sqrt(1 / 2 - (1 / 10) * Sqrt(5)), (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s5_plus_s1, -golden, s10_minus_s2 });
+      vertex.addRow({ half + tenth * sqrt5, sMinus, -fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
-      // 10: (Sqrt(1 / 2 + (11 / 50) * Sqrt(5)) + Sqrt(4 / 5 + (8 / 25) * Sqrt(5)), 1 / 2 + (1 / 2) * Sqrt(5),
-      //      Sqrt(1 / 5 - (2 / 25) * Sqrt(5)) - Sqrt(8 / 5 + (8 / 25) * Sqrt(5)))
+      // 10: ((2 / 5) * Sqrt(5), 0, (1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
-      vertex.addRow({ s5_plus_s1, golden, s10_minus_s2 });
+      vertex.addRow({ twoFifths * sqrt5, zero_, fifth * sqrt5 });
       icosa.insert(vertex.transpose());
     }
     {
@@ -1132,8 +1075,6 @@ Vertex 10 =
       icosa.insert(vertex.transpose());
     }
 
-    // Normalize to unit length:
-    auto factor = one_ / fiveS3;
     // edge lengths if vertices are unit length:
     auto dist = BiquadraticNumber::sqrt(q_1 + q_1 - q_2_5 * qSqrt5, true);
     factor = factor * edgeLength / dist;
