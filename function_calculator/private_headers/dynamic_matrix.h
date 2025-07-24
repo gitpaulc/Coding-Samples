@@ -514,10 +514,25 @@ public:
 
   Num matrixSqNorm() const { return matrixDot(*this); }
 
+  /** \return Cross product of 3 x 1 vectors `u` and `v`.
+   *  \throw  Throws an exception if vectors are not 3 x 1 matrices.
+   */
+  Matrix<Num> cross(const Matrix<Num>& u, const Matrix<Num>& v)
+  {
+    Matrix<Num> answer = u;
+    if (u.numRows() != v.numRows()) { throw std::invalid_argument("Num. vector rows not equal."); return answer; }
+    if (u.numCols() != v.numCols()) { throw std::invalid_argument("Num. vector columns not equal."); return answer; }
+    if (u.numRows() != 3) { throw std::invalid_argument("Matrices u and v must have three rows."); return answer; }
+    if (u.numCols() != 1) { throw std::invalid_argument("Matrices u and v must have one column."); return answer; }
+    answer.rows[0][0] = u.at(1, 0) * v.at(2, 0) - v.at(1, 0) * u.at(2, 0);
+    answer.rows[1][0] = u.at(2, 0) * v.at(0, 0) - v.at(2, 0) * u.at(0, 0);
+    answer.rows[2][0] = u.at(0, 0) * v.at(1, 0) - v.at(0, 0) * u.at(1, 0);
+    return answer;
+  }
 
-  /** \brief Given vectors `vecFrom` and `vecTo`, returns a rotation matrix mapping vecFrom / |vecFrom| to vecTo / |vecTo|.
-   *  \throw Throws an exception if the vectors are not 2 x 1 matrices or 3 x 1 matrices,
-   *         or if either of them has zero length.
+  /** \brief Given unit vectors `vecFrom` and `vecTo`, returns a rotation matrix mapping `vecFrom` to `vecTo`.
+   *  \throw Throws an exception if the vectors are not 2 x 1 matrices or 3 x 1 matrices.
+   *  \throw Throws an exception if the vectors do not have length 1.
    */
   Matrix<Num> getRotation(const Matrix<Num>& vecFrom, const Matrix<Num>& vecTo)
   {
@@ -525,6 +540,11 @@ public:
     if (vecTo.numCols() != vecFrom.numCols()) { throw std::invalid_argument("Num. vector columns not equal."); return answer; }
     if (vecTo.numRows() != vecFrom.numRows()) { throw std::invalid_argument("Num. vector rows not equal."); return answer; }
     if (vecTo.numCols() != 1) { throw std::invalid_argument("Matrices vecFrom and vecTo must have one column."); return answer; }
+    auto u2 = vecFrom.matrixSqNorm(); auto v2 = vecTo.matrixSqNorm();
+    Num zero_ = u2 - u2;
+    if ((u2 == zero_) || (v2 == zero_)) { throw std::invalid_argument("vecFrom and vecTo must have nonzero length."); return answer; }
+    auto one_ = u2 / u2;
+    if ((u2 != one_) || (v2 != one_)) { throw std::invalid_argument("vecFrom and vecTo must have unit length."); return answer; }
     if (vecTo.numRows() == 2)
     {
       auto x0 = vecFrom.at(0, 0); auto y0 = vecFrom.at(1, 0);
