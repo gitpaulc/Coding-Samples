@@ -513,6 +513,32 @@ public:
   }
 
   Num matrixSqNorm() const { return matrixDot(*this); }
+
+
+  /** \brief Given vectors `vecFrom` and `vecTo`, returns a rotation matrix mapping vecFrom / |vecFrom| to vecTo / |vecTo|.
+   *  \throw Throws an exception if the vectors are not 2 x 1 matrices or 3 x 1 matrices,
+   *         or if either of them has zero length.
+   */
+  Matrix<Num> getRotation(const Matrix<Num>& vecFrom, const Matrix<Num>& vecTo)
+  {
+    Matrix<Num> answer = Matrix<Num>::zeroMatrix(vecFrom.numRows());
+    if (vecTo.numCols() != vecFrom.numCols()) { throw std::invalid_argument("Num. vector columns not equal."); return answer; }
+    if (vecTo.numRows() != vecFrom.numRows()) { throw std::invalid_argument("Num. vector rows not equal."); return answer; }
+    if (vecTo.numCols() != 1) { throw std::invalid_argument("Matrices vecFrom and vecTo must have one column."); return answer; }
+    if (vecTo.numRows() == 2)
+    {
+      auto x0 = vecFrom.at(0, 0); auto y0 = vecFrom.at(1, 0);
+      auto x1 = vecTo.at(0, 0); auto y1 = vecTo.at(1, 0);
+      auto aa = x0 * x1 + y0 * y1;
+      auto bb = y0 * x1 - x0 * y1;
+      answer.rows[0][0] = aa; answer.rows[0][1] = bb;
+      answer.rows[1][0] = -bb; answer.rows[1][1] = aa;
+      return answer;
+    }
+    if (vecTo.numRows() != 3) { throw std::invalid_argument("Inputs must be 2-vectors or 3-vectors."); return answer; }
+
+    return answer;
+  }
 };
 }
 
