@@ -556,7 +556,30 @@ public:
       return answer;
     }
     if (vecTo.numRows() != 3) { throw std::invalid_argument("Inputs must be 2-vectors or 3-vectors."); return answer; }
-
+    auto II = answer;
+    II.rows[0][0] = one_; II.rows[1][1] = one_; II.rows[2][2] = one_;
+    auto uCrossV = cross(vecFrom, vecTo);
+    auto sinThetaK = answer;
+    sinThetaK.rows[0][1] = -uCrossV.at(2, 0); sinThetaK.rows[0][2] = uCrossV.at(1, 0);
+    sinThetaK.rows[1][0] = uCrossV.at(2, 0);  sinThetaK.rows[1][2] = -uCrossV.at(0, 0);
+    sinThetaK.rows[2][0] = -uCrossV.at(1, 0); sinThetaK.rows[2][1] = uCrossV.at(0, 0);
+    auto K2 = sinThetaK * sinThetaK;
+    K2 = K2 * (one_ / uCrossV.matrixSqNorm());
+    auto oneMinusCosTheta = one_ - vecFrom.matrixDot(vecTo);
+    auto K2_oneMinusCosTheta = K2 * oneMinusCosTheta;
+    answer = II + sinThetaK + K2_oneMinusCosTheta;
+    if (answer * vecFrom != vecTo)
+    {
+      answer = II - sinThetaK + K2_oneMinusCosTheta;
+    }
+    if (answer * vecFrom != vecTo)
+    {
+      throw std::invalid_argument("Matrix does not properly map input vector to output vector.");
+    }
+    if (answer * answer.transpose() != II)
+    {
+      throw std::invalid_argument("Matrix is not a true rotation.");
+    }
     return answer;
   }
 };
