@@ -1652,6 +1652,24 @@ namespace FunctionalCalculator
     return true;
   }
 
+  bool test_icosahedral_symmetries()
+  {
+    std::string prompt;
+    std::cout << "\n\nTest icosahedral symmetries... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    auto syms = getIcosahedralSymmetries();
+
+    std::cout << "\nNumber of icosahedral symmetries without reflections == " << syms.size();
+
+    std::cout << "\nMore... or 'T' to end current test?  ";
+    std::cin >> prompt;
+    if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+    return true;
+  }
+
   bool test_platonic()
   {
     std::string prompt;

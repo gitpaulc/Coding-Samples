@@ -131,6 +131,7 @@ namespace FunctionalCalculator
 
   bool test_dodecahedron();
   bool test_icosahedron();
+  bool test_icosahedral_symmetries();
   bool test_platonic();
 }
 

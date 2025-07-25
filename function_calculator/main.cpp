@@ -1260,6 +1260,11 @@ int main()
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest icosahedral symmetries:\n";
+  test_icosahedral_symmetries();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest biquadratic:\n";
   test_biquadratic();
   std::cout << "\nContinue, or 'Q' to exit? ";
