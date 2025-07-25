@@ -1194,13 +1194,25 @@ namespace FunctionalCalculator
       sDodecahedron = dodec;
       sDodecFaces = faces;
     }
+    QuadraticNumber q_1(Rational(1));
     for (const auto& face : sDodecFaces)
     {
       if (face.size() < 5) { throw std::logic_error("Dodecahedral faces should be pentagons."); }
       auto& uu = sDodecahedron[face[0]];
       auto& vv = sDodecahedron[face[1]];
       auto& ww = sDodecahedron[face[2]];
-      auto R = Matrix<BiquadraticNumber>::getRotation(uu - ww, vv - ww);
+      auto UU = uu - ww;
+      auto VV = vv - ww;
+      auto factor = UU.matrixSqNorm();
+      QuadraticNumber quad;
+      if (!factor.getAsQuadratic(quad)) { throw std::invalid_argument("Dodecahedron vertex should square to quadratic number."); }
+      factor = BiquadraticNumber::sqrt(q_1 / quad);
+      UU = UU * factor;
+      factor = VV.matrixSqNorm();
+      if (!factor.getAsQuadratic(quad)) { throw std::invalid_argument("Dodecahedron vertex should square to quadratic number."); }
+      factor = BiquadraticNumber::sqrt(q_1 / quad);
+      VV = VV * factor;
+      auto R = Matrix<BiquadraticNumber>::getRotation(UU, VV);
       icosahedralSymmetries.insert(R);
     }
     Matrix<BiquadraticNumber> A;
