@@ -517,7 +517,7 @@ public:
   /** \return Cross product of 3 x 1 vectors `u` and `v`.
    *  \throw  Throws an exception if vectors are not 3 x 1 matrices.
    */
-  Matrix<Num> cross(const Matrix<Num>& u, const Matrix<Num>& v)
+  static Matrix<Num> cross(const Matrix<Num>& u, const Matrix<Num>& v)
   {
     Matrix<Num> answer = u;
     if (u.numRows() != v.numRows()) { throw std::invalid_argument("Num. vector rows not equal."); return answer; }
@@ -534,7 +534,7 @@ public:
    *  \throw Throws an exception if the vectors are not 2 x 1 matrices or 3 x 1 matrices.
    *  \throw Throws an exception if the vectors do not have length 1.
    */
-  Matrix<Num> getRotation(const Matrix<Num>& vecFrom, const Matrix<Num>& vecTo)
+  static Matrix<Num> getRotation(const Matrix<Num>& vecFrom, const Matrix<Num>& vecTo)
   {
     Matrix<Num> answer = Matrix<Num>::zeroMatrix(vecFrom.numRows());
     if (vecTo.numCols() != vecFrom.numCols()) { throw std::invalid_argument("Num. vector columns not equal."); return answer; }

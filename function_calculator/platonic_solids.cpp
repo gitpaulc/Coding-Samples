@@ -1011,7 +1011,7 @@ namespace FunctionalCalculator
     auto sqrt5 = BiquadraticNumber::sqrt(5);
     BiquadraticNumber sPlus = BiquadraticNumber::sqrt(q_1_2 + q_1_10 * qSqrt5);
     BiquadraticNumber sMinus = BiquadraticNumber::sqrt(q_1_2 - q_1_10 * qSqrt5);
- 
+
     {
       // 0: ((-2 / 5) * Sqrt(5), 0, (-1 / 5) * Sqrt(5))
       Matrix<BiquadraticNumber> vertex;
@@ -1095,6 +1095,145 @@ namespace FunctionalCalculator
     }
 
     return icosaOut;
+  }
+
+  std::set<Matrix<BiquadraticNumber> > getIcosahedralSymmetries(bool includeReflections)
+  {
+    std::set<Matrix<BiquadraticNumber> > icosahedralSymmetries;
+    struct CompareFaces
+    {
+      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+      {
+        if (lhs.size() < rhs.size()) { return true; }
+        if (lhs.size() > rhs.size()) { return false; }
+        auto lhs_ = lhs; auto rhs_ = rhs;
+        std::sort(lhs_.begin(), lhs_.end());
+        std::sort(rhs_.begin(), rhs_.end());
+        auto lhsSize = (int)lhs_.size();
+        for (int ii = 0; ii < lhsSize; ++ii)
+        {
+          if (lhs_[ii] < rhs_[ii]) { return true; }
+          if (lhs_[ii] > rhs_[ii]) { return false; }
+        }
+        return false;
+      }
+    };
+    static std::map<int, Matrix<BiquadraticNumber> > sDodecahedron;
+    static std::set<std::vector<int>, CompareFaces> sDodecFaces;
+    if (sDodecahedron.empty() || sDodecFaces.empty())
+    {
+      BiquadraticNumber edgeLengthSq(Rational(1, 1));
+      int facetSize = 5;
+      int expectedNumVertices = 20;
+      int expectedNumNeighbors = 3;
+      int expectedNumFaces = 12;
+      std::map<int, Matrix<BiquadraticNumber> > dodec;
+      {
+        int ii = -1;
+        auto dodecSet = getDodecahedron();
+        for (const auto& vertex : dodecSet)
+        {
+          ++ii;
+          dodec[ii] = vertex;
+        }
+      }
+      if ((int)dodec.size() != expectedNumVertices) { return icosahedralSymmetries; }
+
+      std::map<int, std::vector<int> > adjacencyGraph;
+      for (const auto& iter : dodec)
+      {
+        std::vector<int> neighbors;
+        for (const auto& jter : dodec)
+        {
+          auto neighborSqDist = (iter.second - jter.second).matrixSqNorm();
+          if (neighborSqDist == edgeLengthSq)
+          {
+            neighbors.push_back(jter.first);
+          }
+        }
+        if ((int)neighbors.size() != expectedNumNeighbors) { return icosahedralSymmetries; }
+        adjacencyGraph[iter.first] = neighbors;
+      }
+
+      std::set<std::vector<int>, CompareFaces> faces;
+      for (const auto& iter : adjacencyGraph)
+      {
+        std::vector<std::vector<int> > facesFrom;
+        facesFrom.push_back({ iter.second[0], iter.first, iter.second[1] });
+        facesFrom.push_back({ iter.second[1], iter.first, iter.second[2] });
+        facesFrom.push_back({ iter.second[2], iter.first, iter.second[0] });
+        auto verticesRemain = (int)(facetSize - facesFrom[0].size());
+        for (const auto& faceFrom : facesFrom)
+        {
+          auto current = faceFrom;
+          for (int verticesRemaining = 0; verticesRemaining < verticesRemain; ++verticesRemaining)
+          {
+            int nextOne = -1;
+            for (const auto& subsequent : adjacencyGraph[current[current.size() - 1]])
+            {
+              bool doNotAdd = false;
+              for (int ii = 0; ii < (int)current.size(); ++ii)
+              {
+                if (subsequent != current[ii]) { continue; }
+                doNotAdd = true; break;
+              }
+              if (doNotAdd) { continue; }
+              if (nextOne == -1) { nextOne = subsequent; continue; }
+              if ((dodec[current[0]] - dodec[subsequent]).matrixSqNorm()
+                < (dodec[current[0]] - dodec[nextOne]).matrixSqNorm())
+              {
+                nextOne = subsequent; continue;
+              }
+            }
+            current.push_back(nextOne);
+          }
+          faces.insert(current);
+        }
+      }
+      if ((int)faces.size() != expectedNumFaces) { return icosahedralSymmetries; }
+      sDodecahedron = dodec;
+      sDodecFaces = faces;
+    }
+    for (const auto& face : sDodecFaces)
+    {
+      if (face.size() < 5) { throw std::logic_error("Dodecahedral faces should be pentagons."); }
+      auto& uu = sDodecahedron[face[0]];
+      auto& vv = sDodecahedron[face[1]];
+      auto& ww = sDodecahedron[face[2]];
+      auto R = Matrix<BiquadraticNumber>::getRotation(uu - ww, vv - ww);
+      icosahedralSymmetries.insert(R);
+    }
+    Matrix<BiquadraticNumber> A;
+    if (includeReflections)
+    {
+      A.addRow({ Rational(-1), Rational(0), Rational(0) });
+      A.addRow({ Rational(0), Rational(-1), Rational(0) });
+      A.addRow({ Rational(0), Rational(0) , Rational(-1) });
+      icosahedralSymmetries.insert(A);
+    }
+    //int limit = includeReflections ? 2 * num : num;
+    //while (icosahedralSymmetries.size() < limit)
+    auto oldSize = icosahedralSymmetries.size();
+    bool started = false;
+    while (!started || (icosahedralSymmetries.size() != oldSize))
+    {
+      started = true;
+      oldSize = icosahedralSymmetries.size();
+      auto others = icosahedralSymmetries;
+      for (const auto& rot : icosahedralSymmetries)
+      {
+        for (const auto& other : icosahedralSymmetries)
+        {
+          others.insert(rot * other);
+        }
+        if (includeReflections)
+        {
+          others.insert(A * rot);
+        }
+      }
+      icosahedralSymmetries = others;
+    }
+    return icosahedralSymmetries;
   }
 
   bool exportIcosahedronObj(const std::string& filename)

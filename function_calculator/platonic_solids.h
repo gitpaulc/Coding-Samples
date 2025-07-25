@@ -115,6 +115,14 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getIcosahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  /** \return Set of rotations which preserve an icosahedron. Reflections may also be included.
+   *  These transformations map (0, 0, 1) to the twelve vertices making up an icosahedron.
+   *  They are the smallest set of such rotations forming a group (so that compositions thereof remain in the set).
+   *  These symmetries also preserve the dodecahedron.
+   *  \param `includeReflectons` will also include reflections, doubling the size of the set.
+   */
+  std::set<Matrix<BiquadraticNumber> > getIcosahedralSymmetries(bool includeReflections = false);
+
   /** \brief Exports a regular icosahedron as an .obj file. It has unit edges and is centered at the origin.
    *  \return `true` if and only if the export succeeds.
    *  \param `filename` is the name of the file the user wishes to export the shape to.
