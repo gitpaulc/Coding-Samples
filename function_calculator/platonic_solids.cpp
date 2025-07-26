@@ -1099,6 +1099,7 @@ namespace FunctionalCalculator
 
   std::set<Matrix<BiquadraticNumber> > getIcosahedralSymmetries(bool includeReflections)
   {
+    BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > icosahedralSymmetries;
     struct CompareFaces
     {
@@ -1137,7 +1138,11 @@ namespace FunctionalCalculator
           dodec[ii] = vertex;
         }
       }
-      if ((int)dodec.size() != expectedNumVertices) { return icosahedralSymmetries; }
+      if ((int)dodec.size() != expectedNumVertices)
+      {
+        BiquadraticNumber::setExtraSimplification(false);
+        return icosahedralSymmetries;
+      }
 
       std::map<int, std::vector<int> > adjacencyGraph;
       for (const auto& iter : dodec)
@@ -1151,7 +1156,11 @@ namespace FunctionalCalculator
             neighbors.push_back(jter.first);
           }
         }
-        if ((int)neighbors.size() != expectedNumNeighbors) { return icosahedralSymmetries; }
+        if ((int)neighbors.size() != expectedNumNeighbors)
+        {
+          BiquadraticNumber::setExtraSimplification(false);
+          return icosahedralSymmetries;
+        }
         adjacencyGraph[iter.first] = neighbors;
       }
 
@@ -1190,7 +1199,11 @@ namespace FunctionalCalculator
           faces.insert(current);
         }
       }
-      if ((int)faces.size() != expectedNumFaces) { return icosahedralSymmetries; }
+      if ((int)faces.size() != expectedNumFaces)
+      {
+        BiquadraticNumber::setExtraSimplification(false);
+        return icosahedralSymmetries;
+      }
       sDodecahedron = dodec;
       sDodecFaces = faces;
     }
@@ -1250,6 +1263,7 @@ namespace FunctionalCalculator
       }
       icosahedralSymmetries = others;
     }
+    BiquadraticNumber::setExtraSimplification(false);
     return icosahedralSymmetries;
   }
 
