@@ -1212,8 +1212,13 @@ namespace FunctionalCalculator
       if (!factor.getAsQuadratic(quad)) { throw std::invalid_argument("Dodecahedron vertex should square to quadratic number."); }
       factor = BiquadraticNumber::sqrt(q_1 / quad);
       VV = VV * factor;
-      auto R = Matrix<BiquadraticNumber>::getRotation(UU, VV);
-      icosahedralSymmetries.insert(R);
+      auto R_0 = Matrix<BiquadraticNumber>::getRotation(UU, VV);
+      auto R = R_0;
+      for (int ii = 0; ii < 5; ++ii)
+      {
+        icosahedralSymmetries.insert(R);
+        R = R * R_0;
+      }
     }
     Matrix<BiquadraticNumber> A;
     if (includeReflections)
