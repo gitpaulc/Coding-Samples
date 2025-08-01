@@ -13,6 +13,7 @@ namespace MeshRenderer
   static std::vector<ComputationalGeometry::Edge3d> gWireframe;
   static GLuint gVertexBufferObj;
   static bool gPointsHidden = false;
+  static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
   static bool gWireframeOn = true;
 
@@ -212,6 +213,10 @@ void keyboard(unsigned char key, int x, int y)
   {
     gCam.setViewOrthogonal(!(gCam.viewIsOrthogonal()));
   }
+  if ((key == 'p') || (key == 'P'))
+  {
+    gDepthBuffering = !gDepthBuffering;
+  }
   if ((key == 'h') || (key == 'H'))
   {
     gPointsHidden = !gPointsHidden;
@@ -296,6 +301,8 @@ void render()
   using namespace ComputationalGeometry;
   using namespace MeshRenderer;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  if (gDepthBuffering) { glEnable(GL_DEPTH_TEST); }
+  else { glDisable(GL_DEPTH_TEST); }
 
   std::vector<float> vertexData;
   toVertex3dData(gWireframe, vertexData, !gWireframeOn);
