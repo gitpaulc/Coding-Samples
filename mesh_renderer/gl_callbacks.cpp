@@ -339,23 +339,21 @@ void render()
     glEnableClientState(GL_VERTEX_ARRAY);
 
     glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_TRIANGLES);
+    auto numTriangles = static_cast<GLsizei>(vertexData.size() / 9);
+    for (GLsizei ii = 0; ii < numTriangles; ++ii)
     {
-      auto numTriangles = (GLsizei)vertexData.size() / 9;
-      for (GLsizei ii = 0; ii < numTriangles; ++ii)
+      float rr = 0; float gg = 0; float bb = 0;
+      for (int jj = 0; jj < 3; ++jj)
       {
-        glBegin(GL_TRIANGLES);
-        float rr = 0; float gg = 0; float bb = 0;
-        for (int jj = 0; jj < 3; ++jj)
-        {
-          auto ind = 9 * ii + 3 * jj;
-          float xx = vertexData[ind]; float yy = vertexData[ind + 1]; float zz = vertexData[ind + 2];
-          vertex2color(xx, yy, zz, rr, gg, bb);
-          glColor3f(rr, gg, bb);
-          glVertex3f(xx, yy, zz);
-        }
-        glEnd();
+        auto ind = 9 * ii + 3 * jj;
+        float xx = vertexData[ind]; float yy = vertexData[ind + 1]; float zz = vertexData[ind + 2];
+        vertex2color(xx, yy, zz, rr, gg, bb);
+        glColor3f(rr, gg, bb);
+        glVertex3f(xx, yy, zz);
       }
     }
+    glEnd();
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
