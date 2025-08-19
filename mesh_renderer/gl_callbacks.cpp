@@ -332,15 +332,12 @@ void render()
     glPointSize(3.0f);
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
 
     int stride = 0;
     glVertexPointer(3, GL_FLOAT, stride, NULL);
-    glEnableClientState(GL_VERTEX_ARRAY);
 
-    glClear(GL_COLOR_BUFFER_BIT);
-    glBegin(GL_TRIANGLES);
     auto numTriangles = static_cast<GLsizei>(vertexData.size() / 9);
+    glBegin(GL_TRIANGLES);
     for (GLsizei ii = 0; ii < numTriangles; ++ii)
     {
       float rr = 0; float gg = 0; float bb = 0;
