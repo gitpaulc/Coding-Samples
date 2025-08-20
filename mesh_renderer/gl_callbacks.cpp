@@ -228,6 +228,13 @@ void keyboard(unsigned char key, int x, int y)
     gWireframeOn = !gWireframeOn;
     recalculate();
   }
+  if ((key == '1'))
+  {
+    gUseShaders = !gUseShaders;
+    if (gUseShaders) { std::cout << "\nOpenGL vertex and fragment shading on."; }
+    else { std::cout << "\nOpenGL vertex and fragment shading off."; }
+    recalculate();
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
