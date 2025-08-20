@@ -73,7 +73,11 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
 
+#ifdef __APPLE__
+  glGenVertexArraysAPPLE(1, &MeshRenderer::gVertexArrayObj);
+#else
   glGenVertexArrays(1, &MeshRenderer::gVertexArrayObj);
+#endif
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
   linkShaderProgram();
 
@@ -318,7 +322,11 @@ void render()
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn && gUseShaders)
   {
-    glBindVertexArray(gVertexArrayObj); // To GPU.
+#ifdef __APPLE__ // To GPU.
+    glBindVertexArrayAPPLE(gVertexArrayObj);
+#else
+    glBindVertexArray(gVertexArrayObj);
+#endif
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
     gPosLocation = 0;
@@ -332,7 +340,11 @@ void render()
     glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
+#ifdef __APPLE__
+    glBindVertexArrayAPPLE(0);
+#else
     glBindVertexArray(0);
+#endif
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
     return;
@@ -435,11 +447,20 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
 std::string glslVertexShaderCode()
 {
   std::stringstream glsl;
+#ifdef __APPLE__
+  glsl << "\n#version 110";
+#else
   glsl << "\n#version 330 core";
+#endif
   glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
   glsl << "\nuniform mat4 proj;";
+#ifdef __APPLE__
+  glsl << "\nattribute vec3 posVec;";
+  glsl << "\nvarying vec3 fragColor;";
+#else
   glsl << "\nlayout(location = 0) in vec3 posVec;";
   glsl << "\nout vec3 fragColor;";
+#endif
   glsl << "\nvoid main()";
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
@@ -453,12 +474,21 @@ std::string glslVertexShaderCode()
 std::string glslFragmentShaderCode()
 {
   std::stringstream glsl;
+#ifdef __APPLE__
+  glsl << "\n#version 110";
+  glsl << "\nvarying vec3 fragColor;";
+#else
   glsl << "\n#version 330 core";
   glsl << "\nin vec3 fragColor;";
   glsl << "\nout vec4 outFragColor;";
+#endif
   glsl << "\nvoid main()";
   glsl << "\n{";
+#ifdef __APPLE__
+  glsl << "\n  gl_FragColor = vec4(fragColor, 1.0);";
+#else
   glsl << "\n  outFragColor = vec4(fragColor, 1.0);";
+#endif
   glsl << "\n}";
   return glsl.str();
 }
