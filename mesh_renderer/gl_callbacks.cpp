@@ -11,7 +11,7 @@
 namespace MeshRenderer
 {
   static std::vector<ComputationalGeometry::Edge3d> gWireframe;
-  static GLuint gVertexBufferObj;
+  static GLuint gVertexArrayObj, gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
@@ -27,7 +27,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gMvMatrix(16, 0.0f);
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
-  static bool gUseShaders = false;
+  static bool gUseShaders = true;
   static GLint gPosLocation, gMvLocation, gProjLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
@@ -73,6 +73,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   glutMouseFunc(mouse);
   glutDisplayFunc(render);
 
+  glGenVertexArrays(1, &MeshRenderer::gVertexArrayObj);
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
   linkShaderProgram();
 
@@ -227,6 +228,13 @@ void keyboard(unsigned char key, int x, int y)
     gWireframeOn = !gWireframeOn;
     recalculate();
   }
+  if ((key == '1'))
+  {
+    gUseShaders = !gUseShaders;
+    if (gUseShaders) { std::cout << "\nOpenGL vertex and fragment shading on."; }
+    else { std::cout << "\nOpenGL vertex and fragment shading off."; }
+    recalculate();
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -310,18 +318,21 @@ void render()
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn && gUseShaders)
   {
+    glBindVertexArray(gVertexArrayObj); // To GPU.
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
+    gPosLocation = 0;
+    // 3 * sizeof(float):
+    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexData.data()[0]), (void*)0);
     glEnableVertexAttribArray(gPosLocation);
-    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, sizeof(vertexData.data()[0]), (void*)0);
     glUseProgram(gShaderProgram);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
-    glDrawArrays(GL_TRIANGLES, whichArray, (GLsizei)vertexData.size() / 3);
+    glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
+    glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
     return;
@@ -332,34 +343,25 @@ void render()
     glPointSize(3.0f);
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
 
     int stride = 0;
     glVertexPointer(3, GL_FLOAT, stride, NULL);
-    glEnableClientState(GL_VERTEX_ARRAY);
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    auto numTriangles = static_cast<GLsizei>(vertexData.size() / 9);
+    glBegin(GL_TRIANGLES);
+    for (GLsizei ii = 0; ii < numTriangles; ++ii)
     {
-      auto numTriangles = (GLsizei)vertexData.size() / 9;
-      for (GLsizei ii = 0; ii < numTriangles; ++ii)
+      float rr = 0; float gg = 0; float bb = 0;
+      for (int jj = 0; jj < 3; ++jj)
       {
-        glBegin(GL_TRIANGLES);
-        float rr = 0; float gg = 0; float bb = 0;
-        float xx = vertexData[9 * ii]; float yy = vertexData[9 * ii + 1]; float zz = vertexData[9 * ii + 2];
+        auto ind = 9 * ii + 3 * jj;
+        float xx = vertexData[ind]; float yy = vertexData[ind + 1]; float zz = vertexData[ind + 2];
         vertex2color(xx, yy, zz, rr, gg, bb);
         glColor3f(rr, gg, bb);
         glVertex3f(xx, yy, zz);
-        xx = vertexData[9 * ii + 3]; yy = vertexData[9 * ii + 4]; zz = vertexData[9 * ii + 5];
-        vertex2color(xx, yy, zz, rr, gg, bb);
-        glColor3f(rr, gg, bb);
-        glVertex3f(xx, yy, zz);
-        xx = vertexData[9 * ii + 6]; yy = vertexData[9 * ii + 7]; zz = vertexData[9 * ii + 8];
-        vertex2color(xx, yy, zz, rr, gg, bb);
-        glColor3f(rr, gg, bb);
-        glVertex3f(xx, yy, zz);
-        glEnd();
       }
     }
+    glEnd();
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -433,15 +435,17 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
 std::string glslVertexShaderCode()
 {
   std::stringstream glsl;
-  glsl << "\n#version 110";
+  glsl << "\n#version 330 core";
   glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
   glsl << "\nuniform mat4 proj;";
-  glsl << "\nattribute vec3 posVec;";
-  glsl << "\nvarying vec3 color;";
+  glsl << "\nlayout(location = 0) in vec3 posVec;";
+  glsl << "\nout vec3 fragColor;";
   glsl << "\nvoid main()";
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
-  glsl << "\n  color = vec3(0.0, 0.0, 0.5 + gl_Position.z);";
+  glsl << "\n  float tt = 0.5 * (posVec.z + 1.0);";
+  glsl << "\n  float factor = 0.9;";
+  glsl << "\n  fragColor = vec3(tt * factor, tt * factor, 1.0);";
   glsl << "\n}";
   return glsl.str();
 }
@@ -449,11 +453,12 @@ std::string glslVertexShaderCode()
 std::string glslFragmentShaderCode()
 {
   std::stringstream glsl;
-  glsl << "\n#version 110";
-  glsl << "\nvarying vec3 color;";
+  glsl << "\n#version 330 core";
+  glsl << "\nin vec3 fragColor;";
+  glsl << "\nout vec4 outFragColor;";
   glsl << "\nvoid main()";
   glsl << "\n{";
-  glsl << "\n  gl_FragColor = vec4(color, 1.0);";
+  glsl << "\n  outFragColor = vec4(fragColor, 1.0);";
   glsl << "\n}";
   return glsl.str();
 }
