@@ -445,7 +445,7 @@ std::string glslVertexShaderCode()
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
   glsl << "\n  float tt = 0.5 * (posVec.z + 1.0);";
   glsl << "\n  float factor = 0.9;";
-  glsl << "\n  fragColor = vec3(tt * factor, tt * factor, factor);";
+  glsl << "\n  fragColor = vec3(tt * factor, tt * factor, 1.0);";
   glsl << "\n}";
   return glsl.str();
 }
