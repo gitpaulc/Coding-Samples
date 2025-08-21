@@ -423,6 +423,11 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
     for (int ii = 0; ii < oldSize; ii += 3)
     {
       ComputationalGeometry::vector3d nn;
+      if (normals)
+      {
+        ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
+        nn = plane.getNormal();
+      }
       for (int jj = 0; jj < 3; ++jj)
       {
         auto ind = ii + jj;
