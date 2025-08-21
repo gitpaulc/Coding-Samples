@@ -79,7 +79,6 @@ void initialize_glut(int* argc_ptr, char** argv)
   glGenVertexArrays(1, &MeshRenderer::gVertexArrayObj);
 #endif
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
-  linkShaderProgram();
 
   {
     ComputationalGeometry::point3d minPt, maxPt;
@@ -90,6 +89,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   }
 
   recalculate();
+  linkShaderProgram();
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
   auto& gCam = GetCamera(mesh);
   gCam.setEye(ComputationalGeometry::point3d());
@@ -334,8 +334,8 @@ void render()
     glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexData.data()[0]), (void*)0);
     glEnableVertexAttribArray(gPosLocation);
     glUseProgram(gShaderProgram);
-    glUniform1f(gMaxLocation, gBoundingMax.z);
-    glUniform1f(gMinLocation, gBoundingMin.z);
+    glUniform1f(gMaxLocation, (float)gBoundingMax.z);
+    glUniform1f(gMinLocation, (float)gBoundingMin.z);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
@@ -469,9 +469,13 @@ std::string glslVertexShaderCode()
   glsl << "\nvoid main()";
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
-  glsl << "\n  float tt = 0.5 * (posVec.z + 1.0);";
-  glsl << "\n  float factor = 0.9;";
-  glsl << "\n  fragColor = vec3(tt * factor, tt * factor, 1.0);";
+  glsl << "\n  float tt = 0.0;";
+  glsl << "\n  if (maxHeight != minHeight)";
+  glsl << "\n  {";
+  glsl << "\n    float factor = 0.7;";
+  glsl << "\n    tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
+  glsl << "\n  }";
+  glsl << "\n  fragColor = vec3(tt, tt, 1.0);";
   glsl << "\n}";
   return glsl.str();
 }
@@ -537,8 +541,8 @@ void linkShaderProgram()
     std::cout << "\nShader linking failed:\n" << errorLog << "\n";
   }
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
-  gMaxLocation = glGetAttribLocation(gShaderProgram, "maxHeight");
-  gMinLocation = glGetAttribLocation(gShaderProgram, "minHeight");
+  gMaxLocation = glGetUniformLocation(gShaderProgram, "maxHeight");
+  gMinLocation = glGetUniformLocation(gShaderProgram, "minHeight");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);
