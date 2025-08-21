@@ -514,6 +514,37 @@ namespace FunctionalCalculator
       throw std::invalid_argument("Division by zero.");
       return QuadraticNumber();
     }
+    if (rhs.content.size() == 1)
+    {
+      auto inv = rhs;
+      auto iter = inv.content.begin();
+      auto coeff = iter->second;
+      iter->second = Rational(1, 1) / (coeff * Rational(iter->first, mp(1)));
+      return *this * inv;
+    }
+    if (rhs.content.size() == 2)
+    {
+      mp rr, qq;
+      Rational aa, bb;
+      int ii = -1;
+      for (const auto& iter : rhs.content)
+      {
+        ++ii;
+        if (ii == 0)
+        {
+          rr = iter.first;
+          aa = iter.second;
+          continue;
+        }
+        qq = iter.first;
+        bb = iter.second;
+      }
+      QuadraticNumber inv;
+      auto sqNorm = aa * aa * Rational(rr, mp(1)) - bb * bb * Rational(qq, mp(1));
+      inv.content[rr] = aa / sqNorm;
+      inv.content[qq] = -bb / sqNorm;
+      return *this * inv;
+    }
     std::map<int, mp> index2Root;
     std::map<mp, int> root2Index;
     auto multMatrix = rhs.getMultiplicationMatrix(root2Index, index2Root);
