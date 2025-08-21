@@ -871,6 +871,8 @@ bool test_quadratic()
   std::cout << "\nSquare root of 1 = " << one.print();
   auto sqrt2 = QuadraticNumber::sqrt(2);
   std::cout << "\nSquare root of 2 = " << sqrt2.print();
+  auto sqrt5 = QuadraticNumber::sqrt(5);
+  std::cout << "\nSquare root of 5 = " << sqrt5.print();
   auto sqrt36 = QuadraticNumber::sqrt(36);
   std::cout << "\nSquare root of 36 = " << sqrt36.print();
   auto sqrt12 = QuadraticNumber::sqrt(12);
@@ -890,6 +892,13 @@ bool test_quadratic()
   auto reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\nThe reciprocal of " << sumOfSquareRoots.print() << " is " << reciprocal.print();
   std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  // Optimization for sum consisting of 2 square roots:
+  {
+    sumOfSquareRoots = QuadraticNumber(Rational(1, 32)) + sqrt5 * QuadraticNumber(Rational(1, 160));
+    reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
+    std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
+    std::cout << "\nOne = " << (reciprocal * sumOfSquareRoots).print();
+  }
   sumOfSquareRoots = QuadraticNumber::sqrt(5) - QuadraticNumber::sqrt(3) + Rational(1);
   reciprocal = QuadraticNumber(1) / sumOfSquareRoots;
   std::cout << "\n\nThe reciprocal of " << sumOfSquareRoots.print() << " is:\n" << reciprocal.print();
