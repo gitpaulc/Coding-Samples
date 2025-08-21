@@ -16,6 +16,7 @@ namespace MeshRenderer
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
   static bool gWireframeOn = true;
+  static bool gNormalsShading = false;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
   {
@@ -40,7 +41,8 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
+                    bool triangles, bool normals);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -317,7 +319,7 @@ void render()
   else { glDisable(GL_DEPTH_TEST); }
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !gWireframeOn);
+  toVertex3dData(gWireframe, vertexData, !gWireframeOn, gNormalsShading);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn && gUseShaders)
@@ -407,27 +409,34 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
+                    bool triangles, bool normals)
 {
   const auto oldSize = dataIn.size();
   if (triangles)
   {
-    const auto newSize = dataIn.size() * 3;
+    int sizeMultiplier = 3;
+    if (normals) { sizeMultiplier = 6; }
+    const auto newSize = dataIn.size() * sizeMultiplier;
     dataOut.resize(newSize);
     if (oldSize == 0) { return; }
-    for (int ind = 0; ind < oldSize; ind += 3)
+    for (int ii = 0; ii < oldSize; ii += 3)
     {
-      if (ind + 1 > oldSize) { break; }
-      if (ind + 2 > oldSize) { break; }
-      dataOut[ind * 3] = (float)dataIn[ind].a.x;
-      dataOut[ind * 3 + 1] = (float)dataIn[ind].a.y;
-      dataOut[ind * 3 + 2] = (float)dataIn[ind].a.z;
-      dataOut[ind * 3 + 3] = (float)dataIn[ind + 1].a.x;
-      dataOut[ind * 3 + 4] = (float)dataIn[ind + 1].a.y;
-      dataOut[ind * 3 + 5] = (float)dataIn[ind + 1].a.z;
-      dataOut[ind * 3 + 6] = (float)dataIn[ind + 2].a.x;
-      dataOut[ind * 3 + 7] = (float)dataIn[ind + 2].a.y;
-      dataOut[ind * 3 + 8] = (float)dataIn[ind + 2].a.z;
+      ComputationalGeometry::vector3d nn;
+      for (int jj = 0; jj < 3; ++jj)
+      {
+        auto ind = ii + jj;
+        if (ind > oldSize) { break; }
+        dataOut[ind * sizeMultiplier] = (float)dataIn[ind].a.x;
+        dataOut[ind * sizeMultiplier + 1] = (float)dataIn[ind].a.y;
+        dataOut[ind * sizeMultiplier + 2] = (float)dataIn[ind].a.z;
+        if (normals)
+        {
+          dataOut[ind * sizeMultiplier + 3] = nn.x;
+          dataOut[ind * sizeMultiplier + 4] = nn.y;
+          dataOut[ind * sizeMultiplier + 5] = nn.z;
+        }
+      }
     }
     return;
   }
