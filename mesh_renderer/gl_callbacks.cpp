@@ -28,7 +28,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = true;
-  static GLint gPosLocation, gMvLocation, gProjLocation;
+  static GLint gPosLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
 
@@ -334,6 +334,8 @@ void render()
     glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexData.data()[0]), (void*)0);
     glEnableVertexAttribArray(gPosLocation);
     glUseProgram(gShaderProgram);
+    glUniform1f(gMaxLocation, gBoundingMax.z);
+    glUniform1f(gMinLocation, gBoundingMin.z);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
@@ -454,11 +456,14 @@ std::string glslVertexShaderCode()
 #endif
   glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
   glsl << "\nuniform mat4 proj;";
+  glsl << "\nuniform float maxHeight;";
+  glsl << "\nuniform float minHeight;";
 #ifdef __APPLE__
   glsl << "\nattribute vec3 posVec;";
   glsl << "\nvarying vec3 fragColor;";
 #else
   glsl << "\nlayout(location = 0) in vec3 posVec;";
+  //glsl << "\nlayout(location = 1) in vec3 normalVec;";
   glsl << "\nout vec3 fragColor;";
 #endif
   glsl << "\nvoid main()";
@@ -532,6 +537,8 @@ void linkShaderProgram()
     std::cout << "\nShader linking failed:\n" << errorLog << "\n";
   }
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
+  gMaxLocation = glGetAttribLocation(gShaderProgram, "maxHeight");
+  gMinLocation = glGetAttribLocation(gShaderProgram, "minHeight");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);
