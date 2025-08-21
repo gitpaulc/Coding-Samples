@@ -42,7 +42,7 @@ int& GetWindowId()
 }
 
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
-                    bool triangles, bool normals);
+                    bool triangles, bool useShaders, bool normals);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -319,7 +319,7 @@ void render()
   else { glDisable(GL_DEPTH_TEST); }
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !gWireframeOn, gNormalsShading);
+  toVertex3dData(gWireframe, vertexData, !gWireframeOn, gUseShaders, gNormalsShading);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn && gUseShaders)
@@ -332,17 +332,16 @@ void render()
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
     gPosLocation = 0;
-    int sizeMultiplier = gNormalsShading ? 6 : 3;
+    int sizeMultiplier = 6; // 3 for triangle vertices, 3 for face normals at vertices.
     glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE,
       sizeMultiplier * sizeof(vertexData.data()[0]), (void*)0); // sizeof(float)
     glEnableVertexAttribArray(gPosLocation);
-    if (gNormalsShading)
-    {
-      gNormalsLocation = gPosLocation + 1;
-      glVertexAttribPointer(gNormalsLocation, 3, GL_FLOAT, GL_FALSE,
-        sizeMultiplier * sizeof(vertexData.data()[0]), (void*)(3 * sizeof(vertexData.data()[0])));
-      glEnableVertexAttribArray(gNormalsLocation);
-    }
+
+    gNormalsLocation = gPosLocation + 1;
+    glVertexAttribPointer(gNormalsLocation, 3, GL_FLOAT, GL_FALSE,
+      sizeMultiplier * sizeof(vertexData.data()[0]), (void*)(3 * sizeof(vertexData.data()[0])));
+    glEnableVertexAttribArray(gNormalsLocation);
+
     glUseProgram(gShaderProgram);
     glUniform1f(gMaxLocation, (float)gBoundingMax.z);
     glUniform1f(gMinLocation, (float)gBoundingMin.z);
@@ -352,10 +351,7 @@ void render()
     glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
-    if (gNormalsShading)
-    {
-      glDisableVertexAttribArray(gNormalsLocation);
-    }
+    glDisableVertexAttribArray(gNormalsLocation);
 #ifdef __APPLE__
     glBindVertexArrayAPPLE(0);
 #else
@@ -422,20 +418,19 @@ void render()
 }
 
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
-                    bool triangles, bool normals)
+                    bool triangles, bool useShaders, bool normals)
 {
   const auto oldSize = dataIn.size();
   if (triangles)
   {
-    int sizeMultiplier = 3;
-    if (normals) { sizeMultiplier = 6; }
+    int sizeMultiplier = useShaders ? 6 : 3;
     const auto newSize = dataIn.size() * sizeMultiplier;
     dataOut.resize(newSize);
     if (oldSize == 0) { return; }
     for (int ii = 0; ii < oldSize; ii += 3)
     {
       ComputationalGeometry::vector3d nn;
-      if (normals)
+      if (useShaders && normals)
       {
         ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
         nn = plane.getNormal();
@@ -447,7 +442,8 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
         dataOut[ind * sizeMultiplier] = (float)dataIn[ind].a.x;
         dataOut[ind * sizeMultiplier + 1] = (float)dataIn[ind].a.y;
         dataOut[ind * sizeMultiplier + 2] = (float)dataIn[ind].a.z;
-        if (normals)
+        // Add normals, they are zero if normals == false.
+        if (useShaders)
         {
           dataOut[ind * sizeMultiplier + 3] = (float)nn.x;
           dataOut[ind * sizeMultiplier + 4] = (float)nn.y;
@@ -489,7 +485,7 @@ std::string glslVertexShaderCode()
   glsl << "\nvarying vec3 fragColor;";
 #else
   glsl << "\nlayout(location = 0) in vec3 posVec;";
-  //glsl << "\nlayout(location = 1) in vec3 normalVec;";
+  glsl << "\nlayout(location = 1) in vec3 normalVec;";
   glsl << "\nout vec3 fragColor;";
 #endif
   glsl << "\nvoid main()";
