@@ -29,7 +29,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = true;
-  static GLint gPosLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
+  static GLint gPosLocation, gNormalsLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
 
@@ -332,9 +332,17 @@ void render()
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
     gPosLocation = 0;
-    // 3 * sizeof(float):
-    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexData.data()[0]), (void*)0);
+    int sizeMultiplier = gNormalsShading ? 6 : 3;
+    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE,
+      sizeMultiplier * sizeof(vertexData.data()[0]), (void*)0); // sizeof(float)
     glEnableVertexAttribArray(gPosLocation);
+    if (gNormalsShading)
+    {
+      gNormalsLocation = gPosLocation + 1;
+      glVertexAttribPointer(gNormalsLocation, 3, GL_FLOAT, GL_FALSE,
+        sizeMultiplier * sizeof(vertexData.data()[0]), (void*)(3 * sizeof(vertexData.data()[0])));
+      glEnableVertexAttribArray(gNormalsLocation);
+    }
     glUseProgram(gShaderProgram);
     glUniform1f(gMaxLocation, (float)gBoundingMax.z);
     glUniform1f(gMinLocation, (float)gBoundingMin.z);
@@ -344,6 +352,10 @@ void render()
     glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
+    if (gNormalsShading)
+    {
+      glDisableVertexAttribArray(gNormalsLocation);
+    }
 #ifdef __APPLE__
     glBindVertexArrayAPPLE(0);
 #else
@@ -437,9 +449,9 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
         dataOut[ind * sizeMultiplier + 2] = (float)dataIn[ind].a.z;
         if (normals)
         {
-          dataOut[ind * sizeMultiplier + 3] = nn.x;
-          dataOut[ind * sizeMultiplier + 4] = nn.y;
-          dataOut[ind * sizeMultiplier + 5] = nn.z;
+          dataOut[ind * sizeMultiplier + 3] = (float)nn.x;
+          dataOut[ind * sizeMultiplier + 4] = (float)nn.y;
+          dataOut[ind * sizeMultiplier + 5] = (float)nn.z;
         }
       }
     }
