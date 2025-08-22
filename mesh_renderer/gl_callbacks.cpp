@@ -339,15 +339,22 @@ void render()
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
     gPosLocation = 0;
+#ifdef __APPLE__
+    int sizeMultiplier = 3;
+#else
     int sizeMultiplier = 6; // 3 for triangle vertices, 3 for face normals at vertices.
+#endif
     glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE,
       sizeMultiplier * sizeof(vertexData.data()[0]), (void*)0); // sizeof(float)
     glEnableVertexAttribArray(gPosLocation);
 
+#ifdef __APPLE__
+#else
     gNormalsLocation = gPosLocation + 1;
     glVertexAttribPointer(gNormalsLocation, 3, GL_FLOAT, GL_FALSE,
       sizeMultiplier * sizeof(vertexData.data()[0]), (void*)(3 * sizeof(vertexData.data()[0])));
     glEnableVertexAttribArray(gNormalsLocation);
+#endif
 
     glUseProgram(gShaderProgram);
     glUniform1f(gMaxLocation, (float)gBoundingMax.z);
@@ -358,11 +365,11 @@ void render()
     glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
+#ifndef __APPLE__
     glDisableVertexAttribArray(gNormalsLocation);
-#ifdef __APPLE__
-    glBindVertexArrayAPPLE(0);
-#else
     glBindVertexArray(0);
+#else
+    glBindVertexArrayAPPLE(0);
 #endif
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glutSwapBuffers();
@@ -430,6 +437,9 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
   const auto oldSize = dataIn.size();
   if (triangles)
   {
+#ifdef __APPLE__
+    useShaders = false;
+#endif
     int sizeMultiplier = useShaders ? 6 : 3;
     const auto newSize = dataIn.size() * sizeMultiplier;
     dataOut.resize(newSize);
@@ -489,6 +499,7 @@ std::string glslVertexShaderCode()
   glsl << "\nuniform float minHeight;";
 #ifdef __APPLE__
   glsl << "\nattribute vec3 posVec;";
+  glsl << "\nvec3 normalVec = vec3(0.0, 0.0, 0.0);";
   glsl << "\nvarying vec3 fragColor;";
 #else
   glsl << "\nlayout(location = 0) in vec3 posVec;";
