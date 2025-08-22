@@ -231,11 +231,11 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-    if (!gWireframeOn && !gNormalsShading)
+    //if (!gWireframeOn && !gNormalsShading)
     {
-      gNormalsShading = !gNormalsShading;
+      //gNormalsShading = !gNormalsShading;
     }
-    else
+    //else
     {
       gWireframeOn = !gWireframeOn;
     }
