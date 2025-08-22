@@ -16,6 +16,7 @@ namespace MeshRenderer
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
   static bool gWireframeOn = true;
+  static bool gNormalsShading = false;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
   {
@@ -28,7 +29,7 @@ namespace MeshRenderer
   static std::vector<GLfloat> gProjMatrix(16, 0.0f);
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = true;
-  static GLint gPosLocation, gMvLocation, gProjLocation;
+  static GLint gPosLocation, gNormalsLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
 }
 
@@ -40,7 +41,8 @@ int& GetWindowId()
   return window_id;
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles);
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
+                    bool triangles, bool useShaders, bool normals);
 void linkShaderProgram();
 
 void initialize_glut(int* argc_ptr, char** argv)
@@ -79,7 +81,6 @@ void initialize_glut(int* argc_ptr, char** argv)
   glGenVertexArrays(1, &MeshRenderer::gVertexArrayObj);
 #endif
   glGenBuffers(1, &MeshRenderer::gVertexBufferObj);
-  linkShaderProgram();
 
   {
     ComputationalGeometry::point3d minPt, maxPt;
@@ -90,6 +91,7 @@ void initialize_glut(int* argc_ptr, char** argv)
   }
 
   recalculate();
+  linkShaderProgram();
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
   auto& gCam = GetCamera(mesh);
   gCam.setEye(ComputationalGeometry::point3d());
@@ -229,7 +231,14 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-    gWireframeOn = !gWireframeOn;
+    //if (!gWireframeOn && !gNormalsShading)
+    {
+      //gNormalsShading = !gNormalsShading;
+    }
+    //else
+    {
+      gWireframeOn = !gWireframeOn;
+    }
     recalculate();
   }
   if ((key == '1'))
@@ -317,7 +326,7 @@ void render()
   else { glDisable(GL_DEPTH_TEST); }
 
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !gWireframeOn);
+  toVertex3dData(gWireframe, vertexData, !gWireframeOn, gUseShaders, gNormalsShading);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (!gWireframeOn && gUseShaders)
@@ -330,16 +339,26 @@ void render()
     glBindBuffer(GL_ARRAY_BUFFER, gVertexBufferObj);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
     gPosLocation = 0;
-    // 3 * sizeof(float):
-    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(vertexData.data()[0]), (void*)0);
+    int sizeMultiplier = 6; // 3 for triangle vertices, 3 for face normals at vertices.
+    glVertexAttribPointer(gPosLocation, 3, GL_FLOAT, GL_FALSE,
+      sizeMultiplier * sizeof(vertexData.data()[0]), (void*)0); // sizeof(float)
     glEnableVertexAttribArray(gPosLocation);
+
+    gNormalsLocation = gPosLocation + 1;
+    glVertexAttribPointer(gNormalsLocation, 3, GL_FLOAT, GL_FALSE,
+      sizeMultiplier * sizeof(vertexData.data()[0]), (void*)(3 * sizeof(vertexData.data()[0])));
+    glEnableVertexAttribArray(gNormalsLocation);
+
     glUseProgram(gShaderProgram);
+    glUniform1f(gMaxLocation, (float)gBoundingMax.z);
+    glUniform1f(gMinLocation, (float)gBoundingMin.z);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
     glDrawArrays(GL_TRIANGLES, whichArray, static_cast<GLsizei>(vertexData.size() / 3));
 
     glDisableVertexAttribArray(gPosLocation);
+    glDisableVertexAttribArray(gNormalsLocation);
 #ifdef __APPLE__
     glBindVertexArrayAPPLE(0);
 #else
@@ -405,27 +424,39 @@ void render()
   glutSwapBuffers();
 }
 
-void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut, bool triangles)
+void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
+                    bool triangles, bool useShaders, bool normals)
 {
   const auto oldSize = dataIn.size();
   if (triangles)
   {
-    const auto newSize = dataIn.size() * 3;
+    int sizeMultiplier = useShaders ? 6 : 3;
+    const auto newSize = dataIn.size() * sizeMultiplier;
     dataOut.resize(newSize);
     if (oldSize == 0) { return; }
-    for (int ind = 0; ind < oldSize; ind += 3)
+    for (int ii = 0; ii < oldSize; ii += 3)
     {
-      if (ind + 1 > oldSize) { break; }
-      if (ind + 2 > oldSize) { break; }
-      dataOut[ind * 3] = (float)dataIn[ind].a.x;
-      dataOut[ind * 3 + 1] = (float)dataIn[ind].a.y;
-      dataOut[ind * 3 + 2] = (float)dataIn[ind].a.z;
-      dataOut[ind * 3 + 3] = (float)dataIn[ind + 1].a.x;
-      dataOut[ind * 3 + 4] = (float)dataIn[ind + 1].a.y;
-      dataOut[ind * 3 + 5] = (float)dataIn[ind + 1].a.z;
-      dataOut[ind * 3 + 6] = (float)dataIn[ind + 2].a.x;
-      dataOut[ind * 3 + 7] = (float)dataIn[ind + 2].a.y;
-      dataOut[ind * 3 + 8] = (float)dataIn[ind + 2].a.z;
+      ComputationalGeometry::vector3d nn;
+      if (useShaders && normals)
+      {
+        ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
+        nn = plane.getNormal();
+      }
+      for (int jj = 0; jj < 3; ++jj)
+      {
+        auto ind = ii + jj;
+        if (ind > oldSize) { break; }
+        dataOut[ind * sizeMultiplier] = (float)dataIn[ind].a.x;
+        dataOut[ind * sizeMultiplier + 1] = (float)dataIn[ind].a.y;
+        dataOut[ind * sizeMultiplier + 2] = (float)dataIn[ind].a.z;
+        // Add normals, they are zero if normals == false.
+        if (useShaders)
+        {
+          dataOut[ind * sizeMultiplier + 3] = (float)nn.x;
+          dataOut[ind * sizeMultiplier + 4] = (float)nn.y;
+          dataOut[ind * sizeMultiplier + 5] = (float)nn.z;
+        }
+      }
     }
     return;
   }
@@ -454,19 +485,39 @@ std::string glslVertexShaderCode()
 #endif
   glsl << "\nuniform mat4 mv;"; // mv = VIEW * MODEL
   glsl << "\nuniform mat4 proj;";
+  glsl << "\nuniform float maxHeight;";
+  glsl << "\nuniform float minHeight;";
 #ifdef __APPLE__
   glsl << "\nattribute vec3 posVec;";
   glsl << "\nvarying vec3 fragColor;";
 #else
   glsl << "\nlayout(location = 0) in vec3 posVec;";
+  glsl << "\nlayout(location = 1) in vec3 normalVec;";
   glsl << "\nout vec3 fragColor;";
 #endif
   glsl << "\nvoid main()";
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
-  glsl << "\n  float tt = 0.5 * (posVec.z + 1.0);";
-  glsl << "\n  float factor = 0.9;";
-  glsl << "\n  fragColor = vec3(tt * factor, tt * factor, 1.0);";
+  glsl << "\n  float tt = 0.0;";
+  glsl << "\n  float normSq = normalVec.x * normalVec.x + normalVec.y * normalVec.y + normalVec.z * normalVec.z;";
+  glsl << "\n  if (normSq < 0.5)"; // Rendering via normals is off.
+  glsl << "\n  {";
+  glsl << "\n    if (maxHeight != minHeight)";
+  glsl << "\n    {";
+  glsl << "\n      float factor = 0.7;";
+  glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
+  glsl << "\n    }";
+  glsl << "\n  }";
+  glsl << "\n  else"; // Rendering via normals is on.
+  glsl << "\n  {";
+  glsl << "\n    if (maxHeight != minHeight)";
+  glsl << "\n    {";
+  glsl << "\n      float factor = normalVec.z * 0.9;";
+  glsl << "\n      if (factor < 0.0) { factor = -factor; }";
+  glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
+  glsl << "\n    }";
+  glsl << "\n  }";
+  glsl << "\n  fragColor = vec3(tt, tt, 1.0);";
   glsl << "\n}";
   return glsl.str();
 }
@@ -532,6 +583,8 @@ void linkShaderProgram()
     std::cout << "\nShader linking failed:\n" << errorLog << "\n";
   }
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
+  gMaxLocation = glGetUniformLocation(gShaderProgram, "maxHeight");
+  gMinLocation = glGetUniformLocation(gShaderProgram, "minHeight");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);
