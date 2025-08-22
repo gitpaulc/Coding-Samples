@@ -231,7 +231,14 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-    gWireframeOn = !gWireframeOn;
+    if (!gWireframeOn && !gNormalsShading)
+    {
+      gNormalsShading = !gNormalsShading;
+    }
+    else
+    {
+      gWireframeOn = !gWireframeOn;
+    }
     recalculate();
   }
   if ((key == '1'))
@@ -492,18 +499,23 @@ std::string glslVertexShaderCode()
   glsl << "\n{";
   glsl << "\n  gl_Position = proj * mv * vec4(posVec, 1.0);";
   glsl << "\n  float tt = 0.0;";
-  glsl << "\n  if (maxHeight != minHeight)";
-  glsl << "\n  {";
-  glsl << "\n    float factor = 0.7;";
-  glsl << "\n    tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
-  glsl << "\n  }";
   glsl << "\n  float normSq = normalVec.x * normalVec.x + normalVec.y * normalVec.y + normalVec.z * normalVec.z;";
   glsl << "\n  if (normSq < 0.5)"; // Rendering via normals is off.
   glsl << "\n  {";
-  //glsl << "\n    tt = 0.0;";
+  glsl << "\n    if (maxHeight != minHeight)";
+  glsl << "\n    {";
+  glsl << "\n      float factor = 0.7;";
+  glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
+  glsl << "\n    }";
   glsl << "\n  }";
   glsl << "\n  else"; // Rendering via normals is on.
   glsl << "\n  {";
+  glsl << "\n    if (maxHeight != minHeight)";
+  glsl << "\n    {";
+  glsl << "\n      float factor = normalVec.z * 0.9;";
+  glsl << "\n      if (factor < 0.0) { factor = -factor; }";
+  glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
+  glsl << "\n    }";
   glsl << "\n  }";
   glsl << "\n  fragColor = vec3(tt, tt, 1.0);";
   glsl << "\n}";
