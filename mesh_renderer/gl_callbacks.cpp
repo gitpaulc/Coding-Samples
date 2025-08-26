@@ -30,7 +30,9 @@ namespace MeshRenderer
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = true;
   static GLint gPosLocation, gNormalsLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
+  static GLint gAmbientLocation, gDiffuseLocation, gSpecularLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
+  static float g_kA, g_kD, g_kS;
 }
 
 void recalculate();
@@ -89,6 +91,10 @@ void initialize_glut(int* argc_ptr, char** argv)
     scale = 0.2 / scale;
     MeshRenderer::gScale = scale;
   }
+
+  MeshRenderer::g_kA = 0.0f;
+  MeshRenderer::g_kD = 0.9f;
+  MeshRenderer::g_kS = 0.0f;
 
   recalculate();
   linkShaderProgram();
@@ -231,13 +237,14 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-    //if (!gWireframeOn && !gNormalsShading)
+    if (!gWireframeOn && !gNormalsShading)
     {
-      //gNormalsShading = !gNormalsShading;
+      gNormalsShading = !gNormalsShading;
     }
-    //else
+    else
     {
       gWireframeOn = !gWireframeOn;
+      gNormalsShading = false;
     }
     recalculate();
   }
@@ -359,6 +366,9 @@ void render()
     glUseProgram(gShaderProgram);
     glUniform1f(gMaxLocation, (float)gBoundingMax.z);
     glUniform1f(gMinLocation, (float)gBoundingMin.z);
+    glUniform1f(gAmbientLocation, g_kA);
+    glUniform1f(gDiffuseLocation, g_kD);
+    glUniform1f(gSpecularLocation, g_kS);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
@@ -497,6 +507,9 @@ std::string glslVertexShaderCode()
   glsl << "\nuniform mat4 proj;";
   glsl << "\nuniform float maxHeight;";
   glsl << "\nuniform float minHeight;";
+  glsl << "\nuniform float kA;";
+  glsl << "\nuniform float kD;";
+  glsl << "\nuniform float kS;";
 #ifdef __APPLE__
   glsl << "\nattribute vec3 posVec;";
   glsl << "\nvec3 normalVec = vec3(0.0, 0.0, 0.0);";
@@ -523,7 +536,7 @@ std::string glslVertexShaderCode()
   glsl << "\n  {";
   glsl << "\n    if (maxHeight != minHeight)";
   glsl << "\n    {";
-  glsl << "\n      float factor = normalVec.z * 0.9;";
+  glsl << "\n      float factor = normalVec.z * kD;";
   glsl << "\n      if (factor < 0.0) { factor = -factor; }";
   glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
   glsl << "\n    }";
@@ -596,6 +609,9 @@ void linkShaderProgram()
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
   gMaxLocation = glGetUniformLocation(gShaderProgram, "maxHeight");
   gMinLocation = glGetUniformLocation(gShaderProgram, "minHeight");
+  gAmbientLocation = glGetUniformLocation(gShaderProgram, "kA");
+  gDiffuseLocation = glGetUniformLocation(gShaderProgram, "kD");
+  gSpecularLocation = glGetUniformLocation(gShaderProgram, "kS");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);
