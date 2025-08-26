@@ -745,6 +745,7 @@ namespace MeshRenderer
       avgNormals[it.first] = normal;
     }
 
+    point3d zero_;
     for (const auto& faceTri : triangles)
     {
       Triangle3d tri;
@@ -763,6 +764,16 @@ namespace MeshRenderer
       meshOut.push_back({ tri.a, tri.b });
       meshOut.push_back({ tri.b, tri.c });
       meshOut.push_back({ tri.c, tri.a });
+      vector3d nA, nB, nC;
+      auto& it = avgNormals.find(faceTri.a);
+      if (it != avgNormals.end()) { nA = it->second; }
+      it = avgNormals.find(faceTri.b);
+      if (it != avgNormals.end()) { nB = it->second; }
+      it = avgNormals.find(faceTri.c);
+      if (it != avgNormals.end()) { nC = it->second; }
+      normalsOut.push_back({ zero_ + nA, zero_ + nB });
+      normalsOut.push_back({ zero_ + nB, zero_ + nC });
+      normalsOut.push_back({ zero_ + nC, zero_ + nA });
     }
     
     return true;
