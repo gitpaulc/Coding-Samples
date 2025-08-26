@@ -51,7 +51,7 @@ namespace MeshRenderer
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::map<std::pair<int, int>, int>& halfEdgesCache);
     /** \brief The optional output map sends vertexIndex |--> { faceIndex, index within face }
      */
-    std::map<int, ComputationalGeometry::Face3d> getFaces(std::map<int, std::set<std::pair<int, int> > >* oVert2Faces = nullptr) const;
+    std::map<int, ComputationalGeometry::Face3d> getFaces() const;
     bool getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut, std::vector<ComputationalGeometry::Edge3d>& normalsOut) const;
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
@@ -479,13 +479,9 @@ namespace MeshRenderer
     return success;
   }
 
-  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces(std::map<int, std::set<std::pair<int, int> > >* oVert2Faces) const
+  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces() const
   {
     std::map<int, ComputationalGeometry::Face3d> faceMap;
-    if (oVert2Faces != nullptr)
-    {
-      oVert2Faces->clear();
-    }
     const int facesSize = (int)(faces.size());
     for (int ind = 0; ind < facesSize; ++ind)
     {
@@ -499,18 +495,6 @@ namespace MeshRenderer
       if (initial.source >= (int)(vertices.size())) { continue; }
       const Vertex& initialSrc = vertices[initial.source];
       ComputationalGeometry::Face3d face;
-      if (oVert2Faces != nullptr)
-      {
-        auto& it = oVert2Faces->find(initial.source);
-        if (it == oVert2Faces->end())
-        {
-          (*oVert2Faces)[initial.source] = { { ind, (int)face.vertices.size() } };
-        }
-        else
-        {
-          it->second.insert({ ind, (int)face.vertices.size() });
-        }
-      }
       face.vertices.push_back(initialSrc.coords);
       HalfEdge current = initial;
       for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
@@ -523,18 +507,6 @@ namespace MeshRenderer
         if (current.source < 0) { break; }
         if (current.source >= (int)(vertices.size())) { break; }
         const Vertex& currentSrc = vertices[current.source];
-        if (oVert2Faces != nullptr)
-        {
-          auto& it = oVert2Faces->find(current.source);
-          if (it == oVert2Faces->end())
-          {
-            (*oVert2Faces)[current.source] = { { ind, (int)face.vertices.size() } };
-          }
-          else
-          {
-            it->second.insert({ ind, (int)face.vertices.size() });
-          }
-        }
         face.vertices.push_back(currentSrc.coords);
       }
       faceMap[ind] = face;
@@ -682,9 +654,61 @@ namespace MeshRenderer
     using namespace ComputationalGeometry;
     meshOut.resize(0);
     std::map<int, std::set<std::pair<int, int> > > vert2Faces;
-    // const Vertex& initialSrc = vertices[initial.source];
-    //std::map<int, std::vector<Triangle3d> > face2Triangles;
-    std::map<int, Face3d> renderFaces = getFaces(&vert2Faces);
+    std::map<int, ComputationalGeometry::Face3d> renderFaces;
+    {
+      const int facesSize = (int)(faces.size());
+      for (int ind = 0; ind < facesSize; ++ind)
+      {
+        HalfEdgePtr initialPtr = faces[ind].outerComponent;
+        if (initialPtr == DcelNull) { continue; }
+        if (initialPtr < 0) { continue; }
+        if (initialPtr >= (int)(halfEdges.size())) { continue; }
+        const HalfEdge& initial = halfEdges[initialPtr];
+        if (initial.source == DcelNull) { continue; }
+        if (initial.source < 0) { continue; }
+        if (initial.source >= (int)(vertices.size())) { continue; }
+        const Vertex& initialSrc = vertices[initial.source];
+        ComputationalGeometry::Face3d face;
+        {
+          auto& it = vert2Faces.find(initial.source);
+          if (it == vert2Faces.end())
+          {
+            vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
+          }
+          else
+          {
+            it->second.insert({ ind, (int)face.vertices.size() });
+          }
+        }
+        face.vertices.push_back(initialSrc.coords);
+        HalfEdge current = initial;
+        for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
+        {
+          if (current.next == DcelNull) { break; }
+          if (current.next < 0) { break; }
+          if (current.next >= (int)(halfEdges.size())) { break; }
+          current = halfEdges[current.next];
+          if (current.source == DcelNull) { break; }
+          if (current.source < 0) { break; }
+          if (current.source >= (int)(vertices.size())) { break; }
+          const Vertex& currentSrc = vertices[current.source];
+          {
+            auto& it = vert2Faces.find(current.source);
+            if (it == vert2Faces.end())
+            {
+              vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
+            }
+            else
+            {
+              it->second.insert({ ind, (int)face.vertices.size() });
+            }
+          }
+          face.vertices.push_back(currentSrc.coords);
+        }
+        renderFaces[ind] = face;
+      }
+    }
+
     for (const auto& faceIt : renderFaces)
     {
       bool addFace = (faceIt.second.vertices.size() >= 3);
