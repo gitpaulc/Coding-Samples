@@ -658,8 +658,17 @@ namespace MeshRenderer
       VertexPtr a = DcelNull;
       VertexPtr b = DcelNull;
       VertexPtr c = DcelNull;
+      void addTo(std::vector<FaceTriangle>& triangles, std::map<VertexPtr,
+        std::set<vector3d> >& vertexNormals)
+      {
+        if (a == DcelNull) { return; }
+        if (b == DcelNull) { return; }
+        if (c == DcelNull) { return; }
+        triangles.push_back(*this);
+      }
     };
     std::vector<FaceTriangle> triangles;
+    std::map<VertexPtr, std::set<vector3d> > vertexNormals;
     const int facesSize = (int)(faces.size());
     for (int ind = 0; ind < facesSize; ++ind)
     {
@@ -690,14 +699,13 @@ namespace MeshRenderer
         else if (ii == 2)
         {
           tri.c = current.source;
-          triangles.push_back(tri);
         }
         else if (ii >= 3)
         {
           tri.b = tri.c;
           tri.c = current.source;
-          triangles.push_back(tri);
         }
+        tri.addTo(triangles, vertexNormals);
         ++ii;
       }
     }
