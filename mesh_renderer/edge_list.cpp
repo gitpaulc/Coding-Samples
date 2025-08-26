@@ -49,7 +49,7 @@ namespace MeshRenderer
       const std::vector<std::string>& faceBuffer);
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::map<std::pair<int, int>, int>& halfEdgesCache);
-    std::map<int, ComputationalGeometry::Face3d> getFaces() const;
+    std::map<int, ComputationalGeometry::Face3d> getFaces(std::map<int, std::set<int> >* oVert2Faces = nullptr) const;
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
     bool setNormal(int vertIdx, const std::string& vertexNormal);
@@ -476,10 +476,15 @@ namespace MeshRenderer
     return success;
   }
 
-  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces() const
+  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces(std::map<int, std::set<int> >* oVert2Faces) const
   {
     std::map<int, ComputationalGeometry::Face3d> faceMap;
-    for (int ind = 0; ind < (int)(faces.size()); ++ind)
+    if (oVert2Faces != nullptr)
+    {
+      oVert2Faces->clear();
+    }
+    const int facesSize = (int)(faces.size());
+    for (int ind = 0; ind < facesSize; ++ind)
     {
       HalfEdgePtr initialPtr = faces[ind].outerComponent;
       if (initialPtr == DcelNull) { continue; }
@@ -504,6 +509,31 @@ namespace MeshRenderer
         if (current.source >= (int)(vertices.size())) { break; }
         const Vertex& currentSrc = vertices[current.source];
         face.vertices.push_back(currentSrc.coords);
+        if (oVert2Faces != nullptr)
+        {
+          {
+            auto& it = oVert2Faces->find(current.source);
+            if (it == oVert2Faces->end())
+            {
+              (*oVert2Faces)[current.source] = { ind };
+            }
+            else
+            {
+              it->second.insert(current.source);
+            }
+          }
+          {
+            auto& it = oVert2Faces->find(current.next);
+            if (it == oVert2Faces->end())
+            {
+              (*oVert2Faces)[current.next] = { ind };
+            }
+            else
+            {
+              it->second.insert(current.next);
+            }
+          }
+        }
       }
       faceMap[ind] = face;
     }
@@ -644,13 +674,15 @@ namespace MeshRenderer
     }
   }
 
-  bool DoublyConnectedEdgeList::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut) const
+  bool DoublyConnectedEdgeList::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut,
+    std::vector<ComputationalGeometry::Edge3d>& normalsOut) const
   {
     meshOut.resize(0);
     if (pImpl == nullptr) { return false; }
 
     using namespace ComputationalGeometry;
-    std::map<int, Face3d> renderFaces = pImpl->getFaces();
+    std::map<int, std::set<int> > vert2Faces;
+    std::map<int, Face3d> renderFaces = pImpl->getFaces(&vert2Faces);
     for (const auto& faceIt : renderFaces)
     {
       bool addFace = (faceIt.second.vertices.size() >= 3);

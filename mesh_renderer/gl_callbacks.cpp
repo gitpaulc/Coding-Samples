@@ -113,7 +113,8 @@ void recalculate()
   }
   else
   {
-    mesh.getSkeleton(MeshRenderer::gWireframe);
+    std::vector<ComputationalGeometry::Edge3d> normalsOut;
+    mesh.getSkeleton(MeshRenderer::gWireframe, normalsOut);
   }
   mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
 }
