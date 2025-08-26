@@ -654,86 +654,86 @@ namespace MeshRenderer
     using namespace ComputationalGeometry;
     meshOut.resize(0);
     //std::map<int, std::set<std::pair<int, int> > > vert2Faces;
-    {
-      const int facesSize = (int)(faces.size());
-      for (int ind = 0; ind < facesSize; ++ind)
-      {
-        HalfEdgePtr initialPtr = faces[ind].outerComponent;
-        if (initialPtr == DcelNull) { continue; }
-        if (initialPtr < 0) { continue; }
-        if (initialPtr >= (int)(halfEdges.size())) { continue; }
-        const HalfEdge& initial = halfEdges[initialPtr];
-        if (initial.source == DcelNull) { continue; }
-        if (initial.source < 0) { continue; }
-        if (initial.source >= (int)(vertices.size())) { continue; }
-        const Vertex& initialSrc = vertices[initial.source];
 
-        std::vector<Triangle3d> triangles;
-        Triangle3d tri;
+    const int facesSize = (int)(faces.size());
+    for (int ind = 0; ind < facesSize; ++ind)
+    {
+      HalfEdgePtr initialPtr = faces[ind].outerComponent;
+      if (initialPtr == DcelNull) { continue; }
+      if (initialPtr < 0) { continue; }
+      if (initialPtr >= (int)(halfEdges.size())) { continue; }
+      const HalfEdge& initial = halfEdges[initialPtr];
+      if (initial.source == DcelNull) { continue; }
+      if (initial.source < 0) { continue; }
+      if (initial.source >= (int)(vertices.size())) { continue; }
+      const Vertex& initialSrc = vertices[initial.source];
+
+      std::vector<Triangle3d> triangles;
+      Triangle3d tri;
+      {
+        //auto& it = vert2Faces.find(initial.source);
+        //if (it == vert2Faces.end())
         {
-          //auto& it = vert2Faces.find(initial.source);
+          //vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
+        }
+        //else
+        {
+          //it->second.insert({ ind, (int)face.vertices.size() });
+        }
+      }
+      tri.a = initialSrc.coords;
+      int i = 1;
+      HalfEdge current = initial;
+      for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
+      {
+        if (current.next == DcelNull) { break; }
+        if (current.next < 0) { break; }
+        if (current.next >= (int)(halfEdges.size())) { break; }
+        current = halfEdges[current.next];
+        if (current.source == DcelNull) { break; }
+        if (current.source < 0) { break; }
+        if (current.source >= (int)(vertices.size())) { break; }
+        const Vertex& currentSrc = vertices[current.source];
+        {
+          //auto& it = vert2Faces.find(current.source);
           //if (it == vert2Faces.end())
           {
-            //vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
+            //vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
           }
           //else
           {
             //it->second.insert({ ind, (int)face.vertices.size() });
           }
         }
-        tri.a = initialSrc.coords;
-        int i = 1;
-        HalfEdge current = initial;
-        for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
+        if (i == 1) { tri.b = currentSrc.coords; }
+        else if (i == 2)
         {
-          if (current.next == DcelNull) { break; }
-          if (current.next < 0) { break; }
-          if (current.next >= (int)(halfEdges.size())) { break; }
-          current = halfEdges[current.next];
-          if (current.source == DcelNull) { break; }
-          if (current.source < 0) { break; }
-          if (current.source >= (int)(vertices.size())) { break; }
-          const Vertex& currentSrc = vertices[current.source];
-          {
-            //auto& it = vert2Faces.find(current.source);
-            //if (it == vert2Faces.end())
-            {
-              //vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
-            }
-            //else
-            {
-              //it->second.insert({ ind, (int)face.vertices.size() });
-            }
-          }
-          if (i == 1) { tri.b = currentSrc.coords; }
-          else if (i == 2)
-          {
-            tri.c = currentSrc.coords;
-            triangles.push_back(tri);
-          }
-          else if (i >= 3)
-          {
-            tri.b = tri.c;
-            tri.c = currentSrc.coords;
-            triangles.push_back(tri);
-          }
-          ++i;
+          tri.c = currentSrc.coords;
+          triangles.push_back(tri);
         }
-
-        for (const auto& tri : triangles)
+        else if (i >= 3)
         {
-          auto edgeSet = tri.getEdges();
-          if (edgeSet.size() < 3) { continue; }
-          i = 0;
-          for (const auto& edg : edgeSet)
-          {
-            if (i >= 3) { break; }
-            meshOut.push_back(edg);
-            ++i;
-          }
+          tri.b = tri.c;
+          tri.c = currentSrc.coords;
+          triangles.push_back(tri);
+        }
+        ++i;
+      }
+
+      for (const auto& tri : triangles)
+      {
+        auto edgeSet = tri.getEdges();
+        if (edgeSet.size() < 3) { continue; }
+        i = 0;
+        for (const auto& edg : edgeSet)
+        {
+          if (i >= 3) { break; }
+          meshOut.push_back(edg);
+          ++i;
         }
       }
     }
+    
     return true;
   }
 
