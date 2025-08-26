@@ -10,7 +10,7 @@
 
 namespace MeshRenderer
 {
-  static std::vector<ComputationalGeometry::Edge3d> gWireframe;
+  static std::vector<ComputationalGeometry::Edge3d> gWireframe, gAvgNormals;
   static GLuint gVertexArrayObj, gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gDepthBuffering = true;
@@ -113,8 +113,7 @@ void recalculate()
   }
   else
   {
-    std::vector<ComputationalGeometry::Edge3d> interpolatedNormals;
-    mesh.getSkeleton(MeshRenderer::gWireframe, interpolatedNormals);
+    mesh.getSkeleton(MeshRenderer::gWireframe, MeshRenderer::gAvgNormals);
   }
   mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
 }
@@ -460,8 +459,16 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
       ComputationalGeometry::vector3d nn;
       if (useShaders && normals)
       {
-        ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
-        nn = plane.getNormal();
+        if (ii >= (int)MeshRenderer::gAvgNormals.size())
+        {
+          ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
+          nn = plane.getNormal();
+        }
+        else
+        {
+          ComputationalGeometry::point3d zero_;
+          nn = MeshRenderer::gAvgNormals[ii].a - zero_;
+        }
       }
       for (int jj = 0; jj < 3; ++jj)
       {

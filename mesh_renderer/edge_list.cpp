@@ -653,6 +653,7 @@ namespace MeshRenderer
   {
     using namespace ComputationalGeometry;
     meshOut.resize(0);
+    normalsOut.resize(0);
     struct FaceTriangle
     {
       VertexPtr a = DcelNull;
