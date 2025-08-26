@@ -653,9 +653,13 @@ namespace MeshRenderer
   {
     using namespace ComputationalGeometry;
     meshOut.resize(0);
-    //std::map<int, std::set<std::pair<int, int> > > vert2Faces;
-
-    std::vector<Triangle3d> triangles;
+    struct FaceTriangle
+    {
+      VertexPtr a = DcelNull;
+      VertexPtr b = DcelNull;
+      VertexPtr c = DcelNull;
+    };
+    std::vector<FaceTriangle> triangles;
     const int facesSize = (int)(faces.size());
     for (int ind = 0; ind < facesSize; ++ind)
     {
@@ -667,21 +671,9 @@ namespace MeshRenderer
       if (initial.source == DcelNull) { continue; }
       if (initial.source < 0) { continue; }
       if (initial.source >= (int)(vertices.size())) { continue; }
-      const Vertex& initialSrc = vertices[initial.source];
 
-      Triangle3d tri;
-      {
-        //auto& it = vert2Faces.find(initial.source);
-        //if (it == vert2Faces.end())
-        {
-          //vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
-        }
-        //else
-        {
-          //it->second.insert({ ind, (int)face.vertices.size() });
-        }
-      }
-      tri.a = initialSrc.coords;
+      FaceTriangle tri;
+      tri.a = initial.source;
       int ii = 1;
       HalfEdge current = initial;
       for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
@@ -693,36 +685,38 @@ namespace MeshRenderer
         if (current.source == DcelNull) { break; }
         if (current.source < 0) { break; }
         if (current.source >= (int)(vertices.size())) { break; }
-        const Vertex& currentSrc = vertices[current.source];
-        {
-          //auto& it = vert2Faces.find(current.source);
-          //if (it == vert2Faces.end())
-          {
-            //vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
-          }
-          //else
-          {
-            //it->second.insert({ ind, (int)face.vertices.size() });
-          }
-        }
-        if (ii == 1) { tri.b = currentSrc.coords; }
+
+        if (ii == 1) { tri.b = current.source; }
         else if (ii == 2)
         {
-          tri.c = currentSrc.coords;
+          tri.c = current.source;
           triangles.push_back(tri);
         }
         else if (ii >= 3)
         {
           tri.b = tri.c;
-          tri.c = currentSrc.coords;
+          tri.c = current.source;
           triangles.push_back(tri);
         }
         ++ii;
       }
     }
 
-    for (const auto& tri : triangles)
+    for (const auto& faceTri : triangles)
     {
+      Triangle3d tri;
+      if (faceTri.a == DcelNull) { continue; }
+      if (faceTri.b == DcelNull) { continue; }
+      if (faceTri.c == DcelNull) { continue; }
+      if (faceTri.a < 0) { continue; }
+      if (faceTri.b < 0) { continue; }
+      if (faceTri.c < 0) { continue; }
+      if (faceTri.a >= (int)(vertices.size())) { continue; }
+      if (faceTri.b >= (int)(vertices.size())) { continue; }
+      if (faceTri.c >= (int)(vertices.size())) { continue; }
+      tri.a = vertices[faceTri.a].coords;
+      tri.b = vertices[faceTri.b].coords;
+      tri.c = vertices[faceTri.c].coords;
       auto edgeSet = tri.getEdges();
       if (edgeSet.size() < 3) { continue; }
       int ii = 0;
