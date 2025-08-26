@@ -653,8 +653,7 @@ namespace MeshRenderer
   {
     using namespace ComputationalGeometry;
     meshOut.resize(0);
-    std::map<int, std::set<std::pair<int, int> > > vert2Faces;
-    std::map<int, ComputationalGeometry::Face3d> renderFaces;
+    //std::map<int, std::set<std::pair<int, int> > > vert2Faces;
     {
       const int facesSize = (int)(faces.size());
       for (int ind = 0; ind < facesSize; ++ind)
@@ -668,19 +667,22 @@ namespace MeshRenderer
         if (initial.source < 0) { continue; }
         if (initial.source >= (int)(vertices.size())) { continue; }
         const Vertex& initialSrc = vertices[initial.source];
-        ComputationalGeometry::Face3d face;
+
+        std::vector<Triangle3d> triangles;
+        Triangle3d tri;
         {
-          auto& it = vert2Faces.find(initial.source);
-          if (it == vert2Faces.end())
+          //auto& it = vert2Faces.find(initial.source);
+          //if (it == vert2Faces.end())
           {
-            vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
+            //vert2Faces[initial.source] = { { ind, (int)face.vertices.size() } };
           }
-          else
+          //else
           {
-            it->second.insert({ ind, (int)face.vertices.size() });
+            //it->second.insert({ ind, (int)face.vertices.size() });
           }
         }
-        face.vertices.push_back(initialSrc.coords);
+        tri.a = initialSrc.coords;
+        int i = 1;
         HalfEdge current = initial;
         for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
         {
@@ -693,55 +695,42 @@ namespace MeshRenderer
           if (current.source >= (int)(vertices.size())) { break; }
           const Vertex& currentSrc = vertices[current.source];
           {
-            auto& it = vert2Faces.find(current.source);
-            if (it == vert2Faces.end())
+            //auto& it = vert2Faces.find(current.source);
+            //if (it == vert2Faces.end())
             {
-              vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
+              //vert2Faces[current.source] = { { ind, (int)face.vertices.size() } };
             }
-            else
+            //else
             {
-              it->second.insert({ ind, (int)face.vertices.size() });
+              //it->second.insert({ ind, (int)face.vertices.size() });
             }
           }
-          face.vertices.push_back(currentSrc.coords);
-        }
-        renderFaces[ind] = face;
-      }
-    }
-
-    for (const auto& faceIt : renderFaces)
-    {
-      bool addFace = (faceIt.second.vertices.size() >= 3);
-      if (!addFace) { continue; }
-      int i = 0;
-      std::vector<Triangle3d> triangles;
-      {
-        Triangle3d tri;
-        for (const point3d& target : faceIt.second.vertices)
-        {
-          if (i == 0) { tri.a = point3d(target.x, target.y, target.z); }
-          else if (i == 1) { tri.b = point3d(target.x, target.y, target.z); }
-          else if (i == 2) { tri.c = point3d(target.x, target.y, target.z); }
+          if (i == 1) { tri.b = currentSrc.coords; }
+          else if (i == 2)
+          {
+            tri.c = currentSrc.coords;
+            triangles.push_back(tri);
+          }
           else if (i >= 3)
           {
-            triangles.push_back(tri);
             tri.b = tri.c;
-            tri.c = point3d(target.x, target.y, target.z);
+            tri.c = currentSrc.coords;
+            triangles.push_back(tri);
           }
           ++i;
         }
-        triangles.push_back(tri);
-      }
-      for (const auto& tri : triangles)
-      {
-        auto edgeSet = tri.getEdges();
-        if (edgeSet.size() < 3) { continue; }
-        i = 0;
-        for (const auto& edg : edgeSet)
+
+        for (const auto& tri : triangles)
         {
-          if (i >= 3) { break; }
-          meshOut.push_back(edg);
-          ++i;
+          auto edgeSet = tri.getEdges();
+          if (edgeSet.size() < 3) { continue; }
+          i = 0;
+          for (const auto& edg : edgeSet)
+          {
+            if (i >= 3) { break; }
+            meshOut.push_back(edg);
+            ++i;
+          }
         }
       }
     }
