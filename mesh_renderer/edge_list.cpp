@@ -658,13 +658,33 @@ namespace MeshRenderer
       VertexPtr a = DcelNull;
       VertexPtr b = DcelNull;
       VertexPtr c = DcelNull;
-      void addTo(std::vector<FaceTriangle>& triangles, std::map<VertexPtr,
-        std::set<vector3d> >& vertexNormals)
+      void addTo(const std::vector<Vertex>& vertices, std::vector<FaceTriangle>& triangles,
+        std::map<VertexPtr, std::set<vector3d> >& vertexNormals)
       {
         if (a == DcelNull) { return; }
         if (b == DcelNull) { return; }
         if (c == DcelNull) { return; }
+        if (a < 0) { return; }
+        if (b < 0) { return; }
+        if (c < 0) { return; }
+        if (a >= (int)(vertices.size())) { return; }
+        if (b >= (int)(vertices.size())) { return; }
+        if (c >= (int)(vertices.size())) { return; }
+        Plane3d plane(vertices[a].coords, vertices[b].coords, vertices[c].coords);
+        if (!(plane.isValid())) { return; }
         triangles.push_back(*this);
+        auto normal = plane.getNormal();
+        auto verts = { a, b, c };
+        for (const auto& vert : verts)
+        {
+          auto& it = vertexNormals.find(vert);
+          if (it == vertexNormals.end())
+          {
+            vertexNormals[vert] = { normal };
+            continue;
+          }
+          it->second.insert(normal);
+        }
       }
     };
     std::vector<FaceTriangle> triangles;
@@ -705,9 +725,24 @@ namespace MeshRenderer
           tri.b = tri.c;
           tri.c = current.source;
         }
-        tri.addTo(triangles, vertexNormals);
+        tri.addTo(vertices, triangles, vertexNormals);
         ++ii;
       }
+    }
+
+    std::map<VertexPtr, vector3d> avgNormals;
+    for (const auto& it : vertexNormals)
+    {
+      vector3d normal;
+      int siz = (int)it.second.size();
+      if (siz == 0) { continue; }
+      double factor = 1.0 / ((double)siz);
+      for (const auto& jt : it.second)
+      {
+        normal = normal + jt;
+      }
+      normal = normal * factor;
+      avgNormals[it.first] = normal;
     }
 
     for (const auto& faceTri : triangles)
@@ -725,15 +760,9 @@ namespace MeshRenderer
       tri.a = vertices[faceTri.a].coords;
       tri.b = vertices[faceTri.b].coords;
       tri.c = vertices[faceTri.c].coords;
-      auto edgeSet = tri.getEdges();
-      if (edgeSet.size() < 3) { continue; }
-      int ii = 0;
-      for (const auto& edg : edgeSet)
-      {
-        if (ii >= 3) { break; }
-        meshOut.push_back(edg);
-        ++ii;
-      }
+      meshOut.push_back({ tri.a, tri.b });
+      meshOut.push_back({ tri.b, tri.c });
+      meshOut.push_back({ tri.c, tri.a });
     }
     
     return true;
