@@ -49,7 +49,8 @@ namespace MeshRenderer
       const std::vector<std::string>& faceBuffer);
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::map<std::pair<int, int>, int>& halfEdgesCache);
-    std::map<int, ComputationalGeometry::Face3d> getFaces(std::map<int, std::set<int> >* oVert2Faces = nullptr) const;
+    std::map<int, ComputationalGeometry::Face3d> getFaces(std::map<int, std::set<int> >* oVert2Faces = nullptr,
+      std::map<int, ComputationalGeometry::vector3d>* face2Normal = nullptr) const;
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
     bool setNormal(int vertIdx, const std::string& vertexNormal);
@@ -476,12 +477,17 @@ namespace MeshRenderer
     return success;
   }
 
-  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces(std::map<int, std::set<int> >* oVert2Faces) const
+  std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces(std::map<int, std::set<int> >* oVert2Faces,
+    std::map<int, ComputationalGeometry::vector3d>* face2Normal) const
   {
     std::map<int, ComputationalGeometry::Face3d> faceMap;
     if (oVert2Faces != nullptr)
     {
       oVert2Faces->clear();
+    }
+    if (face2Normal != nullptr)
+    {
+      face2Normal->clear();
     }
     const int facesSize = (int)(faces.size());
     for (int ind = 0; ind < facesSize; ++ind)
@@ -536,6 +542,12 @@ namespace MeshRenderer
         }
       }
       faceMap[ind] = face;
+      if (face2Normal != nullptr)
+      {
+        auto facePlane = face.getPlane();
+        auto faceN = facePlane.getNormal();
+        (*face2Normal)[ind] = faceN;
+      }
     }
     return faceMap;
   }
@@ -682,7 +694,8 @@ namespace MeshRenderer
 
     using namespace ComputationalGeometry;
     std::map<int, std::set<int> > vert2Faces;
-    std::map<int, Face3d> renderFaces = pImpl->getFaces(&vert2Faces);
+    std::map<int, vector3d> faces2Normals;
+    std::map<int, Face3d> renderFaces = pImpl->getFaces(&vert2Faces, &faces2Normals);
     for (const auto& faceIt : renderFaces)
     {
       bool addFace = (faceIt.second.vertices.size() >= 3);
