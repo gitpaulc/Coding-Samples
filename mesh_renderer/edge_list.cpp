@@ -655,6 +655,7 @@ namespace MeshRenderer
     meshOut.resize(0);
     //std::map<int, std::set<std::pair<int, int> > > vert2Faces;
 
+    std::vector<Triangle3d> triangles;
     const int facesSize = (int)(faces.size());
     for (int ind = 0; ind < facesSize; ++ind)
     {
@@ -668,7 +669,6 @@ namespace MeshRenderer
       if (initial.source >= (int)(vertices.size())) { continue; }
       const Vertex& initialSrc = vertices[initial.source];
 
-      std::vector<Triangle3d> triangles;
       Triangle3d tri;
       {
         //auto& it = vert2Faces.find(initial.source);
@@ -682,7 +682,7 @@ namespace MeshRenderer
         }
       }
       tri.a = initialSrc.coords;
-      int i = 1;
+      int ii = 1;
       HalfEdge current = initial;
       for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
       {
@@ -705,32 +705,32 @@ namespace MeshRenderer
             //it->second.insert({ ind, (int)face.vertices.size() });
           }
         }
-        if (i == 1) { tri.b = currentSrc.coords; }
-        else if (i == 2)
+        if (ii == 1) { tri.b = currentSrc.coords; }
+        else if (ii == 2)
         {
           tri.c = currentSrc.coords;
           triangles.push_back(tri);
         }
-        else if (i >= 3)
+        else if (ii >= 3)
         {
           tri.b = tri.c;
           tri.c = currentSrc.coords;
           triangles.push_back(tri);
         }
-        ++i;
+        ++ii;
       }
+    }
 
-      for (const auto& tri : triangles)
+    for (const auto& tri : triangles)
+    {
+      auto edgeSet = tri.getEdges();
+      if (edgeSet.size() < 3) { continue; }
+      int ii = 0;
+      for (const auto& edg : edgeSet)
       {
-        auto edgeSet = tri.getEdges();
-        if (edgeSet.size() < 3) { continue; }
-        i = 0;
-        for (const auto& edg : edgeSet)
-        {
-          if (i >= 3) { break; }
-          meshOut.push_back(edg);
-          ++i;
-        }
+        if (ii >= 3) { break; }
+        meshOut.push_back(edg);
+        ++ii;
       }
     }
     
