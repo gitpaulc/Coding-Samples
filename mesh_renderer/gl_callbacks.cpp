@@ -238,11 +238,13 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
+#ifndef __APPLE__
     if (!gWireframeOn && !gNormalsShading)
     {
       gNormalsShading = !gNormalsShading;
     }
     else
+#endif
     {
       gWireframeOn = !gWireframeOn;
       gNormalsShading = false;
@@ -256,6 +258,7 @@ void keyboard(unsigned char key, int x, int y)
     else { std::cout << "\nOpenGL vertex and fragment shading off."; }
     recalculate();
   }
+#ifndef __APPLE__
   else if ((key == '2'))
   {
     gUseFaceNormals = !gUseFaceNormals;
@@ -263,6 +266,7 @@ void keyboard(unsigned char key, int x, int y)
     else { std::cout << "\nUsing average normals for shading (e.g., Gouraud shading)."; }
     recalculate();
   }
+#endif
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {

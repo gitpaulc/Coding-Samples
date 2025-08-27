@@ -678,7 +678,7 @@ namespace MeshRenderer
         auto verts = { a, b, c };
         for (const auto& vert : verts)
         {
-          auto& it = vertexNormals.find(vert);
+          std::map<VertexPtr, std::set<vector3d> >::iterator it = vertexNormals.find(vert);
           if (it == vertexNormals.end())
           {
             vertexNormals[vert] = { normal };
@@ -766,7 +766,7 @@ namespace MeshRenderer
       meshOut.push_back({ tri.b, tri.c });
       meshOut.push_back({ tri.c, tri.a });
       vector3d nA, nB, nC;
-      auto& it = avgNormals.find(faceTri.a);
+      std::map<VertexPtr, vector3d>::const_iterator it = avgNormals.find(faceTri.a);
       if (it != avgNormals.end()) { nA = it->second; }
       it = avgNormals.find(faceTri.b);
       if (it != avgNormals.end()) { nB = it->second; }
