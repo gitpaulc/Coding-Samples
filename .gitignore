@@ -58,8 +58,11 @@ function_calculator/FunctionCalculator/RelWithDebInfo
 function_calculator/FunctionCalculator/RelWithDebugInfo
 function_calculator/FunctionCalculator/x64
 
+function_calculator/FunctionCalculator/cube.obj
 function_calculator/FunctionCalculator/dodecahedron.obj
 function_calculator/FunctionCalculator/icosahedron.obj
+function_calculator/FunctionCalculator/octahedron.obj
+function_calculator/FunctionCalculator/tetrahedron.obj
 
 function_calculator_cs/.vs
 function_calculator_cs/bin/Debug
