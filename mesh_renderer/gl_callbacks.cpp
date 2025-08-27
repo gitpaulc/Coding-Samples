@@ -17,6 +17,7 @@ namespace MeshRenderer
   static bool gEdgesHidden = false;
   static bool gWireframeOn = true;
   static bool gNormalsShading = false;
+  static bool gUseFaceNormals = false;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
   {
@@ -255,6 +256,13 @@ void keyboard(unsigned char key, int x, int y)
     else { std::cout << "\nOpenGL vertex and fragment shading off."; }
     recalculate();
   }
+  else if ((key == '2'))
+  {
+    gUseFaceNormals = !gUseFaceNormals;
+    if (gUseFaceNormals) { std::cout << "\nUsing face normals for shading."; }
+    else { std::cout << "\nUsing average normals for shading (e.g., Gouraud shading)."; }
+    recalculate();
+  }
   if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
@@ -459,7 +467,7 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
       ComputationalGeometry::vector3d nn;
       if (useShaders && normals)
       {
-        if (ii >= (int)MeshRenderer::gAvgNormals.size())
+        if (MeshRenderer::gUseFaceNormals || (ii >= (int)MeshRenderer::gAvgNormals.size()))
         {
           ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
           nn = plane.getNormal();
