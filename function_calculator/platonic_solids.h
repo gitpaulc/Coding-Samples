@@ -72,6 +72,12 @@ namespace FunctionalCalculator
    */
   std::set<Matrix<BiquadraticNumber> > getOctahedron(const BiquadraticNumber& edgeLength = BiquadraticNumber(Rational(1)));
 
+  /** \brief Exports an octahedron as an .obj file. It has unit edges and is centered at the origin.
+   *  \return `true` if and only if the export succeeds.
+   *  \param `filename` is the name of the file the user wishes to export the shape to.
+   */
+  bool exportOctahedronObj(const std::string& filename);
+
   /** \return Set of rotations which preserve an octahedron. Reflections may also be included.
    *  These transformations map (1, 0, 0) to the six vertices making up an octahedron.
    *  They are the smallest set of rotations forming a group (so that compositions thereof remain in the set).

@@ -309,6 +309,59 @@ namespace FunctionalCalculator
     return octahedron;
   }
 
+  bool exportOctahedronObj(const std::string& filename)
+  {
+    BiquadraticNumber edgLength(Rational(1, 1));
+    std::map<int, Matrix<BiquadraticNumber> > octahedron;
+    {
+      auto oct = getOctahedron(edgLength);
+      int ii = -1;
+      for (const auto& vertex : oct)
+      {
+        ++ii;
+        octahedron[ii] = vertex.transpose();
+      }
+    }
+    std::set<std::vector<int>, CompareFaces> faces;
+    faces.insert({ 0, 4, 3 });
+    faces.insert({ 4, 5, 3 });
+    faces.insert({ 1, 3, 5 });
+    faces.insert({ 3, 1, 0 });
+    faces.insert({ 2, 0, 1 });
+    faces.insert({ 0, 2, 4 });
+    faces.insert({ 5, 4, 2 });
+    faces.insert({ 5, 2, 1 });
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : octahedron)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
+  }
+
   std::set<Matrix<BiquadraticNumber> > getOctahedralSymmetries(bool includeReflections)
   {
     return getSymmetriesOfACube(includeReflections);
@@ -1830,6 +1883,20 @@ namespace FunctionalCalculator
       std::cout << "\n\nMore... or 'T' to end current test?  ";
       std::cin >> prompt;
       if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      {
+        std::cout << "\nExporting octahedron to .obj format. Continue, Y or N?  ";
+        std::cin >> prompt;
+        if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+        std::cout << "\nWriting..." << std::endl;
+        bool wrote = exportOctahedronObj("octahedron.obj");
+        std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
+
+        std::cout << "\n\nMore... or 'T' to end current test?  ";
+        std::cin >> prompt;
+        if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+      }
 
       std::set<Matrix<BiquadraticNumber> > cube = getCube();
       for (const auto& vertex : cube)
