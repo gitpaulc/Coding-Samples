@@ -10,13 +10,14 @@
 
 namespace MeshRenderer
 {
-  static std::vector<ComputationalGeometry::Edge3d> gWireframe;
+  static std::vector<ComputationalGeometry::Edge3d> gWireframe, gAvgNormals;
   static GLuint gVertexArrayObj, gVertexBufferObj;
   static bool gPointsHidden = false;
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
   static bool gWireframeOn = true;
   static bool gNormalsShading = false;
+  static bool gUseFaceNormals = false;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
   {
@@ -30,7 +31,9 @@ namespace MeshRenderer
   static GLuint gVertexShader, gFragmentShader, gShaderProgram;
   static bool gUseShaders = true;
   static GLint gPosLocation, gNormalsLocation, gMvLocation, gProjLocation, gMinLocation, gMaxLocation;
+  static GLint gAmbientLocation, gDiffuseLocation, gSpecularLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
+  static float g_kA, g_kD, g_kS;
 }
 
 void recalculate();
@@ -90,6 +93,10 @@ void initialize_glut(int* argc_ptr, char** argv)
     MeshRenderer::gScale = scale;
   }
 
+  MeshRenderer::g_kA = 0.0f;
+  MeshRenderer::g_kD = 0.9f;
+  MeshRenderer::g_kS = 0.0f;
+
   recalculate();
   linkShaderProgram();
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
@@ -107,7 +114,7 @@ void recalculate()
   }
   else
   {
-    mesh.getSkeleton(MeshRenderer::gWireframe);
+    mesh.getSkeleton(MeshRenderer::gWireframe, MeshRenderer::gAvgNormals);
   }
   mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
 }
@@ -231,13 +238,14 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-    //if (!gWireframeOn && !gNormalsShading)
+    if (!gWireframeOn && !gNormalsShading)
     {
-      //gNormalsShading = !gNormalsShading;
+      gNormalsShading = !gNormalsShading;
     }
-    //else
+    else
     {
       gWireframeOn = !gWireframeOn;
+      gNormalsShading = false;
     }
     recalculate();
   }
@@ -246,6 +254,13 @@ void keyboard(unsigned char key, int x, int y)
     gUseShaders = !gUseShaders;
     if (gUseShaders) { std::cout << "\nOpenGL vertex and fragment shading on."; }
     else { std::cout << "\nOpenGL vertex and fragment shading off."; }
+    recalculate();
+  }
+  else if ((key == '2'))
+  {
+    gUseFaceNormals = !gUseFaceNormals;
+    if (gUseFaceNormals) { std::cout << "\nUsing face normals for shading."; }
+    else { std::cout << "\nUsing average normals for shading (e.g., Gouraud shading)."; }
     recalculate();
   }
   if ((key == 27) //Esc
@@ -359,6 +374,9 @@ void render()
     glUseProgram(gShaderProgram);
     glUniform1f(gMaxLocation, (float)gBoundingMax.z);
     glUniform1f(gMinLocation, (float)gBoundingMin.z);
+    glUniform1f(gAmbientLocation, g_kA);
+    glUniform1f(gDiffuseLocation, g_kD);
+    glUniform1f(gSpecularLocation, g_kS);
     glUniformMatrix4fv(gProjLocation, 1, GL_FALSE, (const GLfloat*)gProjMatrix.data());
     glUniformMatrix4fv(gMvLocation, 1, GL_FALSE, (const GLfloat*)gMvMatrix.data());
     int whichArray = 0;
@@ -449,8 +467,16 @@ void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, st
       ComputationalGeometry::vector3d nn;
       if (useShaders && normals)
       {
-        ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
-        nn = plane.getNormal();
+        if (MeshRenderer::gUseFaceNormals || (ii >= (int)MeshRenderer::gAvgNormals.size()))
+        {
+          ComputationalGeometry::Plane3d plane(dataIn[ii].a, dataIn[ii + 1].a, dataIn[ii + 2].a);
+          nn = plane.getNormal();
+        }
+        else
+        {
+          ComputationalGeometry::point3d zero_;
+          nn = MeshRenderer::gAvgNormals[ii].a - zero_;
+        }
       }
       for (int jj = 0; jj < 3; ++jj)
       {
@@ -497,6 +523,9 @@ std::string glslVertexShaderCode()
   glsl << "\nuniform mat4 proj;";
   glsl << "\nuniform float maxHeight;";
   glsl << "\nuniform float minHeight;";
+  glsl << "\nuniform float kA;";
+  glsl << "\nuniform float kD;";
+  glsl << "\nuniform float kS;";
 #ifdef __APPLE__
   glsl << "\nattribute vec3 posVec;";
   glsl << "\nvec3 normalVec = vec3(0.0, 0.0, 0.0);";
@@ -523,7 +552,7 @@ std::string glslVertexShaderCode()
   glsl << "\n  {";
   glsl << "\n    if (maxHeight != minHeight)";
   glsl << "\n    {";
-  glsl << "\n      float factor = normalVec.z * 0.9;";
+  glsl << "\n      float factor = normalVec.z * kD;";
   glsl << "\n      if (factor < 0.0) { factor = -factor; }";
   glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
   glsl << "\n    }";
@@ -596,6 +625,9 @@ void linkShaderProgram()
   gPosLocation = glGetAttribLocation(gShaderProgram, "posVec");
   gMaxLocation = glGetUniformLocation(gShaderProgram, "maxHeight");
   gMinLocation = glGetUniformLocation(gShaderProgram, "minHeight");
+  gAmbientLocation = glGetUniformLocation(gShaderProgram, "kA");
+  gDiffuseLocation = glGetUniformLocation(gShaderProgram, "kD");
+  gSpecularLocation = glGetUniformLocation(gShaderProgram, "kS");
   gMvLocation = glGetUniformLocation(gShaderProgram, "mv");
   gProjLocation = glGetUniformLocation(gShaderProgram, "proj");
   glDeleteShader(gVertexShader);

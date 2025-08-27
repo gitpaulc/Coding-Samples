@@ -51,8 +51,8 @@ int main(int argc, char **argv)
   std::cout << "\nNavigation: Pan Left = J, Pan Right = L, Pan Up = I, Pan Down = K, Pan Back = B, Pan Forward = Mouse Click, Zoom In = Z, Zoom Out = Y.\n";
   std::cout << "Rotation: Press R to rotate clockwise, T counter-clockwise. W, A, S, and D to rotate screen.\n";
   std::cout << "Orthogonal/Perspective: O to toggle, Depth Testing: P to toggle.\n";
-  std::cout << "Wireframe/Opaque: U to toggle.\n";
-  std::cout << "Use shaders: 1 to toggle.\n";
+  std::cout << "Wireframe/Opaque/Shading: U to toggle.\n";
+  std::cout << "Use shaders: 1 to toggle, Face normals: 2 to toggle.\n";
 
   MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));

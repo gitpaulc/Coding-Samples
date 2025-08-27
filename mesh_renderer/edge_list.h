@@ -37,7 +37,8 @@ namespace MeshRenderer
       int getNumFaces() const;
       int getNumHalfEdges() const;
       int getNumVertices() const;
-      bool getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut) const;
+      bool getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut,
+        std::vector<ComputationalGeometry::Edge3d>& normalsOut) const;
       bool getWireframe(std::vector<ComputationalGeometry::Edge3d>& wireframeOut) const;
   };
 }

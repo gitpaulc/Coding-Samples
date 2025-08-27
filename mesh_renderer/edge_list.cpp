@@ -49,7 +49,10 @@ namespace MeshRenderer
       const std::vector<std::string>& faceBuffer);
     bool parseCurrentFaceVertex(int faceIndex, std::vector<int>& faceBuffer, const std::string& info, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures);
     bool setFace(int i, const std::string& faceStr, const std::vector<std::string>& vertexNormals, const std::vector<std::string>& vertexTextures, std::map<std::pair<int, int>, int>& halfEdgesCache);
+    /** \brief The optional output map sends vertexIndex |--> { faceIndex, index within face }
+     */
     std::map<int, ComputationalGeometry::Face3d> getFaces() const;
+    bool getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut, std::vector<ComputationalGeometry::Edge3d>& normalsOut) const;
     bool setVertex(int i, const std::string& vertexStr);
     bool setTexture(int vertIdx, const std::string& vertexTexture);
     bool setNormal(int vertIdx, const std::string& vertexNormal);
@@ -479,7 +482,8 @@ namespace MeshRenderer
   std::map<int, ComputationalGeometry::Face3d> DoublyConnectedEdgeList::Impl::getFaces() const
   {
     std::map<int, ComputationalGeometry::Face3d> faceMap;
-    for (int ind = 0; ind < (int)(faces.size()); ++ind)
+    const int facesSize = (int)(faces.size());
+    for (int ind = 0; ind < facesSize; ++ind)
     {
       HalfEdgePtr initialPtr = faces[ind].outerComponent;
       if (initialPtr == DcelNull) { continue; }
@@ -644,50 +648,144 @@ namespace MeshRenderer
     }
   }
 
-  bool DoublyConnectedEdgeList::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut) const
+  bool DoublyConnectedEdgeList::Impl::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut,
+    std::vector<ComputationalGeometry::Edge3d>& normalsOut) const
+  {
+    using namespace ComputationalGeometry;
+    meshOut.resize(0);
+    normalsOut.resize(0);
+    struct FaceTriangle
+    {
+      VertexPtr a = DcelNull;
+      VertexPtr b = DcelNull;
+      VertexPtr c = DcelNull;
+      void addTo(const std::vector<Vertex>& vertices, std::vector<FaceTriangle>& triangles,
+        std::map<VertexPtr, std::set<vector3d> >& vertexNormals)
+      {
+        if (a == DcelNull) { return; }
+        if (b == DcelNull) { return; }
+        if (c == DcelNull) { return; }
+        if (a < 0) { return; }
+        if (b < 0) { return; }
+        if (c < 0) { return; }
+        if (a >= (int)(vertices.size())) { return; }
+        if (b >= (int)(vertices.size())) { return; }
+        if (c >= (int)(vertices.size())) { return; }
+        Plane3d plane(vertices[a].coords, vertices[b].coords, vertices[c].coords);
+        if (!(plane.isValid())) { return; }
+        triangles.push_back(*this);
+        auto normal = plane.getNormal();
+        auto verts = { a, b, c };
+        for (const auto& vert : verts)
+        {
+          auto& it = vertexNormals.find(vert);
+          if (it == vertexNormals.end())
+          {
+            vertexNormals[vert] = { normal };
+            continue;
+          }
+          it->second.insert(normal);
+        }
+      }
+    };
+    std::vector<FaceTriangle> triangles;
+    std::map<VertexPtr, std::set<vector3d> > vertexNormals;
+    const int facesSize = (int)(faces.size());
+    for (int ind = 0; ind < facesSize; ++ind)
+    {
+      HalfEdgePtr initialPtr = faces[ind].outerComponent;
+      if (initialPtr == DcelNull) { continue; }
+      if (initialPtr < 0) { continue; }
+      if (initialPtr >= (int)(halfEdges.size())) { continue; }
+      const HalfEdge& initial = halfEdges[initialPtr];
+      if (initial.source == DcelNull) { continue; }
+      if (initial.source < 0) { continue; }
+      if (initial.source >= (int)(vertices.size())) { continue; }
+
+      FaceTriangle tri;
+      tri.a = initial.source;
+      int ii = 1;
+      HalfEdge current = initial;
+      for (int loopCount = 0; (current.next != initialPtr) && (loopCount < (int)vertices.size()); ++loopCount)
+      {
+        if (current.next == DcelNull) { break; }
+        if (current.next < 0) { break; }
+        if (current.next >= (int)(halfEdges.size())) { break; }
+        current = halfEdges[current.next];
+        if (current.source == DcelNull) { break; }
+        if (current.source < 0) { break; }
+        if (current.source >= (int)(vertices.size())) { break; }
+
+        if (ii == 1) { tri.b = current.source; }
+        else if (ii == 2)
+        {
+          tri.c = current.source;
+        }
+        else if (ii >= 3)
+        {
+          tri.b = tri.c;
+          tri.c = current.source;
+        }
+        tri.addTo(vertices, triangles, vertexNormals);
+        ++ii;
+      }
+    }
+
+    std::map<VertexPtr, vector3d> avgNormals;
+    for (const auto& it : vertexNormals)
+    {
+      vector3d normal;
+      int siz = (int)it.second.size();
+      if (siz == 0) { continue; }
+      double factor = 1.0 / ((double)siz);
+      for (const auto& jt : it.second)
+      {
+        normal = normal + jt;
+      }
+      normal = normal * factor;
+      avgNormals[it.first] = normal;
+    }
+
+    point3d zero_;
+    for (const auto& faceTri : triangles)
+    {
+      Triangle3d tri;
+      if (faceTri.a == DcelNull) { continue; }
+      if (faceTri.b == DcelNull) { continue; }
+      if (faceTri.c == DcelNull) { continue; }
+      if (faceTri.a < 0) { continue; }
+      if (faceTri.b < 0) { continue; }
+      if (faceTri.c < 0) { continue; }
+      if (faceTri.a >= (int)(vertices.size())) { continue; }
+      if (faceTri.b >= (int)(vertices.size())) { continue; }
+      if (faceTri.c >= (int)(vertices.size())) { continue; }
+      tri.a = vertices[faceTri.a].coords;
+      tri.b = vertices[faceTri.b].coords;
+      tri.c = vertices[faceTri.c].coords;
+      meshOut.push_back({ tri.a, tri.b });
+      meshOut.push_back({ tri.b, tri.c });
+      meshOut.push_back({ tri.c, tri.a });
+      vector3d nA, nB, nC;
+      auto& it = avgNormals.find(faceTri.a);
+      if (it != avgNormals.end()) { nA = it->second; }
+      it = avgNormals.find(faceTri.b);
+      if (it != avgNormals.end()) { nB = it->second; }
+      it = avgNormals.find(faceTri.c);
+      if (it != avgNormals.end()) { nC = it->second; }
+      normalsOut.push_back({ zero_ + nA, zero_ + nB });
+      normalsOut.push_back({ zero_ + nB, zero_ + nC });
+      normalsOut.push_back({ zero_ + nC, zero_ + nA });
+    }
+    
+    return true;
+  }
+
+  bool DoublyConnectedEdgeList::getSkeleton(std::vector<ComputationalGeometry::Edge3d>& meshOut,
+    std::vector<ComputationalGeometry::Edge3d>& normalsOut) const
   {
     meshOut.resize(0);
     if (pImpl == nullptr) { return false; }
-
-    using namespace ComputationalGeometry;
-    std::map<int, Face3d> renderFaces = pImpl->getFaces();
-    for (const auto& faceIt : renderFaces)
-    {
-      bool addFace = (faceIt.second.vertices.size() >= 3);
-      if (!addFace) { continue; }
-      int i = 0;
-      std::vector<Triangle3d> triangles;
-      {
-        Triangle3d tri;
-        for (const point3d& target : faceIt.second.vertices)
-        {
-          if (i == 0) { tri.a = point3d(target.x, target.y, target.z); }
-          else if (i == 1) { tri.b = point3d(target.x, target.y, target.z); }
-          else if (i == 2) { tri.c = point3d(target.x, target.y, target.z); }
-          else if (i >= 3)
-          {
-            triangles.push_back(tri);
-            tri.b = tri.c;
-            tri.c = point3d(target.x, target.y, target.z);
-          }
-          ++i;
-        }
-        triangles.push_back(tri);
-      }
-      for (const auto& tri : triangles)
-      {
-        auto edgeSet = tri.getEdges();
-        if (edgeSet.size() < 3) { continue; }
-        i = 0;
-        for (const auto& edg : edgeSet)
-        {
-          if (i >= 3) { break; }
-          meshOut.push_back(edg);
-          ++i;
-        }
-      }
-    }
-    return true;
+    return pImpl->getSkeleton(meshOut, normalsOut);
   }
 
   int DoublyConnectedEdgeList::getNumEdges() const
