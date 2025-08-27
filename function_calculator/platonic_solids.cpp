@@ -8,6 +8,25 @@ All Rights Reserved.*/
 
 namespace FunctionalCalculator
 {
+  struct CompareFaces
+  {
+    bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
+    {
+      if (lhs.size() < rhs.size()) { return true; }
+      if (lhs.size() > rhs.size()) { return false; }
+      auto lhs_ = lhs; auto rhs_ = rhs;
+      std::sort(lhs_.begin(), lhs_.end());
+      std::sort(rhs_.begin(), rhs_.end());
+      auto lhsSize = (int)lhs_.size();
+      for (int ii = 0; ii < lhsSize; ++ii)
+      {
+        if (lhs_[ii] < rhs_[ii]) { return true; }
+        if (lhs_[ii] > rhs_[ii]) { return false; }
+      }
+      return false;
+    }
+  };
+
   std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
     const BiquadraticNumber& edgeLength, Matrix<BiquadraticNumber>* generator)
   {
@@ -124,6 +143,58 @@ namespace FunctionalCalculator
       if (cube.size() >= 8) { break; }
     }
     return cube;
+  }
+
+  bool exportCubeObj(const std::string& filename)
+  {
+    BiquadraticNumber edgLength(Rational(1, 1));
+    auto sqLen = edgLength * edgLength;
+    std::map<int, Matrix<BiquadraticNumber> > cube;
+    {
+      auto cube0 = getCube(edgLength);
+      int ii = -1;
+      for (const auto& vertex : cube0)
+      {
+        ++ii;
+        cube[ii] = vertex.transpose();
+      }
+    }
+    std::set<std::vector<int>, CompareFaces> faces;
+    faces.insert({ 0, 1, 3, 2 });
+    faces.insert({ 0, 2, 6, 4 });
+    faces.insert({ 7, 6, 2, 3 });
+    faces.insert({ 1, 0, 4, 5 });
+    faces.insert({ 6, 7, 5, 4 });
+    faces.insert({ 7, 3, 1, 5 });
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : cube)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
   }
 
   std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections)
@@ -775,24 +846,6 @@ namespace FunctionalCalculator
       adjacencyGraph[iter.first] = neighbors;
     }
 
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
@@ -908,24 +961,6 @@ namespace FunctionalCalculator
       adjacencyGraph[iter.first] = neighbors;
     }
 
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
@@ -1101,24 +1136,6 @@ namespace FunctionalCalculator
   {
     BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > icosahedralSymmetries;
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     static std::map<int, Matrix<BiquadraticNumber> > sDodecahedron;
     static std::set<std::vector<int>, CompareFaces> sDodecFaces;
     if (sDodecahedron.empty() || sDodecFaces.empty())
@@ -1310,24 +1327,6 @@ namespace FunctionalCalculator
     }
     if ((int)halfEdges.size() != expectedNumEdges * 2) { return false; }
 
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
@@ -1450,24 +1449,6 @@ namespace FunctionalCalculator
     std::cin >> prompt;
     if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
@@ -1612,24 +1593,6 @@ namespace FunctionalCalculator
     std::cin >> prompt;
     if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-    struct CompareFaces
-    {
-      bool operator()(const std::vector<int>& lhs, const std::vector<int>& rhs) const
-      {
-        if (lhs.size() < rhs.size()) { return true; }
-        if (lhs.size() > rhs.size()) { return false; }
-        auto lhs_ = lhs; auto rhs_ = rhs;
-        std::sort(lhs_.begin(), lhs_.end());
-        std::sort(rhs_.begin(), rhs_.end());
-        auto lhsSize = (int)lhs_.size();
-        for (int ii = 0; ii < lhsSize; ++ii)
-        {
-          if (lhs_[ii] < rhs_[ii]) { return true; }
-          if (lhs_[ii] > rhs_[ii]) { return false; }
-        }
-        return false;
-      }
-    };
     std::set<std::vector<int>, CompareFaces> faces;
     for (const auto& iter : adjacencyGraph)
     {
@@ -1704,6 +1667,7 @@ namespace FunctionalCalculator
   bool test_platonic()
   {
     std::string prompt;
+
     auto tetrahedralSymmetries = getTetrahedralSymmetries();
     std::cout << "\nTetrahedral (orientation-preserving) symmetries are:";
     int ind = -1;
@@ -1811,6 +1775,18 @@ namespace FunctionalCalculator
         std::cout << "\nCube vertex: " << vertex.print(true);
       }
       std::cout << "\nVertex count of cube is: " << cube.size();
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+
+      std::cout << "\nExporting cube to .obj format. Continue, Y or N?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+      std::cout << "\nWriting..." << std::endl;
+      bool wrote = exportCubeObj("cube.obj");
+      std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
 
       std::cout << "\n\nMore... or 'T' to end current test?  ";
       std::cin >> prompt;
