@@ -87,6 +87,55 @@ namespace FunctionalCalculator
     return tetrahedron;
   }
 
+  bool exportTetrahedronObj(const std::string& filename)
+  {
+    BiquadraticNumber edgLength(Rational(1, 1));
+    std::map<int, Matrix<BiquadraticNumber> > tetrahedron;
+    {
+      auto t0 = getTetrahedron(edgLength);
+      int ii = -1;
+      for (const auto& vertex : t0)
+      {
+        ++ii;
+        tetrahedron[ii] = vertex.transpose();
+      }
+    }
+    std::set<std::vector<int>, CompareFaces> faces;
+    faces.insert({ 1, 2, 3 });
+    faces.insert({ 0, 3, 2 });
+    faces.insert({ 3, 0, 1 });
+    faces.insert({ 1, 0, 2 });
+
+    std::ofstream obj(filename);
+    if (!(obj.good())) { return false; }
+    obj << "\n";
+
+    bool success = true;
+    try
+    {
+      for (const auto& iter : tetrahedron)
+      {
+        obj << "\nv " << iter.second.at(0, 0).get().first;
+        obj << " " << iter.second.at(1, 0).get().first;
+        obj << " " << iter.second.at(2, 0).get().first;
+      }
+      obj << "\n";
+      for (const auto& face : faces)
+      {
+        obj << "\nf";
+        for (const auto& vert : face)
+        {
+          obj << " " << (vert + 1);
+        }
+      }
+    }
+    catch (...)
+    {
+      success = false;
+    }
+    return success;
+  }
+
   std::set<Matrix<BiquadraticNumber> > getTetrahedralSymmetries(bool includeReflections)
   {
     std::set<Matrix<BiquadraticNumber> > tetrahedralSymmetries;
@@ -148,7 +197,6 @@ namespace FunctionalCalculator
   bool exportCubeObj(const std::string& filename)
   {
     BiquadraticNumber edgLength(Rational(1, 1));
-    auto sqLen = edgLength * edgLength;
     std::map<int, Matrix<BiquadraticNumber> > cube;
     {
       auto cube0 = getCube(edgLength);
@@ -1749,6 +1797,20 @@ namespace FunctionalCalculator
     }
 
     {
+      std::cout << "\nExporting tetrahedron to .obj format. Continue, Y or N?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+
+      std::cout << "\nWriting..." << std::endl;
+      bool wrote = exportTetrahedronObj("tetrahedron.obj");
+      std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
+
+      std::cout << "\n\nMore... or 'T' to end current test?  ";
+      std::cin >> prompt;
+      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+    }
+
+    {
       auto octahedralSymmetries0 = getSymmetriesOfACube(true);
       std::cout << "\nFull group of octahedral symmetries is:";
       ind = -1;
@@ -1780,17 +1842,19 @@ namespace FunctionalCalculator
       std::cin >> prompt;
       if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
 
-      std::cout << "\nExporting cube to .obj format. Continue, Y or N?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
+      {
+        std::cout << "\nExporting cube to .obj format. Continue, Y or N?  ";
+        std::cin >> prompt;
+        if ((prompt.compare("N") == 0) || (prompt.compare("n") == 0)) { return true; }
 
-      std::cout << "\nWriting..." << std::endl;
-      bool wrote = exportCubeObj("cube.obj");
-      std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
+        std::cout << "\nWriting..." << std::endl;
+        bool wrote = exportCubeObj("cube.obj");
+        std::cout << (wrote ? "Export succeeded.\n" : "Export failed.\n");
 
-      std::cout << "\n\nMore... or 'T' to end current test?  ";
-      std::cin >> prompt;
-      if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+        std::cout << "\n\nMore... or 'T' to end current test?  ";
+        std::cin >> prompt;
+        if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+      }
 
       std::set<Matrix<BiquadraticNumber> > octahedron = getOctahedron();
       for (const auto& vertex : octahedron)
