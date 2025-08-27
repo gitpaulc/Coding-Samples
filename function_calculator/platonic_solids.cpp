@@ -27,6 +27,85 @@ namespace FunctionalCalculator
     }
   };
 
+  bool consistentlyOrient(std::set<std::vector<int>, CompareFaces>& faces)
+  {
+    std::map<int, std::vector<int> > faceMap;
+    {
+      int ii = -1;
+      for (const auto& face : faces)
+      {
+        ++ii;
+        faceMap[ii] = face;
+      }
+    }
+    std::set<std::vector<int>, CompareFaces> oriented;
+    auto facesSize = (int)faces.size();
+    for (int ii = 0; ii < facesSize; ++ii)
+    {
+      if (oriented.empty())
+      {
+        auto& it = faceMap.begin();
+        oriented.insert(it->second);
+        faceMap.erase(it->first);
+        continue;
+      }
+      int match = -1;
+      std::vector<int> newFace;
+      for (const auto& orientedFace : oriented)
+      {
+        std::set<std::pair<int, int> > faceEdgeSet;
+        for (int ind = 0; ind < (int)orientedFace.size(); ++ind)
+        {
+          if (ind == 0)
+          {
+            faceEdgeSet.insert({ orientedFace[(int)orientedFace.size() - 1], orientedFace[0] });
+            continue;
+          }
+          faceEdgeSet.insert({ orientedFace[ind - 1], orientedFace[ind] });
+        }
+        for (const auto& jt : faceMap)
+        {
+          for (int ind = 0; ind < (int)jt.second.size(); ++ind)
+          {
+            std::pair<int, int> candidate = { 0, 0 };
+            if (ind == 0)
+            {
+              candidate = { jt.second[(int)jt.second.size() - 1], jt.second[0] };
+            }
+            else
+            {
+              candidate = { jt.second[ind - 1], jt.second[ind] };
+            }
+            if (faceEdgeSet.find(candidate) != faceEdgeSet.end())
+            {
+              match = jt.first;
+              newFace.clear();
+              for (int jj = 0, nn = (int)jt.second.size(); jj < nn; ++jj)
+              {
+                newFace.push_back(jt.second[nn - jj - 1]);
+              }
+              break;
+            }
+            std::pair<int, int> reversed = { candidate.second, candidate.first };
+            if (faceEdgeSet.find(reversed) != faceEdgeSet.end())
+            {
+              match = jt.first;
+              newFace = jt.second;
+              break;
+            }
+          }
+          if (match >= 0) { break; }
+        }
+        if (match >= 0) { break; }
+      }
+      if (match < 0) { return false; }
+      oriented.insert(newFace);
+      faceMap.erase(match);
+    }
+    faces = oriented;
+    return true;
+  }
+
   std::vector<Matrix<BiquadraticNumber> > getRegularPolygon(int nn,
     const BiquadraticNumber& edgeLength, Matrix<BiquadraticNumber>* generator)
   {
@@ -105,6 +184,7 @@ namespace FunctionalCalculator
     faces.insert({ 0, 3, 2 });
     faces.insert({ 3, 0, 1 });
     faces.insert({ 1, 0, 2 });
+    if (!consistentlyOrient(faces)) { return false; }
 
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
@@ -214,6 +294,7 @@ namespace FunctionalCalculator
     faces.insert({ 1, 0, 4, 5 });
     faces.insert({ 6, 7, 5, 4 });
     faces.insert({ 7, 3, 1, 5 });
+    if (!consistentlyOrient(faces)) { return false; }
 
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
@@ -331,6 +412,7 @@ namespace FunctionalCalculator
     faces.insert({ 0, 2, 4 });
     faces.insert({ 5, 4, 2 });
     faces.insert({ 5, 2, 1 });
+    if (!consistentlyOrient(faces)) { return false; }
 
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
@@ -983,6 +1065,7 @@ namespace FunctionalCalculator
       }
     }
     if ((int)faces.size() != expectedNumFaces) { return false; }
+    if (!consistentlyOrient(faces)) { return false; }
 
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
@@ -1444,6 +1527,7 @@ namespace FunctionalCalculator
       }
     }
     if ((int)faces.size() != expectedNumFaces) { return false; }
+    if (!consistentlyOrient(faces)) { return false; }
 
     std::ofstream obj(filename);
     if (!(obj.good())) { return false; }
@@ -1584,6 +1668,11 @@ namespace FunctionalCalculator
         faces.insert(current);
       }
     }
+    if (!consistentlyOrient(faces))
+    {
+      std::cout << "\nDid not consistently orient faces.";
+      return false;
+    }
 
     for (const auto& face : faces)
     {
@@ -1623,6 +1712,11 @@ namespace FunctionalCalculator
 
   bool test_icosahedron()
   {
+    auto success = exportTetrahedronObj("tetrahedron.obj"); ///
+    success = exportCubeObj("cube.obj"); ///
+    success = exportOctahedronObj("octahedron.obj"); ///
+    success = exportDodecahedronObj("dodecahedron.obj"); ///
+    success = exportIcosahedronObj("icosahedron.obj"); ///
     std::string prompt;
     BiquadraticNumber edgeLength(Rational(1, 1));
     auto edgeLengthSq = edgeLength * edgeLength;
@@ -1722,6 +1816,11 @@ namespace FunctionalCalculator
         std::cout << vert;
       }
       std::cout << ")";
+    }
+    if (!consistentlyOrient(faces))
+    {
+      std::cout << "\nDid not consistently orient faces.";
+      return false;
     }
     std::cout << "\n\nNum. faces == " << faces.size();
 
