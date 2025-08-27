@@ -1712,11 +1712,6 @@ namespace FunctionalCalculator
 
   bool test_icosahedron()
   {
-    auto success = exportTetrahedronObj("tetrahedron.obj"); ///
-    success = exportCubeObj("cube.obj"); ///
-    success = exportOctahedronObj("octahedron.obj"); ///
-    success = exportDodecahedronObj("dodecahedron.obj"); ///
-    success = exportIcosahedronObj("icosahedron.obj"); ///
     std::string prompt;
     BiquadraticNumber edgeLength(Rational(1, 1));
     auto edgeLengthSq = edgeLength * edgeLength;
