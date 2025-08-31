@@ -362,10 +362,12 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\camera.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\edge_list.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\gl_callbacks.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\image.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\includes.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\mesh_renderer\primitives.h" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\camera.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\edge_list.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\image.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\mesh_renderer.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\gl_callbacks.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\mesh_renderer\primitives.cpp" />
