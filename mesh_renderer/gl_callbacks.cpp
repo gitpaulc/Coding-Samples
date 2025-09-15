@@ -15,8 +15,39 @@ namespace MeshRenderer
   static bool gPointsHidden = false;
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
-  static bool gWireframeOn = true;
-  static bool gNormalsShading = false;
+
+#ifdef _WIN64
+  enum class RenderState
+  {
+    Wireframe = 0,
+    Opaque = 1,
+    NormalsShading = 2,
+    TextureMap = 3,
+    NumStates = 4
+  };
+#else
+#ifdef _WIN32
+  // Win32:
+  enum class RenderState
+  {
+    Wireframe = 0,
+    Opaque = 1,
+    NormalsShading = 2,
+    TextureMap = 3,
+    NumStates = 4
+  };
+#else
+  // Otherwise...
+  enum class RenderState
+  {
+    Wireframe = 0,
+    Opaque = 1,
+    NumStates = 2
+  };
+#endif
+#endif
+  RenderState gRenderState = RenderState::Wireframe;
+
   static bool gUseFaceNormals = false;
 
   static Camera& GetCamera(const DoublyConnectedEdgeList& mesh)
@@ -34,6 +65,7 @@ namespace MeshRenderer
   static GLint gAmbientLocation, gDiffuseLocation, gSpecularLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
   static float g_kA, g_kD, g_kS;
+  static GLuint gTextureId;
 }
 
 void recalculate();
@@ -97,6 +129,14 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::g_kD = 0.9f;
   MeshRenderer::g_kS = 0.0f;
 
+  glGenTextures(1, &MeshRenderer::gTextureId);
+  glBindTexture(GL_TEXTURE_2D, MeshRenderer::gTextureId);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
   recalculate();
   linkShaderProgram();
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
@@ -108,7 +148,7 @@ void initialize_glut(int* argc_ptr, char** argv)
 void recalculate()
 {
   const auto& mesh = MeshRenderer::DoublyConnectedEdgeList::Get();
-  if (MeshRenderer::gWireframeOn)
+  if (MeshRenderer::gRenderState == MeshRenderer::RenderState::Wireframe)
   {
     mesh.getWireframe(MeshRenderer::gWireframe);
   }
@@ -238,16 +278,10 @@ void keyboard(unsigned char key, int x, int y)
   }
   if ((key == 'u') || (key == 'U'))
   {
-#ifndef __APPLE__
-    if (!gWireframeOn && !gNormalsShading)
+    gRenderState = static_cast<RenderState>(static_cast<int>(gRenderState) + 1);
+    if (gRenderState == RenderState::NumStates)
     {
-      gNormalsShading = !gNormalsShading;
-    }
-    else
-#endif
-    {
-      gWireframeOn = !gWireframeOn;
-      gNormalsShading = false;
+      gRenderState = static_cast<RenderState>(0);
     }
     recalculate();
   }
@@ -344,11 +378,21 @@ void render()
   if (gDepthBuffering) { glEnable(GL_DEPTH_TEST); }
   else { glDisable(GL_DEPTH_TEST); }
 
+#ifdef _WIN64
+  bool normalsShading = (gRenderState == RenderState::NormalsShading);
+#else
+#ifdef _WIN32
+  bool normalsShading = (gRenderState == RenderState::NormalsShading);
+#else
+  bool normalsShading = false;
+#endif
+#endif
+  bool wireframeOn = (gRenderState == RenderState::Wireframe);
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !gWireframeOn, gUseShaders, gNormalsShading);
+  toVertex3dData(gWireframe, vertexData, !wireframeOn, gUseShaders, normalsShading);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
-  else if (!gWireframeOn && gUseShaders)
+  else if (!wireframeOn && gUseShaders)
   {
 #ifdef __APPLE__ // To GPU.
     glBindVertexArrayAPPLE(gVertexArrayObj);
@@ -397,7 +441,7 @@ void render()
     glutSwapBuffers();
     return;
   }
-  else if (!gWireframeOn)
+  else if (gRenderState != RenderState::Wireframe)
   {
     glUseProgram(0);
     glPointSize(3.0f);
