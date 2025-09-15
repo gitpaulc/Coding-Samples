@@ -8,7 +8,23 @@ All Rights Reserved.*/
 
 namespace MeshRenderer
 {
-  void* loadImage(const std::string& filename, long& imgW, long& imgH);
+  class Image
+  {
+#ifdef _WIN64
+    BITMAP bmp = {};
+#else
+#ifdef _WIN32
+    // Win32:
+    BITMAP bmp = {};
+#else
+    // Otherwise...
+    long imgH = 0;
+    long imgW = 0;
+#endif
+#endif
+  public:
+    Image(const std::string& filename);
+  };
 }
 
 #endif //def MESH_IMAGE_H

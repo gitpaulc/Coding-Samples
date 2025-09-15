@@ -6,12 +6,12 @@ All Rights Reserved.*/
 
 namespace MeshRenderer
 {
-  void* loadImage(const std::string& filename, long& imgW, long& imgH)
+  Image::Image(const std::string& filename)
   {
     if (false) // Test if file exists.
     {
       std::ifstream istr(filename);
-      if (!(istr.is_open())) { return nullptr; }
+      if (!(istr.is_open())) { return; }
     }
 #ifdef _WIN64
     // Win64:
@@ -19,29 +19,23 @@ namespace MeshRenderer
       NULL, filename.c_str(), IMAGE_BITMAP, 0, 0,
       LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
-    if (hBitmap == false)
+    if (hBitmap != false)
     {
-      return nullptr;
-    }
-
-    BITMAP bmp = {};
-    GetObject(hBitmap, sizeof(BITMAP), &bmp);
-
-    if (bmp.bmBits == false)
-    {
+      GetObject(hBitmap, sizeof(BITMAP), &bmp);
       DeleteObject(hBitmap);
-      imgH = 0;
-      imgW = 0;
-      return NULL;
     }
-
-    DeleteObject(hBitmap);
-    imgH = bmp.bmHeight;
-    imgW = bmp.bmWidth;
-    return bmp.bmBits;
 #else
 #ifdef _WIN32
     // Win32:
+    HBITMAP hBitmap = (HBITMAP)LoadImage(
+      NULL, filename.c_str(), IMAGE_BITMAP, 0, 0,
+      LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+
+    if (hBitmap != false)
+    {
+      GetObject(hBitmap, sizeof(BITMAP), &bmp);
+      DeleteObject(hBitmap);
+    }
 #else
     // Otherwise...
 #endif
