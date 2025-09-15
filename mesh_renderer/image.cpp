@@ -15,25 +15,34 @@ namespace MeshRenderer
     }
 #ifdef _WIN64
     // Win64:
-    HBITMAP hBitmap = (HBITMAP)LoadImage(
+    hBitmap = (HBITMAP)LoadImage(
       NULL, filename.c_str(), IMAGE_BITMAP, 0, 0,
       LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+#else
+#ifdef _WIN32
+    // Win32:
+    hBitmap = (HBITMAP)LoadImage(
+      NULL, filename.c_str(), IMAGE_BITMAP, 0, 0,
+      LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+#else
+    // Otherwise...
+#endif
+#endif
+  }
 
+  Image::~Image()
+  {
+#ifdef _WIN64
+    // Win64:
     if (hBitmap != false)
     {
-      GetObject(hBitmap, sizeof(BITMAP), &bmp);
       DeleteObject(hBitmap);
     }
 #else
 #ifdef _WIN32
     // Win32:
-    HBITMAP hBitmap = (HBITMAP)LoadImage(
-      NULL, filename.c_str(), IMAGE_BITMAP, 0, 0,
-      LR_LOADFROMFILE | LR_CREATEDIBSECTION);
-
     if (hBitmap != false)
     {
-      GetObject(hBitmap, sizeof(BITMAP), &bmp);
       DeleteObject(hBitmap);
     }
 #else
@@ -41,4 +50,32 @@ namespace MeshRenderer
 #endif
 #endif
   }
+
+#ifdef _WIN64
+  BITMAP Image::GetBitmap()
+  {
+    BITMAP bmp = {};
+    if (hBitmap != false)
+    {
+      GetObject(hBitmap, sizeof(BITMAP), &bmp);
+    }
+    return bmp;
+  }
+#else
+#ifdef _WIN32
+  // Win32:
+  BITMAP Image::GetBitmap()
+  {
+    BITMAP bmp = {};
+    if (hBitmap != false)
+    {
+      GetObject(hBitmap, sizeof(BITMAP), &bmp);
+    }
+    return bmp;
+  }
+#else
+  // Otherwise...
+#endif
+#endif
+
 }
