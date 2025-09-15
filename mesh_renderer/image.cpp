@@ -51,6 +51,22 @@ namespace MeshRenderer
 #endif
   }
 
+  bool Image::isGood() const
+  {
+#ifdef _WIN64
+    // Win64:
+    return (hBitmap != false);
+#else
+#ifdef _WIN32
+    // Win32:
+    return (hBitmap != false);
+#else
+    // Otherwise...
+    return ((imgH > 0) && (imgW > 0));
+#endif
+#endif
+  }
+
 #ifdef _WIN64
   BITMAP Image::GetBitmap()
   {

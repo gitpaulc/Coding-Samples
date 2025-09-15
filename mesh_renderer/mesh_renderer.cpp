@@ -3,6 +3,7 @@ All Rights Reserved.*/
 
 #include "gl_callbacks.h"
 
+#include "image.h"
 #include "includes.h"
 #include "camera.h"
 #include "edge_list.h"
@@ -13,6 +14,12 @@ All Rights Reserved.*/
 
 int main(int argc, char **argv)
 {
+  if (argc >= 3)
+  {
+    std::string filename = std::string(argv[2]);
+    MeshRenderer::Image img(filename); // Texture map.
+    enableTextureMap(img.isGood());
+  }
 #ifdef USE_OPEN_CV
   {
     std::string errorMessage = "";

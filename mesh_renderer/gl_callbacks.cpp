@@ -65,6 +65,7 @@ namespace MeshRenderer
   static GLint gAmbientLocation, gDiffuseLocation, gSpecularLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
   static float g_kA, g_kD, g_kS;
+  static bool gTextureMapEnabled = true;
   static GLuint gTextureId;
 }
 
@@ -79,6 +80,11 @@ int& GetWindowId()
 void toVertex3dData(const std::vector<ComputationalGeometry::Edge3d>& dataIn, std::vector<float>& dataOut,
                     bool triangles, bool useShaders, bool normals);
 void linkShaderProgram();
+
+void enableTextureMap(bool on)
+{
+  MeshRenderer::gTextureMapEnabled = on;
+}
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
@@ -279,6 +285,19 @@ void keyboard(unsigned char key, int x, int y)
   if ((key == 'u') || (key == 'U'))
   {
     gRenderState = static_cast<RenderState>(static_cast<int>(gRenderState) + 1);
+    bool textureMapping = false;
+#ifdef _WIN64
+    textureMapping = (gRenderState == RenderState::TextureMap);
+#else
+#ifdef _WIN32
+    textureMapping = (gRenderState == RenderState::TextureMap);
+#else
+#endif
+#endif
+    if (textureMapping && (!gTextureMapEnabled))
+    {
+      gRenderState = static_cast<RenderState>(static_cast<int>(gRenderState) + 1);
+    }
     if (gRenderState == RenderState::NumStates)
     {
       gRenderState = static_cast<RenderState>(0);
@@ -397,6 +416,8 @@ void render()
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
   else if (textureMapping)
   {
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
     return;
   }
   else if (!wireframeOn && gUseShaders)
