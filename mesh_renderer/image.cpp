@@ -2,11 +2,17 @@
 All Rights Reserved.*/
 
 #include "image.h"
+#include <fstream>
 
 namespace MeshRenderer
 {
   void* loadImage(const std::string& filename, long& imgW, long& imgH)
   {
+    if (false) // Test if file exists.
+    {
+      std::ifstream istr(filename);
+      if (!(istr.is_open())) { return nullptr; }
+    }
 #ifdef _WIN64
     // Win64:
     HBITMAP hBitmap = (HBITMAP)LoadImage(
