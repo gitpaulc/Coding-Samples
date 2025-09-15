@@ -378,13 +378,16 @@ void render()
   if (gDepthBuffering) { glEnable(GL_DEPTH_TEST); }
   else { glDisable(GL_DEPTH_TEST); }
 
+  bool normalsShading = false;
+  bool textureMapping = false;
 #ifdef _WIN64
-  bool normalsShading = (gRenderState == RenderState::NormalsShading);
+  normalsShading = (gRenderState == RenderState::NormalsShading);
+  textureMapping = (gRenderState == RenderState::TextureMap);
 #else
 #ifdef _WIN32
-  bool normalsShading = (gRenderState == RenderState::NormalsShading);
+  normalsShading = (gRenderState == RenderState::NormalsShading);
+  textureMapping = (gRenderState == RenderState::TextureMap);
 #else
-  bool normalsShading = false;
 #endif
 #endif
   bool wireframeOn = (gRenderState == RenderState::Wireframe);
@@ -392,6 +395,10 @@ void render()
   toVertex3dData(gWireframe, vertexData, !wireframeOn, gUseShaders, normalsShading);
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
+  else if (textureMapping)
+  {
+    return;
+  }
   else if (!wireframeOn && gUseShaders)
   {
 #ifdef __APPLE__ // To GPU.
