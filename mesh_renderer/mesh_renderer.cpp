@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   std::cout << "Orthogonal/Perspective: O to toggle, Depth Testing: P to toggle.\n";
   std::cout << "Wireframe/Opaque/Shading: U to toggle.\n";
   std::cout << "Use shaders: 1 to toggle, Face normals: 2 to toggle.\n";
-  std::cout << "Optionally add a second .bmp texture map parameter.\n";
+  //std::cout << "Optionally add a second .bmp texture map parameter.\n";
 
   MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));
