@@ -6,6 +6,10 @@
   <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/dodecahedronSolid.png" width="48%"/></a>
 </h1>
 
+<h1>
+  <a href="#"><img alt="ComputationalGeometry" src="mesh_renderer/Demosthenes.png" width="98%"/></a>
+</h1>
+
 <p>
   <button>
   <a href="https://github.com/gitpaulc/Coding-Samples/tree/dev/computational_geometry" alt="Computational Geometry"><img alt="Computational Geometry" src="ui/geometry.png" height="20%" width="10%"/></a>
