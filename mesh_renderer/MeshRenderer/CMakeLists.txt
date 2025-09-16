@@ -63,6 +63,7 @@ set(HEADER_FILES
   ../camera.h
   ../edge_list.h
   ../gl_callbacks.h
+  ../image.h
   ../includes.h
   ../primitives.h
 )
@@ -72,6 +73,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
   ../camera.cpp
   ../edge_list.cpp
+  ../image.cpp
   ../mesh_renderer.cpp
   ../gl_callbacks.cpp
   ../primitives.cpp
