@@ -77,7 +77,7 @@ namespace MeshRenderer
   static GLint gAmbientLocation, gDiffuseLocation, gSpecularLocation;
   static ComputationalGeometry::point3d gBoundingMax, gBoundingMin;
   static float g_kA, g_kD, g_kS;
-  static bool gTextureMapEnabled = true;
+  static bool gTextureMapEnabled = false;
   static GLuint gTextureId;
 }
 
