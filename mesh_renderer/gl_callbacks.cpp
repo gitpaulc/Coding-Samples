@@ -47,6 +47,18 @@ namespace MeshRenderer
 #endif
 #endif
   RenderState gRenderState = RenderState::Wireframe;
+#ifdef _WIN64
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
+#else
+#ifdef _WIN32
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
+#else
+  static bool stateIsNormalsShading() { return false; }
+  static bool stateIsTextureMap() { return false; }
+#endif
+#endif
 
   static bool gUseFaceNormals = false;
 
@@ -285,16 +297,7 @@ void keyboard(unsigned char key, int x, int y)
   if ((key == 'u') || (key == 'U'))
   {
     gRenderState = static_cast<RenderState>(static_cast<int>(gRenderState) + 1);
-    bool textureMapping = false;
-#ifdef _WIN64
-    textureMapping = (gRenderState == RenderState::TextureMap);
-#else
-#ifdef _WIN32
-    textureMapping = (gRenderState == RenderState::TextureMap);
-#else
-#endif
-#endif
-    if (textureMapping && (!gTextureMapEnabled))
+    if (stateIsTextureMap() && (!gTextureMapEnabled))
     {
       gRenderState = static_cast<RenderState>(static_cast<int>(gRenderState) + 1);
     }
@@ -397,24 +400,12 @@ void render()
   if (gDepthBuffering) { glEnable(GL_DEPTH_TEST); }
   else { glDisable(GL_DEPTH_TEST); }
 
-  bool normalsShading = false;
-  bool textureMapping = false;
-#ifdef _WIN64
-  normalsShading = (gRenderState == RenderState::NormalsShading);
-  textureMapping = (gRenderState == RenderState::TextureMap);
-#else
-#ifdef _WIN32
-  normalsShading = (gRenderState == RenderState::NormalsShading);
-  textureMapping = (gRenderState == RenderState::TextureMap);
-#else
-#endif
-#endif
   bool wireframeOn = (gRenderState == RenderState::Wireframe);
   std::vector<float> vertexData;
-  toVertex3dData(gWireframe, vertexData, !wireframeOn, gUseShaders, normalsShading);
+  toVertex3dData(gWireframe, vertexData, !wireframeOn, gUseShaders, stateIsNormalsShading());
     
   if (gPointsHidden || gEdgesHidden) { vertexData.resize(0); }
-  else if (textureMapping)
+  else if (stateIsTextureMap())
   {
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
