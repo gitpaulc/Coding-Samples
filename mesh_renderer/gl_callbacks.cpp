@@ -548,7 +548,7 @@ void render()
   glColor3f(0.0f, 0.0f, 0.0f);
   glDrawArrays(GL_POINTS, whichArray, (GLsizei)vertexData.size() / 3);
     
-  glColor3f(1.0f, 0.0f, 0.0f);
+  glColor3f((float)gRenderRed, (float)gRenderGreen, (float)gRenderBlue);
   glDrawArrays(GL_LINES, whichArray, (GLsizei)vertexData.size() / 3);
 
   glDisableClientState(GL_VERTEX_ARRAY);
