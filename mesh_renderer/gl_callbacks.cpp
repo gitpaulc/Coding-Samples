@@ -33,6 +33,9 @@ namespace MeshRenderer
     TextureMap = 3,
     NumStates = 4
   };
+  RenderState gRenderState = RenderState::NormalsShading;
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
 #else
 #ifdef _WIN32
   // Win32:
@@ -44,6 +47,9 @@ namespace MeshRenderer
     TextureMap = 3,
     NumStates = 4
   };
+  RenderState gRenderState = RenderState::NormalsShading;
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
 #else
   // Otherwise...
   enum class RenderState
@@ -52,17 +58,7 @@ namespace MeshRenderer
     Opaque = 1,
     NumStates = 2
   };
-#endif
-#endif
-  RenderState gRenderState = RenderState::Wireframe;
-#ifdef _WIN64
-  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
-  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
-#else
-#ifdef _WIN32
-  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
-  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
-#else
+  RenderState gRenderState = RenderState::NumStates - 1;
   static bool stateIsNormalsShading() { return false; }
   static bool stateIsTextureMap() { return false; }
 #endif
