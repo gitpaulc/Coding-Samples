@@ -16,6 +16,10 @@ namespace MeshRenderer
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
 
+  static double gRenderRed = 0.0;
+  static double gRenderGreen = 0.0;
+  static double gRenderBlue = 1.0;
+
 #ifdef _WIN64
   enum class RenderState
   {
@@ -100,6 +104,9 @@ void enableTextureMap(bool on)
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
+  MeshRenderer::gRenderRed = 0.0;
+  MeshRenderer::gRenderGreen = 0.0;
+  MeshRenderer::gRenderBlue = 1.0;
   // Initialize GLUT and create a window.
   glutInit(argc_ptr, argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -624,7 +631,16 @@ std::string glslVertexShaderCode()
   glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
   glsl << "\n    }";
   glsl << "\n  }";
-  glsl << "\n  fragColor = vec3(tt, tt, 1.0);";
+  double rMax = 1.0;
+  double gMax = 1.0;
+  double bMax = 1.0;
+  double rMin = MeshRenderer::gRenderRed;
+  double gMin = MeshRenderer::gRenderGreen;
+  double bMin = MeshRenderer::gRenderBlue;
+  glsl << "\n  float rr = " << rMax << " * tt" << " + " << rMin << " * (1.0 - tt);";
+  glsl << "\n  float gg = " << gMax << " * tt" << " + " << gMin << " * (1.0 - tt);";
+  glsl << "\n  float bb = " << bMax << " * tt" << " + " << bMin << " * (1.0 - tt);";
+  glsl << "\n  fragColor = vec3(rr, gg, bb);";
   glsl << "\n}";
   return glsl.str();
 }
