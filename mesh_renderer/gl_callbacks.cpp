@@ -90,6 +90,7 @@ namespace MeshRenderer
 }
 
 void recalculate();
+void updateColors(int _dr, int _dg, int _db);
 
 int& GetWindowId()
 {
@@ -191,6 +192,25 @@ void recalculate()
     mesh.getSkeleton(MeshRenderer::gWireframe, MeshRenderer::gAvgNormals);
   }
   mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
+}
+
+void updateColors(int _dr, int _dg, int _db)
+{
+  double dt = 0.05;
+  double dR = _dr * dt;
+  double dG = _dg * dt;
+  double dB = _db * dt;
+  MeshRenderer::gRenderRed += dR;
+  MeshRenderer::gRenderGreen += dG;
+  MeshRenderer::gRenderBlue += dB;
+  if (MeshRenderer::gRenderRed < 0.0) { MeshRenderer::gRenderRed = 0.0; }
+  else if (MeshRenderer::gRenderRed >= 1.0) { MeshRenderer::gRenderRed = 1.0; }
+  if (MeshRenderer::gRenderGreen < 0.0) { MeshRenderer::gRenderGreen = 0.0; }
+  else if (MeshRenderer::gRenderGreen >= 1.0) { MeshRenderer::gRenderGreen = 1.0; }
+  if (MeshRenderer::gRenderBlue < 0.0) { MeshRenderer::gRenderBlue = 0.0; }
+  else if (MeshRenderer::gRenderBlue >= 1.0) { MeshRenderer::gRenderBlue = 1.0; }
+  linkShaderProgram();
+  recalculate();
 }
 
 void vertex2color(const float& xIn, const float& yIn, const float& zIn,
@@ -339,6 +359,12 @@ void keyboard(unsigned char key, int x, int y)
     recalculate();
   }
 #endif
+  else if (key == '!') { updateColors(1, 0, 0); }
+  else if (key == '@') { updateColors(0, 1, 0); }
+  else if (key == '#') { updateColors(0, 0, 1); }
+  else if (key == '$') { updateColors(-1, 0, 0); }
+  else if (key == '%') { updateColors(0, -1, 0); }
+  else if (key == '^') { updateColors(0, 0, -1); }
   else if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
