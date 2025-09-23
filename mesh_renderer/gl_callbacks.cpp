@@ -20,6 +20,10 @@ namespace MeshRenderer
   static double gRenderGreen = 0.0;
   static double gRenderBlue = 1.0;
 
+  static double gRenderRedMax = 1.0;
+  static double gRenderGreenMax = 1.0;
+  static double gRenderBlueMax = 1.0;
+
 #ifdef _WIN64
   enum class RenderState
   {
@@ -107,6 +111,11 @@ void initialize_glut(int* argc_ptr, char** argv)
   MeshRenderer::gRenderRed = 0.0;
   MeshRenderer::gRenderGreen = 0.0;
   MeshRenderer::gRenderBlue = 1.0;
+
+  MeshRenderer::gRenderRedMax = 1.0;
+  MeshRenderer::gRenderGreenMax = 1.0;
+  MeshRenderer::gRenderBlueMax = 1.0;
+
   // Initialize GLUT and create a window.
   glutInit(argc_ptr, argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -631,9 +640,9 @@ std::string glslVertexShaderCode()
   glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
   glsl << "\n    }";
   glsl << "\n  }";
-  double rMax = 1.0;
-  double gMax = 1.0;
-  double bMax = 1.0;
+  double rMax = MeshRenderer::gRenderRedMax;
+  double gMax = MeshRenderer::gRenderGreenMax;
+  double bMax = MeshRenderer::gRenderBlueMax;
   double rMin = MeshRenderer::gRenderRed;
   double gMin = MeshRenderer::gRenderGreen;
   double bMin = MeshRenderer::gRenderBlue;
