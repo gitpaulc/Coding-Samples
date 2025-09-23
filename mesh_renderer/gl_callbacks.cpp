@@ -323,7 +323,7 @@ void keyboard(unsigned char key, int x, int y)
     }
     recalculate();
   }
-  if ((key == '1'))
+  if (key == '1')
   {
     gUseShaders = !gUseShaders;
     if (gUseShaders) { std::cout << "\nOpenGL vertex and fragment shading on."; }
@@ -331,7 +331,7 @@ void keyboard(unsigned char key, int x, int y)
     recalculate();
   }
 #ifndef __APPLE__
-  else if ((key == '2'))
+  else if (key == '2')
   {
     gUseFaceNormals = !gUseFaceNormals;
     if (gUseFaceNormals) { std::cout << "\nUsing face normals for shading."; }
@@ -339,7 +339,7 @@ void keyboard(unsigned char key, int x, int y)
     recalculate();
   }
 #endif
-  if ((key == 27) //Esc
+  else if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
     glutDestroyWindow(GetWindowId());
