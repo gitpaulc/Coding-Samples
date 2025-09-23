@@ -200,15 +200,18 @@ void updateColors(int _dr, int _dg, int _db)
   double dR = _dr * dt;
   double dG = _dg * dt;
   double dB = _db * dt;
-  MeshRenderer::gRenderRed += dR;
-  MeshRenderer::gRenderGreen += dG;
-  MeshRenderer::gRenderBlue += dB;
-  if (MeshRenderer::gRenderRed < 0.0) { MeshRenderer::gRenderRed = 0.0; }
-  else if (MeshRenderer::gRenderRed >= 1.0) { MeshRenderer::gRenderRed = 1.0; }
-  if (MeshRenderer::gRenderGreen < 0.0) { MeshRenderer::gRenderGreen = 0.0; }
-  else if (MeshRenderer::gRenderGreen >= 1.0) { MeshRenderer::gRenderGreen = 1.0; }
-  if (MeshRenderer::gRenderBlue < 0.0) { MeshRenderer::gRenderBlue = 0.0; }
-  else if (MeshRenderer::gRenderBlue >= 1.0) { MeshRenderer::gRenderBlue = 1.0; }
+  using namespace MeshRenderer;
+  gRenderRed += dR;
+  gRenderGreen += dG;
+  gRenderBlue += dB;
+  if (gRenderRed < 0.0) { gRenderRed = 0.0; }
+  else if (gRenderRed >= 1.0) { gRenderRed = 1.0; }
+  if (gRenderGreen < 0.0) { gRenderGreen = 0.0; }
+  else if (gRenderGreen >= 1.0) { gRenderGreen = 1.0; }
+  if (gRenderBlue < 0.0) { gRenderBlue = 0.0; }
+  else if (gRenderBlue >= 1.0) { gRenderBlue = 1.0; }
+  std::cout << "\nColor: Red = " << gRenderRed * 100.0 << "%, Green = " << gRenderGreen * 100.0
+    << "%, Blue = " << gRenderBlue * 100.0 << "%.";
   linkShaderProgram();
   recalculate();
 }

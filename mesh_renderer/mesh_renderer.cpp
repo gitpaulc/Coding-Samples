@@ -61,6 +61,7 @@ int main(int argc, char **argv)
   std::cout << "Wireframe/Opaque/Shading: U to toggle.\n";
   std::cout << "Use shaders: 1 to toggle, Face normals: 2 to toggle.\n";
   //std::cout << "Optionally add a second .bmp texture map parameter.\n";
+  std::cout << "Color: Shift + 1, 2, 3, 4, 5, or 6 to toggle.\n";
 
   MeshRenderer::DoublyConnectedEdgeList::Create(filename);
   srand((unsigned)time(NULL));
