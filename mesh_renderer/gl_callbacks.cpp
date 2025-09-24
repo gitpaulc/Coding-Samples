@@ -16,6 +16,14 @@ namespace MeshRenderer
   static bool gDepthBuffering = true;
   static bool gEdgesHidden = false;
 
+  static double gRenderRed = 0.0;
+  static double gRenderGreen = 0.0;
+  static double gRenderBlue = 1.0;
+
+  static double gRenderRedMax = 1.0;
+  static double gRenderGreenMax = 1.0;
+  static double gRenderBlueMax = 1.0;
+
 #ifdef _WIN64
   enum class RenderState
   {
@@ -25,6 +33,9 @@ namespace MeshRenderer
     TextureMap = 3,
     NumStates = 4
   };
+  RenderState gRenderState = RenderState::NormalsShading;
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
 #else
 #ifdef _WIN32
   // Win32:
@@ -36,6 +47,9 @@ namespace MeshRenderer
     TextureMap = 3,
     NumStates = 4
   };
+  RenderState gRenderState = RenderState::NormalsShading;
+  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
+  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
 #else
   // Otherwise...
   enum class RenderState
@@ -44,17 +58,7 @@ namespace MeshRenderer
     Opaque = 1,
     NumStates = 2
   };
-#endif
-#endif
-  RenderState gRenderState = RenderState::Wireframe;
-#ifdef _WIN64
-  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
-  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
-#else
-#ifdef _WIN32
-  static bool stateIsNormalsShading() { return (gRenderState == RenderState::NormalsShading); }
-  static bool stateIsTextureMap() { return (gRenderState == RenderState::TextureMap); }
-#else
+  RenderState gRenderState = RenderState::NumStates - 1;
   static bool stateIsNormalsShading() { return false; }
   static bool stateIsTextureMap() { return false; }
 #endif
@@ -82,6 +86,7 @@ namespace MeshRenderer
 }
 
 void recalculate();
+void updateColors(int _dr, int _dg, int _db);
 
 int& GetWindowId()
 {
@@ -100,6 +105,14 @@ void enableTextureMap(bool on)
 
 void initialize_glut(int* argc_ptr, char** argv)
 {
+  MeshRenderer::gRenderRed = 0.0;
+  MeshRenderer::gRenderGreen = 0.0;
+  MeshRenderer::gRenderBlue = 1.0;
+
+  MeshRenderer::gRenderRedMax = 1.0;
+  MeshRenderer::gRenderGreenMax = 1.0;
+  MeshRenderer::gRenderBlueMax = 1.0;
+
   // Initialize GLUT and create a window.
   glutInit(argc_ptr, argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -177,11 +190,33 @@ void recalculate()
   mesh.getBoundingBox(MeshRenderer::gBoundingMax, MeshRenderer::gBoundingMin);
 }
 
+void updateColors(int _dr, int _dg, int _db)
+{
+  double dt = 0.05;
+  double dR = _dr * dt;
+  double dG = _dg * dt;
+  double dB = _db * dt;
+  using namespace MeshRenderer;
+  gRenderRed += dR;
+  gRenderGreen += dG;
+  gRenderBlue += dB;
+  if (gRenderRed < 0.0) { gRenderRed = 0.0; }
+  else if (gRenderRed >= 1.0) { gRenderRed = 1.0; }
+  if (gRenderGreen < 0.0) { gRenderGreen = 0.0; }
+  else if (gRenderGreen >= 1.0) { gRenderGreen = 1.0; }
+  if (gRenderBlue < 0.0) { gRenderBlue = 0.0; }
+  else if (gRenderBlue >= 1.0) { gRenderBlue = 1.0; }
+  std::cout << "\nColor: Red = " << gRenderRed * 100.0 << "%, Green = " << gRenderGreen * 100.0
+    << "%, Blue = " << gRenderBlue * 100.0 << "%.";
+  linkShaderProgram();
+  recalculate();
+}
+
 void vertex2color(const float& xIn, const float& yIn, const float& zIn,
   float& rOut, float& gOut, float& bOut)
 {
-  ComputationalGeometry::point3d rgbMax(1, 1, 1);
-  ComputationalGeometry::point3d rgbMin(0, 0, 1);
+  ComputationalGeometry::point3d rgbMax(MeshRenderer::gRenderRedMax, MeshRenderer::gRenderGreenMax, MeshRenderer::gRenderBlueMax);
+  ComputationalGeometry::point3d rgbMin(MeshRenderer::gRenderRed, MeshRenderer::gRenderGreen, MeshRenderer::gRenderBlue);
   float margin = (float)(0.25 * (MeshRenderer::gBoundingMax.z - MeshRenderer::gBoundingMin.z));
   auto MM = (float)MeshRenderer::gBoundingMax.z + margin;
   if (zIn >= MM)
@@ -307,7 +342,7 @@ void keyboard(unsigned char key, int x, int y)
     }
     recalculate();
   }
-  if ((key == '1'))
+  if (key == '1')
   {
     gUseShaders = !gUseShaders;
     if (gUseShaders) { std::cout << "\nOpenGL vertex and fragment shading on."; }
@@ -315,7 +350,7 @@ void keyboard(unsigned char key, int x, int y)
     recalculate();
   }
 #ifndef __APPLE__
-  else if ((key == '2'))
+  else if (key == '2')
   {
     gUseFaceNormals = !gUseFaceNormals;
     if (gUseFaceNormals) { std::cout << "\nUsing face normals for shading."; }
@@ -323,7 +358,13 @@ void keyboard(unsigned char key, int x, int y)
     recalculate();
   }
 #endif
-  if ((key == 27) //Esc
+  else if (key == '!') { updateColors(1, 0, 0); }
+  else if (key == '@') { updateColors(0, 1, 0); }
+  else if (key == '#') { updateColors(0, 0, 1); }
+  else if (key == '$') { updateColors(-1, 0, 0); }
+  else if (key == '%') { updateColors(0, -1, 0); }
+  else if (key == '^') { updateColors(0, 0, -1); }
+  else if ((key == 27) //Esc
       || (key == 'q') || (key == 'Q'))
   {
     glutDestroyWindow(GetWindowId());
@@ -507,7 +548,7 @@ void render()
   glColor3f(0.0f, 0.0f, 0.0f);
   glDrawArrays(GL_POINTS, whichArray, (GLsizei)vertexData.size() / 3);
     
-  glColor3f(1.0f, 0.0f, 0.0f);
+  glColor3f((float)gRenderRed, (float)gRenderGreen, (float)gRenderBlue);
   glDrawArrays(GL_LINES, whichArray, (GLsizei)vertexData.size() / 3);
 
   glDisableClientState(GL_VERTEX_ARRAY);
@@ -624,7 +665,16 @@ std::string glslVertexShaderCode()
   glsl << "\n      tt = (factor * posVec.z - minHeight) / (maxHeight - minHeight);";
   glsl << "\n    }";
   glsl << "\n  }";
-  glsl << "\n  fragColor = vec3(tt, tt, 1.0);";
+  double rMax = MeshRenderer::gRenderRedMax;
+  double gMax = MeshRenderer::gRenderGreenMax;
+  double bMax = MeshRenderer::gRenderBlueMax;
+  double rMin = MeshRenderer::gRenderRed;
+  double gMin = MeshRenderer::gRenderGreen;
+  double bMin = MeshRenderer::gRenderBlue;
+  glsl << "\n  float rr = " << rMax << " * tt" << " + " << rMin << " * (1.0 - tt);";
+  glsl << "\n  float gg = " << gMax << " * tt" << " + " << gMin << " * (1.0 - tt);";
+  glsl << "\n  float bb = " << bMax << " * tt" << " + " << bMin << " * (1.0 - tt);";
+  glsl << "\n  fragColor = vec3(rr, gg, bb);";
   glsl << "\n}";
   return glsl.str();
 }
