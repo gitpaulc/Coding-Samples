@@ -6,6 +6,7 @@
 #include "edge_list.h"
 #include "primitives.h"
 
+#include <iomanip>
 #include <sstream>
 
 namespace MeshRenderer
@@ -58,7 +59,7 @@ namespace MeshRenderer
     Opaque = 1,
     NumStates = 2
   };
-  RenderState gRenderState = RenderState::NumStates - 1;
+  RenderState gRenderState = RenderState::Opaque;
   static bool stateIsNormalsShading() { return false; }
   static bool stateIsTextureMap() { return false; }
 #endif
@@ -671,9 +672,9 @@ std::string glslVertexShaderCode()
   double rMin = MeshRenderer::gRenderRed;
   double gMin = MeshRenderer::gRenderGreen;
   double bMin = MeshRenderer::gRenderBlue;
-  glsl << "\n  float rr = " << rMax << " * tt" << " + " << rMin << " * (1.0 - tt);";
-  glsl << "\n  float gg = " << gMax << " * tt" << " + " << gMin << " * (1.0 - tt);";
-  glsl << "\n  float bb = " << bMax << " * tt" << " + " << bMin << " * (1.0 - tt);";
+  glsl << "\n  float rr = " << std::fixed << std::setprecision(1) << rMax << " * tt" << " + " << std::fixed << std::setprecision(1) << rMin << " * (1.0 - tt);";
+  glsl << "\n  float gg = " << std::fixed << std::setprecision(1) << gMax << " * tt" << " + " << std::fixed << std::setprecision(1) << gMin << " * (1.0 - tt);";
+  glsl << "\n  float bb = " << std::fixed << std::setprecision(1) << bMax << " * tt" << " + " << std::fixed << std::setprecision(1) << bMin << " * (1.0 - tt);";
   glsl << "\n  fragColor = vec3(rr, gg, bb);";
   glsl << "\n}";
   return glsl.str();
