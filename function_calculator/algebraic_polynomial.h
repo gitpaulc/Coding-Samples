@@ -25,6 +25,7 @@ class AlgebraicPolynomial
     bool isConstTerm() const;
     unsigned int getDimension() const;
     bool operator<(const Monomial& rhs) const;
+    void clean();
   };
 
   std::map<Monomial, PiRational> self;

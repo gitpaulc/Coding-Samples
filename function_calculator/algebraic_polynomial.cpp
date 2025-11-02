@@ -1,230 +1,67 @@
-/*  Copyright Paul Cernea, May 2025.
+/*  Copyright Paul Cernea, November 2025.
 All Rights Reserved.*/
 
-#include "fn_polynomial.h"
+#include "algebraic_polynomial.h"
 
 #include <stdexcept>
 #include <sstream>
 
 namespace FunctionalCalculator
 {
-  bool FnPolynomial::TrigIndex::isCos() const
+  bool AlgebraicPolynomial::Monomial::isConstTerm() const
   {
-    if (self == BiquadraticNumber(0)) { return true; }
-    return isCosine;
+    return indices.empty();
   }
 
-  bool FnPolynomial::TrigIndex::operator==(const FnPolynomial::TrigIndex& rhs) const
+  unsigned int AlgebraicPolynomial::Monomial::getDimension() const
   {
-    if (self == BiquadraticNumber(0)) { return (self == rhs.self); }
-    if (rhs.self == BiquadraticNumber(0)) { return (self == rhs.self); }
-    if (self != rhs.self) { return false; }
-    return (isCosine == rhs.isCosine);
-  }
-
-  bool FnPolynomial::TrigIndex::operator!=(const FnPolynomial::TrigIndex& rhs) const
-  {
-    return !((*this) == rhs);
-  }
-
-  bool FnPolynomial::TrigIndex::operator<(const FnPolynomial::TrigIndex& rhs) const
-  {
-    if (self < rhs.self) { return true; }
-    if (rhs.self < self) { return false; }
-    if (self == BiquadraticNumber(0)) { return false; } // They are both treated as cosine.
-    if (isCosine == rhs.isCosine) { return false; }
-    // One must be true, one must be false. false < true:
-    return (isCosine == false);
-  }
-
-  bool FnPolynomial::TrigIndex::operator>(const FnPolynomial::TrigIndex& rhs) const { return (rhs < (*this)); }
-
-  bool FnPolynomial::Monomial::isConstTerm() const
-  {
-    if (xInd != 0) { return false; }
-    if (yInd != 0) { return false; }
-    if (zInd != 0) { return false; }
-    if (ePiXInd != 0) { return false; }
-    if (ePiYInd != 0) { return false; }
-    if (ePiZInd != 0) { return false; }
-    if (trigPiXInd != TrigIndex()) { return false; }
-    if (trigPiYInd != TrigIndex()) { return false; }
-    if (trigPiZInd != TrigIndex()) { return false; }
-    return true;
-  }
-
-  std::map<FnPolynomial::Monomial, BiquadraticNumber> FnPolynomial::Monomial::trigSum(const Monomial& rhs) const
-  {
-    std::map<Monomial, BiquadraticNumber> answers;
-    for (int i = 0; i < 8; ++i)
+    unsigned int maxDim = 0;
+    for (const auto& it : indices)
     {
-      Monomial answer;
-      answer.xInd = xInd + rhs.xInd;
-      answer.yInd = yInd + rhs.yInd;
-      answer.zInd = zInd + rhs.zInd;
-      answer.ePiXInd = ePiXInd + rhs.ePiXInd;
-      answer.ePiYInd = ePiYInd + rhs.ePiYInd;
-      answer.ePiZInd = ePiZInd + rhs.ePiZInd;
-      bool xRight = (((i / 4) % 2) == 1) ? true : false;
-      bool yRight = (((i / 2) % 2) == 1) ? true : false;
-      bool zRight = ((i % 2) == 1) ? true : false;
-      /*
-      cos(ax)cos(Ax) = (1/2)cos((a + A)x) + (1/2)cos((a - A)x)
-      cos(ax)sin(Ax) = (1/2)sin((a + A)x) - (1/2)sin((a - A)x)
-      sin(ax)cos(Ax) = (1/2)sin((a + A)x) + (1/2)sin((a - A)x)
-      sin(ax)sin(Ax) = (1/2)cos((a - A)x) - (1/2)cos((a + A)x)
-      */
-      BiquadraticNumber coeff(Rational(1, 1));
-      if (trigPiXInd.isCos() == rhs.trigPiXInd.isCos())
-      {
-        answer.trigPiXInd.isCosine = true;
-        if (trigPiXInd.isCos()) // cos(ax)cos(Ax)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
-        }
-        else // sin(ax)sin(Ax)
-        {
-          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
-          answer.trigPiXInd.self = xRight ? (trigPiXInd.self + rhs.trigPiXInd.self) : (trigPiXInd.self - rhs.trigPiXInd.self);
-        }
-      }
-      else
-      {
-        answer.trigPiXInd.isCosine = false;
-        if (trigPiXInd.isCos()) // cos(ax)sin(Ax)
-        {
-          coeff = coeff * Rational(1, 2); if (xRight) { coeff = -coeff; }
-          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
-          if (answer.trigPiXInd.self == BiquadraticNumber(0)) { continue; }
-        }
-        else // sin(ax)cos(Ax)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiXInd.self = xRight ? (trigPiXInd.self - rhs.trigPiXInd.self) : (trigPiXInd.self + rhs.trigPiXInd.self);
-          if (answer.trigPiXInd.self == BiquadraticNumber(0)) { continue; }
-        }
-      }
-      if (trigPiYInd.isCos() == rhs.trigPiYInd.isCos())
-      {
-        answer.trigPiYInd.isCosine = true;
-        if (trigPiYInd.isCos()) // cos(ay)cos(Ay)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
-        }
-        else // sin(ay)sin(Ay)
-        {
-          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
-          answer.trigPiYInd.self = yRight ? (trigPiYInd.self + rhs.trigPiYInd.self) : (trigPiYInd.self - rhs.trigPiYInd.self);
-        }
-      }
-      else
-      {
-        answer.trigPiYInd.isCosine = false;
-        if (trigPiYInd.isCos()) // cos(ay)sin(Ay)
-        {
-          coeff = coeff * Rational(1, 2); if (yRight) { coeff = -coeff; }
-          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
-          if (answer.trigPiYInd.self == BiquadraticNumber(0)) { continue; }
-        }
-        else // sin(ay)cos(Ay)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiYInd.self = yRight ? (trigPiYInd.self - rhs.trigPiYInd.self) : (trigPiYInd.self + rhs.trigPiYInd.self);
-          if (answer.trigPiYInd.self == BiquadraticNumber(0)) { continue; }
-        }
-      }
-      if (trigPiZInd.isCos() == rhs.trigPiZInd.isCos())
-      {
-        answer.trigPiZInd.isCosine = true;
-        if (trigPiZInd.isCos()) // cos(az)cos(Az)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
-        }
-        else // sin(az)sin(Az)
-        {
-          coeff = coeff * Rational(1, 2); if (zRight) { coeff = -coeff; }
-          answer.trigPiZInd.self = zRight ? (trigPiZInd.self + rhs.trigPiZInd.self) : (trigPiZInd.self - rhs.trigPiZInd.self);
-        }
-      }
-      else
-      {
-        answer.trigPiZInd.isCosine = false;
-        if (trigPiZInd.isCos()) // cos(az)sin(Az)
-        {
-          coeff = coeff * Rational(1, 2); if (zRight) { coeff = -coeff; }
-          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
-          if (answer.trigPiZInd.self == BiquadraticNumber(0)) { continue; }
-        }
-        else // sin(az)cos(Az)
-        {
-          coeff = coeff * Rational(1, 2);
-          answer.trigPiZInd.self = zRight ? (trigPiZInd.self - rhs.trigPiZInd.self) : (trigPiZInd.self + rhs.trigPiZInd.self);
-          if (answer.trigPiZInd.self == BiquadraticNumber(0)) { continue; }
-        }
-      }
-      auto answerIter = answers.find(answer);
-      if (answerIter == answers.end()) { answers[answer] = coeff; }
-      else { answerIter->second = answerIter->second + coeff; }
+      if (it.second == 0) { continue; }
+      if ((it.first + 1) > maxDim) { maxDim = it.first + 1; }
     }
-    return answers;
+    return maxDim;
   }
 
-  bool FnPolynomial::Monomial::operator<(const FnPolynomial::Monomial& rhs) const
+  bool AlgebraicPolynomial::Monomial::operator<(const AlgebraicPolynomial::Monomial& rhs) const
   {
-    if (zInd < rhs.zInd) { return true; }
-    if (zInd > rhs.zInd) { return false; }
-    if (ePiZInd < rhs.ePiZInd) { return true; }
-    if (ePiZInd > rhs.ePiZInd) { return false; }
-    if (trigPiZInd < rhs.trigPiZInd) { return true; }
-    if (trigPiZInd > rhs.trigPiZInd) { return false; }
-    if (yInd < rhs.yInd) { return true; }
-    if (yInd > rhs.yInd) { return false; }
-    if (ePiYInd < rhs.ePiYInd) { return true; }
-    if (ePiYInd > rhs.ePiYInd) { return false; }
-    if (trigPiYInd < rhs.trigPiYInd) { return true; }
-    if (trigPiYInd > rhs.trigPiYInd) { return false; }
-    if (xInd < rhs.xInd) { return true; }
-    if (xInd > rhs.xInd) { return false; }
-    if (ePiXInd < rhs.ePiXInd) { return true; }
-    if (ePiXInd > rhs.ePiXInd) { return false; }
-    if (trigPiXInd < rhs.trigPiXInd) { return true; }
-    if (trigPiXInd > rhs.trigPiXInd) { return false; }
+    auto dimLhs = getDimension();
+    auto dimRhs = rhs.getDimension();
+    if (dimLhs < dimRhs) { return true; }
+    if (dimLhs > dimRhs) { return false; }
+    // dimLhs equals dimRhs.
+    std::vector<unsigned int> lhsVec(dimLhs, 0);
+    std::vector<unsigned int> rhsVec(dimRhs, 0);
+    for (const auto& it : indices)
+    {
+      lhsVec[it.first] = it.second;
+    }
+    for (const auto& it : rhs.indices)
+    {
+      rhsVec[it.first] = it.second;
+    }
+    for (int ii = dimLhs - 1; ii >= 0; --ii)
+    {
+      if (lhsVec[ii] < rhsVec[ii]) { return true; }
+      if (lhsVec[ii] > rhsVec[ii]) { return false; }
+    }
     return false; // They are equal.
   }
 
-  std::map<FnPolynomial::Monomial, PiRational>::iterator FnPolynomial::trigFind(const FnPolynomial::Monomial& ind,
-    bool& xNegative, bool& yNegative, bool& zNegative)
+  void AlgebraicPolynomial::Monomial::clean()
   {
-    xNegative = false;
-    yNegative = false;
-    zNegative = false;
-    for (int i = 0; i < 8; ++i)
+    Monomial cleaned;
+    for (const auto& it : indices)
     {
-      bool xNeg = (((i / 4) % 2) == 1) ? true : false;
-      bool yNeg = (((i / 2) % 2) == 1) ? true : false;
-      bool zNeg = ((i % 2) == 1) ? true : false;
-      auto indB = ind;
-      if (xNeg) { indB.trigPiXInd.self = -indB.trigPiXInd.self; }
-      if (yNeg) { indB.trigPiYInd.self = -indB.trigPiYInd.self; }
-      if (zNeg) { indB.trigPiZInd.self = -indB.trigPiZInd.self; }
-      auto iter = self.find(indB);
-      if (iter != self.end())
-      {
-        if (ind.trigPiXInd != indB.trigPiXInd) { xNegative = true; }
-        if (ind.trigPiYInd != indB.trigPiYInd) { yNegative = true; }
-        if (ind.trigPiZInd != indB.trigPiZInd) { zNegative = true; }
-        return iter;
-      }
+      if (it.second != 0) { cleaned.indices[it.first] = it.second; }
     }
-    return self.end();
+    *this = cleaned;
   }
 
-  void FnPolynomial::clean()
+  void AlgebraicPolynomial::clean()
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
 
     for (const auto& iter : self)
     {
@@ -284,7 +121,7 @@ namespace FunctionalCalculator
     }
   }
 
-  FnPolynomial::FnPolynomial(const PiRational& coeff)
+  AlgebraicPolynomial::AlgebraicPolynomial(const PiRational& coeff)
   {
     if (coeff != PiRational())
     {
@@ -293,7 +130,7 @@ namespace FunctionalCalculator
     }
   }
 
-  std::string FnPolynomial::print(bool useParentheses) const
+  std::string AlgebraicPolynomial::print(bool useParentheses) const
   {
     std::stringstream strm;
     bool useBrackets = true;
@@ -384,9 +221,9 @@ namespace FunctionalCalculator
     return outStr;
   }
 
-  FnPolynomial FnPolynomial::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  AlgebraicPolynomial AlgebraicPolynomial::composeWith(const Matrix<ComplexQuadratic>& transform) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
 
     if (transform.numRows() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
     if (transform.numCols() != 3) { throw std::invalid_argument("Transform must be 3x3 matrix."); return answer; }
@@ -406,7 +243,7 @@ namespace FunctionalCalculator
     for (const auto& iter : self)
     {
       if (iter.second == PiRational()) { continue; }
-      FnPolynomial term(iter.second);
+      AlgebraicPolynomial term(iter.second);
       term = term * multinomial(one, PiPolynomial(AA), PiPolynomial(BB), PiPolynomial(CC), zero, iter.first.xInd);
       term = term * multinomial(one, PiPolynomial(DD), PiPolynomial(EE), PiPolynomial(FF), zero, iter.first.yInd);
       term = term * multinomial(one, PiPolynomial(GG), PiPolynomial(HH), PiPolynomial(II), zero, iter.first.zInd);
@@ -444,37 +281,37 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::xToPower(const PiRational& coeff, unsigned int p)
+  AlgebraicPolynomial AlgebraicPolynomial::xToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.xInd = p;
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     answer.self[term] = coeff;
     return answer;
   }
 
-  FnPolynomial FnPolynomial::yToPower(const PiRational& coeff, unsigned int p)
+  AlgebraicPolynomial AlgebraicPolynomial::yToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.yInd = p;
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     answer.self[term] = coeff;
     return answer;
   }
 
-  FnPolynomial FnPolynomial::zToPower(const PiRational& coeff, unsigned int p)
+  AlgebraicPolynomial AlgebraicPolynomial::zToPower(const PiRational& coeff, unsigned int p)
   {
     Monomial term;
     term.zInd = p;
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     answer.self[term] = coeff;
     return answer;
   }
 
-  FnPolynomial FnPolynomial::multinomial(const PiRational& coeff,
+  AlgebraicPolynomial AlgebraicPolynomial::multinomial(const PiRational& coeff,
       const PiRational& A, const PiRational& B, const PiRational& C, const PiRational& D, unsigned int p)
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     PiRational one = PiPolynomial(ComplexQuadratic(Rational(mp(1), mp(1))));
     for (unsigned int aa = 0; aa <= p; ++aa)
     {
@@ -486,80 +323,80 @@ namespace FunctionalCalculator
           termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)p, (int)aa), mp(1))));
           termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa), (int)bb), mp(1))));
           termCoeff = termCoeff * PiPolynomial(ComplexQuadratic(Rational(mp::binomialCoeff((int)(p - aa - bb), (int)cc), mp(1))));
-          answer = answer + FnPolynomial::xToPower(termCoeff, aa) * FnPolynomial::yToPower(one, bb) * FnPolynomial::zToPower(one, cc);
+          answer = answer + AlgebraicPolynomial::xToPower(termCoeff, aa) * AlgebraicPolynomial::yToPower(one, bb) * AlgebraicPolynomial::zToPower(one, cc);
         }
       }
     }
     return answer * coeff;
   }
 
-  FnPolynomial FnPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::eToTheATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
     term.ePiXInd = A.getRe();
     term.trigPiXInd = { A.getIm(), true };
-    FnPolynomial realTerm;
+    AlgebraicPolynomial realTerm;
     realTerm.self[term] = coeff;
     if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiXInd = { A.getIm(), false };
-    FnPolynomial imTerm;
+    AlgebraicPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
     return realTerm + imTerm;
   }
 
-  FnPolynomial FnPolynomial::eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::eToTheATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
     term.ePiYInd = A.getRe();
     term.trigPiYInd = { A.getIm(), true };
-    FnPolynomial realTerm;
+    AlgebraicPolynomial realTerm;
     realTerm.self[term] = coeff;
     if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiYInd = { A.getIm(), false };
-    FnPolynomial imTerm;
+    AlgebraicPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
     return realTerm + imTerm;
   }
 
-  FnPolynomial FnPolynomial::eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::eToTheATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     Monomial term;
     term.ePiZInd = A.getRe();
     term.trigPiZInd = { A.getIm(), true };
-    FnPolynomial realTerm;
+    AlgebraicPolynomial realTerm;
     realTerm.self[term] = coeff;
     if (A.getIm() == BiquadraticNumber(0)) { return realTerm; }
     term.trigPiZInd = { A.getIm(), false };
-    FnPolynomial imTerm;
+    AlgebraicPolynomial imTerm;
     imTerm.self[term] = coeff * PiPolynomial(ComplexQuadratic::sqrt(-1));
     return realTerm + imTerm;
   }
 
-  FnPolynomial FnPolynomial::eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  AlgebraicPolynomial AlgebraicPolynomial::eToThePi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(ComplexQuadratic(1));
     return eToTheATimesPiX(coeff, A) * eToTheATimesPiY(one, B) * eToTheATimesPiZ(one, C);
   }
 
-  FnPolynomial FnPolynomial::sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(-1, 4)));
     return eToTheATimesPiX(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiX(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(-1, 4)));
     return eToTheATimesPiY(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiY(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::sinATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(-1, 4)));
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) - eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::sinPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  AlgebraicPolynomial AlgebraicPolynomial::sinPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // sin(A)cos(B)cos(C) - sin(A)sin(B)sin(C)
@@ -570,25 +407,25 @@ namespace FunctionalCalculator
     + cosATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
   }
 
-  FnPolynomial FnPolynomial::cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::cosATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiX(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiX(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::cosATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::cosATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiY(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiY(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::cosATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiZ(coeffNew, A * ComplexQuadratic::sqrt(-1)) + eToTheATimesPiZ(coeffNew, -A * ComplexQuadratic::sqrt(-1));
   }
 
-  FnPolynomial FnPolynomial::cosPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  AlgebraicPolynomial AlgebraicPolynomial::cosPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // cos(A)cos(B)cos(C) - cos(A)sin(B)sin(C)
@@ -599,25 +436,25 @@ namespace FunctionalCalculator
     - sinATimesPiX(coeff, A) * cosATimesPiY(one, B) * sinATimesPiZ(one, C);
   }
 
-  FnPolynomial FnPolynomial::sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinhATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
     return eToTheATimesPiX(coeffNew, A) - eToTheATimesPiX(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinhATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
     return eToTheATimesPiY(coeffNew, A) - eToTheATimesPiY(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::sinhATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = -coeff * PiPolynomial(ComplexQuadratic::sqrt(Rational(1, 4)));
     return eToTheATimesPiZ(coeffNew, A) - eToTheATimesPiZ(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  AlgebraicPolynomial AlgebraicPolynomial::sinhPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // sinh(A)cosh(B)cosh(C) + sinh(A)sinh(B)sinh(C)
@@ -628,25 +465,25 @@ namespace FunctionalCalculator
     + coshATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
   }
 
-  FnPolynomial FnPolynomial::coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::coshATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiX(coeffNew, A) + eToTheATimesPiX(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::coshATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiY(coeffNew, A) + eToTheATimesPiY(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  AlgebraicPolynomial AlgebraicPolynomial::coshATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
     auto coeffNew = coeff * PiPolynomial(ComplexQuadratic(Rational(1, 2)));
     return eToTheATimesPiZ(coeffNew, A) + eToTheATimesPiZ(coeffNew, -A);
   }
 
-  FnPolynomial FnPolynomial::coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
+  AlgebraicPolynomial AlgebraicPolynomial::coshPi_AX_plus_BY_plus_CZ(const PiRational& coeff, const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
     PiRational one(PiPolynomial(1), PiPolynomial(1));
     // cosh(A)cosh(B)cosh(C) + cosh(A)sinh(B)sinh(C)
@@ -657,12 +494,12 @@ namespace FunctionalCalculator
     + sinhATimesPiX(coeff, A) * coshATimesPiY(one, B) * sinhATimesPiZ(one, C);
   }
 
-  FnPolynomial FnPolynomial::operator+() const
+  AlgebraicPolynomial AlgebraicPolynomial::operator+() const
   {
     return *this;
   }
 
-  FnPolynomial FnPolynomial::operator-() const
+  AlgebraicPolynomial AlgebraicPolynomial::operator-() const
   {
     auto answer = *this;
     for (auto& iter : answer.self)
@@ -672,9 +509,9 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::operator+(const FnPolynomial& rhs) const
+  AlgebraicPolynomial AlgebraicPolynomial::operator+(const AlgebraicPolynomial& rhs) const
   {
-    FnPolynomial answer = *this;
+    AlgebraicPolynomial answer = *this;
 
     for (auto& iter : rhs.self)
     {
@@ -689,14 +526,14 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::operator-(const FnPolynomial& rhs) const
+  AlgebraicPolynomial AlgebraicPolynomial::operator-(const AlgebraicPolynomial& rhs) const
   {
     return (*this) + (-rhs);
   }
 
-  FnPolynomial FnPolynomial::operator*(const FnPolynomial& rhs) const
+  AlgebraicPolynomial AlgebraicPolynomial::operator*(const AlgebraicPolynomial& rhs) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
 
     for (const auto& iter : self)
     {
@@ -721,18 +558,18 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::operator*(const PiPolynomial& rhs) const
+  AlgebraicPolynomial AlgebraicPolynomial::operator*(const PiPolynomial& rhs) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self) { answer.self[iter.first] = iter.second * PiRational(PiPolynomial(rhs)); }
     return answer;
   }
 
-  FnPolynomial FnPolynomial::pow(int p) const
+  AlgebraicPolynomial AlgebraicPolynomial::pow(int p) const
   {
     bool isNeg = (p < 0);
     if (isNeg) { throw std::invalid_argument("Exponent must be nonnegative."); }
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     Monomial constTerm;
     answer.self[constTerm] = PiPolynomial(ComplexQuadratic(1));
     for (int i = 0; i < p; ++i)
@@ -742,7 +579,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  bool FnPolynomial::operator==(const FnPolynomial& rhs) const
+  bool AlgebraicPolynomial::operator==(const AlgebraicPolynomial& rhs) const
   {
     auto diff = (*this) - rhs;
     for (const auto& iter : diff.self)
@@ -752,15 +589,15 @@ namespace FunctionalCalculator
     return true;
   }
 
-  bool FnPolynomial::operator!=(const FnPolynomial& rhs) const
+  bool AlgebraicPolynomial::operator!=(const AlgebraicPolynomial& rhs) const
   {
     return !((*this) == rhs);
   }
 
 
-  FnPolynomial FnPolynomial::partial_x() const
+  AlgebraicPolynomial AlgebraicPolynomial::partial_x() const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       std::pair<Monomial, PiRational> newIndex = iter;
@@ -800,9 +637,9 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::partial_y() const
+  AlgebraicPolynomial AlgebraicPolynomial::partial_y() const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       std::pair<Monomial, PiRational> newIndex = iter;
@@ -842,9 +679,9 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::partial_z() const
+  AlgebraicPolynomial AlgebraicPolynomial::partial_z() const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       std::pair<Monomial, PiRational> newIndex = iter;
@@ -884,7 +721,7 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  FnPolynomial FnPolynomial::laplacian() const
+  AlgebraicPolynomial AlgebraicPolynomial::laplacian() const
   {
     auto xPortion = (*this).partial_x().partial_x();
     auto yPortion = (*this).partial_y().partial_y();
@@ -892,7 +729,7 @@ namespace FunctionalCalculator
     return xPortion + yPortion + zPortion;
   }
 
-  bool FnPolynomial::isLaplaceEigenfunction(PiRational& eigenvalue) const
+  bool AlgebraicPolynomial::isLaplaceEigenfunction(PiRational& eigenvalue) const
   {
     if (isHarmonic()) { eigenvalue = PiRational(PiPolynomial(0), PiPolynomial(1)); return true; }
     auto lap = laplacian();
@@ -912,14 +749,14 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  bool FnPolynomial::isHarmonic() const
+  bool AlgebraicPolynomial::isHarmonic() const
   {
-    return (laplacian() == FnPolynomial(PiPolynomial(0)));
+    return (laplacian() == AlgebraicPolynomial(PiPolynomial(0)));
   }
 
-  bool FnPolynomial::tryEvaluateAtX(const ComplexQuadratic& xVal, FnPolynomial& output) const
+  bool AlgebraicPolynomial::tryEvaluateAtX(const ComplexQuadratic& xVal, AlgebraicPolynomial& output) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       auto newKey = iter.first;
@@ -966,9 +803,9 @@ namespace FunctionalCalculator
     return true;
   }
 
-  bool FnPolynomial::tryEvaluateAtY(const ComplexQuadratic& yVal, FnPolynomial& output) const
+  bool AlgebraicPolynomial::tryEvaluateAtY(const ComplexQuadratic& yVal, AlgebraicPolynomial& output) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       auto newKey = iter.first;
@@ -1015,9 +852,9 @@ namespace FunctionalCalculator
     return true;
   }
 
-  bool FnPolynomial::tryEvaluateAtZ(const ComplexQuadratic& zVal, FnPolynomial& output) const
+  bool AlgebraicPolynomial::tryEvaluateAtZ(const ComplexQuadratic& zVal, AlgebraicPolynomial& output) const
   {
-    FnPolynomial answer;
+    AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       auto newKey = iter.first;
@@ -1064,9 +901,9 @@ namespace FunctionalCalculator
     return true;
   }
 
-  bool FnPolynomial::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
+  bool AlgebraicPolynomial::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
   {
-    FnPolynomial answerX, answerY, answerZ;
+    AlgebraicPolynomial answerX, answerY, answerZ;
     bool success = tryEvaluateAtX(xVal, answerX);
     if (!success) { return false; }
     success = answerX.tryEvaluateAtY(yVal, answerY);
