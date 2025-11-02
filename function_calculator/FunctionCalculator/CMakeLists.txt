@@ -25,6 +25,7 @@ set(PRIVATE_HEADERS
 )
 
 set(HEADER_FILES
+  ../algebraic_polynomial.h
   ../biquadratic_number.h
   ../complex_quadratic.h
   ../fn_polynomial.h
@@ -41,6 +42,7 @@ set(HEADER_FILES
 # Source files.
 
 set(SOURCE_FILES
+  ../algebraic_polynomial.cpp
   ../biquadratic_number.cpp
   ../complex_quadratic.cpp
   ../fn_polynomial.cpp
