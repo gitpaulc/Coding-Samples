@@ -173,7 +173,7 @@ namespace FunctionalCalculator
           if (jt.second != 1) { strm << "^" << jt.second; }
           continue;
         }
-        if (jt.second != 1) { strm << "(" << jt.second; }
+        if (jt.second != 1) { strm << "("; }
         strm << "x_" << jt.first;
         if (jt.second != 1) { strm << ")^" << jt.second; }
       }
