@@ -1285,11 +1285,23 @@ bool test_algebraic_polys()
     std::cout << "\nsum = x + y + z + w = " << sum.print();
     auto sumSq = sum * sum;
     std::cout << "\nsum * sum = " << sumSq.print();
+    auto sumSq_0 = sumSq;
     sum = xx + yy + zz + ww + x_4;
     std::cout << "\nsum = x_0 + x_1 + x_2 + x_3 + x_4 = " << sum.print();
     sumSq = sum * sum;
     std::cout << "\nsum * sum = " << sumSq.print();
+    {
+      std::map<unsigned, PiRational> input;
+      input[4] = PiRational();
+      sumSq = sumSq.evaluateAt(input);
+      std::cout << "\n(sum * sum)[x_4 == 0] = " << sumSq.print();
+      std::cout << "\n0 = " << (sumSq - sumSq_0).print();
+    }
   }
+
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { std::cout << "\n"; return true; }
 
   std::cout << "\n";
   return true;
