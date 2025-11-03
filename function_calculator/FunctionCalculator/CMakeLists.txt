@@ -25,10 +25,12 @@ set(PRIVATE_HEADERS
 )
 
 set(HEADER_FILES
+  ../algebraic_polynomial.h
   ../biquadratic_number.h
   ../complex_quadratic.h
   ../fn_polynomial.h
   ../function.h
+  ../manifold.h
   ../mp_integer.h
   ../number.h
   ../pi_polynomial.h
@@ -36,16 +38,19 @@ set(HEADER_FILES
   ../platonic_solids.h
   ../quadratic_number.h
   ../rational.h
+  ../rational_function.h
 )
 
 # Source files.
 
 set(SOURCE_FILES
+  ../algebraic_polynomial.cpp
   ../biquadratic_number.cpp
   ../complex_quadratic.cpp
   ../fn_polynomial.cpp
   ../function.cpp
   ../main.cpp
+  ../manifold.cpp
   ../mp_integer.cpp
   ../number.cpp
   ../pi_polynomial.cpp
@@ -53,6 +58,7 @@ set(SOURCE_FILES
   ../platonic_solids.cpp
   ../quadratic_number.cpp
   ../rational.cpp
+  ../rational_function.cpp
 )
 
 # Binary output.

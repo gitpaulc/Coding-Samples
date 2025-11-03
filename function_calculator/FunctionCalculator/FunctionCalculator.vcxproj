@@ -276,10 +276,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\private_headers\dynamic_matrix.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\algebraic_polynomial.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\biquadratic_number.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\function.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\manifold.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\number.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\pi_polynomial.h" />
@@ -287,11 +289,14 @@
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\platonic_solids.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\quadratic_number.h" />
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.h" />
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational_function.h" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\algebraic_polynomial.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\biquadratic_number.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\complex_quadratic.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\fn_polynomial.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\function.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\main.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\manifold.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\number.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\pi_polynomial.cpp" />
@@ -299,6 +304,7 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\platonic_solids.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\quadratic_number.cpp" />
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.cpp" />
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\rational_function.cpp" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>

@@ -1,6 +1,7 @@
 
 #include <iostream>
 
+#include "algebraic_polynomial.h"
 #include "function.h"
 #include "platonic_solids.h"
 
@@ -1256,6 +1257,64 @@ bool test_function()
   return true;
 }
 
+bool test_algebraic_polys()
+{
+  std::string prompt = "";
+  auto xx = AlgebraicPolynomial::xToPower(PiPolynomial(1), 1);
+  {
+    auto xx_ = AlgebraicPolynomial::x_iToPower(PiPolynomial(1), 0, 1);
+    std::cout << "\nx = " << xx.print();
+    std::cout << "\nx = " << xx_.print();
+    auto diff = xx - xx_;
+    std::cout << "\n0 = " << diff.print();
+  }
+  auto yy = AlgebraicPolynomial::yToPower(PiPolynomial(1), 1);
+  std::cout << "\ny = " << yy.print();
+  auto zz = AlgebraicPolynomial::zToPower(PiPolynomial(1), 1);
+  std::cout << "\nz = " << zz.print();
+  auto ww = AlgebraicPolynomial::wToPower(PiPolynomial(1), 1);
+  std::cout << "\nw = " << ww.print();
+  auto x_4 = AlgebraicPolynomial::x_iToPower(PiPolynomial(1), 4, 1);
+  std::cout << "\nx_4 = " << x_4.print();
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { std::cout << "\n"; return true; }
+
+  {
+    auto sum = xx + yy + zz + ww;
+    std::cout << "\nsum = x + y + z + w = " << sum.print();
+    auto sumSq = sum * sum;
+    std::cout << "\nsum * sum = " << sumSq.print();
+    auto sumSq_0 = sumSq;
+    sum = xx + yy + zz + ww + x_4;
+    std::cout << "\nsum = x_0 + x_1 + x_2 + x_3 + x_4 = " << sum.print();
+    sumSq = sum * sum;
+    std::cout << "\nsum * sum = " << sumSq.print();
+    {
+      std::map<unsigned, PiRational> input;
+      input[4] = PiRational();
+      sumSq = sumSq.evaluateAt(input);
+      std::cout << "\n(sum * sum)[x_4 == 0] = " << sumSq.print();
+      std::cout << "\n0 = " << (sumSq - sumSq_0).print();
+    }
+  }
+
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { std::cout << "\n"; return true; }
+
+  {
+    auto harmonic = xx * xx - ww * ww;
+    std::cout << "\n" << harmonic.print() << (harmonic.isHarmonic() ? " is harmonic." : " is mistaken.");
+    std::cout << "\n0 = " << harmonic.partial_y().print();
+    std::cout << "\n0 = " << harmonic.partial_deriv(100).print();
+    std::cout << "\n0 = " << harmonic.laplacian().print();
+  }
+
+  std::cout << "\n";
+  return true;
+}
+
 int main()
 {
   std::string prompt;
@@ -1296,6 +1355,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest algebraic polynomials:\n";
+  test_algebraic_polys();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
