@@ -60,9 +60,11 @@ public:
   bool operator==(const AlgebraicPolynomial& rhs) const;
   bool operator!=(const AlgebraicPolynomial& rhs) const;
 
+  AlgebraicPolynomial partial_deriv(unsigned int index) const;
   AlgebraicPolynomial partial_x() const;
   AlgebraicPolynomial partial_y() const;
   AlgebraicPolynomial partial_z() const;
+  AlgebraicPolynomial partial_w() const;
   AlgebraicPolynomial laplacian() const;
 
   bool isLaplaceEigenfunction(PiRational& eigenvalue) const;

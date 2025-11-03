@@ -299,138 +299,70 @@ namespace FunctionalCalculator
   }
 
 
-  AlgebraicPolynomial AlgebraicPolynomial::partial_x() const
+  AlgebraicPolynomial AlgebraicPolynomial::partial_deriv(unsigned int index) const
   {
     AlgebraicPolynomial answer;
     for (const auto& iter : self)
     {
       std::pair<Monomial, PiRational> newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.xInd));
-      if (newIndex.first.xInd > 0) { --(newIndex.first.xInd); }
-      if (answer.self.find(newIndex.first) != answer.self.end())
+      unsigned int power = 0;
       {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
+        auto jt = iter.first.indices.find(index);
+        if (jt != iter.first.indices.end())
+        {
+          power = jt->second;
+        }
+      }
+      newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(power));
+      if (power > 0)
+      {
+        auto jt = newIndex.first.indices.find(index);
+        if (jt != newIndex.first.indices.end())
+        {
+          --(jt->second);
+        }
+      }
+      auto jt = answer.self.find(newIndex.first);
+      if (jt != answer.self.end())
+      {
+        jt->second = jt->second + newIndex.second;
       }
       else { answer.self[newIndex.first] = newIndex.second; }
-
-      if (iter.first.ePiXInd != 0)
-      {
-        newIndex = iter;
-        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiXInd) * PiPolynomial(1, 1));
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
-
-      if (iter.first.trigPiXInd != TrigIndex())
-      {
-        newIndex = iter;
-        newIndex.first.trigPiXInd.isCosine = !iter.first.trigPiXInd.isCosine;
-        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiXInd.self) * PiPolynomial(1, 1));
-        if (iter.first.trigPiXInd.isCosine) { newIndex.second = -newIndex.second; }
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
+      
     }
     answer.clean();
     return answer;
+  }
+
+  AlgebraicPolynomial AlgebraicPolynomial::partial_x() const
+  {
+    return partial_deriv(0);
   }
 
   AlgebraicPolynomial AlgebraicPolynomial::partial_y() const
   {
-    AlgebraicPolynomial answer;
-    for (const auto& iter : self)
-    {
-      std::pair<Monomial, PiRational> newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.yInd));
-      if (newIndex.first.yInd > 0) { --(newIndex.first.yInd); }
-      if (answer.self.find(newIndex.first) != answer.self.end())
-      {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-      }
-      else { answer.self[newIndex.first] = newIndex.second; }
-
-      if (iter.first.ePiYInd != 0)
-      {
-        newIndex = iter;
-        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiYInd) * PiPolynomial(1, 1));
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
-
-      if (iter.first.trigPiYInd != TrigIndex())
-      {
-        newIndex = iter;
-        newIndex.first.trigPiYInd.isCosine = !iter.first.trigPiYInd.isCosine;
-        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiYInd.self) * PiPolynomial(1, 1));
-        if (iter.first.trigPiYInd.isCosine) { newIndex.second = -newIndex.second; }
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
-    }
-    answer.clean();
-    return answer;
+    return partial_deriv(1);
   }
 
   AlgebraicPolynomial AlgebraicPolynomial::partial_z() const
   {
-    AlgebraicPolynomial answer;
-    for (const auto& iter : self)
-    {
-      std::pair<Monomial, PiRational> newIndex = iter;
-      newIndex.second = newIndex.second * PiPolynomial(ComplexQuadratic(iter.first.zInd));
-      if (newIndex.first.zInd > 0) { --(newIndex.first.zInd); }
-      if (answer.self.find(newIndex.first) != answer.self.end())
-      {
-        answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-      }
-      else { answer.self[newIndex.first] = newIndex.second; }
+    return partial_deriv(2);
+  }
 
-      if (iter.first.ePiZInd != 0)
-      {
-        newIndex = iter;
-        newIndex.second = newIndex.second * (PiPolynomial(newIndex.first.ePiZInd) * PiPolynomial(1, 1));
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
-
-      if (iter.first.trigPiZInd != TrigIndex())
-      {
-        newIndex = iter;
-        newIndex.first.trigPiZInd.isCosine = !iter.first.trigPiZInd.isCosine;
-        newIndex.second = newIndex.second * (PiPolynomial(iter.first.trigPiZInd.self) * PiPolynomial(1, 1));
-        if (iter.first.trigPiZInd.isCosine) { newIndex.second = -newIndex.second; }
-        if (answer.self.find(newIndex.first) != answer.self.end())
-        {
-          answer.self[newIndex.first] = answer.self[newIndex.first] + newIndex.second;
-        }
-        else { answer.self[newIndex.first] = newIndex.second; }
-      }
-    }
-    answer.clean();
-    return answer;
+  AlgebraicPolynomial AlgebraicPolynomial::partial_w() const
+  {
+    return partial_deriv(3);
   }
 
   AlgebraicPolynomial AlgebraicPolynomial::laplacian() const
   {
-    auto xPortion = (*this).partial_x().partial_x();
-    auto yPortion = (*this).partial_y().partial_y();
-    auto zPortion = (*this).partial_z().partial_z();
-    return xPortion + yPortion + zPortion;
+    AlgebraicPolynomial answer;
+    auto dim = getDimension();
+    for (int ii = 0; ii < dim - 1; ++ii)
+    {
+      answer = answer + (*this).partial_deriv(ii).partial_deriv(ii);
+    }
+    return answer;
   }
 
   bool AlgebraicPolynomial::isLaplaceEigenfunction(PiRational& eigenvalue) const
