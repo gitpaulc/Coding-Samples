@@ -19,6 +19,9 @@
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\manifold.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -38,6 +41,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\pcern\Coding-Samples\function_calculator\rational_function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,6 +66,9 @@
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\manifold.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\mp_integer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -79,6 +88,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\pcern\Coding-Samples\function_calculator\rational_function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
