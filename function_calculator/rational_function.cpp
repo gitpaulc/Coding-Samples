@@ -1,31 +1,33 @@
+/*  Copyright Paul Cernea, May 2025.
+All Rights Reserved.*/
 
-#include "function.h"
+#include "rational_function.h"
 
 #include <stdexcept>
 #include <sstream>
 
 namespace FunctionalCalculator
 {
-  Function::Function(const FnPolynomial& nn, const FnPolynomial& dd)
+  RationalFunction::RationalFunction(const AlgebraicPolynomial& nn, const AlgebraicPolynomial& dd)
   {
-    if (dd == FnPolynomial(PiPolynomial(0)))
+    if (dd == AlgebraicPolynomial(PiPolynomial(0)))
     {
       throw std::invalid_argument("Division by zero.");
     }
-    else // TODO: Implement simplifying rational functions later.
+    else // TODO: Implement simplifying rational RationalFunctions later.
     {
-      //auto gcd_ = FnPolynomial::gcd(nn, dd);
+      //auto gcd_ = AlgebraicPolynomial::gcd(nn, dd);
       num = nn; denom = dd;
-      /*if (gcd_ != FnPolynomial(PiPolynomial(0)))
+      /*if (gcd_ != AlgebraicPolynomial(PiPolynomial(0)))
       {
-        FnPolynomial remainder;
+        AlgebraicPolynomial remainder;
         num = num.division(gcd_, remainder);
         denom = denom.division(gcd_, remainder);
       }*/
     }
   }
 
-  std::string Function::print(bool useParentheses) const
+  std::string RationalFunction::print(bool useParentheses) const
   {
     auto num_ = num;
     auto den_ = denom;
@@ -35,7 +37,7 @@ namespace FunctionalCalculator
     strm << "[";
     strm << num_.print(false);
     strm << "]";
-    if ((den_ != FnPolynomial(PiPolynomial(1))) && (num_ != FnPolynomial(PiPolynomial(0))))
+    if ((den_ != AlgebraicPolynomial(PiPolynomial(1))) && (num_ != AlgebraicPolynomial(PiPolynomial(0))))
     {
       strm << " / ";
       strm << "[";
@@ -46,111 +48,111 @@ namespace FunctionalCalculator
     return strm.str();
   }
 
-  FnPolynomial Function::denominator() const { return denom; }
-  FnPolynomial Function::numerator() const { return num; }
+  AlgebraicPolynomial RationalFunction::denominator() const { return denom; }
+  AlgebraicPolynomial RationalFunction::numerator() const { return num; }
 
-  Function Function::operator+() const
+  RationalFunction RationalFunction::operator+() const
   {
     return *this;
   }
 
-  Function Function::operator-() const
+  RationalFunction RationalFunction::operator-() const
   {
-    return Function(-num, denom);
+    return RationalFunction(-num, denom);
   }
 
-  Function Function::operator+(const Function& rhs) const
+  RationalFunction RationalFunction::operator+(const RationalFunction& rhs) const
   {
-    return Function(num * rhs.denom + rhs.num * denom, denom * rhs.denom);
+    return RationalFunction(num * rhs.denom + rhs.num * denom, denom * rhs.denom);
   }
 
-  Function Function::operator-(const Function& rhs) const
+  RationalFunction RationalFunction::operator-(const RationalFunction& rhs) const
   {
     return ((*this) + (-rhs));
   }
 
-  Function Function::operator*(const Function& rhs) const
+  RationalFunction RationalFunction::operator*(const RationalFunction& rhs) const
   {
-    return Function(num * rhs.num, denom * rhs.denom);
+    return RationalFunction(num * rhs.num, denom * rhs.denom);
   }
 
-  Function Function::operator/(const Function& rhs) const
+  RationalFunction RationalFunction::operator/(const RationalFunction& rhs) const
   {
-    if (rhs.num == FnPolynomial(PiPolynomial(0)))
+    if (rhs.num == AlgebraicPolynomial(PiPolynomial(0)))
     {
       throw std::invalid_argument("Operator division by zero.");
     }
-    return Function(num * rhs.denom, denom * rhs.num);
+    return RationalFunction(num * rhs.denom, denom * rhs.num);
   }
 
-  Function Function::pow(int p) const
+  RationalFunction RationalFunction::pow(int p) const
   {
     bool isNeg = (p < 0);
     if (isNeg) { p = -p; }
-    Function answer(FnPolynomial(PiPolynomial(1)), FnPolynomial(PiPolynomial(1)));
+    RationalFunction answer(AlgebraicPolynomial(PiPolynomial(1)), AlgebraicPolynomial(PiPolynomial(1)));
     for (int i = 0; i < p; ++i)
     {
       answer = answer * (*this);
     }
     if (isNeg)
     {
-      return Function(answer.denom, answer.num);
+      return RationalFunction(answer.denom, answer.num);
     }
     return answer;
   }
 
-  bool Function::operator==(const Function& rhs) const
+  bool RationalFunction::operator==(const RationalFunction& rhs) const
   {
     if (rhs.num != num) { return false; }
     if (rhs.denom != denom) { return false; }
     return true;
   }
 
-  bool Function::operator!=(const Function& rhs) const
+  bool RationalFunction::operator!=(const RationalFunction& rhs) const
   {
     if (*this == rhs) { return false; }
     return true;
   }
 
-  Function Function::constant(const PiRational& coeff)
+  RationalFunction RationalFunction::constant(const PiRational& coeff)
   {
-    FnPolynomial one(PiRational(PiPolynomial(ComplexQuadratic(1))));
-    return Function(FnPolynomial(coeff), one);
+    AlgebraicPolynomial one(PiRational(PiPolynomial(ComplexQuadratic(1))));
+    return RationalFunction(AlgebraicPolynomial(coeff), one);
   }
 
-  Function Function::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  RationalFunction RationalFunction::composeWith(const Matrix<ComplexQuadratic>& transform) const
   {
-    Function answer;
+    RationalFunction answer;
     answer.num = num.composeWith(transform);
     answer.denom = denom.composeWith(transform);
     return answer;
   }
 
-  Function Function::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
+  RationalFunction RationalFunction::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
   {
-    return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::cosATimesPiX(PiPolynomial(1), A));
+    return RationalFunction(AlgebraicPolynomial::sinATimesPiX(coeff, A), AlgebraicPolynomial::cosATimesPiX(PiPolynomial(1), A));
   }
 
-  Function Function::tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
+  RationalFunction RationalFunction::tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
   {
-    return Function(FnPolynomial::sinATimesPiY(coeff, A), FnPolynomial::cosATimesPiY(PiPolynomial(1), A));
+    return RationalFunction(AlgebraicPolynomial::sinATimesPiY(coeff, A), AlgebraicPolynomial::cosATimesPiY(PiPolynomial(1), A));
   }
 
-  Function Function::tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
+  RationalFunction RationalFunction::tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
   {
-    return Function(FnPolynomial::sinATimesPiZ(coeff, A), FnPolynomial::cosATimesPiZ(PiPolynomial(1), A));
+    return RationalFunction(AlgebraicPolynomial::sinATimesPiZ(coeff, A), AlgebraicPolynomial::cosATimesPiZ(PiPolynomial(1), A));
   }
 
-  Function Function::tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
+  RationalFunction RationalFunction::tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
       const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
   {
-    return Function(FnPolynomial::sinPi_AX_plus_BY_plus_CZ(coeff, A, B, C),
-      FnPolynomial::cosPi_AX_plus_BY_plus_CZ(PiPolynomial(1), A, B, C));
+    return RationalFunction(AlgebraicPolynomial::sinPi_AX_plus_BY_plus_CZ(coeff, A, B, C),
+      AlgebraicPolynomial::cosPi_AX_plus_BY_plus_CZ(PiPolynomial(1), A, B, C));
   }
 
-  Function Function::partial_x() const
+  RationalFunction RationalFunction::partial_x() const
   {
-    Function answer;
+    RationalFunction answer;
     auto numPrime = num.partial_x();
     auto denPrime = denom.partial_x();
     answer.num = numPrime * denom - num * denPrime;
@@ -158,9 +160,9 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  Function Function::partial_y() const
+  RationalFunction RationalFunction::partial_y() const
   {
-    Function answer;
+    RationalFunction answer;
     auto numPrime = num.partial_y();
     auto denPrime = denom.partial_y();
     answer.num = numPrime * denom - num * denPrime;
@@ -168,9 +170,9 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  Function Function::partial_z() const
+  RationalFunction RationalFunction::partial_z() const
   {
-    Function answer;
+    RationalFunction answer;
     auto numPrime = num.partial_z();
     auto denPrime = denom.partial_z();
     answer.num = numPrime * denom - num * denPrime;
@@ -178,15 +180,15 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  Function Function::laplacian() const
+  RationalFunction RationalFunction::laplacian() const
   {
     auto u_x = num.partial_x(); auto u_y = num.partial_y(); auto u_z = num.partial_z();
     auto v_x = denom.partial_x(); auto v_y = denom.partial_y(); auto v_z = denom.partial_z();
     auto u_xx = u_x.partial_x(); auto u_yy = u_y.partial_y(); auto u_zz = u_z.partial_z();
     auto v_xx = v_x.partial_x(); auto v_yy = v_y.partial_y(); auto v_zz = v_z.partial_z();
 
-    auto u_twice = num * FnPolynomial(PiPolynomial(2));
-    auto v_twice = denom * FnPolynomial(PiPolynomial(2));
+    auto u_twice = num * AlgebraicPolynomial(PiPolynomial(2));
+    auto v_twice = denom * AlgebraicPolynomial(PiPolynomial(2));
     auto v2 = denom * denom;
     auto v3 = denom * v2;
     auto uv = num * denom;
@@ -195,10 +197,10 @@ namespace FunctionalCalculator
     auto yPortion = u_yy * v2 - v_yy * uv - u_y * v_y * v_twice + v_y * v_y * u_twice;
     auto zPortion = u_zz * v2 - v_zz * uv - u_z * v_z * v_twice + v_z * v_z * u_twice;
 
-    return Function(xPortion + yPortion + zPortion, v3);
+    return RationalFunction(xPortion + yPortion + zPortion, v3);
   }
 
-  bool Function::isLaplaceEigenfunction(PiRational& eigenvalue) const
+  bool RationalFunction::isLaplaceEigenRationalFunction(PiRational& eigenvalue) const
   {
     if (isHarmonic()) { eigenvalue = PiRational(PiPolynomial(0), PiPolynomial(1)); return true; }
     auto lap0 = laplacian();
@@ -220,86 +222,86 @@ namespace FunctionalCalculator
     return answer;
   }
 
-  bool Function::isHarmonic() const
+  bool RationalFunction::isHarmonic() const
   {
-    return (laplacian().num == FnPolynomial(PiPolynomial(0)));
+    return (laplacian().num == AlgebraicPolynomial(PiPolynomial(0)));
   }
 
-  Function Function::sphericalBesselATimesPiX(const ComplexQuadratic& A, int n)
+  RationalFunction RationalFunction::sphericalBesselATimesPiX(const ComplexQuadratic& A, int n)
   {
     if (n < 0)
     {
       ComplexQuadratic qq(Rational(1, 1));
       if ((n % 2) == 1) { qq = -qq; }
-      return sphericalNeumannATimesPiX(A, -n - 1) * FnPolynomial(PiPolynomial(qq));
+      return sphericalNeumannATimesPiX(A, -n - 1) * AlgebraicPolynomial(PiPolynomial(qq));
     }
     if (n == 0)
     {
       PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
       PiRational piRatio = PiPolynomial(A, 1);
-      return Function(FnPolynomial::sinATimesPiX(coeff, A), FnPolynomial::xToPower(piRatio, 1));
+      return RationalFunction(AlgebraicPolynomial::sinATimesPiX(coeff, A), AlgebraicPolynomial::xToPower(piRatio, 1));
     }
     ComplexQuadratic qq(Rational(-1, 1));
     qq = qq / A;
-    return sphericalBesselATimesPiX(A, n - 1).partial_x() * FnPolynomial(PiPolynomial(qq));
+    return sphericalBesselATimesPiX(A, n - 1).partial_x() * AlgebraicPolynomial(PiPolynomial(qq));
   }
 
-  Function Function::sphericalNeumannATimesPiX(const ComplexQuadratic& A, int n)
+  RationalFunction RationalFunction::sphericalNeumannATimesPiX(const ComplexQuadratic& A, int n)
   {
     if (n < 0)
     {
       ComplexQuadratic qq(Rational(1, 1));
       if ((n % 2) == 0) { qq = -qq; }
-      return sphericalBesselATimesPiX(A, -n - 1) * FnPolynomial(PiPolynomial(qq));
+      return sphericalBesselATimesPiX(A, -n - 1) * AlgebraicPolynomial(PiPolynomial(qq));
     }
     if (n == 0)
     {
       PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
       PiRational piRatio = PiPolynomial(-A, 1);
-      return Function(FnPolynomial::cosATimesPiX(coeff, A), FnPolynomial::xToPower(piRatio, 1));
+      return RationalFunction(AlgebraicPolynomial::cosATimesPiX(coeff, A), AlgebraicPolynomial::xToPower(piRatio, 1));
     }
     ComplexQuadratic qq(Rational(-1, 1));
     qq = qq / A;
-    return sphericalNeumannATimesPiX(A, n - 1).partial_x() * FnPolynomial(PiPolynomial(qq));
+    return sphericalNeumannATimesPiX(A, n - 1).partial_x() * AlgebraicPolynomial(PiPolynomial(qq));
   }
 
-  bool Function::tryEvaluateAtX(const ComplexQuadratic& xVal, Function& output) const
+  bool RationalFunction::tryEvaluateAtX(const ComplexQuadratic& xVal, RationalFunction& output) const
   {
-    FnPolynomial numFn;
+    AlgebraicPolynomial numFn;
     bool success = num.tryEvaluateAtX(xVal, numFn);
     if (!success) { return false; }
-    FnPolynomial denomFn;
+    AlgebraicPolynomial denomFn;
     success = denom.tryEvaluateAtX(xVal, denomFn);
     if (!success) { return false; }
-    output = Function(numFn, denomFn);
+    output = RationalFunction(numFn, denomFn);
     return true;
   }
 
-  bool Function::tryEvaluateAtY(const ComplexQuadratic& yVal, Function& output) const
+  bool RationalFunction::tryEvaluateAtY(const ComplexQuadratic& yVal, RationalFunction& output) const
   {
-    FnPolynomial numFn;
+    AlgebraicPolynomial numFn;
     bool success = num.tryEvaluateAtY(yVal, numFn);
     if (!success) { return false; }
-    FnPolynomial denomFn;
+    AlgebraicPolynomial denomFn;
     success = denom.tryEvaluateAtY(yVal, denomFn);
     if (!success) { return false; }
-    output = Function(numFn, denomFn);
+    output = RationalFunction(numFn, denomFn);
     return true;
   }
 
-  bool Function::tryEvaluateAtZ(const ComplexQuadratic& zVal, Function& output) const
+  bool RationalFunction::tryEvaluateAtZ(const ComplexQuadratic& zVal, RationalFunction& output) const
   {
-    FnPolynomial numFn;
+    AlgebraicPolynomial numFn;
     bool success = num.tryEvaluateAtZ(zVal, numFn);
     if (!success) { return false; }
-    FnPolynomial denomFn;
+    AlgebraicPolynomial denomFn;
     success = denom.tryEvaluateAtZ(zVal, denomFn);
     if (!success) { return false; }
-    output = Function(numFn, denomFn);
+    output = RationalFunction(numFn, denomFn);
     return true;
   }
 
-  bool Function::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
+  bool RationalFunction::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
   {
     PiRational numConstant;
     bool success = num.tryEvaluateAtXYZ(xVal, yVal, zVal, numConstant);

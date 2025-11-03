@@ -1,3 +1,5 @@
+/*  Copyright Paul Cernea, November 2025.
+All Rights Reserved.*/
 
 #include "function.h"
 
