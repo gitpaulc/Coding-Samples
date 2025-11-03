@@ -1,6 +1,7 @@
 
 #include <iostream>
 
+#include "algebraic_polynomial.h"
 #include "function.h"
 #include "platonic_solids.h"
 
@@ -1256,9 +1257,52 @@ bool test_function()
   return true;
 }
 
+bool test_algebraic_polys()
+{
+  std::string prompt = "";
+  auto xx = AlgebraicPolynomial::xToPower(PiPolynomial(1), 1);
+  {
+    auto xx_ = AlgebraicPolynomial::x_iToPower(PiPolynomial(1), 0, 1);
+    std::cout << "\nx = " << xx.print();
+    std::cout << "\nx = " << xx_.print();
+    auto diff = xx - xx_;
+    std::cout << "\n0 = " << diff.print();
+  }
+  auto yy = AlgebraicPolynomial::yToPower(PiPolynomial(1), 1);
+  std::cout << "\ny = " << yy.print();
+  auto zz = AlgebraicPolynomial::zToPower(PiPolynomial(1), 1);
+  std::cout << "\nz = " << zz.print();
+  auto ww = AlgebraicPolynomial::wToPower(PiPolynomial(1), 1);
+  std::cout << "\nw = " << ww.print();
+  auto x_4 = AlgebraicPolynomial::x_iToPower(PiPolynomial(1), 4, 1);
+  std::cout << "\nx_4 = " << x_4.print();
+  std::cout << "\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { std::cout << "\n"; return true; }
+
+  {
+    auto sum = xx + yy + zz + ww;
+    std::cout << "\nsum = x + y + z + w = " << sum.print();
+    auto sumSq = sum * sum;
+    std::cout << "\nsum * sum = " << sumSq.print();
+    sum = xx + yy + zz + ww + x_4;
+    std::cout << "\nsum = x_0 + x_1 + x_2 + x_3 + x_4 = " << sum.print();
+    sumSq = sum * sum;
+    std::cout << "\nsum * sum = " << sumSq.print();
+  }
+
+  std::cout << "\n";
+  return true;
+}
+
 int main()
 {
   std::string prompt;
+  std::cout << "\n\nTest algebraic polynomials:\n";
+  test_algebraic_polys();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest icosahedron:\n";
   test_icosahedron();
   std::cout << "\nContinue, or 'Q' to exit? ";
