@@ -80,6 +80,8 @@ public:
   /** \return `true` if and only if evaluation returns a constant. Only then is the `output` parameter written.
    */
   bool tryEvaluate(const std::vector<PiRational>& input, PiRational& output) const;
+
+  friend class RationalFunction;
 };
 }
 

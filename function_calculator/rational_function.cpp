@@ -27,6 +27,13 @@ namespace FunctionalCalculator
     }
   }
 
+  unsigned int RationalFunction::getDimension() const
+  {
+    auto dimNum = num.getDimension();
+    auto dimDen = denom.getDimension();
+    return (dimNum > dimDen) ? dimNum : dimDen;
+  }
+
   std::string RationalFunction::print(bool useParentheses) const
   {
     auto num_ = num;
@@ -120,87 +127,48 @@ namespace FunctionalCalculator
     return RationalFunction(AlgebraicPolynomial(coeff), one);
   }
 
-  RationalFunction RationalFunction::composeWith(const Matrix<ComplexQuadratic>& transform) const
+  RationalFunction RationalFunction::partial_deriv(unsigned int index) const
   {
     RationalFunction answer;
-    answer.num = num.composeWith(transform);
-    answer.denom = denom.composeWith(transform);
+    auto numPrime = num.partial_deriv(index);
+    auto denPrime = denom.partial_deriv(index);
+    answer.num = numPrime * denom - num * denPrime;
+    answer.denom = denom * denom;
     return answer;
-  }
-
-  RationalFunction RationalFunction::tanATimesPiX(const PiRational& coeff, const ComplexQuadratic& A)
-  {
-    return RationalFunction(AlgebraicPolynomial::sinATimesPiX(coeff, A), AlgebraicPolynomial::cosATimesPiX(PiPolynomial(1), A));
-  }
-
-  RationalFunction RationalFunction::tanATimesPiY(const PiRational& coeff, const ComplexQuadratic& A)
-  {
-    return RationalFunction(AlgebraicPolynomial::sinATimesPiY(coeff, A), AlgebraicPolynomial::cosATimesPiY(PiPolynomial(1), A));
-  }
-
-  RationalFunction RationalFunction::tanATimesPiZ(const PiRational& coeff, const ComplexQuadratic& A)
-  {
-    return RationalFunction(AlgebraicPolynomial::sinATimesPiZ(coeff, A), AlgebraicPolynomial::cosATimesPiZ(PiPolynomial(1), A));
-  }
-
-  RationalFunction RationalFunction::tanPi_AX_plus_BY_plus_CZ(const PiRational& coeff,
-      const ComplexQuadratic& A, const ComplexQuadratic& B, const ComplexQuadratic& C)
-  {
-    return RationalFunction(AlgebraicPolynomial::sinPi_AX_plus_BY_plus_CZ(coeff, A, B, C),
-      AlgebraicPolynomial::cosPi_AX_plus_BY_plus_CZ(PiPolynomial(1), A, B, C));
   }
 
   RationalFunction RationalFunction::partial_x() const
   {
-    RationalFunction answer;
-    auto numPrime = num.partial_x();
-    auto denPrime = denom.partial_x();
-    answer.num = numPrime * denom - num * denPrime;
-    answer.denom = denom * denom;
-    return answer;
+    return partial_deriv(0);
   }
 
   RationalFunction RationalFunction::partial_y() const
   {
-    RationalFunction answer;
-    auto numPrime = num.partial_y();
-    auto denPrime = denom.partial_y();
-    answer.num = numPrime * denom - num * denPrime;
-    answer.denom = denom * denom;
-    return answer;
+    return partial_deriv(1);
   }
 
   RationalFunction RationalFunction::partial_z() const
   {
-    RationalFunction answer;
-    auto numPrime = num.partial_z();
-    auto denPrime = denom.partial_z();
-    answer.num = numPrime * denom - num * denPrime;
-    answer.denom = denom * denom;
-    return answer;
+    return partial_deriv(2);
+  }
+
+  RationalFunction RationalFunction::partial_w() const
+  {
+    return partial_deriv(3);
   }
 
   RationalFunction RationalFunction::laplacian() const
   {
-    auto u_x = num.partial_x(); auto u_y = num.partial_y(); auto u_z = num.partial_z();
-    auto v_x = denom.partial_x(); auto v_y = denom.partial_y(); auto v_z = denom.partial_z();
-    auto u_xx = u_x.partial_x(); auto u_yy = u_y.partial_y(); auto u_zz = u_z.partial_z();
-    auto v_xx = v_x.partial_x(); auto v_yy = v_y.partial_y(); auto v_zz = v_z.partial_z();
-
-    auto u_twice = num * AlgebraicPolynomial(PiPolynomial(2));
-    auto v_twice = denom * AlgebraicPolynomial(PiPolynomial(2));
-    auto v2 = denom * denom;
-    auto v3 = denom * v2;
-    auto uv = num * denom;
-
-    auto xPortion = u_xx * v2 - v_xx * uv - u_x * v_x * v_twice + v_x * v_x * u_twice;
-    auto yPortion = u_yy * v2 - v_yy * uv - u_y * v_y * v_twice + v_y * v_y * u_twice;
-    auto zPortion = u_zz * v2 - v_zz * uv - u_z * v_z * v_twice + v_z * v_z * u_twice;
-
-    return RationalFunction(xPortion + yPortion + zPortion, v3);
+    RationalFunction answer;
+    int dim = (int)getDimension();
+    for (int ii = 0; ii < dim; ++ii)
+    {
+      answer = answer + (*this).partial_deriv(ii).partial_deriv(ii);
+    }
+    return answer;
   }
 
-  bool RationalFunction::isLaplaceEigenRationalFunction(PiRational& eigenvalue) const
+  bool RationalFunction::isLaplaceEigenfunction(PiRational& eigenvalue) const
   {
     if (isHarmonic()) { eigenvalue = PiRational(PiPolynomial(0), PiPolynomial(1)); return true; }
     auto lap0 = laplacian();
@@ -227,89 +195,28 @@ namespace FunctionalCalculator
     return (laplacian().num == AlgebraicPolynomial(PiPolynomial(0)));
   }
 
-  RationalFunction RationalFunction::sphericalBesselATimesPiX(const ComplexQuadratic& A, int n)
+  RationalFunction RationalFunction::evaluateAt(const std::vector<PiRational>& input) const
   {
-    if (n < 0)
-    {
-      ComplexQuadratic qq(Rational(1, 1));
-      if ((n % 2) == 1) { qq = -qq; }
-      return sphericalNeumannATimesPiX(A, -n - 1) * AlgebraicPolynomial(PiPolynomial(qq));
-    }
-    if (n == 0)
-    {
-      PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
-      PiRational piRatio = PiPolynomial(A, 1);
-      return RationalFunction(AlgebraicPolynomial::sinATimesPiX(coeff, A), AlgebraicPolynomial::xToPower(piRatio, 1));
-    }
-    ComplexQuadratic qq(Rational(-1, 1));
-    qq = qq / A;
-    return sphericalBesselATimesPiX(A, n - 1).partial_x() * AlgebraicPolynomial(PiPolynomial(qq));
+    auto numEval = num.evaluateAt(input);
+    auto denEval = denom.evaluateAt(input);
+    return RationalFunction(numEval, denEval);
   }
 
-  RationalFunction RationalFunction::sphericalNeumannATimesPiX(const ComplexQuadratic& A, int n)
+  RationalFunction RationalFunction::evaluateAt(const std::map<unsigned int, PiRational>& input) const
   {
-    if (n < 0)
-    {
-      ComplexQuadratic qq(Rational(1, 1));
-      if ((n % 2) == 0) { qq = -qq; }
-      return sphericalBesselATimesPiX(A, -n - 1) * AlgebraicPolynomial(PiPolynomial(qq));
-    }
-    if (n == 0)
-    {
-      PiPolynomial coeff = ComplexQuadratic(Rational(1, 1));
-      PiRational piRatio = PiPolynomial(-A, 1);
-      return RationalFunction(AlgebraicPolynomial::cosATimesPiX(coeff, A), AlgebraicPolynomial::xToPower(piRatio, 1));
-    }
-    ComplexQuadratic qq(Rational(-1, 1));
-    qq = qq / A;
-    return sphericalNeumannATimesPiX(A, n - 1).partial_x() * AlgebraicPolynomial(PiPolynomial(qq));
+    auto numEval = num.evaluateAt(input);
+    auto denEval = denom.evaluateAt(input);
+    return RationalFunction(numEval, denEval);
   }
 
-  bool RationalFunction::tryEvaluateAtX(const ComplexQuadratic& xVal, RationalFunction& output) const
+  bool RationalFunction::tryEvaluate(const std::vector<PiRational>& input, PiRational& output) const
   {
-    AlgebraicPolynomial numFn;
-    bool success = num.tryEvaluateAtX(xVal, numFn);
-    if (!success) { return false; }
-    AlgebraicPolynomial denomFn;
-    success = denom.tryEvaluateAtX(xVal, denomFn);
-    if (!success) { return false; }
-    output = RationalFunction(numFn, denomFn);
-    return true;
-  }
-
-  bool RationalFunction::tryEvaluateAtY(const ComplexQuadratic& yVal, RationalFunction& output) const
-  {
-    AlgebraicPolynomial numFn;
-    bool success = num.tryEvaluateAtY(yVal, numFn);
-    if (!success) { return false; }
-    AlgebraicPolynomial denomFn;
-    success = denom.tryEvaluateAtY(yVal, denomFn);
-    if (!success) { return false; }
-    output = RationalFunction(numFn, denomFn);
-    return true;
-  }
-
-  bool RationalFunction::tryEvaluateAtZ(const ComplexQuadratic& zVal, RationalFunction& output) const
-  {
-    AlgebraicPolynomial numFn;
-    bool success = num.tryEvaluateAtZ(zVal, numFn);
-    if (!success) { return false; }
-    AlgebraicPolynomial denomFn;
-    success = denom.tryEvaluateAtZ(zVal, denomFn);
-    if (!success) { return false; }
-    output = RationalFunction(numFn, denomFn);
-    return true;
-  }
-
-  bool RationalFunction::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
-  {
-    PiRational numConstant;
-    bool success = num.tryEvaluateAtXYZ(xVal, yVal, zVal, numConstant);
-    if (!success) { return false; }
-    PiRational denomConstant;
-    success = denom.tryEvaluateAtXYZ(xVal, yVal, zVal, denomConstant);
-    if (!success) { return false; }
-    output = numConstant / denomConstant;
+    RationalFunction answer = evaluateAt(input);
+    PiRational constAnsNum, constAnsDen;
+    bool itIsConst = answer.num.isConstant(&constAnsNum);
+    itIsConst = answer.denom.isConstant(&constAnsDen);
+    if (!itIsConst) { return false; }
+    output = constAnsNum / constAnsDen;
     return true;
   }
 }
