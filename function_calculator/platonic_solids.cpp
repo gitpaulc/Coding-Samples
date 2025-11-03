@@ -44,7 +44,7 @@ namespace FunctionalCalculator
     {
       if (oriented.empty())
       {
-        auto& it = faceMap.begin();
+        auto it = faceMap.begin();
         oriented.insert(it->second);
         faceMap.erase(it->first);
         continue;
@@ -118,7 +118,7 @@ namespace FunctionalCalculator
       BiquadraticNumber half(Rational(1, 2));
       BiquadraticNumber sinAngle;
       bool success = BiquadraticNumber::tryGetSine(angle, sinAngle);
-      if (!success) { throw std::exception("Unsupported angle."); return polygon; }
+      if (!success) { throw std::logic_error("Unsupported angle."); return polygon; }
       radius = half * radius / sinAngle;
     }
     for (int ii = 0; ii < nn; ++ii)
@@ -135,7 +135,7 @@ namespace FunctionalCalculator
       BiquadraticNumber cosAngle, sinAngle;
       bool success = BiquadraticNumber::tryGetCosine(angle, cosAngle);
       success = success && BiquadraticNumber::tryGetSine(angle, sinAngle);
-      if (!success) { throw std::exception("Unsupported angle."); break; }
+      if (!success) { throw std::logic_error("Unsupported angle."); break; }
       if ((generator != nullptr) && (ii == 1))
       {
         Matrix<BiquadraticNumber> R;
@@ -478,7 +478,7 @@ namespace FunctionalCalculator
     QuadraticNumber quad;
     if (!radicand.getAsQuadratic(quad))
     {
-      throw std::exception("The z component is not the square root of a quadratic number.");
+      throw std::logic_error("The z component is not the square root of a quadratic number.");
       Matrix<BiquadraticNumber> answer;
       return answer;
     }
@@ -558,14 +558,14 @@ namespace FunctionalCalculator
       bool success = kNorm.getAsQuadratic(quad);
       if (!success)
       {
-        throw std::exception("|((u - w) x (v - w)) x (0, 0, 1)|^2 cannot be written in terms of quadratic numbers.");
+        throw std::logic_error("|((u - w) x (v - w)) x (0, 0, 1)|^2 cannot be written in terms of quadratic numbers.");
         return RR;
       }
       kNorm = BiquadraticNumber::sqrt(quad);
       success = uuCrossVvNorm.getAsQuadratic(quad);
       if (!success)
       {
-        throw std::exception("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
+        throw std::logic_error("|(u - w) x (v - w)|^2 cannot be written in terms of quadratic numbers.");
         return RR;
       }
       uuCrossVvNorm = BiquadraticNumber::sqrt(quad);
@@ -573,7 +573,7 @@ namespace FunctionalCalculator
       success = uuNormTimesVvNorm.getAsQuadratic(quad);
       if (!success)
       {
-        throw std::exception("|u - w|^2 * |v - w|^2 cannot be written in terms of quadratic numbers.");
+        throw std::logic_error("|u - w|^2 * |v - w|^2 cannot be written in terms of quadratic numbers.");
         return RR;
       }
       uuNormTimesVvNorm = BiquadraticNumber::sqrt(quad);
@@ -755,7 +755,7 @@ namespace FunctionalCalculator
         if (!success)
         {
           BiquadraticNumber::setExtraSimplification(false);
-          throw std::exception("Unsupported angle.");
+          throw std::logic_error("Unsupported angle.");
           return dodec;
         }
         sideLength = sinAngle + sinAngle;
@@ -849,7 +849,7 @@ namespace FunctionalCalculator
       if (!success)
       {
         BiquadraticNumber::setExtraSimplification(false);
-        throw std::exception("Unsupported angle.");
+        throw std::logic_error("Unsupported angle.");
         return dodec;
       }
       sideLength = sinAngle + sinAngle;
