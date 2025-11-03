@@ -30,23 +30,22 @@ namespace FunctionalCalculator
       return invStereo;
     }
     AlgebraicPolynomial one(PiPolynomial(1));
-    AlgebraicPolynomial sgn(PiPolynomial(1));
-    if (northPoleRemoved) { sgn = -sgn; }
     AlgebraicPolynomial sqNorm;
     for (int ii = 0; ii < (int)sphereDimension; ++ii)
     {
       auto xx = AlgebraicPolynomial::x_iToPower(PiPolynomial(1), ii, 1);
       sqNorm = sqNorm + xx * xx;
     }
-    AlgebraicPolynomial denom = one - sgn * sqNorm;
+    AlgebraicPolynomial denom = one + sqNorm;
     {
-      RationalFunction f0(one + sgn * sqNorm, denom);
+      RationalFunction f0(one - sqNorm, denom);
+      if (northPoleRemoved) { f0 = -f0; }
       invStereo.inverse.push_back(f0);
     }
     for (int ii = 0; ii < (int)sphereDimension; ++ii)
     {
-      RationalFunction f0(AlgebraicPolynomial::x_iToPower(PiPolynomial(2), ii, 1), denom);
-      invStereo.inverse.push_back(f0);
+      RationalFunction f_i(AlgebraicPolynomial::x_iToPower(PiPolynomial(2), ii, 1), denom);
+      invStereo.inverse.push_back(f_i);
     }
     return invStereo;
   }
