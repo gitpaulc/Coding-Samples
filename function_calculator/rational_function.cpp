@@ -1,4 +1,4 @@
-/*  Copyright Paul Cernea, May 2025.
+/*  Copyright Paul Cernea, November 2025.
 All Rights Reserved.*/
 
 #include "rational_function.h"

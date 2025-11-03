@@ -26,13 +26,25 @@ public:
    */
   class OpenSet
   {
+  public:
     /** \brief This function F = (f_0, f_1, ... f_K) inversely maps its domain in R^n to the open set in the n-dimensional manifold. */
     std::vector<RationalFunction> inverse;
+    /** \brief This returns 3 if we have a function of (y, z) without x so care must be taken for Cartesian products, etc. */
     unsigned int getDimension() const;
+    /** \return The inverse stereographic projection. If `northPoleRemoved` is false then the south pole is removed. */
+    static OpenSet InverseStereo(bool northPoleRemoved, unsigned int sphereDimension);
+  };
+  class CoordinateChart
+  {
+  public:
+    OpenSet patch;
+    /** \brief This mapping restricts to an invertible smooth mapping on the coordinate patch. */
+    std::vector<RationalFunction> mapping;
   };
 private:
-  std::vector<OpenSet> coordinateCover;
+  std::vector<CoordinateChart> atlas; /**< This is not the (infinite) maximal atlas. Rather it is a finite cover. */
 public:
+  static Manifold sphere(unsigned int dimension); /**< \return S^n where the dimension == n. */
 };
 }
 
