@@ -678,12 +678,13 @@ namespace FunctionalCalculator
 
     for (auto& iter : rhs.self)
     {
-      if (answer.self.find(iter.first) == answer.self.end())
+      auto jt = answer.self.find(iter.first);
+      if (jt == answer.self.end())
       {
         answer.self[iter.first] = iter.second;
         continue;
       }
-      answer.self[iter.first] = answer.self[iter.first] + iter.second;
+      jt->second = jt->second + iter.second;
     }
     answer.clean();
     return answer;
@@ -707,13 +708,13 @@ namespace FunctionalCalculator
         for (const auto& kter : monomials)
         {
           auto currentSummand = summand * PiPolynomial(kter.second);
-          auto kk = kter.first;
-          if (answer.self.find(kk) == answer.self.end())
-          { 
-            answer.self[kk] = currentSummand;
+          auto kk = answer.self.find(kter.first);
+          if (kk == answer.self.end())
+          {
+            answer.self[kter.first] = currentSummand;
             continue;
           }
-          answer.self[kk] = answer.self[kk] + currentSummand;
+          kk->second = kk->second + currentSummand;
         }
       }
     }
@@ -724,6 +725,7 @@ namespace FunctionalCalculator
   FnPolynomial FnPolynomial::operator*(const PiPolynomial& rhs) const
   {
     FnPolynomial answer;
+    if (rhs == PiPolynomial()) { return answer; }
     for (const auto& iter : self) { answer.self[iter.first] = iter.second * PiRational(PiPolynomial(rhs)); }
     return answer;
   }

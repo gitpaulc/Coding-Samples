@@ -24,6 +24,7 @@ class AlgebraicPolynomial
     std::map<unsigned int, unsigned int> indices;
     bool isConstTerm() const;
     unsigned int getDimension() const;
+    Monomial operator*(const Monomial& rhs) const;
     bool operator<(const Monomial& rhs) const;
     void clean();
   };
@@ -32,17 +33,22 @@ class AlgebraicPolynomial
   void clean();
 public:
   AlgebraicPolynomial(const PiRational& coeff = PiPolynomial(0));
-  virtual std::string print(bool useParentheses = false) const;
+  unsigned int getDimension() const;
+  virtual std::string print(bool useParentheses = false, bool detectLowDimension = true) const;
 
   // MATRIX COMPOSITION:
 
   /** \brief If the poly. is F(u), returns F(M * u) where M is the matrix and u is (x_0, x_1, ..., x_{n-1}). */
-  AlgebraicPolynomial composeWith(const Matrix<ComplexQuadratic>& transform) const;
+  // TODO: AlgebraicPolynomial composeWith(const Matrix<ComplexQuadratic>& transform) const;
 
   // POLYNOMIALS:
 
   /**< \return coeff * x_i^p where p is the power. */
   static AlgebraicPolynomial x_iToPower(const PiRational& coeff, unsigned int i, unsigned int p);
+  static AlgebraicPolynomial xToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * x^p */
+  static AlgebraicPolynomial yToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * y^p */
+  static AlgebraicPolynomial zToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * z^p */
+  static AlgebraicPolynomial wToPower(const PiRational& coeff, unsigned int p); /**< \return coeff * w^p */
 
   AlgebraicPolynomial operator+() const;
   AlgebraicPolynomial operator-() const;
