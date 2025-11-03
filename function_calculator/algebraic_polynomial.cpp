@@ -117,6 +117,20 @@ namespace FunctionalCalculator
     return maxDimension;
   }
 
+  bool AlgebraicPolynomial::isConstant(PiRational* evaluatedValue) const
+  {
+    bool answer = true;
+    PiRational theVal;
+    for (const auto& it : self)
+    {
+      if (it.second == PiRational()) { continue; }
+      if (!(it.first.isConstTerm())) { return false; }
+      theVal = it.second;
+    }
+    if (answer && (evaluatedValue != nullptr)) { *evaluatedValue = theVal; }
+    return answer;
+  }
+
   std::string AlgebraicPolynomial::print(bool useParentheses, bool detectLowDimension) const
   {
     std::stringstream strm;
@@ -390,166 +404,21 @@ namespace FunctionalCalculator
     return (laplacian() == AlgebraicPolynomial(PiPolynomial(0)));
   }
 
-  bool AlgebraicPolynomial::tryEvaluateAtX(const ComplexQuadratic& xVal, AlgebraicPolynomial& output) const
+  AlgebraicPolynomial AlgebraicPolynomial::evaluateAt(const std::vector<PiRational>& input) const
   {
-    AlgebraicPolynomial answer;
-    for (const auto& iter : self)
-    {
-      auto newKey = iter.first;
-      auto newVal = iter.second;
-      if (newKey.xInd != 0)
-      {
-        newVal = newVal * PiPolynomial(xVal.pow(newKey.xInd));
-        newKey.xInd = 0;
-      }
-      if (newKey.ePiXInd != 0)
-      {
-        if (xVal != 0) { return false; }
-        newKey.ePiXInd = BiquadraticNumber();
-      }
-      if (newKey.trigPiXInd != TrigIndex())
-      {
-        ComplexQuadratic trigInput = xVal * newKey.trigPiXInd.self;
-        if (trigInput.getIm() != 0) { return false; }
-        Rational rationalVal;
-        bool isRational = trigInput.getRe().getRational(rationalVal);
-        if (!isRational) { return false; }
-        if (newKey.trigPiXInd.isCos())
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        else
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        newKey.trigPiXInd = TrigIndex();
-      }
-      auto newIter = answer.self.find(newKey);
-      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
-      else { newIter->second = newIter->second + newVal; }
-    }
-    answer.clean();
-    output = answer;
-    return true;
   }
 
-  bool AlgebraicPolynomial::tryEvaluateAtY(const ComplexQuadratic& yVal, AlgebraicPolynomial& output) const
+  AlgebraicPolynomial AlgebraicPolynomial::evaluateAt(const std::map<unsigned int, PiRational>& input) const
   {
-    AlgebraicPolynomial answer;
-    for (const auto& iter : self)
-    {
-      auto newKey = iter.first;
-      auto newVal = iter.second;
-      if (newKey.yInd != 0)
-      {
-        newVal = newVal * PiPolynomial(yVal.pow(newKey.yInd));
-        newKey.yInd = 0;
-      }
-      if (newKey.ePiYInd != 0)
-      {
-        if (yVal != 0) { return false; }
-        newKey.ePiYInd = BiquadraticNumber();
-      }
-      if (newKey.trigPiYInd != TrigIndex())
-      {
-        ComplexQuadratic trigInput = yVal * newKey.trigPiYInd.self;
-        if (trigInput.getIm() != 0) { return false; }
-        Rational rationalVal;
-        bool isRational = trigInput.getRe().getRational(rationalVal);
-        if (!isRational) { return false; }
-        if (newKey.trigPiYInd.isCos())
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        else
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        newKey.trigPiYInd = TrigIndex();
-      }
-      auto newIter = answer.self.find(newKey);
-      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
-      else { newIter->second = newIter->second + newVal; }
-    }
-    answer.clean();
-    output = answer;
-    return true;
   }
 
-  bool AlgebraicPolynomial::tryEvaluateAtZ(const ComplexQuadratic& zVal, AlgebraicPolynomial& output) const
+  bool AlgebraicPolynomial::tryEvaluate(const std::vector<PiRational>& input, PiRational& output) const
   {
-    AlgebraicPolynomial answer;
-    for (const auto& iter : self)
-    {
-      auto newKey = iter.first;
-      auto newVal = iter.second;
-      if (newKey.zInd != 0)
-      {
-        newVal = newVal * PiPolynomial(zVal.pow(newKey.zInd));
-        newKey.zInd = 0;
-      }
-      if (newKey.ePiZInd != 0)
-      {
-        if (zVal != 0) { return false; }
-        newKey.ePiZInd = BiquadraticNumber();
-      }
-      if (newKey.trigPiZInd != TrigIndex())
-      {
-        ComplexQuadratic trigInput = zVal * newKey.trigPiZInd.self;
-        if (trigInput.getIm() != 0) { return false; }
-        Rational rationalVal;
-        bool isRational = trigInput.getRe().getRational(rationalVal);
-        if (!isRational) { return false; }
-        if (newKey.trigPiZInd.isCos())
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetCosine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        else
-        {
-          BiquadraticNumber factor;
-          bool trigSuccess = BiquadraticNumber::tryGetSine(rationalVal, factor);
-          if (!trigSuccess) { return false; }
-          newVal = newVal * PiPolynomial(ComplexQuadratic(factor));
-        }
-        newKey.trigPiZInd = TrigIndex();
-      }
-      auto newIter = answer.self.find(newKey);
-      if (newIter == answer.self.end()) { answer.self[newKey] = newVal; }
-      else { newIter->second = newIter->second + newVal; }
-    }
-    answer.clean();
-    output = answer;
-    return true;
-  }
-
-  bool AlgebraicPolynomial::tryEvaluateAtXYZ(const ComplexQuadratic& xVal, const ComplexQuadratic& yVal, const ComplexQuadratic& zVal, PiRational& output) const
-  {
-    AlgebraicPolynomial answerX, answerY, answerZ;
-    bool success = tryEvaluateAtX(xVal, answerX);
-    if (!success) { return false; }
-    success = answerX.tryEvaluateAtY(yVal, answerY);
-    if (!success) { return false; }
-    success = answerY.tryEvaluateAtZ(zVal, answerZ);
-    if (!success) { return false; }
-    if (answerZ.self.size() > 1) { return false; }
-    if (answerZ.self.size() < 1) { output = PiRational(); return true; }
-    if (answerZ.self.find(Monomial()) == answerZ.self.end()) { return false; }
-    output = answerZ.self.at(Monomial());
+    AlgebraicPolynomial answer = evaluateAt(input);
+    PiRational constAns;
+    bool itIsConst = answer.isConstant(&constAns);
+    if (!itIsConst) { return false; }
+    output = constAns;
     return true;
   }
 }

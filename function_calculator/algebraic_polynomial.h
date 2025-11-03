@@ -34,6 +34,7 @@ class AlgebraicPolynomial
 public:
   AlgebraicPolynomial(const PiRational& coeff = PiPolynomial(0));
   unsigned int getDimension() const;
+  bool isConstant(PiRational* evaluatedValue = nullptr) const;
   virtual std::string print(bool useParentheses = false, bool detectLowDimension = true) const;
 
   // MATRIX COMPOSITION:
@@ -72,9 +73,13 @@ public:
 
   // EXACT EVALUATION:
 
-  /** \return `true` if and only if evaluation succeeds. Only then is the `output` parameter written.
+  /** \brief Evaluate the polynomial on (x_0, x_1, ..., x_{n - 1}) */
+  AlgebraicPolynomial evaluateAt(const std::vector<PiRational>& input) const;
+  /** \brief Evaluate the polynomial on a map whose keys are variables and values are inputs. */
+  AlgebraicPolynomial evaluateAt(const std::map<unsigned int, PiRational>& input) const;
+  /** \return `true` if and only if evaluation returns a constant. Only then is the `output` parameter written.
    */
-  bool tryEvaluate(const std::vector<PiRational>& input, AlgebraicPolynomial& output) const;
+  bool tryEvaluate(const std::vector<PiRational>& input, PiRational& output) const;
 };
 }
 
