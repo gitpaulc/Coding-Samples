@@ -1303,6 +1303,14 @@ bool test_algebraic_polys()
   std::cin >> prompt;
   if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { std::cout << "\n"; return true; }
 
+  {
+    auto harmonic = xx * xx - ww * ww;
+    std::cout << "\n" << harmonic.print() << (harmonic.isHarmonic() ? " is harmonic." : " is mistaken.");
+    std::cout << "\n0 = " << harmonic.partial_y().print();
+    std::cout << "\n0 = " << harmonic.partial_deriv(100).print();
+    std::cout << "\n0 = " << harmonic.laplacian().print();
+  }
+
   std::cout << "\n";
   return true;
 }

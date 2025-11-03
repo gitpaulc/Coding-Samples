@@ -372,7 +372,7 @@ namespace FunctionalCalculator
   {
     AlgebraicPolynomial answer;
     int dim = (int)getDimension();
-    for (int ii = 0; ii < dim - 1; ++ii)
+    for (int ii = 0; ii < dim; ++ii)
     {
       answer = answer + (*this).partial_deriv(ii).partial_deriv(ii);
     }
