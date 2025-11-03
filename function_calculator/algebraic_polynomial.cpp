@@ -371,7 +371,7 @@ namespace FunctionalCalculator
   AlgebraicPolynomial AlgebraicPolynomial::laplacian() const
   {
     AlgebraicPolynomial answer;
-    auto dim = getDimension();
+    int dim = (int)getDimension();
     for (int ii = 0; ii < dim - 1; ++ii)
     {
       answer = answer + (*this).partial_deriv(ii).partial_deriv(ii);
@@ -406,10 +406,67 @@ namespace FunctionalCalculator
 
   AlgebraicPolynomial AlgebraicPolynomial::evaluateAt(const std::vector<PiRational>& input) const
   {
+    AlgebraicPolynomial answer;
+    if (input.size() == 0) { throw std::logic_error("Input must contain at least one variable."); }
+    if (input.size() == 1)
+    {
+      std::map<unsigned int, PiRational> singleInput;
+      singleInput[0] = input[0];
+      return evaluateAt(singleInput);
+    }
+    auto singleInput = input[input.size() - 1];
+    auto truncated = input;
+    truncated.resize(input.size() - 1);
+    answer = evaluateAt(truncated);
+    answer = answer.evaluateAt({ singleInput });
+    return answer;
   }
 
   AlgebraicPolynomial AlgebraicPolynomial::evaluateAt(const std::map<unsigned int, PiRational>& input) const
   {
+    AlgebraicPolynomial answer;
+    if (input.size() == 0) { throw std::logic_error("Input must contain at least one variable."); }
+    if (input.size() == 1)
+    {
+      auto varIndex = input.begin()->first;
+      auto varValue = input.begin()->second;
+      for (const auto& iter : self)
+      {
+        auto& indexes = iter.first.indices;
+        Monomial monomial;
+        auto coeff = iter.second;
+        for (const auto& jter : indexes)
+        {
+          if (jter.first == varIndex)
+          {
+            coeff = coeff * varValue.pow(jter.second);
+            continue;
+          }
+          monomial.indices[jter.first] = jter.second;
+        }
+        AlgebraicPolynomial summand;
+        summand.self[monomial] = coeff;
+        answer = answer + summand;
+      }
+      return answer;
+    }
+    std::map<unsigned int, PiRational> singleInput, truncated;
+    {
+      int ii = -1;
+      for (const auto& iter : input)
+      {
+        ++ii;
+        if (ii == 0)
+        {
+          singleInput[iter.first] = iter.second;
+          continue;
+        }
+        truncated[iter.first] = iter.second;
+      }
+    }
+    answer = evaluateAt(truncated);
+    answer = answer.evaluateAt({ singleInput });
+    return answer;
   }
 
   bool AlgebraicPolynomial::tryEvaluate(const std::vector<PiRational>& input, PiRational& output) const
