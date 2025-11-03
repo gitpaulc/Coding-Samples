@@ -1318,11 +1318,6 @@ bool test_algebraic_polys()
 int main()
 {
   std::string prompt;
-  std::cout << "\n\nTest algebraic polynomials:\n";
-  test_algebraic_polys();
-  std::cout << "\nContinue, or 'Q' to exit? ";
-  std::cin >> prompt;
-  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest icosahedron:\n";
   test_icosahedron();
   std::cout << "\nContinue, or 'Q' to exit? ";
@@ -1360,6 +1355,11 @@ int main()
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
   std::cout << "\n\nTest function polynomials:\n";
   test_fn_poly();
+  std::cout << "\nContinue, or 'Q' to exit? ";
+  std::cin >> prompt;
+  if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
+  std::cout << "\n\nTest algebraic polynomials:\n";
+  test_algebraic_polys();
   std::cout << "\nContinue, or 'Q' to exit? ";
   std::cin >> prompt;
   if ((prompt.compare("Q") == 0) || (prompt.compare("q") == 0)) { return 0; }
