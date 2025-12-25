@@ -52,10 +52,31 @@ namespace ComputationalGeometry
     return imgOut;
   }
 
-  static std::vector<cv::Point3_<uint8_t> > standardColors()
+  static std::vector<cv::Point3_<uint8_t> > standardColors(bool few = false)
   {
     typedef cv::Point3_<uint8_t> Pixel;
     std::vector<Pixel> colors;
+    if (few)
+    {
+      colors.push_back(Pixel(235, 51, 36)); // Red
+      colors.push_back(Pixel(119, 67, 66)); // Brown
+      colors.push_back(Pixel(115, 251, 253)); // Sky Blue
+      colors.push_back(Pixel(50, 130, 246)); // Blue
+      colors.push_back(Pixel(255, 253, 85)); // Yellow
+      colors.push_back(Pixel(240, 155, 89)); // Light Peach
+      colors.push_back(Pixel(115, 43, 245)); // Purple
+      colors.push_back(Pixel(255, 127, 39)); // Orange
+      colors.push_back(Pixel(117, 249, 77)); // Light Green
+      colors.push_back(Pixel(238, 138, 248)); // Lavender
+      colors.push_back(Pixel(234, 63, 247)); // Hot Pink
+      colors.push_back(Pixel(55, 125, 34)); // Green
+      colors.push_back(Pixel(0, 0, 0)); // Black
+      colors.push_back(Pixel(128, 128, 128)); // Gray
+      colors.push_back(Pixel(192, 192, 192)); // Light Gray
+      colors.push_back(Pixel(255, 255, 255)); // White
+      return colors;
+    }
+// #define EXTRA_COLORS
     colors.push_back(Pixel(240, 135, 132)); // Rose
     colors.push_back(Pixel(235, 51, 36)); // Red
     colors.push_back(Pixel(119, 67, 66)); // Brown
@@ -78,17 +99,25 @@ namespace ComputationalGeometry
     colors.push_back(Pixel(126, 132, 247)); // Mauve
     colors.push_back(Pixel(115, 43, 245)); // Purple
     colors.push_back(Pixel(53, 128, 187)); // Teal
-    //colors.push_back(Pixel(0, 2, 61)); // Almost Black
+#ifdef EXTRA_COLORS
+    colors.push_back(Pixel(0, 2, 61)); // Almost Black
+#endif // def EXTRA_COLORS
     colors.push_back(Pixel(88, 19, 94)); // Dark Purple
     colors.push_back(Pixel(58, 8, 62)); // Darker Purple
 
-    //colors.push_back(Pixel(161, 251, 142)); // Lightest Green
-    //colors.push_back(Pixel(161, 250, 79)); // Lighter Green
+#ifdef EXTRA_COLORS
+    colors.push_back(Pixel(161, 251, 142)); // Lightest Green
+    colors.push_back(Pixel(161, 250, 79)); // Lighter Green
+#endif // def EXTRA_COLORS
     colors.push_back(Pixel(117, 249, 77)); // Light Green
-    //colors.push_back(Pixel(117, 250, 97)); // Light Green
-    //colors.push_back(Pixel(117, 250, 141)); // Light Green
+#ifdef EXTRA_COLORS
+    colors.push_back(Pixel(117, 250, 97)); // Light Green
+    colors.push_back(Pixel(117, 250, 141)); // Light Green
+#endif // def EXTRA_COLORS
     colors.push_back(Pixel(129, 128, 73)); // Olive-Gold
-    //colors.push_back(Pixel(239, 136, 190)); // Cotton Candy Pink
+#ifdef EXTRA_COLORS
+    colors.push_back(Pixel(239, 136, 190)); // Cotton Candy Pink
+#endif // def EXTRA_COLORS
     colors.push_back(Pixel(238, 138, 248)); // Lavender
     colors.push_back(Pixel(234, 63, 247)); // Hot Pink
     colors.push_back(Pixel(234, 54, 128)); // Reddish Pink
@@ -100,7 +129,9 @@ namespace ComputationalGeometry
     colors.push_back(Pixel(54, 126, 127)); // Dark Teal
     colors.push_back(Pixel(80, 127, 128)); // Teal
     colors.push_back(Pixel(24, 62, 12)); // Dark Green
-    //colors.push_back(Pixel(23, 63, 63)); // Dark Teal
+#ifdef EXTRA_COLORS
+    colors.push_back(Pixel(23, 63, 63)); // Dark Teal
+#endif // def EXTRA_COLORS
     colors.push_back(Pixel(116, 27, 124)); // Dark Purple
     colors.push_back(Pixel(57, 16, 123)); // Crayon Purple
     colors.push_back(Pixel(0, 0, 0)); // Black
@@ -233,11 +264,11 @@ namespace ComputationalGeometry
     return sqDistCalc;
   }
 
-  cv::Mat simpleImage(const cv::Mat& imgIn)
+  cv::Mat simpleImage(const cv::Mat& imgIn, bool verySimple = false)
   {
     cv::Mat imgOut = imgIn.clone();
     typedef cv::Point3_<uint8_t> Pixel;
-    const auto simpleColors = standardColors();
+    const auto simpleColors = standardColors(verySimple);
     const auto numSimpleColors = (int)simpleColors.size();
     for (int row = 0; row < imgOut.rows; ++row)
     {
@@ -328,6 +359,8 @@ namespace ComputationalGeometry
       cv::imwrite(imgOutFolder + "/compGeoScreenshot.png", currentFrame);
       // Edge detection.
       cv::imwrite(imgOutFolder + "/compGeoEdges.png", detectEdges(currentFrame));
+      // Very simple colors.
+      cv::imwrite(imgOutFolder + "/compGeoVerySimple.png", simpleImage(currentFrame, true));
       // Simple colors.
       cv::imwrite(imgOutFolder + "/compGeoSimple.png", simpleImage(currentFrame));
       // K-means clustering.
@@ -353,6 +386,14 @@ namespace ComputationalGeometry
         for (const auto& currentFrame : arrayOfFrames)
         {
           videoOut.write(detectEdges(currentFrame.clone()));
+        }
+      }
+      // Very simple colors.
+      {
+        cv::VideoWriter videoOut(videoOutFolder + "/compGeoVerySimple.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+        for (const auto& currentFrame : arrayOfFrames)
+        {
+          videoOut.write(simpleImage(currentFrame.clone(), true));
         }
       }
       // Simple colors.
