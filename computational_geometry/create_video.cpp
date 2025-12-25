@@ -233,6 +233,35 @@ namespace ComputationalGeometry
     return sqDistCalc;
   }
 
+  cv::Mat simpleImage(const cv::Mat& imgIn)
+  {
+    cv::Mat imgOut = imgIn.clone();
+    typedef cv::Point3_<uint8_t> Pixel;
+    const auto simpleColors = standardColors();
+    const auto numSimpleColors = (int)simpleColors.size();
+    for (int row = 0; row < imgOut.rows; ++row)
+    {
+      Pixel* pix = imgOut.ptr<Pixel>(row, 0);
+      const Pixel* row_end = pix + imgOut.cols;
+      for (; pix != row_end; ++pix)
+      {
+        int bestSqDist = sqDist(simpleColors[0], *pix);
+        int bestInd = 0;
+        for (int ind = 0; ind < numSimpleColors; ++ind)
+        {
+          auto current = sqDist(simpleColors[ind], *pix);
+          if (current >= bestSqDist) { continue; }
+          bestSqDist = current;
+          bestInd = ind;
+        }
+        pix->x = simpleColors[bestInd].x;
+        pix->y = simpleColors[bestInd].y;
+        pix->z = simpleColors[bestInd].z;
+      }
+    }
+    return imgOut;
+  }
+
   bool createVideo(std::string& errMsg, VideoMode vm)
   {
     typedef cv::Point3_<uint8_t> Pixel;
@@ -299,6 +328,8 @@ namespace ComputationalGeometry
       cv::imwrite(imgOutFolder + "/compGeoScreenshot.png", currentFrame);
       // Edge detection.
       cv::imwrite(imgOutFolder + "/compGeoEdges.png", detectEdges(currentFrame));
+      // Simple colors.
+      cv::imwrite(imgOutFolder + "/compGeoSimple.png", simpleImage(currentFrame));
       // K-means clustering.
       cv::imwrite(imgOutFolder + "/compGeoKmeans.png", kMeansClustering(currentFrame, numKMeansClusters));
     }
@@ -322,6 +353,14 @@ namespace ComputationalGeometry
         for (const auto& currentFrame : arrayOfFrames)
         {
           videoOut.write(detectEdges(currentFrame.clone()));
+        }
+      }
+      // Simple colors.
+      {
+        cv::VideoWriter videoOut(videoOutFolder + "/compGeoSimple.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 10, cv::Size(frameWidth, frameHeight));
+        for (const auto& currentFrame : arrayOfFrames)
+        {
+          videoOut.write(simpleImage(currentFrame.clone()));
         }
       }
       // K-Means Clustering
