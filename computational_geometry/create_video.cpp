@@ -52,6 +52,88 @@ namespace ComputationalGeometry
     return imgOut;
   }
 
+  void simpleTransform(uint8_t& rr, uint8_t& gg, uint8_t& bb)
+  {
+    const int rr0 = (int)rr;
+    const int gg0 = (int)gg;
+    const int bb0 = (int)bb;
+    const int threshold = 30;
+    if ((rr0 >= (gg0 + threshold)) && (rr0 >= (bb0 + threshold)))
+    {
+      if ((gg0 >= 60) && (bb0 >= 60))
+      {
+        if (rr0 <= 120)
+        {
+          rr = 119; gg = 67; bb = 66; // Brown
+          return;
+        }
+        rr = 234; gg = 63; bb = 247; // Hot Pink
+        return;
+      }
+      rr = 125; gg = 0; bb = 0; // Custom Red
+      return;
+    }
+    if ((rr0 >= (gg0 + threshold)) && (bb0 >= (gg0 + threshold)))
+    {
+      if (gg0 >= 100)
+      {
+        rr = 238; gg = 138; bb = 248; // Lavender
+        return;
+      }
+      rr = 115; gg = 43; bb = 245; // Purple
+      return;
+    }
+    if ((rr0 >= (bb0 + threshold)) && (gg0 >= (bb0 + threshold)))
+    {
+      if (abs(rr0 - gg0) <= threshold)
+      {
+        rr = 255; gg = 253; bb = 85; // Yellow
+        return;
+      }
+    }
+    if ((bb0 >= (gg0 + threshold)) && (bb0 >= (rr0 + threshold)))
+    {
+      rr = 50; gg = 130; bb = 246; // Blue
+      return;
+    }
+    if ((bb0 >= (rr0 + threshold)) && (gg0 >= (rr0 + threshold)))
+    {
+      rr = 115; gg = 251; bb = 253; // Sky Blue
+      return;
+    }
+    if ((gg0 >= (rr0 + threshold)) && (gg0 >= (bb0 + threshold)))
+    {
+      if ((rr0 >= 70) && (bb0 >= 70))
+      {
+        rr = 117; gg = 249; bb = 77; // Light Green
+        return;
+      }
+      rr = 55; gg = 125; bb = 34; // Green
+      return;
+    }
+    int grey = (rr0 + gg0 + bb0) / 3;
+    if (grey >= 200)
+    {
+      rr = 255; gg = 255; bb = 255; // White
+      return;
+    }
+    if (grey <= 100)
+    {
+      rr = 0; gg = 0; bb = 0; // Black
+      return;
+    }
+    if ((grey <= 150) && (grey > 100))
+    {
+      rr = 128; gg = 128; bb = 128; // Light Gray
+      return;
+    }
+    //if ((grey < 200) && (grey >= 150))
+    {
+      rr = 192; gg = 192; bb = 192; // Gray
+      return;
+    }
+  }
+
   static std::vector<cv::Point3_<uint8_t> > standardColors(bool few = false)
   {
     typedef cv::Point3_<uint8_t> Pixel;
@@ -270,7 +352,7 @@ namespace ComputationalGeometry
   {
     cv::Mat imgOut = imgIn.clone();
     typedef cv::Point3_<uint8_t> Pixel;
-    const auto simpleColors = standardColors(verySimple);
+    const auto simpleColors = standardColors();
     const auto numSimpleColors = (int)simpleColors.size();
     for (int row = 0; row < imgOut.rows; ++row)
     {
@@ -278,6 +360,11 @@ namespace ComputationalGeometry
       const Pixel* row_end = pix + imgOut.cols;
       for (; pix != row_end; ++pix)
       {
+        if (verySimple)
+        {
+          simpleTransform(pix->x, pix->y, pix->z);
+          continue;
+        }
         int bestSqDist = sqDist(simpleColors[0], *pix);
         int bestInd = 0;
         for (int ind = 0; ind < numSimpleColors; ++ind)
