@@ -71,6 +71,30 @@ namespace ComputationalGeometry
 
     colors.push_back(Pixel(255, 254, 145)); // Light Yellow
     colors.push_back(Pixel(255, 253, 85)); // Yellow
+    colors.push_back(Pixel(240, 155, 89)); // Light Peach
+    colors.push_back(Pixel(240, 134, 80)); // Peach
+    colors.push_back(Pixel(255, 127, 39)); // Orange
+    colors.push_back(Pixel(120, 67, 21)); // True Brown
+    colors.push_back(Pixel(129, 127, 38)); // Gold
+    colors.push_back(Pixel(126, 132, 247)); // Mauve
+    colors.push_back(Pixel(115, 43, 245)); // Purple
+    colors.push_back(Pixel(53, 128, 187)); // Teal
+    //colors.push_back(Pixel(0, 2, 61)); // Almost Black
+    colors.push_back(Pixel(88, 19, 94)); // Dark Purple
+    colors.push_back(Pixel(58, 8, 62)); // Darker Purple
+
+    //colors.push_back(Pixel(161, 251, 142)); // Lightest Green
+    //colors.push_back(Pixel(161, 250, 79)); // Lighter Green
+    colors.push_back(Pixel(117, 249, 77)); // Light Green
+    //colors.push_back(Pixel(117, 250, 97)); // Light Green
+    //colors.push_back(Pixel(117, 250, 141)); // Light Green
+    colors.push_back(Pixel(129, 128, 73)); // Olive-Gold
+    //colors.push_back(Pixel(239, 136, 190)); // Cotton Candy Pink
+    colors.push_back(Pixel(238, 138, 248)); // Lavender
+    colors.push_back(Pixel(234, 63, 247)); // Hot Pink
+    colors.push_back(Pixel(234, 54, 128)); // Reddish Pink
+    colors.push_back(Pixel(127, 130, 187)); // Blue-gray
+    colors.push_back(Pixel(117, 22, 63)); // Plum
     return colors;
   }
 
