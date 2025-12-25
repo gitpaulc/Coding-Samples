@@ -52,6 +52,28 @@ namespace ComputationalGeometry
     return imgOut;
   }
 
+  static std::vector<cv::Point3_<uint8_t> > standardColors()
+  {
+    typedef cv::Point3_<uint8_t> Pixel;
+    std::vector<Pixel> colors;
+    colors.push_back(Pixel(240, 135, 132)); // Rose
+    colors.push_back(Pixel(235, 51, 36)); // Red
+    colors.push_back(Pixel(119, 67, 66)); // Brown
+    colors.push_back(Pixel(142, 64, 58)); // Brownish
+    colors.push_back(Pixel(58, 6, 3)); // Dark Red
+    colors.push_back(Pixel(159, 252, 253)); // Sky Blue
+    colors.push_back(Pixel(115, 251, 253)); // Sky Blue
+    colors.push_back(Pixel(50, 130, 246)); // Blue
+    colors.push_back(Pixel(0, 35, 245)); // True Blue
+    colors.push_back(Pixel(0, 18, 154)); // Dark Blue
+    colors.push_back(Pixel(22, 65, 124)); // Dark Navy
+    colors.push_back(Pixel(0, 12, 123)); // Darkest Blue
+
+    colors.push_back(Pixel(255, 254, 145)); // Light Yellow
+    colors.push_back(Pixel(255, 253, 85)); // Yellow
+    return colors;
+  }
+
   cv::Mat kMeansClustering(const cv::Mat& imgIn, int k)
   {
     if (k <= 0) { k = 1; }
