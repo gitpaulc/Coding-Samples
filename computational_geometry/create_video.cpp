@@ -58,7 +58,7 @@ namespace ComputationalGeometry
     std::vector<Pixel> colors;
     if (few)
     {
-      colors.push_back(Pixel(235, 51, 36)); // Red
+      colors.push_back(Pixel(125, 0, 0)); // Custom Red
       colors.push_back(Pixel(119, 67, 66)); // Brown
       colors.push_back(Pixel(115, 251, 253)); // Sky Blue
       colors.push_back(Pixel(50, 130, 246)); // Blue
@@ -77,6 +77,8 @@ namespace ComputationalGeometry
       return colors;
     }
 // #define EXTRA_COLORS
+    colors.push_back(Pixel(125, 0, 0)); // Custom Red
+
     colors.push_back(Pixel(240, 135, 132)); // Rose
     colors.push_back(Pixel(235, 51, 36)); // Red
     colors.push_back(Pixel(119, 67, 66)); // Brown
@@ -361,6 +363,7 @@ namespace ComputationalGeometry
       cv::imwrite(imgOutFolder + "/compGeoEdges.png", detectEdges(currentFrame));
       // Very simple colors.
       cv::imwrite(imgOutFolder + "/compGeoVerySimple.png", simpleImage(currentFrame, true));
+      //cv::imwrite(imgOutFolder + "/compGeoVerySimple.png", simpleImage(simpleImage(currentFrame), true));
       // Simple colors.
       cv::imwrite(imgOutFolder + "/compGeoSimple.png", simpleImage(currentFrame));
       // K-means clustering.
@@ -394,6 +397,7 @@ namespace ComputationalGeometry
         for (const auto& currentFrame : arrayOfFrames)
         {
           videoOut.write(simpleImage(currentFrame.clone(), true));
+          //videoOut.write(simpleImage(simpleImage(currentFrame.clone()), true));
         }
       }
       // Simple colors.
