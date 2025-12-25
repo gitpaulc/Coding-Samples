@@ -73,7 +73,6 @@ namespace ComputationalGeometry
     colors.push_back(Pixel(255, 253, 85)); // Yellow
     colors.push_back(Pixel(240, 155, 89)); // Light Peach
     colors.push_back(Pixel(240, 134, 80)); // Peach
-    colors.push_back(Pixel(255, 127, 39)); // Orange
     colors.push_back(Pixel(120, 67, 21)); // True Brown
     colors.push_back(Pixel(129, 127, 38)); // Gold
     colors.push_back(Pixel(126, 132, 247)); // Mauve
@@ -95,6 +94,23 @@ namespace ComputationalGeometry
     colors.push_back(Pixel(234, 54, 128)); // Reddish Pink
     colors.push_back(Pixel(127, 130, 187)); // Blue-gray
     colors.push_back(Pixel(117, 22, 63)); // Plum
+
+    colors.push_back(Pixel(55, 125, 34)); // Green
+    colors.push_back(Pixel(55, 126, 71)); // Forest
+    colors.push_back(Pixel(54, 126, 127)); // Dark Teal
+    colors.push_back(Pixel(80, 127, 128)); // Teal
+    colors.push_back(Pixel(24, 62, 12)); // Dark Green
+    //colors.push_back(Pixel(23, 63, 63)); // Dark Teal
+    colors.push_back(Pixel(116, 27, 124)); // Dark Purple
+    colors.push_back(Pixel(57, 16, 123)); // Crayon Purple
+    colors.push_back(Pixel(0, 0, 0)); // Black
+    colors.push_back(Pixel(128, 128, 128)); // Gray
+    colors.push_back(Pixel(192, 192, 192)); // Light Gray
+    colors.push_back(Pixel(255, 255, 255)); // White
+
+    colors.push_back(Pixel(255, 127, 39)); // Orange
+    colors.push_back(Pixel(185, 122, 87)); // Brown
+    colors.push_back(Pixel(0, 162, 232)); // Turquoise
     return colors;
   }
 
