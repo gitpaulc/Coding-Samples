@@ -54,6 +54,11 @@ public:
   virtual std::pair<double, double> get() const override;
   bool isInt() const;
   virtual std::string print(bool useParentheses = false) const override;
+
+  // Miscellaneous:
+
+  /** \brief Probability of rolling a given integral value > 0, given `numDice` with specified number of faces. Two six-sided dice by default. */
+  static Rational probabilityToRoll(const mp& value, const mp& numFacesOnDice = mp(6), unsigned int numDice = 2);
 };
 }
 

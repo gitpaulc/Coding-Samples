@@ -284,4 +284,36 @@ namespace FunctionalCalculator
     if (useParentheses) { strm << ")"; }
     return strm.str();
   }
+
+  Rational Rational::probabilityToRoll(const mp& value, const mp& numFacesOnDice, unsigned int numDice)
+  {
+    if (numDice == 0) { throw std::invalid_argument("Number of dice must be at least one."); }
+    if (numFacesOnDice < mp(1)) { throw std::invalid_argument("Dice must have at least one face."); }
+    if (value <= 0) { return Rational(0, 1); }
+    static std::map<mp, Rational> probs;
+    {
+      auto it = probs.find(value);
+      if (it != probs.end()) { return it->second; }
+    }
+    mp limit = numFacesOnDice * mp((int)numDice);
+    if (value > limit) { return Rational(0, 1); }
+    std::vector<mp> iter(numDice, mp(0));
+    std::vector<mp> diceLim(numDice, numFacesOnDice - mp(1));
+    mp numMatches(0);
+    mp totalCount(0);
+    for (; true; mp::increment(iter, numFacesOnDice))
+    {
+      totalCount = totalCount + mp(1);
+      mp currentSum(0);
+      for (int ii = 0; ii < (int)(iter.size()); ++ii)
+      {
+        currentSum = currentSum + iter[ii] + mp(1);
+      }
+      if (value == currentSum) { numMatches = numMatches + mp(1); }
+      if (iter == diceLim) { break; }
+    }
+    Rational answer(numMatches, totalCount);
+    probs[value] = answer;
+    return answer;
+  }
 }

@@ -98,6 +98,23 @@ namespace FunctionalCalculator
     if (shouldClean) { clean(); }
   }
 
+  void mp::increment(std::vector<mp>& toIncrement, const mp& maxDigitValue)
+  {
+    if (toIncrement.empty()) { throw std::invalid_argument("Vector to increment must have at least one element."); }
+    if (maxDigitValue < mp(1)) { throw std::invalid_argument("Maximum value must be at least 1."); }
+    for (int ii = 0; ii < (int)(toIncrement.size()); ++ii)
+    {
+      if (toIncrement[ii] < mp(0)) { throw std::invalid_argument("Vector elements must be nonnegative."); }
+      if (toIncrement[ii] >= maxDigitValue) { throw std::invalid_argument("Vector elements must be strictly less than max. digit value."); }
+    }
+    for (int ii = 0; ii < (int)(toIncrement.size()); ++ii)
+    {
+      toIncrement[ii] = toIncrement[ii] + mp(1);
+      if (toIncrement[ii] < maxDigitValue) { break; }
+      toIncrement[ii] = mp(0);
+    }
+  }
+
   int mp::numDigits() const
   {
     if (self.empty()) { return 0; }

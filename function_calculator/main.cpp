@@ -829,6 +829,7 @@ bool test_mp()
 
 bool test_rational()
 {
+  std::string prompt = "";
   Rational zero;
   std::cout << "\nZero = " << zero.print();
   Rational one;
@@ -857,6 +858,24 @@ bool test_rational()
   std::cout << "\nPrime factorization of 100 = " << hundred.printFactors();
   Rational myNum = Rational(-24, 138);
   std::cout << "\nPrime factorization of -24 / 138 = " << myNum.printFactors();
+
+  std::cout << "\n\nMore... or 'T' to end current test?  ";
+  std::cin >> prompt;
+  if ((prompt.compare("T") == 0) || (prompt.compare("t") == 0)) { return true; }
+  std::cout << "\n\nWith two six-sided dice...";
+  for (mp ii = mp(0); ii < mp(14); ii = ii + mp(1))
+  {
+    std::cout << "\nProbability to roll " << ii << " = " << Rational::probabilityToRoll(ii).print();
+  }
+  std::cout << "\nThis is why 7 is considered lucky. It has the highest probability to be rolled!\nThese numbers add up to ";
+  {
+    Rational probSum(0, 1);
+    for (mp ii = mp(0); ii < mp(14); ii = ii + mp(1))
+    {
+      probSum = probSum + Rational::probabilityToRoll(ii);
+    }
+    std::cout << probSum.print() << ".";
+  }
   return true;
 }
 
