@@ -31,6 +31,10 @@ public:
 
   int getDigit(int i) const;
   void setDigit(int i, int val);
+  /** Given a vector (a_0, ..., a_{N-1}) of integers of the form a_0 + a_1 * R + ... + a_{N-1} * R^{N-1}, increases it by 1.
+  *  Here `R` is the maxDigitValue.
+  */
+  static void increment(std::vector<mp>& toIncrement, const mp& maxDigitValue);
   int numDigits() const;
   int toInt() const;
   static mp gcd(const mp& aa, const mp& bb);
