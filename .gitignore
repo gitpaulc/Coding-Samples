@@ -107,3 +107,8 @@ mesh_renderer/MeshRenderer/Release
 mesh_renderer/MeshRenderer/RelWithDebInfo
 mesh_renderer/MeshRenderer/RelWithDebugInfo
 mesh_renderer/MeshRenderer/x64
+
+PlayParser/.vs
+PlayParser/bin
+PlayParser/obj
+PlayParser/Plays/*/ScenesOut*
