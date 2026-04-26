@@ -8,7 +8,7 @@ namespace function_calculator_cs
 {
 
 /** \brief A number which is the sum of square roots of integers. */
-public class QuadraticNumber
+public class QuadraticNumber : IComparable<QuadraticNumber>, IFieldElement<QuadraticNumber>
 {
   static private Dictionary<QuadraticNumber, QuadraticNumber> divisionResults;
   /** \brief The keys represent which numbers the square roots are taken of. The values are coefficients.
@@ -689,6 +689,284 @@ public class QuadraticNumber
    *  This means that a should be a multiple of 1/12 so that pi * a includes the usual values of pi / 2, pi / 4, pi / 3, and pi / 6.
    */
   //public static Boolean tryGetSine(const Rational& input, QuadraticNumber& output);
+
+  // IComparable<QuadraticNumber>
+  public int CompareTo(QuadraticNumber? other)
+  {
+    if (other is null) return 1;
+    if (this == other) return 0;
+    return (this < other) ? -1 : 1;
+  }
+
+  // IFieldElement<QuadraticNumber>
+  public QuadraticNumber Add(QuadraticNumber rhs) => this + rhs;
+  public QuadraticNumber Sub(QuadraticNumber rhs) => this - rhs;
+  public QuadraticNumber Mul(QuadraticNumber rhs) => this * rhs;
+  public QuadraticNumber Div(QuadraticNumber rhs) => this / rhs;
+  public QuadraticNumber Neg() => -(this);
+  public bool IsZero()
+  {
+    var zero_ = Rational.zero();
+    foreach (var iter in content) { if (iter.Value != zero_) return false; }
+    return true;
+  }
+  public bool FieldEquals(QuadraticNumber other) => this == other;
+  public int FieldCompareTo(QuadraticNumber other) => CompareTo(other);
+  public string Print(bool useParentheses = false) => ToString(useParentheses);
+  public static QuadraticNumber FieldZero() => zero();
+  public static QuadraticNumber FieldOne() => new QuadraticNumber(new Rational(1));
+
+  public int getNumRootsInSum() => content.Count;
+  public SortedSet<mp> getSummandRoots()
+  {
+    var s = new SortedSet<mp>();
+    foreach (var k in content.Keys) { s.Add(new mp(k)); }
+    return s;
+  }
+
+  private void clean()
+  {
+    var zero_ = Rational.zero();
+    var mpZero = mp.zero();
+    var toRemove = new List<mp>();
+    foreach (var iter in content)
+    {
+      if (iter.Key == mpZero || iter.Value == zero_) { toRemove.Add(new mp(iter.Key)); }
+    }
+    foreach (var k in toRemove) { content.Remove(k); }
+  }
+
+  private QuadraticNumber coeffsAbs()
+  {
+    var answer = new QuadraticNumber(this);
+    var zero_ = Rational.zero();
+    var updates = new List<KeyValuePair<mp, Rational>>();
+    foreach (var iter in answer.content)
+    {
+      if (iter.Value < zero_) { updates.Add(new KeyValuePair<mp, Rational>(new mp(iter.Key), -iter.Value)); }
+    }
+    foreach (var kv in updates) { answer.content[kv.Key] = kv.Value; }
+    return answer;
+  }
+
+  private static Dictionary<QuadraticNumber, HashSet<QuadraticNumber>> sIteratesCache = new();
+
+  private HashSet<QuadraticNumber> getIterates0()
+  {
+    var answer = new HashSet<QuadraticNumber>();
+    if (content.Count == 0) { return answer; }
+    {
+      if (sIteratesCache.TryGetValue(this, out var cached)) { return cached; }
+    }
+    var firstEntry = content.First();
+    if (!firstEntry.Value.isInt())
+    {
+      throw new System.Exception("Use integral quadratic number for intermediate prime factorization.");
+    }
+    var lim = firstEntry.Value.numerator();
+    bool isNeg = (lim < mp.zero());
+    var absLim = isNeg ? -lim : new mp(lim);
+    var mpZero = mp.zero();
+    var mpOne = new mp(1);
+
+    if (content.Count == 1)
+    {
+      for (var ind = mpZero; ind <= absLim; ind = ind + mpOne)
+      {
+        var quad = new QuadraticNumber();
+        var coeff = isNeg ? -ind : new mp(ind);
+        quad.content[firstEntry.Key] = new Rational(coeff, mpOne);
+        answer.Add(quad);
+      }
+      sIteratesCache[this] = answer;
+      return answer;
+    }
+
+    var other = new QuadraticNumber();
+    foreach (var jter in content)
+    {
+      if (jter.Key == firstEntry.Key) { continue; }
+      other.content[new mp(jter.Key)] = jter.Value;
+    }
+    var smaller = other.getIterates0();
+
+    for (var ind = mpZero; ind <= absLim; ind = ind + mpOne)
+    {
+      foreach (var remaining in smaller)
+      {
+        var quad = new QuadraticNumber();
+        var coeff = isNeg ? -ind : new mp(ind);
+        quad.content[firstEntry.Key] = new Rational(coeff, mpOne);
+        foreach (var jter in remaining.content) { quad.content[new mp(jter.Key)] = jter.Value; }
+        answer.Add(quad);
+      }
+    }
+    sIteratesCache[this] = answer;
+    return answer;
+  }
+
+  private HashSet<QuadraticNumber> getIterates()
+  {
+    var iterates0 = getIterates0();
+    var iterates = new HashSet<QuadraticNumber>();
+    foreach (var iterate0 in iterates0)
+    {
+      var iterate = new QuadraticNumber(iterate0);
+      iterate.clean();
+      if (iterate.IsZero()) { continue; }
+      Rational rationalVal = new Rational();
+      if (iterate.getRational(ref rationalVal)) { continue; }
+      {
+        var coeffs = new List<mp>();
+        foreach (var iter in iterate.content) { coeffs.Add(iter.Value.numerator()); }
+        if (coeffs.Count > 0)
+        {
+          var g = mp.gcd(coeffs);
+          if (g != new mp(1) && g != new mp(-1)) { continue; }
+        }
+      }
+      iterates.Add(iterate);
+    }
+    return iterates;
+  }
+
+  private Dictionary<QuadraticNumber, int> primeFacIntegral()
+  {
+    var input = new QuadraticNumber(this);
+    var answer = new Dictionary<QuadraticNumber, int>();
+    var lim = input.coeffsAbs();
+    var sieved = new HashSet<QuadraticNumber>();
+    var iterates = input.getIterates();
+    bool foundFactor = false;
+
+    foreach (var init in iterates)
+    {
+      if (foundFactor) { break; }
+      for (var factor = new QuadraticNumber(init); factor.coeffsAbs() < lim; factor = factor + init)
+      {
+        if (sieved.Contains(factor)) { continue; }
+        sieved.Add(new QuadraticNumber(factor));
+        var quotient = input / factor;
+        if (!iterates.Contains(quotient)) { continue; }
+        if (factor == input) { continue; }
+        foundFactor = true;
+        if (!answer.ContainsKey(factor)) { answer[factor] = 1; }
+        else { answer[factor]++; }
+        var others = quotient.primeFacIntegral();
+        foreach (var iter in others)
+        {
+          if (!answer.ContainsKey(iter.Key)) { answer[iter.Key] = iter.Value; }
+          else { answer[iter.Key] += iter.Value; }
+        }
+        break;
+      }
+    }
+    if (!foundFactor) { answer[input] = 1; }
+    return answer;
+  }
+
+  public Dictionary<QuadraticNumber, int> primeFactorization()
+  {
+    var input = new QuadraticNumber(this);
+    var answer = new Dictionary<QuadraticNumber, int>();
+    {
+      Rational inputAsRational = new Rational();
+      if (input.getRational(ref inputAsRational))
+      {
+        var factors = inputAsRational.primeFactorization();
+        foreach (var iter in factors)
+        {
+          answer[new QuadraticNumber(new Rational(new mp(iter.Key), new mp(1)))] = iter.Value;
+        }
+        return answer;
+      }
+    }
+    if (input < zero())
+    {
+      answer[new QuadraticNumber(new Rational(new mp(-1), new mp(1)))] = 1;
+      input = -input;
+    }
+    {
+      var asIntegral = input.factorAsIntegral();
+      input = asIntegral.Key;
+      var factors = new Rational(new mp(1), asIntegral.Value).primeFactorization();
+      foreach (var iter in factors)
+      {
+        if (iter.Key == new mp(1)) { continue; }
+        answer[new QuadraticNumber(new Rational(new mp(iter.Key), new mp(1)))] = iter.Value;
+      }
+    }
+    var fac = input.primeFacIntegral();
+    foreach (var iter in fac)
+    {
+      if (!answer.ContainsKey(iter.Key)) { answer[iter.Key] = iter.Value; }
+      else { answer[iter.Key] += iter.Value; }
+    }
+    return answer;
+  }
+
+  public KeyValuePair<QuadraticNumber, QuadraticNumber> separateSquaredPart()
+  {
+    if (this == zero()) { return new KeyValuePair<QuadraticNumber, QuadraticNumber>(zero(), zero()); }
+    var a = new QuadraticNumber(new Rational(1));
+    var b = new QuadraticNumber(new Rational(1));
+    var factors = primeFactorization();
+    foreach (var iter in factors)
+    {
+      var prim = new QuadraticNumber(iter.Key);
+      int expon = iter.Value;
+      if (expon < 0)
+      {
+        prim = new QuadraticNumber(new Rational(1)) / prim;
+        expon = -expon;
+      }
+      if ((expon % 2) == 1)
+      {
+        a = a * prim.pow((expon - 1) / 2);
+        b = b * prim;
+        continue;
+      }
+      a = a * prim.pow(expon / 2);
+    }
+    return new KeyValuePair<QuadraticNumber, QuadraticNumber>(a, b);
+  }
+
+  public bool simpleSquareRoot(out QuadraticNumber quadSqrt)
+  {
+    quadSqrt = zero();
+    if (content.Count > 2) { return false; }
+    var one_ = new mp(1);
+    if (!content.TryGetValue(one_, out var uu) || uu is null) { return false; }
+    if (content.Count == 1)
+    {
+      if (uu < Rational.zero()) { return false; }
+      quadSqrt = sqrt(uu);
+      return true;
+    }
+    Rational vv = new Rational();
+    mp dd_key = new mp(1);
+    foreach (var jter in content)
+    {
+      if (jter.Key == one_) { continue; }
+      vv = jter.Value;
+      dd_key = new mp(jter.Key);
+      break;
+    }
+    var dd = new Rational(new mp(dd_key), new mp(1));
+    var two = new Rational(2);
+    var radicand = uu * uu - vv * vv * dd;
+    if (radicand < Rational.zero()) { return false; }
+    var rad = sqrt(radicand);
+    Rational radical = new Rational();
+    if (!rad.getRational(ref radical)) { return false; }
+    var a2 = (uu + radical) / two;
+    if (a2 < Rational.zero()) { return false; }
+    var aa = sqrt(a2);
+    var bb = new QuadraticNumber(vv) / (aa + aa);
+    var sqrtDD = sqrt(dd);
+    quadSqrt = aa + bb * sqrtDD;
+    return true;
+  }
 }
 }
 
