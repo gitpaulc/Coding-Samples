@@ -121,24 +121,39 @@ namespace PlayParser
     }
 
 
-    public static void Main()
+    public static string GetPlaysFolder()
     {
-      var plays = new SortedSet<string>();
+      var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+      return Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\PlayParser\Plays"));
+    }
+
+    public static List<Play> RunPlays()
+    {
+      var result = new List<Play>();
+      var playNames = new SortedSet<string>();
       for (int ii = 0; ii < (int)Play.PlayEnum.NumPlays; ++ii)
-      {
-        plays.Add(Play.GetPlayName((Play.PlayEnum)ii));
-      }
-      foreach (var playName in plays)
+        playNames.Add(Play.GetPlayName((Play.PlayEnum)ii));
+
+      var rootFolder = GetPlaysFolder();
+      foreach (var playName in playNames)
       {
         Play play = new Play();
         play.ResetPlay(playName);
-
-        var rootFolder = "..\\..\\..\\..\\PlayParser\\Plays";
-        var playFolder = rootFolder + "\\" + play.playName;
+        var playFolder = rootFolder + "\\" + playName;
         play.CopyTrimmedScenes(playFolder);
         play.WriteCounts(playFolder);
         play.PrintStatistics(playFolder);
+        result.Add(play);
       }
+      return result;
+    }
+
+    [STAThread]
+    public static void Main()
+    {
+      Application.EnableVisualStyles();
+      Application.SetCompatibleTextRenderingDefault(false);
+      Application.Run(new PlayParserForm());
     }
   }
 }
