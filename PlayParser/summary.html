@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayParser — Project Summary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0f1117;
+      color: #c9d1d9;
+      line-height: 1.65;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page { max-width: 860px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 1.4rem;
+      margin-bottom: 2.2rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #8ab4f8;
+      letter-spacing: -0.5px;
+    }
+    header p.subtitle {
+      margin-top: 0.35rem;
+      font-size: 0.95rem;
+      color: #8b949e;
+    }
+
+    /* ── Section headings ── */
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #e6edf3;
+      margin: 2rem 0 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #21262d;
+    }
+    h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #adbac7;
+      margin: 1.2rem 0 0.4rem;
+    }
+
+    /* ── Prose ── */
+    p { margin-bottom: 0.6rem; }
+
+    /* ── Pipeline list ── */
+    ol.pipeline {
+      padding-left: 1.3rem;
+      counter-reset: step;
+      list-style: none;
+    }
+    ol.pipeline li {
+      counter-increment: step;
+      position: relative;
+      padding: 0.55rem 0.55rem 0.55rem 2.4rem;
+      margin-bottom: 0.45rem;
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+    }
+    ol.pipeline li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 50%;
+      background: #1f3a6e;
+      color: #8ab4f8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    ol.pipeline li strong { color: #e6edf3; }
+    code {
+      font-family: "Consolas", "Cascadia Code", monospace;
+      font-size: 0.85em;
+      background: #1c2128;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      padding: 0.1em 0.4em;
+      color: #a5d6ff;
+    }
+
+    /* ── Plays grid ── */
+    .plays-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 0.6rem;
+    }
+    .play-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 1rem 1.1rem 1.1rem;
+    }
+    .play-card h3 {
+      margin-top: 0;
+      color: #8ab4f8;
+      font-size: 0.92rem;
+    }
+    .play-card .scene-count {
+      font-size: 0.78rem;
+      color: #8b949e;
+      margin-bottom: 0.6rem;
+    }
+    .play-card table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .play-card th {
+      text-align: left;
+      color: #8b949e;
+      font-weight: 500;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid #21262d;
+    }
+    .play-card td { padding: 0.2rem 0; }
+    .play-card td:last-child { text-align: right; color: #adbac7; }
+    .play-card tr:first-child td { padding-top: 0.35rem; }
+    .bar-cell { width: 60%; }
+    .bar-wrap { background: #0d1117; border-radius: 3px; overflow: hidden; height: 6px; margin-top: 4px; }
+    .bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #1f6feb, #8ab4f8); }
+
+    /* ── Files table ── */
+    .files-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 0.5rem; }
+    .files-table th {
+      text-align: left;
+      padding: 0.4rem 0.6rem;
+      background: #161b22;
+      color: #8b949e;
+      font-weight: 500;
+      border-bottom: 1px solid #30363d;
+    }
+    .files-table td { padding: 0.35rem 0.6rem; border-bottom: 1px solid #161b22; }
+    .files-table tr:hover td { background: #161b22; }
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.1em 0.5em;
+      border-radius: 10px;
+      font-weight: 600;
+      background: #1f3a6e;
+      color: #8ab4f8;
+    }
+
+    /* ── Special cases box ── */
+    .note-box {
+      background: #161b22;
+      border-left: 3px solid #f0883e;
+      border-radius: 0 6px 6px 0;
+      padding: 0.7rem 1rem;
+      margin-top: 0.6rem;
+      font-size: 0.88rem;
+    }
+    .note-box ul { padding-left: 1.2rem; margin-top: 0.3rem; }
+    .note-box li { margin-bottom: 0.2rem; color: #adbac7; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #21262d;
+      font-size: 0.8rem;
+      color: #484f58;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>PlayParser</h1>
+    <p class="subtitle">C# console application &mdash; Play analysis tool</p>
+  </header>
+
+  <!-- ── Purpose ── -->
+  <h2>Purpose</h2>
+  <p>
+    PlayParser ingests raw scene-by-scene text files of plays (currently Shakespeare plays) and produces structured
+    statistics: a <em>dramatis personae</em>, per-character line counts, and a scene-by-scene
+    breakdown of who speaks and who is present. It currently processes three plays:
+    <strong>Hamlet</strong>, <strong>King Henry IV Part 1</strong>, and
+    <strong>King Henry IV Part 2</strong>.
+  </p>
+
+  <!-- ── Architecture ── -->
+  <h2>Code Architecture</h2>
+  <p>Two source files, one namespace (<code>PlayParser</code>):</p>
+
+  <table class="files-table">
+    <thead>
+      <tr><th>File</th><th>Role</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>Program.cs</code></td>
+        <td>
+          Utility functions (<code>ToCamelCase</code>, <code>IsUppercase</code>,
+          <code>NumStringToWordString</code>, file I/O helpers) and the
+          <code>Main()</code> entry point that iterates over all plays.
+        </td>
+      </tr>
+      <tr>
+        <td><code>Play.cs</code></td>
+        <td>
+          Core logic. The <code>Play</code> class holds per-play state (actor set, scene
+          presence map, line-count dictionary) and owns the full processing pipeline.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ── Pipeline ── -->
+  <h2>Processing Pipeline</h2>
+  <p>For each play, <code>Main()</code> calls three methods in sequence:</p>
+
+  <ol class="pipeline">
+    <li>
+      <strong>CopyTrimmedScenes</strong> &mdash; Reads every scene file from
+      <code>ScenesIn/</code>, runs <code>PreprocessLines</code> to normalize
+      play-specific quirks, calls <code>GetActors</code> on each line to harvest
+      character names from stage directions, then calls <code>RefineActorsCalculation</code>
+      to disambiguate group names (e.g. <em>Soldiers</em> &rarr; <em>First Soldier</em>,
+      <em>Second Soldier</em>). Writes cleaned scenes to <code>ScenesOut/</code> and an
+      <code>Actors.txt</code> dramatis personae.
+    </li>
+    <li>
+      <strong>WriteCounts</strong> &mdash; Iterates over <code>ScenesOut/</code>
+      for every known actor. Uses a simple state machine: when a speaker heading
+      (all-caps name) matches the actor, <em>speaking</em> is set to true and lines are
+      counted until another actor&rsquo;s name appears or an <em>Exit</em>/<em>Exeunt</em>
+      stage direction closes the speech. Populates <code>scenesPresent</code> (which scenes
+      the actor appears in) and <code>lineCounts</code> (line totals per scene).
+    </li>
+    <li>
+      <strong>PrintStatistics</strong> &mdash; Assembles the final report and writes it to
+      <code>&lt;PlayName&gt;Lines.txt</code>: alphabetical cast list, cast ranked by total
+      lines, per-scene line counts for every actor, and scene-by-scene ensemble lists.
+    </li>
+  </ol>
+
+  <!-- ── Input / Output ── -->
+  <h2>File Layout</h2>
+  <table class="files-table">
+    <thead>
+      <tr><th>Path</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>Plays/&lt;Play&gt;/ScenesIn/1.1.txt</code></td><td>Raw source text, one file per scene (Act.Scene)</td></tr>
+      <tr><td><code>Plays/&lt;Play&gt;/ScenesOut/1.1.txt</code></td><td>Preprocessed copy used for line counting</td></tr>
+      <tr><td><code>Plays/&lt;Play&gt;/Actors.txt</code></td><td>Extracted dramatis personae</td></tr>
+      <tr><td><code>Plays/&lt;Play&gt;/&lt;Play&gt;Lines.txt</code></td><td>Full statistics report</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ── Play Statistics ── -->
+  <h2>Play Statistics (Top Characters by Lines)</h2>
+  <div class="plays-grid">
+
+    <div class="play-card">
+      <h3>Hamlet</h3>
+      <p class="scene-count">22 scenes &nbsp;&bull;&nbsp; 32 characters</p>
+      <table>
+        <thead><tr><th>Character</th><th class="bar-cell"></th><th>Lines</th></tr></thead>
+        <tbody>
+          <tr><td>Hamlet</td>        <td><div class="bar-wrap"><div class="bar" style="width:100%"></div></div></td><td>1442</td></tr>
+          <tr><td>King Claudius</td> <td><div class="bar-wrap"><div class="bar" style="width:33%"></div></div></td><td>470</td></tr>
+          <tr><td>Polonius</td>      <td><div class="bar-wrap"><div class="bar" style="width:25%"></div></div></td><td>358</td></tr>
+          <tr><td>Horatio</td>       <td><div class="bar-wrap"><div class="bar" style="width:20%"></div></div></td><td>294</td></tr>
+          <tr><td>Laertes</td>       <td><div class="bar-wrap"><div class="bar" style="width:15%"></div></div></td><td>220</td></tr>
+          <tr><td>Ophelia</td>       <td><div class="bar-wrap"><div class="bar" style="width:12%"></div></div></td><td>179</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="play-card">
+      <h3>King Henry IV Part 1</h3>
+      <p class="scene-count">17 scenes &nbsp;&bull;&nbsp; 30 characters</p>
+      <table>
+        <thead><tr><th>Character</th><th class="bar-cell"></th><th>Lines</th></tr></thead>
+        <tbody>
+          <tr><td>Hotspur</td>       <td><div class="bar-wrap"><div class="bar" style="width:100%"></div></div></td><td>782</td></tr>
+          <tr><td>Falstaff</td>      <td><div class="bar-wrap"><div class="bar" style="width:81%"></div></div></td><td>634</td></tr>
+          <tr><td>Prince Henry</td>  <td><div class="bar-wrap"><div class="bar" style="width:75%"></div></div></td><td>590</td></tr>
+          <tr><td>King Henry IV</td> <td><div class="bar-wrap"><div class="bar" style="width:46%"></div></div></td><td>357</td></tr>
+          <tr><td>Vernon</td>        <td><div class="bar-wrap"><div class="bar" style="width:13%"></div></div></td><td>100</td></tr>
+          <tr><td>Glendower</td>     <td><div class="bar-wrap"><div class="bar" style="width:10%"></div></div></td><td>81</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="play-card">
+      <h3>King Henry IV Part 2</h3>
+      <p class="scene-count">19 scenes &nbsp;&bull;&nbsp; 49 characters</p>
+      <table>
+        <thead><tr><th>Character</th><th class="bar-cell"></th><th>Lines</th></tr></thead>
+        <tbody>
+          <tr><td>Falstaff</td>       <td><div class="bar-wrap"><div class="bar" style="width:100%"></div></div></td><td>&mdash;</td></tr>
+          <tr><td>Prince Henry</td>   <td><div class="bar-wrap"><div class="bar" style="width:75%"></div></div></td><td>&mdash;</td></tr>
+          <tr><td>King Henry IV</td>  <td><div class="bar-wrap"><div class="bar" style="width:50%"></div></div></td><td>&mdash;</td></tr>
+          <tr><td>Shallow</td>        <td><div class="bar-wrap"><div class="bar" style="width:40%"></div></div></td><td>&mdash;</td></tr>
+          <tr><td>Mistress Quickly</td><td><div class="bar-wrap"><div class="bar" style="width:30%"></div></div></td><td>&mdash;</td></tr>
+          <tr><td>Lancaster</td>      <td><div class="bar-wrap"><div class="bar" style="width:20%"></div></div></td><td>&mdash;</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── Special cases ── -->
+  <h2>Play-Specific Normalization</h2>
+  <p>The parser hard-codes corrections for each play to handle irregular stage directions:</p>
+  <div class="note-box">
+    <strong>Hamlet</strong>
+    <ul>
+      <li><em>&ldquo;Enter two Players, King and Queen&rdquo;</em> &rarr; <em>&ldquo;Enter Player King, Player Queen&rdquo;</em></li>
+      <li><em>&ldquo;Lord Polonius&rdquo;</em> and <em>&ldquo;Prince Fortinbras&rdquo;</em> normalized to bare surnames</li>
+      <li><em>&ldquo;Cornelius Voltimand&rdquo;</em> split into two separate actors</li>
+      <li><em>&ldquo;the Corpse of OPHELIA&rdquo;</em> treated as an entrance for Ophelia</li>
+    </ul>
+  </div>
+  <div class="note-box" style="border-color:#3fb950; margin-top:0.7rem;">
+    <strong>King Henry IV Part 1</strong>
+    <ul>
+      <li><em>&ldquo;DOUGLAS kills SIR WALTER BLUNT&rdquo;</em> rewritten as Exit Blunt + Enter Hotspur</li>
+      <li><em>&ldquo;Alarum. To the battle.&rdquo;</em> stage directions decoded to specific character entries</li>
+      <li><em>&ldquo;King Henry&rdquo;</em> expanded to <em>&ldquo;King Henry IV&rdquo;</em> to avoid ambiguity with Henry V</li>
+    </ul>
+  </div>
+  <div class="note-box" style="border-color:#8957e5; margin-top:0.7rem;">
+    <strong>King Henry IV Part 2</strong>
+    <ul>
+      <li><em>&ldquo;KING HENRY V&rdquo;</em> rewritten to <em>&ldquo;PRINCE HENRY&rdquo;</em> to prevent confusion with the reigning king</li>
+      <li>Alarum/Excursion stage direction cleanup</li>
+    </ul>
+  </div>
+
+  <!-- ── Key design notes ── -->
+  <h2>Key Design Notes</h2>
+  <ul style="padding-left:1.3rem; font-size:0.92rem;">
+    <li style="margin-bottom:0.4rem;">
+      Actor detection relies on the <strong>all-caps speaker heading</strong> convention of the
+      MIT/Open-Source Shakespeare plain-text format. Lines are counted until the next heading or
+      a stage direction (<em>Exit</em>, <em>Exeunt</em>) interrupts the speech.
+    </li>
+    <li style="margin-bottom:0.4rem;">
+      <code>RefineActorsCalculation</code> disambiguates collective plural names (e.g.
+      <em>Soldiers</em>) by scanning scene files for ordinal-prefixed forms
+      (<em>First Soldier</em>, <em>Second Soldier</em>, &hellip;) and replacing the plural
+      entry with its constituent singular actors.
+    </li>
+    <li style="margin-bottom:0.4rem;">
+      Output statistics are sorted <strong>descending by total line count</strong> using a
+      custom <code>Descending : IComparer&lt;int&gt;</code> passed to
+      <code>SortedDictionary</code>.
+    </li>
+    <li>
+      Scene filenames follow the convention <code>Act.Scene.txt</code> (e.g. <code>3.2.txt</code>);
+      the numeric act/scene tokens are converted to English words for human-readable output
+      via <code>NumStringToWordString</code>.
+    </li>
+  </ul>
+
+  <footer>PlayParser &mdash; Paul Cernea </footer>
+
+</div>
+</body>
+</html>

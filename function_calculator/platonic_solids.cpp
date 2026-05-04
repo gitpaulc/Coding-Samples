@@ -218,6 +218,10 @@ namespace FunctionalCalculator
 
   std::set<Matrix<BiquadraticNumber> > getTetrahedralSymmetries(bool includeReflections)
   {
+    static std::set<Matrix<BiquadraticNumber> > tetrSyms;
+    static std::set<Matrix<BiquadraticNumber> > tetrSymsRefl;
+    if (!includeReflections && (tetrSyms.size() > 0)) { return tetrSyms; }
+    if (includeReflections && (tetrSymsRefl.size() > 0)) { return tetrSymsRefl; }
     std::set<Matrix<BiquadraticNumber> > tetrahedralSymmetries;
     Matrix<BiquadraticNumber> P;
     P.addRow({ Rational(-1, 3), BiquadraticNumber::sqrt(Rational(2, 3)) * Rational(-1), BiquadraticNumber::sqrt(Rational(2)) * Rational(-1, 3) });
@@ -255,6 +259,8 @@ namespace FunctionalCalculator
       }
       tetrahedralSymmetries = others;
     }
+    if (includeReflections) { tetrSymsRefl = tetrahedralSymmetries; }
+    else { tetrSyms = tetrahedralSymmetries; }
     return tetrahedralSymmetries;
   }
 
@@ -328,6 +334,11 @@ namespace FunctionalCalculator
 
   std::set<Matrix<BiquadraticNumber> > getSymmetriesOfACube(bool includeReflections)
   {
+    static std::set<Matrix<BiquadraticNumber> > octaSyms;
+    static std::set<Matrix<BiquadraticNumber> > octaSymsRefl;	
+    if (!includeReflections && (octaSyms.size() > 0)) { return octaSyms; }
+    if (includeReflections && (octaSymsRefl.size() > 0)) { return octaSymsRefl; }
+
     std::set<Matrix<BiquadraticNumber> > octahedralSymmetries;
     Matrix<BiquadraticNumber> P;
     P.addRow({ Rational(0), Rational(0), Rational(1) });
@@ -372,6 +383,8 @@ namespace FunctionalCalculator
       }
       octahedralSymmetries = others;
     }
+    if (includeReflections) { octaSymsRefl = octahedralSymmetries; }
+    else { octaSyms = octahedralSymmetries; }
     return octahedralSymmetries;
   }
 
@@ -1318,6 +1331,10 @@ namespace FunctionalCalculator
 
   std::set<Matrix<BiquadraticNumber> > getIcosahedralSymmetries(bool includeReflections)
   {
+    static std::set<Matrix<BiquadraticNumber> > icosaSyms;
+    static std::set<Matrix<BiquadraticNumber> > icosaSymsRefl;
+    if (!includeReflections && (icosaSyms.size() > 0)) { return icosaSyms; }
+    if (includeReflections && (icosaSymsRefl.size() > 0)) { return icosaSymsRefl; }
     BiquadraticNumber::setExtraSimplification(true);
     std::set<Matrix<BiquadraticNumber> > icosahedralSymmetries;
     static std::map<int, Matrix<BiquadraticNumber> > sDodecahedron;
@@ -1464,6 +1481,8 @@ namespace FunctionalCalculator
       }
       icosahedralSymmetries = others;
     }
+    if (includeReflections) { icosaSymsRefl = icosahedralSymmetries; }
+    else { icosaSyms = icosahedralSymmetries; }
     BiquadraticNumber::setExtraSimplification(false);
     return icosahedralSymmetries;
   }

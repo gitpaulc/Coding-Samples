@@ -65,6 +65,14 @@ namespace function_calculator_cs
 
     private void InitializeComponent()
     {
+      var bg         = Color.FromArgb(20, 22, 35);
+      var consoleBg  = Color.FromArgb(11, 13, 22);
+      var consoleFg  = Color.FromArgb(200, 215, 240);
+      var inputBg    = Color.FromArgb(28, 32, 50);
+      var labelFg    = Color.FromArgb(175, 185, 210);
+      var border     = Color.FromArgb(55, 65, 95);
+      var opBg       = Color.FromArgb(52, 85, 175);
+
       continueBtn = new Button();
       endCurrentTest = new Button();
       console = new TextBox();
@@ -84,144 +92,197 @@ namespace function_calculator_cs
       reciprocalBtn = new Button();
       SuspendLayout();
 
-      continueBtn.Location = new Point(694, 559);
+      continueBtn.Location = new Point(694, 603);
       continueBtn.Name = "continueBtn";
       continueBtn.Size = new Size(94, 29);
       continueBtn.TabIndex = 0;
       continueBtn.Text = "Continue";
-      continueBtn.UseVisualStyleBackColor = true;
+      continueBtn.FlatStyle = FlatStyle.Flat;
+      continueBtn.BackColor = Color.FromArgb(30, 115, 140);
+      continueBtn.ForeColor = Color.White;
+      continueBtn.FlatAppearance.BorderColor = border;
       continueBtn.Click += OnContinue;
 
-      endCurrentTest.Location = new Point(549, 559);
+      endCurrentTest.Location = new Point(549, 603);
       endCurrentTest.Name = "endCurrentTest";
       endCurrentTest.Size = new Size(138, 29);
       endCurrentTest.TabIndex = 1;
       endCurrentTest.Text = "End Current Test";
-      endCurrentTest.UseVisualStyleBackColor = true;
+      endCurrentTest.FlatStyle = FlatStyle.Flat;
+      endCurrentTest.BackColor = Color.FromArgb(145, 100, 25);
+      endCurrentTest.ForeColor = Color.White;
+      endCurrentTest.FlatAppearance.BorderColor = border;
       endCurrentTest.Click += OnEndCurrentTest;
 
-      console.Location = new Point(12, 12);
+      console.Location = new Point(12, 56);
       console.Multiline = true;
       console.Name = "console";
       console.ReadOnly = true;
-      console.Size = new Size(776, 438);
+      console.Size = new Size(776, 430);
       console.TabIndex = 2;
+      console.BackColor = consoleBg;
+      console.ForeColor = consoleFg;
+      console.Font = new Font("Consolas", 9.5F);
+      console.BorderStyle = BorderStyle.None;
+      console.ScrollBars = ScrollBars.Vertical;
 
-      testBtn.Location = new Point(12, 559);
+      testBtn.Location = new Point(12, 603);
       testBtn.Name = "testBtn";
       testBtn.Size = new Size(94, 29);
       testBtn.TabIndex = 3;
       testBtn.Text = "Run Tests";
-      testBtn.UseVisualStyleBackColor = true;
+      testBtn.FlatStyle = FlatStyle.Flat;
+      testBtn.BackColor = Color.FromArgb(75, 52, 148);
+      testBtn.ForeColor = Color.White;
+      testBtn.FlatAppearance.BorderColor = border;
       testBtn.Click += OnTestClicked;
 
-      numberInput.Location = new Point(195, 453);
+      numberInput.Location = new Point(195, 497);
       numberInput.Name = "numberInput";
       numberInput.Size = new Size(593, 27);
       numberInput.TabIndex = 4;
+      numberInput.BackColor = inputBg;
+      numberInput.ForeColor = Color.White;
+      numberInput.BorderStyle = BorderStyle.FixedSingle;
       numberInput.KeyUp += HandleKeyUp;
 
       enterIntegerLbl.AutoSize = true;
-      enterIntegerLbl.Location = new Point(12, 456);
+      enterIntegerLbl.Location = new Point(12, 500);
       enterIntegerLbl.Name = "enterIntegerLbl";
       enterIntegerLbl.Size = new Size(161, 20);
       enterIntegerLbl.TabIndex = 5;
       enterIntegerLbl.Text = "Enter a whole number: ";
+      enterIntegerLbl.ForeColor = labelFg;
+      enterIntegerLbl.BackColor = Color.Transparent;
       enterIntegerLbl.Click += OnNumberLabelClick;
 
-      okBtn.Location = new Point(694, 486);
+      okBtn.Location = new Point(694, 530);
       okBtn.Name = "okBtn";
       okBtn.Size = new Size(94, 29);
       okBtn.TabIndex = 6;
       okBtn.Text = "OK";
-      okBtn.UseVisualStyleBackColor = true;
+      okBtn.FlatStyle = FlatStyle.Flat;
+      okBtn.BackColor = Color.FromArgb(38, 125, 70);
+      okBtn.ForeColor = Color.White;
+      okBtn.FlatAppearance.BorderColor = Color.FromArgb(60, 165, 100);
       okBtn.Click += OnOK;
 
-      divisionBtn.Location = new Point(614, 486);
+      divisionBtn.Location = new Point(614, 530);
       divisionBtn.Name = "divisionBtn";
       divisionBtn.Size = new Size(34, 29);
       divisionBtn.TabIndex = 7;
       divisionBtn.Text = "÷";
-      divisionBtn.UseVisualStyleBackColor = true;
+      divisionBtn.FlatStyle = FlatStyle.Flat;
+      divisionBtn.BackColor = opBg;
+      divisionBtn.ForeColor = Color.White;
+      divisionBtn.FlatAppearance.BorderColor = border;
       divisionBtn.Click += OnDiv;
 
-      timesBtn.Location = new Point(574, 486);
+      timesBtn.Location = new Point(574, 530);
       timesBtn.Name = "timesBtn";
       timesBtn.Size = new Size(34, 29);
       timesBtn.TabIndex = 8;
       timesBtn.Text = "×";
-      timesBtn.UseVisualStyleBackColor = true;
+      timesBtn.FlatStyle = FlatStyle.Flat;
+      timesBtn.BackColor = opBg;
+      timesBtn.ForeColor = Color.White;
+      timesBtn.FlatAppearance.BorderColor = border;
       timesBtn.Click += OnTimes;
 
-      minusBtn.Location = new Point(534, 486);
+      minusBtn.Location = new Point(534, 530);
       minusBtn.Name = "minusBtn";
       minusBtn.Size = new Size(34, 29);
       minusBtn.TabIndex = 9;
-      minusBtn.Text = "-";
-      minusBtn.UseVisualStyleBackColor = true;
+      minusBtn.Text = "−";
+      minusBtn.FlatStyle = FlatStyle.Flat;
+      minusBtn.BackColor = opBg;
+      minusBtn.ForeColor = Color.White;
+      minusBtn.FlatAppearance.BorderColor = border;
       minusBtn.Click += OnMinus;
 
-      plusBtn.Location = new Point(494, 486);
+      plusBtn.Location = new Point(494, 530);
       plusBtn.Name = "plusBtn";
       plusBtn.Size = new Size(34, 29);
       plusBtn.TabIndex = 10;
       plusBtn.Text = "+";
-      plusBtn.UseVisualStyleBackColor = true;
+      plusBtn.FlatStyle = FlatStyle.Flat;
+      plusBtn.BackColor = opBg;
+      plusBtn.ForeColor = Color.White;
+      plusBtn.FlatAppearance.BorderColor = border;
       plusBtn.Click += OnPlus;
 
-      powerBtn.Location = new Point(653, 486);
+      powerBtn.Location = new Point(653, 530);
       powerBtn.Name = "powerBtn";
       powerBtn.Size = new Size(34, 29);
       powerBtn.TabIndex = 11;
       powerBtn.Text = "^";
-      powerBtn.UseVisualStyleBackColor = true;
+      powerBtn.FlatStyle = FlatStyle.Flat;
+      powerBtn.BackColor = opBg;
+      powerBtn.ForeColor = Color.White;
+      powerBtn.FlatAppearance.BorderColor = border;
       powerBtn.Click += OnPower;
 
-      cancelBtn.Location = new Point(694, 521);
+      cancelBtn.Location = new Point(694, 565);
       cancelBtn.Name = "cancelBtn";
       cancelBtn.Size = new Size(94, 29);
       cancelBtn.TabIndex = 12;
       cancelBtn.Text = "Cancel";
-      cancelBtn.UseVisualStyleBackColor = true;
+      cancelBtn.FlatStyle = FlatStyle.Flat;
+      cancelBtn.BackColor = Color.FromArgb(145, 40, 40);
+      cancelBtn.ForeColor = Color.White;
+      cancelBtn.FlatAppearance.BorderColor = Color.FromArgb(185, 60, 60);
       cancelBtn.Click += OnCancel;
 
-      undoBtn.Location = new Point(594, 521);
+      undoBtn.Location = new Point(594, 565);
       undoBtn.Name = "undoBtn";
       undoBtn.Size = new Size(94, 29);
       undoBtn.TabIndex = 13;
       undoBtn.Text = "Undo";
-      undoBtn.UseVisualStyleBackColor = true;
+      undoBtn.FlatStyle = FlatStyle.Flat;
+      undoBtn.BackColor = Color.FromArgb(58, 68, 92);
+      undoBtn.ForeColor = labelFg;
+      undoBtn.FlatAppearance.BorderColor = border;
       undoBtn.Click += OnUndo;
 
-      redoBtn.Location = new Point(195, 486);
+      redoBtn.Location = new Point(195, 530);
       redoBtn.Name = "redoBtn";
       redoBtn.Size = new Size(94, 29);
       redoBtn.TabIndex = 14;
       redoBtn.Text = "Redo";
-      redoBtn.UseVisualStyleBackColor = true;
+      redoBtn.FlatStyle = FlatStyle.Flat;
+      redoBtn.BackColor = Color.FromArgb(58, 68, 92);
+      redoBtn.ForeColor = labelFg;
+      redoBtn.FlatAppearance.BorderColor = border;
       redoBtn.Click += OnRedo;
 
       checkSqrt.AutoSize = true;
-      checkSqrt.Location = new Point(12, 486);
+      checkSqrt.Location = new Point(12, 530);
       checkSqrt.Name = "checkSqrt";
       checkSqrt.Size = new Size(160, 24);
       checkSqrt.TabIndex = 15;
       checkSqrt.Text = "Taking square root?";
-      checkSqrt.UseVisualStyleBackColor = true;
+      checkSqrt.UseVisualStyleBackColor = false;
+      checkSqrt.BackColor = bg;
+      checkSqrt.ForeColor = labelFg;
       checkSqrt.CheckedChanged += OnCheckSqrt;
       checkSqrt.KeyUp += HandleKeyUp;
 
-      reciprocalBtn.Location = new Point(450, 486);
+      reciprocalBtn.Location = new Point(450, 530);
       reciprocalBtn.Name = "reciprocalBtn";
       reciprocalBtn.Size = new Size(38, 29);
       reciprocalBtn.TabIndex = 16;
       reciprocalBtn.Text = "1/x";
-      reciprocalBtn.UseVisualStyleBackColor = true;
+      reciprocalBtn.FlatStyle = FlatStyle.Flat;
+      reciprocalBtn.BackColor = opBg;
+      reciprocalBtn.ForeColor = Color.White;
+      reciprocalBtn.FlatAppearance.BorderColor = border;
       reciprocalBtn.Click += OnReciprocal;
 
       AutoScaleDimensions = new SizeF(8F, 20F);
       AutoScaleMode = AutoScaleMode.Font;
-      ClientSize = new Size(800, 600);
+      BackColor = bg;
+      ClientSize = new Size(800, 644);
+      Font = new Font("Segoe UI", 9.5F);
       Controls.Add(reciprocalBtn);
       Controls.Add(checkSqrt);
       Controls.Add(redoBtn);
