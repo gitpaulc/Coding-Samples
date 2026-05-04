@@ -142,6 +142,7 @@ namespace PlayParser
         var playFolder = rootFolder + "\\" + playName;
         play.CopyTrimmedScenes(playFolder);
         play.WriteCounts(playFolder);
+        play.DetectGenders(playFolder);
         play.PrintStatistics(playFolder);
         result.Add(play);
       }

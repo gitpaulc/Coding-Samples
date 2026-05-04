@@ -1,5 +1,6 @@
 
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PlayParser
 {
@@ -14,6 +15,17 @@ namespace PlayParser
             sb.Append(Footer());
             return sb.ToString();
         }
+
+        // ── ID / slug helpers ─────────────────────────────────────────────────
+
+        private static string Slug(string s) =>
+            Regex.Replace(s.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+
+        private static string ActorId(string playSlug, string actor) =>
+            $"actor-{playSlug}-{Slug(actor)}";
+
+        private static string SceneId(string playSlug, string filename) =>
+            $"scene-{playSlug}-{Slug(Path.GetFileNameWithoutExtension(filename))}";
 
         // ── Scene filename helpers ────────────────────────────────────────────
 
@@ -53,6 +65,7 @@ namespace PlayParser
 
         private static string PlaySection(Play play)
         {
+            string playSlug = Slug(play.playName);
             var totalCounts = play.TotalLineCounts();
             var actorsOrdered = totalCounts
                 .OrderByDescending(kvp => kvp.Value)
@@ -67,19 +80,18 @@ namespace PlayParser
                 .ToList();
 
             var sb = new StringBuilder();
-            sb.Append($"<section class='play'><h2>{H(play.playName)}</h2>");
-
-            sb.Append(BarChart(actorsOrdered, totalCounts, maxLines));
-            sb.Append(ActorTable(play, actorsOrdered, totalCounts));
-            sb.Append(SceneTable(allScenes, sceneActors));
-
+            sb.Append($"<section class='play' id='play-{playSlug}'><h2>{H(play.playName)}</h2>");
+            sb.Append(BarChart(actorsOrdered, totalCounts, maxLines, playSlug));
+            sb.Append(ActorTable(play, actorsOrdered, totalCounts, playSlug));
+            sb.Append(SceneTable(allScenes, sceneActors, playSlug));
             sb.Append("</section>");
             return sb.ToString();
         }
 
         // ── Bar chart ────────────────────────────────────────────────────────
 
-        private static string BarChart(List<string> actors, Dictionary<string, int> totals, int maxLines)
+        private static string BarChart(List<string> actors, Dictionary<string, int> totals,
+            int maxLines, string playSlug)
         {
             var sb = new StringBuilder();
             sb.Append("<h3>Lines per Actor</h3><div class='barchart'>");
@@ -87,9 +99,10 @@ namespace PlayParser
             {
                 int n = totals.TryGetValue(actor, out int v) ? v : 0;
                 double pct = maxLines > 0 ? n * 100.0 / maxLines : 0;
+                string aid = ActorId(playSlug, actor);
                 sb.Append(
                     $"<div class='bar-row'>" +
-                    $"<span class='bar-name'>{H(actor)}</span>" +
+                    $"<span class='bar-name'><a href='#{aid}'>{H(actor)}</a></span>" +
                     $"<div class='bar-track'>" +
                     $"<div class='bar-fill' style='width:{pct:F1}%'>" +
                     $"<span class='bar-label'>{n}</span>" +
@@ -101,7 +114,8 @@ namespace PlayParser
 
         // ── Actor appearances table ───────────────────────────────────────────
 
-        private static string ActorTable(Play play, List<string> actors, Dictionary<string, int> totals)
+        private static string ActorTable(Play play, List<string> actors,
+            Dictionary<string, int> totals, string playSlug)
         {
             var sb = new StringBuilder();
             sb.Append(
@@ -112,6 +126,7 @@ namespace PlayParser
 
             foreach (var actor in actors)
             {
+                string aid = ActorId(playSlug, actor);
                 int total = totals.TryGetValue(actor, out int t) ? t : 0;
                 var scenes = play.scenesPresent.TryGetValue(actor, out var sl) ? sl : new List<string>();
                 var sceneParts = scenes
@@ -119,13 +134,15 @@ namespace PlayParser
                     .Select(f =>
                     {
                         string label = SceneLabel(f);
+                        string sid = SceneId(playSlug, f);
+                        string link = $"<a href='#{sid}'>{H(label)}</a>";
                         if (play.lineCounts.TryGetValue(actor, out var sd) && sd.TryGetValue(f, out int lc))
-                            return $"{label} ({lc})";
-                        return $"{label} (entrance)";
+                            return $"{link} ({lc})";
+                        return $"{link} (entrance)";
                     });
 
                 sb.Append(
-                    $"<tr><td class='actor-cell'>{H(actor)}</td>" +
+                    $"<tr id='{aid}'><td class='actor-cell'>{H(actor)}</td>" +
                     $"<td class='num-cell'>{total}</td>" +
                     $"<td class='scene-list'>{string.Join(", ", sceneParts)}</td></tr>");
             }
@@ -136,7 +153,8 @@ namespace PlayParser
 
         // ── Cast-per-scene table ──────────────────────────────────────────────
 
-        private static string SceneTable(List<string> scenes, Dictionary<string, List<string>> sceneActors)
+        private static string SceneTable(List<string> scenes,
+            Dictionary<string, List<string>> sceneActors, string playSlug)
         {
             var sb = new StringBuilder();
             sb.Append(
@@ -148,12 +166,15 @@ namespace PlayParser
             bool alt = false;
             foreach (var scene in scenes)
             {
+                string sid = SceneId(playSlug, scene);
                 var actors = sceneActors.TryGetValue(scene, out var al) ? al : new List<string>();
                 string rowClass = alt ? " class='alt'" : "";
+                var actorLinks = actors.Select(a =>
+                    $"<a href='#{ActorId(playSlug, a)}'>{H(a)}</a>");
                 sb.Append(
-                    $"<tr{rowClass}>" +
+                    $"<tr{rowClass} id='{sid}'>" +
                     $"<td class='scene-cell'>{H(SceneLabelLong(scene))}</td>" +
-                    $"<td>{H(string.Join(", ", actors))}</td></tr>");
+                    $"<td>{string.Join(", ", actorLinks)}</td></tr>");
                 alt = !alt;
             }
 
@@ -181,6 +202,9 @@ h2{font-size:1.35rem;font-weight:600;color:#e6edf3;margin:2rem 0 1rem;
   padding-bottom:0.5rem;border-bottom:2px solid #21262d;}
 h3{font-size:0.95rem;font-weight:600;color:#adbac7;margin:1.6rem 0 0.6rem;
   text-transform:uppercase;letter-spacing:0.04em;}
+/* links */
+a{color:inherit;text-decoration:none;}
+a:hover{text-decoration:underline;opacity:0.85;}
 /* bar chart */
 .barchart{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem;}
 .bar-row{display:flex;align-items:center;gap:8px;}

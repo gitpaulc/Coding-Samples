@@ -24,6 +24,7 @@ namespace PlayParser
     public SortedSet<string> Actors = new SortedSet<string>();
     public Dictionary<string, List<string> > scenesPresent = new Dictionary<string, List<string>>();
     public Dictionary<string, Dictionary<string, int> > lineCounts = new Dictionary<string, Dictionary<string, int> >();
+    public Dictionary<string, ActorGender> actorGenders = new Dictionary<string, ActorGender>();
 
     public void ResetPlay(string nameOfPlay)
     {
@@ -31,6 +32,7 @@ namespace PlayParser
       Actors.Clear();
       scenesPresent.Clear();
       lineCounts.Clear();
+      actorGenders.Clear();
     }
 
     public Dictionary<string, List<string> > GetActorsInEachScene()
@@ -213,7 +215,7 @@ namespace PlayParser
       }
       else if (playName == GetPlayName(PlayEnum.Henry1))
       {
-        if (word == "King Henry") { word = "King Henry IV"; }
+        if (word == "King Henry") { word = "King"; }
       }
       return word;
     }
@@ -245,7 +247,7 @@ namespace PlayParser
       }
       else if (playName == GetPlayName(PlayEnum.Henry1))
       {
-        matches.Add("King Henry IV");
+        matches.Add("King");
         matches.Add("Sir Walter Blunt");
         matches.Add("Douglas");
         matches.Add("Falstaff");
@@ -277,6 +279,8 @@ namespace PlayParser
       line = line.Replace(", a ", ", ");
       line = line.Replace(" and ", ", ");
       line = line.Replace(", and", ", ");
+      if (line.StartsWith("the ")) line = line.Substring(4);
+      line = line.Replace(", the ", ", ");
       var words = line.Split(", ");
       foreach (var word0 in words)
       {
@@ -454,6 +458,13 @@ namespace PlayParser
           if (lineCount > 0) { lineCounts[actor][filename] = lineCount; }
         }
       }
+    }
+
+    public void DetectGenders(string folderName)
+    {
+      var sceneFiles = System.IO.Directory.GetFiles(folderName + "\\ScenesOut");
+      foreach (var actor in Actors)
+        actorGenders[actor] = GenderDetector.Detect(actor, sceneFiles);
     }
 
     public class Descending : IComparer<int>
