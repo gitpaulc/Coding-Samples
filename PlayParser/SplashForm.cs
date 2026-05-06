@@ -1,5 +1,6 @@
 
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 
@@ -7,77 +8,107 @@ namespace PlayParser
 {
     public class SplashForm : Form
     {
-        private readonly System.Windows.Forms.Timer _timer = new() { Interval = 2000 };
+        private readonly System.Windows.Forms.Timer _lingerTimer = new() { Interval = 5000 };
+        private readonly Bitmap    _shakespeareBmp;
+        private readonly Rectangle _imageRect;
+        private bool  _canDismiss = false;
+        private readonly Panel _canvas;
 
         public SplashForm()
         {
             FormBorderStyle = FormBorderStyle.None;
             StartPosition   = FormStartPosition.CenterScreen;
-            ClientSize      = new Size(600, 340);
-            BackColor       = Color.FromArgb(13, 17, 23);
+            ClientSize      = new Size(900, 540);
+            BackColor       = Color.Black;
             TopMost         = true;
 
-            string splashPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "splash.png");
-            Image img = File.Exists(splashPath) ? Image.FromFile(splashPath) : MakePlaceholder();
+            string shakePath    = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "shakespeare.png");
+            _shakespeareBmp     = File.Exists(shakePath) ? new Bitmap(shakePath) : MakeSolid(Color.DimGray);
+            _imageRect          = CalcZoomRect(_shakespeareBmp.Size, new Rectangle(0, 0, 900, 540));
 
-            var pb = new PictureBox
+            _canvas = new DoubleBufferedPanel { Dock = DockStyle.Fill, BackColor = Color.Black };
+            _canvas.Paint += (_, e) => DrawFrame(e.Graphics);
+            _canvas.Click += (_, _) => { if (_canDismiss) Close(); };
+            Controls.Add(_canvas);
+
+            _lingerTimer.Tick += (_, _) =>
             {
-                Image    = img,
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Dock     = DockStyle.Fill,
-                BackColor = Color.FromArgb(13, 17, 23)
+                _lingerTimer.Stop();
+                _canDismiss = true;
+                _canvas.Invalidate();
             };
-            pb.Click += (_, _) => Close();
-            Controls.Add(pb);
-
-            _timer.Tick += (_, _) => { _timer.Stop(); Close(); };
-            _timer.Start();
+            _lingerTimer.Start();
         }
 
-        private Image MakePlaceholder()
+        private static Rectangle CalcZoomRect(Size imgSize, Rectangle panel)
         {
-            const int W = 600, H = 340;
-            var bmp = new Bitmap(W, H);
-            using var g = Graphics.FromImage(bmp);
-            g.SmoothingMode      = SmoothingMode.AntiAlias;
-            g.TextRenderingHint  = TextRenderingHint.ClearTypeGridFit;
-            g.Clear(Color.FromArgb(13, 17, 23));
-
-            // Subtle gradient band across the middle
-            using var grad = new LinearGradientBrush(
-                new Rectangle(0, 80, W, 180),
-                Color.FromArgb(30, 100, 80, 200),
-                Color.FromArgb(0, 13, 17, 23),
-                LinearGradientMode.Vertical);
-            g.FillRectangle(grad, 0, 80, W, 180);
-
-            // Shakespeare icon on the left
-            string icoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "shakespeare.ico");
-            if (File.Exists(icoPath))
+            double imgAR   = (double)imgSize.Width / imgSize.Height;
+            double panelAR = (double)panel.Width   / panel.Height;
+            int w, h, x, y;
+            if (imgAR > panelAR)
             {
-                using var icon = new Icon(icoPath, 128, 128);
-                using var iconBmp = icon.ToBitmap();
-                g.DrawImage(iconBmp, 70, 80, 160, 160);
+                w = panel.Width;
+                h = (int)(panel.Width / imgAR);
+                x = 0;
+                y = (panel.Height - h) / 2;
             }
-
-            // Title
-            using var titleFont    = new Font("Segoe UI", 38, FontStyle.Bold,    GraphicsUnit.Pixel);
-            using var subtitleFont = new Font("Segoe UI", 16, FontStyle.Regular, GraphicsUnit.Pixel);
-            using var hintFont     = new Font("Segoe UI",  11, FontStyle.Italic,  GraphicsUnit.Pixel);
-            using var titleBr    = new SolidBrush(Color.FromArgb(201, 209, 217));
-            using var subtitleBr = new SolidBrush(Color.FromArgb(139, 148, 158));
-            using var hintBr     = new SolidBrush(Color.FromArgb(72, 79, 88));
-
-            g.DrawString("Play Parser",             titleFont,    titleBr,    270, 108);
-            g.DrawString("Theatrical Viewing App", subtitleFont, subtitleBr, 272, 158);
-            g.DrawString("Paul Cernea",            subtitleFont, subtitleBr, 272, 184);
-            g.DrawString("Click to continue",      hintFont,     hintBr,     272, 270);
-
-            // Bottom rule
-            using var rule = new Pen(Color.FromArgb(33, 38, 45), 1);
-            g.DrawLine(rule, 0, H - 1, W, H - 1);
-
-            return bmp;
+            else
+            {
+                h = panel.Height;
+                w = (int)(panel.Height * imgAR);
+                x = (panel.Width - w) / 2;
+                y = 0;
+            }
+            return new Rectangle(x, y, w, h);
         }
+
+        private void DrawFrame(Graphics g)
+        {
+            g.InterpolationMode  = InterpolationMode.HighQualityBicubic;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+
+            g.DrawImage(_shakespeareBmp, _imageRect,
+                        0, 0, _shakespeareBmp.Width, _shakespeareBmp.Height, GraphicsUnit.Pixel);
+
+            if (_canDismiss)
+                DrawText(g);
+        }
+
+        private static void DrawText(Graphics g)
+        {
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+            using var titleFont    = new Font("Segoe UI", 56, FontStyle.Bold,    GraphicsUnit.Pixel);
+            using var subtitleFont = new Font("Segoe UI", 24, FontStyle.Regular, GraphicsUnit.Pixel);
+            using var hintFont     = new Font("Segoe UI", 16, FontStyle.Italic,  GraphicsUnit.Pixel);
+            using var whiteBr      = new SolidBrush(Color.White);
+
+            g.DrawString("Play Parser",            titleFont,    whiteBr, 405, 162);
+            g.DrawString("Theatrical Viewing App", subtitleFont, whiteBr, 408, 237);
+            g.DrawString("Paul Cernea",            subtitleFont, whiteBr, 408, 270);
+            g.DrawString("Click to continue",      hintFont,     whiteBr, 408, 405);
+        }
+
+        private static Bitmap MakeSolid(Color c)
+        {
+            var b = new Bitmap(1, 1);
+            b.SetPixel(0, 0, c);
+            return b;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _lingerTimer.Dispose();
+                _shakespeareBmp.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    internal sealed class DoubleBufferedPanel : Panel
+    {
+        public DoubleBufferedPanel() { DoubleBuffered = true; }
     }
 }
