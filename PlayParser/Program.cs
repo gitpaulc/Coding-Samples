@@ -3,6 +3,8 @@ namespace PlayParser
 {
   public static class Program
   {
+    private static PlayParserForm? ppf = null;
+
     public static bool IsUppercase(string str)
     {
       if (str.Length == 0) { return false; }
@@ -149,12 +151,17 @@ namespace PlayParser
       return result;
     }
 
+    public static PlayParserForm? GetPlayParserForm() { return ppf; }
+
     [STAThread]
     public static void Main()
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      Application.Run(new PlayParserForm());
+      using (var splash = new SplashForm())
+        splash.ShowDialog();
+      ppf = new PlayParserForm();
+      Application.Run(ppf);
     }
   }
 }

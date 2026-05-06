@@ -6,6 +6,9 @@ namespace PlayParser
 {
     public class PlayParserForm : Form
     {
+        Play? recentScenePlay = null;
+        string recentScenePath = "";
+
         // ── Layout constants ──────────────────────────────────────────────────
         private const int TabStripHeight = 60;
         private const int TabBtnReportWidth = 120;
@@ -45,6 +48,14 @@ namespace PlayParser
             Size = new Size(1440, 900);
             MinimumSize = new Size(900, 600);
             StartPosition = FormStartPosition.CenterScreen;
+
+            try
+            {
+                var icoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "shakespeare.ico");
+                if (File.Exists(icoPath))
+                    Icon = new Icon(icoPath);
+            }
+            catch { }
 
             BuildToolStrip();
             BuildStatusStrip();
@@ -410,22 +421,22 @@ namespace PlayParser
             if (!sceneWebViewReady) return;
             if (playCombo.SelectedIndex < 0 || sceneCombo.SelectedItem is not SceneItem item) return;
 
-            var play = lastPlays[playCombo.SelectedIndex];
-            var path = Path.Combine(Program.GetPlaysFolder(), play.playName, "ScenesOut", item.Filename);
-            if (!File.Exists(path)) return;
+            recentScenePlay = lastPlays[playCombo.SelectedIndex];
+            recentScenePath = Path.Combine(Program.GetPlaysFolder(), recentScenePlay.playName, "ScenesOut", item.Filename);
+            if (!File.Exists(recentScenePath)) return;
 
             // Repopulate actor combo without re-triggering a render
-            _actorColors = SceneViewer.BuildColorMap(play);
+            _actorColors = SceneViewer.BuildColorMap(recentScenePlay);
             actorCombo.SelectedIndexChanged -= ActorCombo_Changed;
             actorCombo.Items.Clear();
             actorCombo.Items.Add("None");
-            foreach (var actor in SceneViewer.GetSceneActors(play, path))
+            foreach (var actor in SceneViewer.GetSceneActors(recentScenePlay, recentScenePath))
                 actorCombo.Items.Add(actor);
             actorCombo.SelectedIndex = 0;
             actorCombo.SelectedIndexChanged += ActorCombo_Changed;
             UpdateColorSwatch();
 
-            sceneWebView.NavigateToString(SceneViewer.RenderScene(play, path));
+            sceneWebView.NavigateToString(SceneViewer.RenderScene(recentScenePlay, recentScenePath));
         }
 
         private void UpdateColorSwatch()
@@ -447,23 +458,32 @@ namespace PlayParser
             if (playCombo.SelectedIndex < 0) return;
             string? actorKey = actorCombo.SelectedItem as string;
             if (actorKey == null || actorKey == "None") return;
-            using var dlg = new ActorInfoForm(lastPlays[playCombo.SelectedIndex], actorKey);
+            using var dlg = new ActorInfoForm(lastPlays[playCombo.SelectedIndex], actorKey, recentScenePath);
             dlg.ShowDialog(this);
         }
 
-        private void ActorCombo_Changed(object? sender, EventArgs e)
+        public string? GetHighlightActor()
         {
-            if (!sceneWebViewReady) return;
-            if (playCombo.SelectedIndex < 0 || sceneCombo.SelectedItem is not SceneItem item) return;
-
-            var play = lastPlays[playCombo.SelectedIndex];
-            var path = Path.Combine(Program.GetPlaysFolder(), play.playName, "ScenesOut", item.Filename);
-            if (!File.Exists(path)) return;
-
-            UpdateColorSwatch();
             string? highlight = actorCombo.SelectedItem as string;
             if (highlight == "None") highlight = null;
-            sceneWebView.NavigateToString(SceneViewer.RenderScene(play, path, highlight));
+            // Update highlighting in-place via JS so the scroll position is preserved.
+            var actor = (highlight ?? "").Replace("\\", "\\\\").Replace("'", "\\'");
+            return actor;
+        }
+
+        private async void ActorCombo_Changed(object? sender, EventArgs e)
+        {
+            if (!sceneWebViewReady) return;
+            UpdateColorSwatch();
+            var actor = GetHighlightActor();
+            await sceneWebView.ExecuteScriptAsync(
+                $"typeof setHighlightActor==='function'&&setHighlightActor('{actor}')");
+        }
+
+        public void RerenderScene()
+        {
+            if (recentScenePlay == null || !sceneWebViewReady) return;
+            sceneWebView.NavigateToString(SceneViewer.RenderScene(recentScenePlay, recentScenePath));
         }
 
         // ── Save PDF ──────────────────────────────────────────────────────────
