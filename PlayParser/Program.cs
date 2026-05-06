@@ -125,8 +125,16 @@ namespace PlayParser
 
     public static string GetPlaysFolder()
     {
-      var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-      return Path.GetFullPath(Path.Combine(baseDir, @"..\..\..\..\PlayParser\Plays"));
+      var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+      for (int i = 0; i < 8; i++)
+      {
+        var candidate = Path.Combine(dir, "Plays");
+        if (Directory.Exists(candidate)) return candidate;
+        var parent = Path.GetDirectoryName(dir);
+        if (parent == null || parent == dir) break;
+        dir = parent;
+      }
+      return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\PlayParser\Plays"));
     }
 
     public static List<Play> RunPlays()
@@ -142,6 +150,7 @@ namespace PlayParser
         Play play = new Play();
         play.ResetPlay(playName);
         var playFolder = rootFolder + "\\" + playName;
+        play.LoadAuthor(playFolder);
         play.CopyTrimmedScenes(playFolder);
         play.WriteCounts(playFolder);
         play.DetectGenders(playFolder);

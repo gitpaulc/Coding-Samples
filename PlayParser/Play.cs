@@ -9,18 +9,21 @@ namespace PlayParser
       Hamlet = 0,
       Henry1 = 1,
       Henry2 = 2,
-      NumPlays = 3
+      TrojanWomen = 3,
+      NumPlays = 4
     }
 
     public static string GetPlayName(PlayEnum plEnum)
     {
-      if (plEnum == PlayEnum.Henry1) { return "King Henry IV Part 1"; }
-      if (plEnum == PlayEnum.Henry2) { return "King Henry IV Part 2"; }
+      if (plEnum == PlayEnum.Henry1)     { return "King Henry IV Part 1"; }
+      if (plEnum == PlayEnum.Henry2)     { return "King Henry IV Part 2"; }
+      if (plEnum == PlayEnum.TrojanWomen){ return "The Trojan Women"; }
       //if (plEnum == PlayEnum.Hamlet)
       return "Hamlet";
     }
 
     public string playName = "";
+    public string author   = "";
     public SortedSet<string> Actors = new SortedSet<string>();
     public Dictionary<string, List<string> > scenesPresent = new Dictionary<string, List<string>>();
     public Dictionary<string, Dictionary<string, int> > lineCounts = new Dictionary<string, Dictionary<string, int> >();
@@ -29,10 +32,23 @@ namespace PlayParser
     public void ResetPlay(string nameOfPlay)
     {
       playName = nameOfPlay;
+      author   = "";
       Actors.Clear();
       scenesPresent.Clear();
       lineCounts.Clear();
       actorGenders.Clear();
+    }
+
+    public void LoadAuthor(string folderName)
+    {
+      var lines = Program.ReadFileAsLines(folderName + "\\Author.txt");
+      if (lines.Count > 0) author = lines[0].Trim();
+    }
+
+    public static string GetPlayEra(string playName)
+    {
+      if (playName == GetPlayName(PlayEnum.TrojanWomen)) return "Classical";
+      return "Renaissance";
     }
 
     public Dictionary<string, List<string> > GetActorsInEachScene()

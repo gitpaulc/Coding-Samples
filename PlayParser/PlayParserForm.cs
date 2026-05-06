@@ -13,7 +13,7 @@ namespace PlayParser
         private const int TabStripHeight = 60;
         private const int TabBtnReportWidth = 120;
         private const int TabBtnSceneWidth = 150;
-        private const int SceneBarHeight = 36;
+        private const int SceneBarHeight = 72;
         private const int ConsolePanelPercent = 30;
 
         // ── Fields ────────────────────────────────────────────────────────────
@@ -31,6 +31,8 @@ namespace PlayParser
         private Button actorInfoBtn = null!;
         private WebView2 webView = null!;
         private WebView2 sceneWebView = null!;
+        private ComboBox eraCombo = null!;
+        private Label authorLabel = null!;
         private ComboBox playCombo = null!;
         private ComboBox sceneCombo = null!;
         private StatusStrip statusStrip = null!;
@@ -189,43 +191,80 @@ namespace PlayParser
                 Visible = false
             };
 
+            const int Row1Top = 6;   // combo top in row 1
+            const int Row1LblTop = 10; // label top in row 1
+            const int Row2 = 36;       // row 2 base offset
+            const int Row2Top = Row2 + 6;
+            const int Row2LblTop = Row2 + 10;
+
+            // ── Row 1: Era ────────────────────────────────────────────────────
+            var lblEra = new Label
+            {
+                Text = "Era:", AutoSize = true,
+                ForeColor = Color.FromArgb(139, 148, 158),
+                Font = new Font("Segoe UI", 8.5f),
+                Top = Row1LblTop, Left = 8
+            };
+            eraCombo = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Width = 110, Top = Row1Top, Left = 40,
+                Font = new Font("Segoe UI", 8.5f)
+            };
+            eraCombo.Items.Add("Classical");
+            eraCombo.Items.Add("Renaissance");
+            eraCombo.SelectedIndex = 1;
+
+            // ── Row 2: Play + author ──────────────────────────────────────────
             var lblPlay = new Label
             {
                 Text = "Play:", AutoSize = true,
                 ForeColor = Color.FromArgb(139, 148, 158),
                 Font = new Font("Segoe UI", 8.5f),
-                Top = 10, Left = 8
+                Top = Row2LblTop, Left = 8
             };
             playCombo = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 210, Top = 6, Left = 50,
+                Width = 175, Top = Row2Top, Left = 50,
                 Font = new Font("Segoe UI", 8.5f)
             };
+            authorLabel = new Label
+            {
+                Text = "", AutoSize = false, Width = 195, Height = 20,
+                Top = Row2LblTop - 1, Left = 234,
+                ForeColor = Color.FromArgb(100, 110, 120),
+                Font = new Font("Segoe UI", 8.5f, FontStyle.Italic),
+                BackColor = Color.Transparent
+            };
+
+            // ── Row 2: Scene ──────────────────────────────────────────────────
             var lblScene = new Label
             {
                 Text = "Scene:", AutoSize = true,
                 ForeColor = Color.FromArgb(139, 148, 158),
                 Font = new Font("Segoe UI", 8.5f),
-                Top = 10, Left = 272
+                Top = Row2LblTop, Left = 438
             };
             sceneCombo = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 170, Top = 6, Left = 320,
+                Width = 160, Top = Row2Top, Left = 484,
                 Font = new Font("Segoe UI", 8.5f)
             };
+
+            // ── Row 2: Actor ──────────────────────────────────────────────────
             var lblActor = new Label
             {
                 Text = "Actor:", AutoSize = true,
                 ForeColor = Color.FromArgb(139, 148, 158),
                 Font = new Font("Segoe UI", 8.5f),
-                Top = 10, Left = 502
+                Top = Row2LblTop, Left = 656
             };
             actorCombo = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 170, Top = 6, Left = 550,
+                Width = 150, Top = Row2Top, Left = 700,
                 Font = new Font("Segoe UI", 8.5f)
             };
             actorCombo.Items.Add("None");
@@ -234,18 +273,15 @@ namespace PlayParser
             colorSwatch = new Panel
             {
                 Width = 16, Height = 16,
-                Left = 550 + 170 + 6,
-                Top = (SceneBarHeight - 16) / 2,
+                Left = 856, Top = Row2 + (36 - 16) / 2,
                 BackColor = Color.FromArgb(48, 54, 61),
                 Visible = false
             };
-
             actorInfoBtn = new Button
             {
                 Text = "Actor Info",
                 Size = new Size(82, 22),
-                Left = 550 + 170 + 6 + 16 + 8,
-                Top = (SceneBarHeight - 22) / 2,
+                Left = 880, Top = Row2 + (36 - 22) / 2,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(33, 38, 45),
                 ForeColor = Color.FromArgb(201, 209, 217),
@@ -256,10 +292,14 @@ namespace PlayParser
             actorInfoBtn.FlatAppearance.BorderColor = Color.FromArgb(64, 72, 80);
             actorInfoBtn.Click += ActorInfoBtn_Click;
 
+            eraCombo.SelectedIndexChanged  += EraCombo_Changed;
             playCombo.SelectedIndexChanged += PlayCombo_Changed;
             sceneCombo.SelectedIndexChanged += SceneCombo_Changed;
             actorCombo.SelectedIndexChanged += ActorCombo_Changed;
-            sceneBar.Controls.AddRange(new Control[] { lblPlay, playCombo, lblScene, sceneCombo, lblActor, actorCombo, colorSwatch, actorInfoBtn });
+            sceneBar.Controls.AddRange(new Control[] {
+                lblEra, eraCombo, lblPlay, playCombo, authorLabel,
+                lblScene, sceneCombo, lblActor, actorCombo, colorSwatch, actorInfoBtn
+            });
 
             sceneWebView = new WebView2 { Dock = DockStyle.Fill, Visible = false };
 
@@ -390,19 +430,32 @@ namespace PlayParser
 
         private void PopulatePlayCombo()
         {
+            string era = eraCombo.SelectedItem as string ?? "Renaissance";
             playCombo.Items.Clear();
-            foreach (var play in lastPlays)
+            foreach (var play in lastPlays.Where(p => Play.GetPlayEra(p.playName) == era))
                 playCombo.Items.Add(play.playName);
             if (playCombo.Items.Count > 0)
                 playCombo.SelectedIndex = 0;
+            else
+            {
+                authorLabel.Text = "";
+                sceneCombo.Items.Clear();
+            }
         }
+
+        private void EraCombo_Changed(object? sender, EventArgs e) => PopulatePlayCombo();
 
         private void PlayCombo_Changed(object? sender, EventArgs e)
         {
             sceneCombo.Items.Clear();
-            if (playCombo.SelectedIndex < 0 || playCombo.SelectedIndex >= lastPlays.Count) return;
+            string? playName = playCombo.SelectedItem as string;
+            if (playName == null) { authorLabel.Text = ""; return; }
 
-            var play = lastPlays[playCombo.SelectedIndex];
+            var play = lastPlays.FirstOrDefault(p => p.playName == playName);
+            if (play == null) { authorLabel.Text = ""; return; }
+
+            authorLabel.Text = play.author.Length > 0 ? $"by {play.author}" : "";
+
             var scenesOut = Path.Combine(Program.GetPlaysFolder(), play.playName, "ScenesOut");
             if (!Directory.Exists(scenesOut)) return;
 
@@ -419,9 +472,10 @@ namespace PlayParser
         private void SceneCombo_Changed(object? sender, EventArgs e)
         {
             if (!sceneWebViewReady) return;
-            if (playCombo.SelectedIndex < 0 || sceneCombo.SelectedItem is not SceneItem item) return;
+            if (playCombo.SelectedItem is not string playName || sceneCombo.SelectedItem is not SceneItem item) return;
 
-            recentScenePlay = lastPlays[playCombo.SelectedIndex];
+            recentScenePlay = lastPlays.FirstOrDefault(p => p.playName == playName);
+            if (recentScenePlay == null) return;
             recentScenePath = Path.Combine(Program.GetPlaysFolder(), recentScenePlay.playName, "ScenesOut", item.Filename);
             if (!File.Exists(recentScenePath)) return;
 
@@ -455,10 +509,12 @@ namespace PlayParser
 
         private void ActorInfoBtn_Click(object? sender, EventArgs e)
         {
-            if (playCombo.SelectedIndex < 0) return;
+            if (playCombo.SelectedItem is not string playName) return;
             string? actorKey = actorCombo.SelectedItem as string;
             if (actorKey == null || actorKey == "None") return;
-            using var dlg = new ActorInfoForm(lastPlays[playCombo.SelectedIndex], actorKey, recentScenePath);
+            var play = lastPlays.FirstOrDefault(p => p.playName == playName);
+            if (play == null) return;
+            using var dlg = new ActorInfoForm(play, actorKey, recentScenePath);
             dlg.ShowDialog(this);
         }
 
