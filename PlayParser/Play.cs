@@ -1,4 +1,4 @@
-﻿
+
 
 namespace PlayParser
 {
@@ -67,246 +67,101 @@ namespace PlayParser
       return totals;
     }
 
-    bool DetectEnterInGetActors(string line)
+    // Speakers that represent groups rather than individual characters.
+    private static readonly HashSet<string> GroupSpeakers = new(StringComparer.OrdinalIgnoreCase)
     {
-      var words = line.Split(' ');
-      string enterWord = "Enter";
-      foreach (var word in words)
+      "All", "Both", "Danes", "Thieves", "Players", "Lords", "Ladies",
+      "Citizens", "Soldiers", "Officers", "Servants", "Attendants",
+      "Sailors", "Messengers", "Ambassadors", "Voices", "Others", "Princes"
+    };
+
+    // A speaker-label line consists entirely of ALL-CAPS words (plus "and"/"&" connectors).
+    private static bool IsSpeakerLabel(string stripped)
+    {
+      bool hasMultiLetter = false;
+      foreach (var word in stripped.Split(' '))
       {
-        if (word.Equals(enterWord))
+        if (word.Length == 0) continue;
+        if (word.Equals("and", StringComparison.OrdinalIgnoreCase)) continue;
+        if (word == "&") continue;
+        if (!word.All(c => char.IsUpper(c) || c == '-')) return false;
+        if (word.Length >= 2) hasMultiLetter = true;
+      }
+      return hasMultiLetter;
+    }
+
+    // Scan ScenesOut for all-caps speaker-label lines; return canonical CamelCase names.
+    private HashSet<string> ExtractSpeakers(string folderOut)
+    {
+      var speakers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+      var paths = System.IO.Directory.GetFiles(folderOut);
+      foreach (var path in paths)
+      {
+        var lines = Program.ReadFileAsLines(path);
+        foreach (var line in lines)
         {
-          return true;
+          if (line.Length == 0) continue;
+          var stripped = line.TrimEnd('.', '_', '\'', ' ');
+          if (!IsSpeakerLabel(stripped)) continue;
+          if (stripped.StartsWith("SCENE") || stripped.StartsWith("ACT")) continue;
+          var parts = stripped.Split(new[] { " and ", " AND ", " & " },
+                                     StringSplitOptions.RemoveEmptyEntries);
+          foreach (var part in parts)
+          {
+            var name = part.Trim();
+            if (name.Length == 0) continue;
+            var camel = ExpandActorName(Program.ToCamelCase(name));
+            if (!GroupSpeakers.Contains(camel))
+              speakers.Add(camel);
+          }
         }
       }
+      return speakers;
+    }
+
+    // Expand abbreviated speaker labels to canonical character names.
+    // Handles cases like "PRINCE" → "Prince Henry" in the Henry IV plays.
+    public string ExpandActorName(string camelName)
+    {
+      if (playName == GetPlayName(PlayEnum.Henry1) || playName == GetPlayName(PlayEnum.Henry2))
+      {
+        if (camelName.Equals("Prince", StringComparison.OrdinalIgnoreCase))
+          return "Prince Henry";
+      }
+      return camelName;
+    }
+
+    // Check if an actor's name (full or abbreviated first-word) appears in camel-case text.
+    // Used for Exit/Exeunt line matching where actor names are prose, not all-caps labels.
+    private bool ActorAppearsInLine(string actor, string ln)
+    {
+      var camel = Program.ToCamelCase(actor);
+      if (ln.Contains(camel)) return true;
+      // Multi-word actor (e.g. "Prince Henry"): also check first word as short form.
+      var words = camel.Split(' ');
+      if (words.Length > 1 && ln.Contains(words[0])) return true;
       return false;
     }
 
+    // Match speaker-label line against an actor's canonical name.
+    // Handles trailing punctuation ("HAMLET._") and joint labels ("CORNELIUS and VOLTEMAND.").
+    // Requires the line to be an all-caps speaker label so that stage directions like
+    // "Exeunt Voltemand and Cornelius" are never mistaken for a speaker change.
     bool ActorMatchesLine(string actor, string line)
     {
       var ac = Program.ToCamelCase(actor);
-      var ln = Program.ToCamelCase(line);
-      if (playName == GetPlayName(PlayEnum.Hamlet))
+      var stripped = line.TrimEnd('.', '_', '\'', ' ');
+      if (!IsSpeakerLabel(stripped)) return false;
+      var parts = stripped.Split(new[] { " and ", " AND ", " & " },
+                                 StringSplitOptions.RemoveEmptyEntries);
+      foreach (var part in parts)
       {
-        if (ln == "Cornelius Voltimand") { return (ac.Equals("Cornelius") || ac.Equals("Voltimand")); }
-        else if (ln == "Lord Polonius") { ln = "Polonius"; }
-        else if (ln == "Prince Fortinbras") { ln = "Fortinbras"; }
-      }
-      else if (playName == GetPlayName(PlayEnum.Henry1))
-      {
-        if (ln == "Sir Walter Blunt") { ln = "Blunt"; }
-      }
-      return ac.Equals(ln);
-    }
-
-    void RefineActorsCalculation(string folderOut)
-    {
-      SortedSet<string> OldActors = new SortedSet<string>();
-      foreach (var actor in Actors)
-      {
-        OldActors.Add(actor);
-      }
-      Actors.Clear();
-      foreach (var actor in OldActors)
-      {
-        if (actor.Length == 0) { continue; }
-        Actors.Add(actor);
-        if (actor[actor.Length - 1] != 's') { continue; }
-        var singular = actor.Substring(0, actor.Length - 1);
-
-        List<int> counts = new List<int>();
-        for (int ii = 0; ii < 5; ++ii)
-        {
-          counts.Add(0);
-        }
-        Program.Print("Refining " + actor + " occurrences.");
-
-        var paths = System.IO.Directory.GetFiles(folderOut);
-        bool found = false;
-        bool foundFull = false;
-        foreach (var path in paths)
-        {
-          var filename = System.IO.Path.GetFileName(path).Trim();
-          var lines = Program.ReadFileAsLines(path);
-          foreach (var line in lines)
-          {
-            if (!foundFull)
-            {
-              if (ActorMatchesLine(actor, line)) {  foundFull = true; }
-            }
-            string prefix = "First ";
-            for (int ii = 0; ii < 5; ++ii)
-            {
-              if (ii + 1 == 2) { prefix = "Second "; }
-              else if (ii + 1 == 3) { prefix = "Third "; }
-              else if (ii + 1 == 4) { prefix = "Fourth "; }
-              else if (ii + 1 == 5) { prefix = "Fifth "; }
-              if (ActorMatchesLine(prefix + singular, line))
-              {
-                counts[ii]++;
-                Actors.Add(prefix + singular);
-                if (!found)
-                {
-                  Actors.Remove(actor);
-                  found = true;
-                }
-              }
-            }
-          }
-        }
-        if (!foundFull)
-        {
-          Actors.Remove(actor);
-        }
-      }
-    }
-
-    string ReplaceLineInGetActors(string playName, string line)
-    {
-      if (playName == GetPlayName(PlayEnum.Hamlet))
-      {
-        line = line.Replace("captain", "Captain");
-        line = line.Replace("the English Ambassadors", "Ambassadors");
-      }
-      else if (playName == GetPlayName(PlayEnum.Henry1))
-      {
-        if (line.Contains("Alarum"))
-        {
-          if (line.Contains("to the battle"))
-          {
-            line = "KING HENRY, EARL OF DOUGLAS, and SIR WALTER BLUNT";
-          }
-          else if (line.Contains("solus"))
-          {
-            line = "FALSTAFF";
-          }
-          else if (line.Contains("xcursions"))
-          {
-            line = line.Replace("Alarum. Excursions. ", "");
-          }
-        }
-      }
-      else if (playName == GetPlayName(PlayEnum.Henry2))
-      {
-        if (line.Contains("Alarum"))
-        {
-          if (line.Contains("xcursions"))
-          {
-            line = line.Replace("Alarum. Excursions. ", "");
-          }
-        }
-      }
-      return line;
-    }
-
-    bool ShouldReturnByLineInGetActors(string playName, string line)
-    {
-      if (playName == GetPlayName(PlayEnum.Hamlet))
-      {
-        if (line.Contains("very lovingly")) { return true; }
+        var ln = Program.ToCamelCase(part.Trim());
+        if (ac.Equals(ln, StringComparison.OrdinalIgnoreCase)) return true;
+        // Accept if expanding the abbreviated label yields the actor's canonical name.
+        if (ExpandActorName(ln).Equals(ac, StringComparison.OrdinalIgnoreCase)) return true;
       }
       return false;
-    }
-
-    string ReplaceWordInGetActors(string playName, string word)
-    {
-      if (playName == GetPlayName(PlayEnum.Hamlet))
-      {
-        if (word == "Attendants With Foils") { word = "Attendants"; }
-      }
-      else if (playName == GetPlayName(PlayEnum.Henry1))
-      {
-        if (word == "King Henry") { word = "King"; }
-      }
-      return word;
-    }
-
-    private enum WordRes
-    {
-      Okay = 0,
-      Continue = 1,
-      Return = 2
-    }
-
-    WordRes ShouldReturnByWordInGetActors(string playName, string word)
-    {
-      if (playName == GetPlayName(PlayEnum.Hamlet))
-      {
-        if (word == "Queen Margaret") { return WordRes.Continue; }
-        if (word == "Anon") { return WordRes.Return; } // 3.2
-      }
-      return WordRes.Okay;
-    }
-
-    string SeekMatch(string playName, string word)
-    {
-      List<string> matches = new List<string>();
-      if (playName == GetPlayName(PlayEnum.Hamlet))
-      {
-        matches.Add("King Claudius");
-        matches.Add("Francisco");
-      }
-      else if (playName == GetPlayName(PlayEnum.Henry1))
-      {
-        matches.Add("King");
-        matches.Add("Sir Walter Blunt");
-        matches.Add("Douglas");
-        matches.Add("Falstaff");
-        matches.Add("Lancaster");
-        matches.Add("Westmoreland");
-        matches.Add("Vernon");
-        matches.Add("Worcester");
-        foreach (var match in matches)
-        {
-          if (match.Contains(word)) { return match; }
-        }
-      }
-      foreach (var match in matches)
-      {
-        if (word.Contains(match)) { return match; }
-      }
-      return word;
-    }
-
-    void GetActors(string line)
-    {
-      if (!DetectEnterInGetActors(line)) { return; }
-      line = line.Replace("Enter ", "");
-      line = line.Replace(" two ", " ");
-      line = line.Replace("two ", "");
-      line = ReplaceLineInGetActors(playName, line);
-      if (ShouldReturnByLineInGetActors(playName, line)) { return; }
-      line = line.Replace(" a ", " ");
-      line = line.Replace(", a ", ", ");
-      line = line.Replace(" and ", ", ");
-      line = line.Replace(", and", ", ");
-      if (line.StartsWith("the ")) line = line.Substring(4);
-      line = line.Replace(", the ", ", ");
-      var words = line.Split(", ");
-      foreach (var word0 in words)
-      {
-        if (word0.Length == 0) { continue; }
-        var word = word0;
-        if (word0[word0.Length - 1] == ',')
-        {
-          word = word0.Substring(0, word0.Length - 1);
-        }
-        if (word.Length == 0) { continue; }
-        if (word.Equals("Enter")) { continue; }
-        if (!Program.IsUppercase(word)) { continue; }
-        word = Program.ToCamelCase(word);
-        if (word == "A") { continue; }
-        if (word == "The") { continue; }
-        if (word == "He") { continue; }
-        if (word == "She") { continue; }
-        word = SeekMatch(playName, word);
-        word = ReplaceWordInGetActors(playName, word);
-        {
-          var wordRes = ShouldReturnByWordInGetActors(playName, word);
-          if (wordRes == WordRes.Continue) { continue; }
-          if (wordRes == WordRes.Return) { return; }
-        }
-        Actors.Add(word);
-      }
     }
 
     List<string> PreprocessLines(List<string> lines)
@@ -341,14 +196,6 @@ namespace PlayParser
             continue;
           }
         }
-        else if (playName == GetPlayName(PlayEnum.Henry2))
-        {
-          if (line.Contains("KING HENRY V"))
-          {
-            linesOut.Add(line.Replace("KING HENRY V", "PRINCE HENRY"));
-            continue;
-          }
-        }
         linesOut.Add(line);
       }
       return linesOut;
@@ -361,6 +208,8 @@ namespace PlayParser
       {
         System.IO.Directory.CreateDirectory(folderOut);
       }
+
+      // Pass 1: preprocess and write scene files.
       var paths = System.IO.Directory.GetFiles(folderName + "\\ScenesIn");
       foreach (var path in paths)
       {
@@ -368,14 +217,13 @@ namespace PlayParser
         Program.Print("Copying " + filename + ".");
         var lines = Program.ReadFileAsLines(path);
         lines = PreprocessLines(lines);
-        foreach (var line in lines)
-        {
-          GetActors(line);
-        }
         Program.Print(lines, Program.PrintMode.FileOnly, folderOut + "\\" + filename, false);
       }
 
-      RefineActorsCalculation(folderOut);
+      // Seed Actors directly from the canonical speaker labels found in the output.
+      var canonicals = ExtractSpeakers(folderOut);
+      foreach (var c in canonicals)
+        Actors.Add(c);
 
       var actorsFilename = folderName + "\\Actors.txt";
       Program.Print("Writing " + actorsFilename + ".");
@@ -386,15 +234,41 @@ namespace PlayParser
     public bool NotSpeaking(string actor, string line)
     {
       var ln = Program.ToCamelCase(line);
-      if (ln.Contains("Exeunt")) { return true; }
-      if (ln.Contains("Exit")) { return true; }
+
+      // "Exit" — bare exit means the current speaker leaves;
+      // "Exit, [stage direction]" — same (unnamed, current speaker exits with descriptor);
+      // "Exit [Name]" — only the named actor(s) leave.
+      if (ln.StartsWith("Exit"))
+      {
+        var rest = ln.Substring(4).Trim();
+        if (rest.Length == 0 || !char.IsUpper(rest[0])) return true;
+        return ActorAppearsInLine(actor, ln);
+      }
+
+      // "Exeunt" — bare or "Exeunt all" means everyone leaves;
+      // "Exeunt all but X" — everyone except X leaves;
+      // "Exeunt [Names]" — only the named actors leave.
+      if (ln.StartsWith("Exeunt"))
+      {
+        var rest = ln.Substring(6).Trim();
+        if (rest.Length == 0) return true;
+        if (rest.StartsWith("All", StringComparison.OrdinalIgnoreCase))
+        {
+          int butIdx = rest.IndexOf("but ", StringComparison.OrdinalIgnoreCase);
+          if (butIdx >= 0)
+          {
+            var staying = Program.ToCamelCase(rest.Substring(butIdx + 4).Trim());
+            if (ActorAppearsInLine(actor, staying)) return false;
+          }
+          return true;
+        }
+        return ActorAppearsInLine(actor, ln);
+      }
+
       foreach (var actor2 in Actors)
       {
         if (actor == actor2) { continue; }
-        if (ActorMatchesLine(actor2, line))
-        {
-          return true;
-        }
+        if (ActorMatchesLine(actor2, line)) return true;
       }
       return false;
     }
@@ -403,8 +277,15 @@ namespace PlayParser
     {
       if (line.Length == 0) { return false; }
       if (line.StartsWith("Enter ")) { return false; }
+      if (line.StartsWith("Re-enter ")) { return false; }
       if (line.StartsWith("Exit ")) { return false; }
       if (line.StartsWith("Exeunt")) { return false; }
+      if (SceneViewer.IsBloodRedStageDir(line)) { return false; }
+      if (SceneViewer.IsInlineStageDir(line))
+      {
+        var (_, remainder) = SceneViewer.SplitInlineStageDir(line);
+        return remainder.Length > 0; // "Writing." → false; "Within. Hello" → true
+      }
       return true;
     }
 
@@ -412,6 +293,7 @@ namespace PlayParser
     {
       var folderOut = folderName + "\\ScenesOut";
       var paths = System.IO.Directory.GetFiles(folderOut);
+
       foreach (var actor in Actors)
       {
         scenesPresent[actor] = new List<string>();
@@ -419,43 +301,30 @@ namespace PlayParser
 
         foreach (var path in paths)
         {
-          int lineCount = 0;
           bool inScene = false;
           bool theSceneWasStarted = false;
-          bool speaking = false;
           var filename = System.IO.Path.GetFileName(path).Trim();
 
           var lines = Program.ReadFileAsLines(path);
           foreach (var line in lines)
           {
-            if (theSceneWasStarted && (line.StartsWith("Shakespeare homepage"))) { break; }
-            if (speaking)
-            {
-              if (NotSpeaking(actor, line)) { speaking = false; }
-            }
-            if (speaking)
-            {
-              if (LineShouldBeAdded(line))
-              {
-                lineCount++;
-              }
-            }
-            if (ActorMatchesLine(actor, line))
-            {
-              inScene = true;
-              speaking = true;
-              theSceneWasStarted = true;
-            }
-            if (line.Contains("Enter "))
-            {
-              if (Program.ToCamelCase(line).Contains(actor))
-              {
-                inScene = true;
-              }
-            }
+            if (theSceneWasStarted && line.StartsWith("Shakespeare homepage")) break;
+            if (ActorMatchesLine(actor, line)) { inScene = true; theSceneWasStarted = true; }
+            if (line.Contains("Enter ") || line.Contains("Re-enter "))
+              if (ActorAppearsInLine(actor, Program.ToCamelCase(line))) inScene = true;
           }
-          if (inScene) { scenesPresent[actor].Add(filename); }
-          if (lineCount > 0) { lineCounts[actor][filename] = lineCount; }
+          if (inScene) scenesPresent[actor].Add(filename);
+        }
+      }
+
+      // Line counts via scene viewer logic (source of truth).
+      foreach (var path in paths)
+      {
+        var filename = System.IO.Path.GetFileName(path).Trim();
+        foreach (var kvp in SceneViewer.CountSceneLines(this, path))
+        {
+          if (kvp.Value > 0 && lineCounts.ContainsKey(kvp.Key))
+            lineCounts[kvp.Key][filename] = kvp.Value;
         }
       }
     }
@@ -533,10 +402,11 @@ namespace PlayParser
       lines.Add("");
       lines.Add("Dramatis Personae by Scene.");
       var actorsInEachScene = GetActorsInEachScene();
-      var paths = System.IO.Directory.GetFiles(folderName + "\\ScenesIn");
-      foreach (var path in paths)
+      var scenePaths = System.IO.Directory.GetFiles(folderName + "\\ScenesIn");
+      foreach (var path in scenePaths)
       {
         var filename = System.IO.Path.GetFileName(path).Trim();
+        if (!actorsInEachScene.ContainsKey(filename)) continue;
         var actorsHere = actorsInEachScene[filename];
         var actNum = filename.Substring(0, 1);
         var sceneNum = filename.Substring(2, 1);

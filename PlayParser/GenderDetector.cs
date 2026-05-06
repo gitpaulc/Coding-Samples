@@ -21,8 +21,10 @@ namespace PlayParser
         private static readonly HashSet<string> MalePronouns = new(StringComparer.OrdinalIgnoreCase)
             { "he", "his", "him", "himself" };
 
+        // Pronouns plus gendered address words ("Alas, sweet lady"; "How do you, pretty lady?")
+        // that appear near a name mention are strong indicators of the character's gender.
         private static readonly HashSet<string> FemalePronouns = new(StringComparer.OrdinalIgnoreCase)
-            { "she", "her", "hers", "herself" };
+            { "she", "her", "hers", "herself", "lady", "madam", "maid", "maiden", "mistress" };
 
         private static readonly char[] WordSep =
             { ' ', '\t', ',', '.', '!', '?', ';', ':', '(', ')', '[', ']', '\'' };

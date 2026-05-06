@@ -7,7 +7,7 @@ namespace PlayParser
         private const int LabelW = 118;
         private const int ContentW = 360;
 
-        public ActorInfoForm(Play play, string actorKey)
+        public ActorInfoForm(Play play, string actorKey, string currentScenePath = "")
         {
             Text = "Actor Info";
             FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -58,6 +58,15 @@ namespace PlayParser
             // Total lines
             int totalLines = play.TotalLineCounts().TryGetValue(actorKey, out var tl) ? tl : 0;
             AddRow(scroll, "Total lines", totalLines == 0 ? "None" : totalLines.ToString(), ref y);
+
+            // Lines in current scene
+            if (currentScenePath.Length > 0)
+            {
+                string sceneFile = Path.GetFileName(currentScenePath);
+                play.lineCounts.TryGetValue(actorKey, out var lc);
+                int sceneLines = lc != null && lc.TryGetValue(sceneFile, out var sl) ? sl : 0;
+                AddRow(scroll, "Lines in this scene", sceneLines == 0 ? "None" : sceneLines.ToString(), ref y);
+            }
 
             // Scenes
             if (play.scenesPresent.TryGetValue(actorKey, out var scenes) && scenes.Count > 0)
