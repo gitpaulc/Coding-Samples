@@ -271,7 +271,7 @@ namespace PlayParser
                 if (t.StartsWith("SCENE ") || t.StartsWith("ACT "))
                 { currentActor = null; currentActors.Clear(); continue; }
 
-                if (firstContent) { firstContent = false; continue; }
+                if (firstContent) { firstContent = false; if (!StartsWithEnterOrExit(t)) continue; }
 
                 if (StartsWithEnterOrExit(t))
                 {
@@ -362,9 +362,13 @@ namespace PlayParser
                 // First non-blank, non-header line is a location description
                 if (firstContent)
                 {
-                    sb.Append($"<div class='location'>{WebUtility.HtmlEncode(t)}</div>");
                     firstContent = false;
-                    continue;
+                    if (!StartsWithEnterOrExit(t))
+                    {
+                        sb.Append($"<div class='location'>{WebUtility.HtmlEncode(t)}</div>");
+                        continue;
+                    }
+                    // Scene opens with a stage direction — no location line; fall through.
                 }
 
                 // Stage directions
