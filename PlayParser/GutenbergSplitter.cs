@@ -9,18 +9,16 @@ namespace PlayParser
     /// Source files live in the Sources/ folder (sibling of the Plays/ folder):
     ///   Sources/hamlet_pg.txt        — PG eBook #1524
     ///   Sources/complete_works.txt   — PG eBook #100  (Henry IV sections)
-    ///   Sources/trojan_women_pg.txt  — PG eBook #1914 (Murray translation)
+    ///   Sources/trojan_women_pg.txt  — PG eBook #35171 (Murray translation)
     /// </summary>
     public static class GutenbergSplitter
     {
         // ── Regex patterns ────────────────────────────────────────────────────
 
-        private static readonly Regex ActRe   = new(@"^ACT ([IVX]+)\s*$",  RegexOptions.Compiled);
-        private static readonly Regex SceneRe = new(@"^SCENE ([IVX]+)\.",  RegexOptions.Compiled);
+        private static readonly Regex ActRe     = new(@"^ACT ([IVX]+)\s*$",  RegexOptions.Compiled);
+        private static readonly Regex SceneRe   = new(@"^SCENE ([IVX]+)\.",  RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex SpeakerRe = new(@"^[A-Z][A-Z '\-]*\.$", RegexOptions.Compiled);
-
-        // Trojan Women: "SCENE I." / "SCENE II." / "SCENE V." (may or may not have trailing content)
-        private static readonly Regex TwSceneRe = new(@"^SCENE\s+([IVX]+)\.?\s*$", RegexOptions.Compiled);
+        private static readonly Regex StarRe    = new(@"^\s*\*\s*\*\s*\*\s*\*\s*\*\s*$", RegexOptions.Compiled);
 
         // ── Roman numeral helper ──────────────────────────────────────────────
 
@@ -58,6 +56,9 @@ namespace PlayParser
             s = Regex.Replace(s, @"\[_(.*?)_\]", "$1");
 
             // 3. Strip trailing period from speaker name lines ("HAMLET." → "HAMLET")
+            if (SpeakerRe.IsMatch(s.TrimStart()))
+                s = s.TrimStart();
+            s = s.TrimEnd();
             if (SpeakerRe.IsMatch(s))
                 s = s[..^1];
 
@@ -69,6 +70,58 @@ namespace PlayParser
             s = s.TrimStart();
 
             return s;
+        }
+
+        // Extended cleaning for Murray's Trojan Women (PG #35171).
+        // Handles italic _text_ markers and leading [ artifacts.
+        private static string CleanLineTw(string line)
+        {
+            string s = CleanLine(line);
+
+            // Strip _italic_ markers (lone underscores — not [_..._] which CleanLine handled)
+            s = Regex.Replace(s, @"_([^_]+)_", "$1");
+
+            // Strip any residual lone leading underscores
+            s = s.TrimStart('_').TrimEnd('_').Trim();
+
+            // Strip a leading bare [ not part of a [_..._] block
+            if (s.StartsWith("[") && !s.StartsWith("[_"))
+                s = s[1..].TrimStart();
+
+            return s;
+        }
+
+        // Pre-join multi-line [_..._] stage-direction blocks into single lines.
+        private static List<string> JoinMultiLineBlocks(string[] lines)
+        {
+            var result = new List<string>();
+            string? pending = null;
+
+            foreach (string raw in lines)
+            {
+                string line = raw.TrimEnd();
+                if (pending != null)
+                {
+                    // Continuation: append (trimming leading indent) until block closes
+                    pending += " " + line.TrimStart();
+                    if (line.Contains("_]") || line.TrimEnd().EndsWith("_."))
+                    {
+                        result.Add(pending);
+                        pending = null;
+                    }
+                }
+                else if (line.Contains("[_") && !line.Contains("_]") && !line.TrimEnd().EndsWith("_."))
+                {
+                    pending = line;
+                }
+                else
+                {
+                    result.Add(line);
+                }
+            }
+
+            if (pending != null) result.Add(pending);
+            return result;
         }
 
         // ── Scene splitter (mirrors Python split_into_scenes) ─────────────────
@@ -131,6 +184,38 @@ namespace PlayParser
             return scenes;
         }
 
+        // ── Author writer ─────────────────────────────────────────────────────
+
+        // Writes Plays/<playName>/Author.txt.
+        // Scans the source file for an "Author:" field in the PG header block.
+        // Writes "None" if no author can be found in the content.
+        private static void WriteAuthor(string playName, string srcFile, string playsRoot)
+        {
+            string author = "None";
+
+            try
+            {
+                using var sr = new StreamReader(srcFile, System.Text.Encoding.UTF8, true);
+                for (int i = 0; i < 50; i++)
+                {
+                    var line = sr.ReadLine();
+                    if (line == null) break;
+                    if (line.StartsWith("Author:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        author = line["Author:".Length..].Trim();
+                        break;
+                    }
+                    // PG header ends at the *** START *** line
+                    if (line.StartsWith("***") && i > 0) break;
+                }
+            }
+            catch { }
+
+            string authorFile = Path.Combine(playsRoot, playName, "Author.txt");
+            File.WriteAllText(authorFile, author, new System.Text.UTF8Encoding(false));
+            Console.WriteLine($"  wrote Author.txt  ({author})");
+        }
+
         // ── Writer ────────────────────────────────────────────────────────────
 
         public static void WriteScenes(Dictionary<string, List<string>> scenes, string scenesInDir)
@@ -148,211 +233,131 @@ namespace PlayParser
 
         private static string[] ReadFile(string path)
         {
-            // utf-8-sig: strip BOM if present
-            using var sr = new StreamReader(path, new System.Text.UTF8Encoding(false), detectEncodingFromByteOrderMarks: true);
+            using var sr = new StreamReader(path, new System.Text.UTF8Encoding(false),
+                detectEncodingFromByteOrderMarks: true);
             var lines = new List<string>();
             string? line;
             while ((line = sr.ReadLine()) != null) lines.Add(line);
             return [.. lines];
         }
 
-        // ── Hamlet extractor (PG #1524) ───────────────────────────────────────
+        // ── Generic Shakespeare extractor ────────────────────────────────────
+        // Works for any individual PG play file that uses ACT/SCENE headers.
+        // Finds the first ACT or INDUCTION line as the play start and the PG
+        // footer as the end.
 
-        public static Dictionary<string, List<string>> ExtractHamlet(string pgFile)
+        public static Dictionary<string, List<string>> ExtractShakespeare(string pgFile)
         {
             var lines = ReadFile(pgFile);
             int start = -1, end = lines.Length;
 
             for (int i = 0; i < lines.Length; i++)
             {
-                if (lines[i].Trim() == "ACT I") { start = i; break; }
+                string t = lines[i].Trim();
+                if (ActRe.IsMatch(t) || t == "INDUCTION") { start = i; break; }
             }
             for (int i = 0; i < lines.Length; i++)
             {
                 if (lines[i].Contains("*** END OF THE PROJECT GUTENBERG")) { end = i; break; }
             }
             if (start < 0)
-                throw new InvalidOperationException("Could not find ACT I in Hamlet file");
+                throw new InvalidOperationException($"Could not find ACT I or INDUCTION in {Path.GetFileName(pgFile)}");
 
             return SplitIntoScenes(lines[start..end]);
         }
 
-        // ── Henry IV extractor (PG Complete Works #100) ───────────────────────
-
-        public static Dictionary<string, List<string>> ExtractFromCompleteWorks(
-            string cwFile, string titleMarker, string nextTitleMarker)
-        {
-            var lines = ReadFile(cwFile);
-            int start = -1, end = lines.Length;
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string s = lines[i].Trim();
-                if (start < 0 && s == titleMarker)
-                {
-                    // Advance to first ACT or INDUCTION within the next 300 lines
-                    for (int j = i; j < Math.Min(i + 300, lines.Length); j++)
-                    {
-                        string t = lines[j].Trim();
-                        if (ActRe.IsMatch(t) || t == "INDUCTION") { start = j; break; }
-                    }
-                }
-                if (start >= 0 && s == nextTitleMarker && i > start + 10)
-                {
-                    end = i;
-                    break;
-                }
-            }
-            if (start < 0)
-                throw new InvalidOperationException($"Could not find play section: {titleMarker}");
-
-            return SplitIntoScenes(lines[start..end]);
-        }
-
-        // ── Trojan Women extractor (PG #1914, Murray translation) ─────────────
+        // ── Trojan Women extractor (PG #35171, Murray translation) ────────────
         //
-        // The Murray translation uses "SCENE I." through "SCENE V." (Roman numerals)
-        // to delimit the five episodes.  All scenes belong to Act 1.
+        // PG #35171 has no ACT/SCENE headers.  Episodes are separated by
+        //   *   *   *   *   *
+        // dividers.  Some dividers introduce a chorus ode within a scene
+        // (the next non-blank line is "CHORUS."); those do NOT start a new scene.
+        // Real scene-break dividers are followed by a stage direction or new entry.
+        //
+        // Play title "THE TROJAN WOMEN" appears three times; we use the last one
+        // (immediately before the opening stage direction).
 
         public static Dictionary<string, List<string>> ExtractTrojanWomen(string pgFile)
         {
             var allLines = ReadFile(pgFile);
             int start = -1, end = allLines.Length;
 
-            // Locate play start: first "SCENE I." or "Enter Poseidon" after PG header
+            // Find last "THE TROJAN WOMEN" centered title (play text begins after it)
             for (int i = 0; i < allLines.Length; i++)
             {
-                string s = allLines[i].Trim();
-                if (TwSceneRe.IsMatch(s) || s == "Enter Poseidon" || s == "PROLOGUE")
-                {
-                    start = i;
-                    break;
-                }
+                if (allLines[i].Trim() == "THE TROJAN WOMEN")
+                    start = i + 1;          // keep scanning to find the LAST occurrence
             }
             for (int i = 0; i < allLines.Length; i++)
             {
                 if (allLines[i].Contains("*** END OF THE PROJECT GUTENBERG")) { end = i; break; }
             }
             if (start < 0)
-                throw new InvalidOperationException("Could not find play start in Trojan Women file");
+                throw new InvalidOperationException("Could not find THE TROJAN WOMEN title in source file");
 
-            var playLines = allLines[start..end];
+            // Pre-join multi-line [_..._] stage directions into single lines
+            var joined = JoinMultiLineBlocks(allLines[start..end]);
+
             var scenes = new Dictionary<string, List<string>>();
-            string? curKey = null;
             var curLines = new List<string>();
-            int sceneCounter = 0;
+            int sceneNum = 1;
 
             void Flush()
             {
-                if (curKey == null || curLines.Count == 0) return;
-                int s2 = 0;
-                while (s2 < curLines.Count && curLines[s2].Trim() == "") s2++;
-                int e2 = curLines.Count;
-                while (e2 > s2 && curLines[e2 - 1].Trim() == "") e2--;
-                if (e2 > s2) scenes[curKey] = curLines.GetRange(s2, e2 - s2);
-            }
-
-            foreach (string raw in playLines)
-            {
-                string line = raw.TrimEnd();
-                string stripped = line.Trim();
-
-                // Check for SCENE [Roman]. header
-                var m = TwSceneRe.Match(stripped);
-                if (m.Success)
-                {
-                    Flush();
-                    sceneCounter = RomanToInt(m.Groups[1].Value);
-                    curKey = $"1.{sceneCounter}";
-                    curLines = [];
-                    continue;
-                }
-
-                // If no scene header found yet but we started at "Enter Poseidon" or "PROLOGUE"
-                if (curKey == null && (stripped == "Enter Poseidon" || stripped == "PROLOGUE"))
-                {
-                    sceneCounter = 1;
-                    curKey = "1.1";
-                    curLines = [];
-                    if (stripped != "PROLOGUE")
-                        curLines.Add(CleanLine(line));
-                    continue;
-                }
-
-                if (curKey != null)
-                    curLines.Add(CleanLine(line));
-            }
-
-            Flush();
-
-            // If no SCENE markers were found and we have only one key, the text is
-            // continuous — split on blank-line-separated major structural transitions.
-            // This is a fallback for formats that don't have SCENE headers.
-            if (scenes.Count <= 1)
-                return SplitTrojanWomenByEnter(playLines);
-
-            return scenes;
-        }
-
-        // Fallback: split Trojan Women by major "Enter ..." lines that start new episodes
-        private static Dictionary<string, List<string>> SplitTrojanWomenByEnter(string[] lines)
-        {
-            // The five natural scene-break entry points
-            string[] sceneOpeners =
-            [
-                "Enter Poseidon",
-                "HECUBA",      // Hecuba's awakening section
-                "Enter Andromache",
-                "Enter Menelaus",
-                "TALTHYBIUS",  // Talthybius bears Astyanax
-            ];
-
-            var scenes = new Dictionary<string, List<string>>();
-            var curLines = new List<string>();
-            int sceneNum = 0;
-
-            bool StartsNewScene(string stripped)
-            {
-                foreach (string opener in sceneOpeners)
-                    if (stripped.StartsWith(opener)) return true;
-                return false;
-            }
-
-            foreach (string raw in lines)
-            {
-                string stripped = raw.Trim();
-                if (sceneNum < sceneOpeners.Length && StartsNewScene(stripped))
-                {
-                    if (sceneNum > 0)
-                    {
-                        int s = 0; while (s < curLines.Count && curLines[s].Trim() == "") s++;
-                        int e = curLines.Count; while (e > s && curLines[e - 1].Trim() == "") e--;
-                        if (e > s) scenes[$"1.{sceneNum}"] = curLines.GetRange(s, e - s);
-                    }
-                    sceneNum++;
-                    curLines = [CleanLine(raw)];
-                    continue;
-                }
-                if (sceneNum > 0)
-                    curLines.Add(CleanLine(raw));
-            }
-
-            if (sceneNum > 0)
-            {
-                int s = 0; while (s < curLines.Count && curLines[s].Trim() == "") s++;
-                int e = curLines.Count; while (e > s && curLines[e - 1].Trim() == "") e--;
+                if (curLines.Count == 0) return;
+                int s = 0;
+                while (s < curLines.Count && curLines[s].Trim() == "") s++;
+                int e = curLines.Count;
+                while (e > s && curLines[e - 1].Trim() == "") e--;
                 if (e > s) scenes[$"1.{sceneNum}"] = curLines.GetRange(s, e - s);
             }
 
+            for (int i = 0; i < joined.Count; i++)
+            {
+                string line = joined[i].TrimEnd();
+                string stripped = line.Trim();
+
+                if (StarRe.IsMatch(stripped))
+                {
+                    // Look ahead for first non-blank line after the separator
+                    int j = i + 1;
+                    while (j < joined.Count && joined[j].Trim() == "") j++;
+                    string nextNonBlank = j < joined.Count ? joined[j].Trim() : "";
+
+                    // If that line is "CHORUS." it's a within-scene choral ode — don't split
+                    if (nextNonBlank == "CHORUS.")
+                    {
+                        curLines.Add("");   // blank line separating the chorus section
+                        continue;
+                    }
+
+                    // Real scene break
+                    Flush();
+                    sceneNum++;
+                    curLines = [];
+                    continue;
+                }
+
+                curLines.Add(CleanLineTw(line));
+            }
+
+            Flush();
             return scenes;
         }
 
-        // ── Sources folder helper ─────────────────────────────────────────────
+        // ── Sources folder helpers ────────────────────────────────────────────
+
+        public static string GetSourcesEditedFolder()
+        {
+            var sources = GetSourcesFolder();
+            var parent = Path.GetDirectoryName(sources);
+            return parent != null
+                ? Path.Combine(parent, "SourcesEdited")
+                : Path.GetFullPath(Path.Combine(sources, @"..\SourcesEdited"));
+        }
 
         public static string GetSourcesFolder()
         {
-            // Walk up from the binary until we find a Sources/ folder, or
-            // fall back to the canonical dev layout.
             var dir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
             for (int i = 0; i < 8; i++)
             {
@@ -366,101 +371,72 @@ namespace PlayParser
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\PlayParser\Sources"));
         }
 
+        // Finds the source file for a play by name (with or without .txt extension).
+        private static string? FindSourceFile(string sourcesFolder, string playName)
+        {
+            foreach (var candidate in new[] { playName, playName + ".txt" })
+            {
+                var path = Path.Combine(sourcesFolder, candidate);
+                if (File.Exists(path)) return path;
+            }
+            return null;
+        }
+
         // ── Top-level dispatch ────────────────────────────────────────────────
 
         /// <summary>
         /// Split one play's source file into ScenesIn text files.
+        /// Source file is looked up as Sources/&lt;playName&gt; or Sources/&lt;playName&gt;.txt.
         /// Returns the number of scene files written, or -1 if the source file is missing.
         /// </summary>
-        public static int Split(Play.PlayEnum play, string? sourcesFolder = null)
+        public static int Split(string playName, string? sourcesFolder = null)
         {
-            string sources = sourcesFolder ?? GetSourcesFolder();
+            string sources   = sourcesFolder ?? GetSourcesFolder();
             string playsRoot = Program.GetPlaysFolder();
-            string playName  = Play.GetPlayName(play);
             string scenesIn  = Path.Combine(playsRoot, playName, "ScenesIn");
+
+            string? src = FindSourceFile(sources, playName);
+            if (src == null)
+            {
+                Console.WriteLine($"\n{"=",-60}");
+                Console.WriteLine($"Splitting: {playName}");
+                Console.WriteLine($"  Source not found in {sources}");
+                Console.WriteLine($"  Expected: {playName} or {playName}.txt");
+                return -1;
+            }
 
             Console.WriteLine($"\n{"=",-60}");
             Console.WriteLine($"Splitting: {playName}");
+            Console.WriteLine($"Source:    {src}");
             Console.WriteLine($"Output:    {scenesIn}");
 
-            Dictionary<string, List<string>> scenes;
+            Dictionary<string, List<string>> scenes = playName == "The Trojan Women"
+                ? ExtractTrojanWomen(src)
+                : ExtractShakespeare(src);
 
-            switch (play)
-            {
-                case Play.PlayEnum.Hamlet:
-                {
-                    string src = Path.Combine(sources, "hamlet_pg.txt");
-                    if (!File.Exists(src))
-                    {
-                        Console.WriteLine($"  Source file not found: {src}");
-                        Console.WriteLine("  Download PG #1524 and save it there.");
-                        return -1;
-                    }
-                    scenes = ExtractHamlet(src);
-                    break;
-                }
-
-                case Play.PlayEnum.Henry1:
-                {
-                    string src = Path.Combine(sources, "complete_works.txt");
-                    if (!File.Exists(src))
-                    {
-                        Console.WriteLine($"  Source file not found: {src}");
-                        Console.WriteLine("  Download PG #100 and save it there.");
-                        return -1;
-                    }
-                    scenes = ExtractFromCompleteWorks(
-                        src,
-                        "THE FIRST PART OF KING HENRY THE FOURTH",
-                        "THE SECOND PART OF KING HENRY THE FOURTH");
-                    break;
-                }
-
-                case Play.PlayEnum.Henry2:
-                {
-                    string src = Path.Combine(sources, "complete_works.txt");
-                    if (!File.Exists(src))
-                    {
-                        Console.WriteLine($"  Source file not found: {src}");
-                        Console.WriteLine("  Download PG #100 and save it there.");
-                        return -1;
-                    }
-                    scenes = ExtractFromCompleteWorks(
-                        src,
-                        "THE SECOND PART OF KING HENRY THE FOURTH",
-                        "THE LIFE OF KING HENRY THE FIFTH");
-                    break;
-                }
-
-                case Play.PlayEnum.TrojanWomen:
-                {
-                    string src = Path.Combine(sources, "trojan_women_pg.txt");
-                    if (!File.Exists(src))
-                    {
-                        Console.WriteLine($"  Source file not found: {src}");
-                        Console.WriteLine("  Download PG #1914 and save it there.");
-                        return -1;
-                    }
-                    scenes = ExtractTrojanWomen(src);
-                    break;
-                }
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(play));
-            }
-
+            Directory.CreateDirectory(Path.Combine(playsRoot, playName));
+            WriteAuthor(playName, src, playsRoot);
             WriteScenes(scenes, scenesIn);
             Console.WriteLine($"  Total scene files written: {scenes.Count}");
             return scenes.Count;
         }
 
         /// <summary>
-        /// Run Split() for every play that has a source file available.
+        /// Run Split() for every *.txt file discovered in the Sources folder.
         /// </summary>
         public static void SplitAll(string? sourcesFolder = null)
         {
-            for (int i = 0; i < (int)Play.PlayEnum.NumPlays; i++)
-                Split((Play.PlayEnum)i, sourcesFolder);
+            string sources = sourcesFolder ?? GetSourcesFolder();
+            if (!Directory.Exists(sources))
+            {
+                Console.WriteLine($"Sources folder not found: {sources}");
+                return;
+            }
+            foreach (var file in Directory.GetFiles(sources, "*.txt").OrderBy(f => f))
+            {
+                string playName = Path.GetFileNameWithoutExtension(file);
+                Split(playName, sources);
+            }
         }
     }
 }

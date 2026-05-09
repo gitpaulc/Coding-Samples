@@ -4,22 +4,17 @@ namespace PlayParser
 {
   public class Play
   {
-    public enum PlayEnum
+    // Returns play names by scanning the Plays folder — no hardcoded list.
+    public static List<string> GetAllPlayNames()
     {
-      Hamlet = 0,
-      Henry1 = 1,
-      Henry2 = 2,
-      TrojanWomen = 3,
-      NumPlays = 4
-    }
-
-    public static string GetPlayName(PlayEnum plEnum)
-    {
-      if (plEnum == PlayEnum.Henry1)     { return "King Henry IV Part 1"; }
-      if (plEnum == PlayEnum.Henry2)     { return "King Henry IV Part 2"; }
-      if (plEnum == PlayEnum.TrojanWomen){ return "The Trojan Women"; }
-      //if (plEnum == PlayEnum.Hamlet)
-      return "Hamlet";
+      var folder = Program.GetPlaysFolder();
+      if (!System.IO.Directory.Exists(folder)) return [];
+      return System.IO.Directory.GetDirectories(folder)
+        .Select(System.IO.Path.GetFileName)
+        .Where(n => n != null)
+        .Select(n => n!)
+        .OrderBy(n => n)
+        .ToList();
     }
 
     public string playName = "";
@@ -45,10 +40,29 @@ namespace PlayParser
       if (lines.Count > 0) author = lines[0].Trim();
     }
 
+    private static readonly HashSet<string> ClassicalPlays = new(StringComparer.OrdinalIgnoreCase)
+    {
+      "The Trojan Women"
+    };
+
     public static string GetPlayEra(string playName)
     {
-      if (playName == GetPlayName(PlayEnum.TrojanWomen)) return "Classical";
+      if (ClassicalPlays.Contains(playName)) return "Classical";
       return "Renaissance";
+    }
+
+    // Returns the main character for a scene given its per-actor line counts.
+    // Priority: actor whose name appears in the play title; fallback: most lines.
+    public string GetSceneMainCharacter(Dictionary<string, int> sceneLineCounts)
+    {
+      string? titleChar = sceneLineCounts.Keys
+        .FirstOrDefault(a => playName.IndexOf(a, StringComparison.OrdinalIgnoreCase) >= 0);
+      if (titleChar != null) return titleChar;
+
+      return sceneLineCounts
+        .OrderByDescending(kv => kv.Value)
+        .Select(kv => kv.Key)
+        .FirstOrDefault() ?? "";
     }
 
     public Dictionary<string, List<string> > GetActorsInEachScene()
@@ -139,7 +153,7 @@ namespace PlayParser
     // Handles cases like "PRINCE" → "Prince Henry" in the Henry IV plays.
     public string ExpandActorName(string camelName)
     {
-      if (playName == GetPlayName(PlayEnum.Henry1) || playName == GetPlayName(PlayEnum.Henry2))
+      if (playName == "King Henry IV Part 1" || playName == "King Henry IV Part 2")
       {
         if (camelName.Equals("Prince", StringComparison.OrdinalIgnoreCase))
           return "Prince Henry";
@@ -180,13 +194,70 @@ namespace PlayParser
       return false;
     }
 
-    List<string> PreprocessLines(List<string> lines)
+    // If the first speaker in a scene has no preceding Enter/Re-enter line, add one.
+    private static List<string> InsertMissingOpeningEnter(List<string> lines)
+    {
+      int firstSpeakerIdx = -1;
+      string firstSpeakerLabel = "";
+      for (int i = 0; i < lines.Count; i++)
+      {
+        var stripped = lines[i].Trim().TrimEnd('.', '_', '\'', ' ');
+        if (stripped.Length == 0) continue;
+        if (stripped.StartsWith("SCENE") || stripped.StartsWith("ACT")) continue;
+        if (IsSpeakerLabel(stripped))
+        {
+          firstSpeakerIdx = i;
+          firstSpeakerLabel = stripped;
+          break;
+        }
+      }
+      if (firstSpeakerIdx < 0) return lines;
+
+      var camelName = Program.ToCamelCase(firstSpeakerLabel);
+
+      // Check if any prior line is an Enter/Re-enter that mentions this character
+      for (int i = 0; i < firstSpeakerIdx; i++)
+      {
+        var ln = lines[i];
+        if ((ln.StartsWith("Enter ") || ln.StartsWith("Re-enter ")) &&
+            ln.IndexOf(camelName, StringComparison.OrdinalIgnoreCase) >= 0)
+          return lines;   // already has an Enter for them
+      }
+
+      // No Enter found — insert one before the speaker label
+      var result = new List<string>(lines);
+      result.Insert(firstSpeakerIdx, "");
+      result.Insert(firstSpeakerIdx, "Enter " + camelName);
+      return result;
+    }
+
+    List<string> PreprocessLines(List<string> lines, string filename)
     {
       var linesOut = new List<string>();
       foreach (var line in lines)
       {
-        if (playName == GetPlayName(PlayEnum.Hamlet))
+        if (line.Contains("Falls and dies"))
         {
+          linesOut.Add(line.Replace("Falls and dies", "Dies"));
+          continue;
+        }
+        if (line.Contains("[_"))
+        {
+          linesOut.Add(line.Replace("[_", ""));
+          continue;
+        }
+        if (line.Contains("_]"))
+        {
+          linesOut.Add(line.Replace("_]", ""));
+          continue;
+        }
+        if (playName == "Hamlet")
+        {
+          if (filename.Contains("5.2") && line.Contains("They") && line.Contains("play"))
+          {
+            linesOut.Add(line.Replace("play", "fight"));
+            continue;
+          }
           if (line.Contains("Enter two Players, King and Queen"))
           {
             linesOut.Add("Enter Player King, Player Queen");
@@ -203,7 +274,7 @@ namespace PlayParser
             continue;
           }
         }
-        else if (playName == GetPlayName(PlayEnum.Henry1))
+        else if (playName == "King Henry IV Part 1")
         {
           if (line.Contains("DOUGLAS kills SIR WALTER BLUNT"))
           {
@@ -214,7 +285,7 @@ namespace PlayParser
         }
         linesOut.Add(line);
       }
-      return linesOut;
+      return InsertMissingOpeningEnter(linesOut);
     }
 
     public void CopyTrimmedScenes(string folderName)
@@ -232,7 +303,7 @@ namespace PlayParser
         var filename = System.IO.Path.GetFileName(path).Trim();
         Program.Print("Copying " + filename + ".");
         var lines = Program.ReadFileAsLines(path);
-        lines = PreprocessLines(lines);
+        lines = PreprocessLines(lines, filename);
         Program.Print(lines, Program.PrintMode.FileOnly, folderOut + "\\" + filename, false);
       }
 

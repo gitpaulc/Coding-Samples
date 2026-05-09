@@ -8,14 +8,19 @@ namespace PlayParser
     {
         Play? recentScenePlay = null;
         string recentScenePath = "";
-        private static string? _cloudPng;
-        private static string LoadCloudPngBase64()
+        private static string? _cloudPng, _maleBase, _maleOutfit, _femaleBase, _femaleOutfit, _wallTile, _floorTile;
+        private static bool _castleReady;
+        private static void EnsureCastle()
         {
-            var asm = System.Reflection.Assembly.GetExecutingAssembly();
-            using var stream = asm.GetManifestResourceStream("PlayParser.cloud.png")!;
-            using var ms = new System.IO.MemoryStream();
-            stream.CopyTo(ms);
-            return Convert.ToBase64String(ms.ToArray());
+            if (_castleReady) return;
+            var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resource", "castle");
+            SpriteGen.EnsureAssets(dir);
+            _castleReady = true;
+        }
+        private static string LoadAsset(string filename)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "resource", "castle", filename);
+            return "data:image/png;base64," + Convert.ToBase64String(File.ReadAllBytes(path));
         }
 
         // ── Layout constants ──────────────────────────────────────────────────
@@ -23,15 +28,13 @@ namespace PlayParser
         private const int TabBtnReportWidth = 120;
         private const int TabBtnSceneWidth  = 150;
         private const int TabBtnRpgWidth    = 80;
-        private const int SceneBarHeight    = 72;
+        private const int SceneBarHeight    = 38;
         private const int RpgBarHeight      = 42;
         private const int ConsolePanelPercent = 30;
 
         // ── Fields ────────────────────────────────────────────────────────────
         private ToolStrip toolStrip = null!;
-        private ToolStripButton btnRun = null!;
         private ToolStripButton btnSavePdf = null!;
-        private ToolStripButton btnSplit = null!;
         private SplitContainer split = null!;
         private SplitContainer rightSplit = null!;
         private RichTextBox consoleBox = null!;
@@ -43,9 +46,7 @@ namespace PlayParser
         private Button actorInfoBtn = null!;
         private WebView2 webView = null!;
         private WebView2 sceneWebView = null!;
-        private ComboBox eraCombo = null!;
-        private Label authorLabel = null!;
-        private ComboBox playCombo = null!;
+        private Label _playNameLabel = null!;
         private ComboBox sceneCombo = null!;
         private StatusStrip statusStrip = null!;
         private ToolStripStatusLabel statusLabel = null!;
@@ -53,13 +54,16 @@ namespace PlayParser
         private bool sceneWebViewReady = false;
         private int selectedTab = 0;
         private List<Play> lastPlays = new();
+        private string _currentPlayName = "";
+        private List<Play>? _pendingPlays;
         private Dictionary<string, string>? _actorColors;
         // ── RPG tab fields ────────────────────────────────────────────────────
         private Label    tabBtnRpg    = null!;
         private Panel    rpgBar       = null!;
         private ComboBox rpgPlayCombo = null!;
-        private Button   btnRpgPrev   = null!;
-        private Button   btnRpgNext   = null!;
+        private Button   btnRpgPrev     = null!;
+        private Button   btnRpgNext     = null!;
+        private Button   btnRpgRestart  = null!;
         private WebView2 rpgWebView   = null!;
         private bool     rpgWebViewReady = false;
         private List<RpgTileEngine.SceneData> _rpgScenes = new();
@@ -92,13 +96,6 @@ namespace PlayParser
         {
             toolStrip = new ToolStrip { GripStyle = ToolStripGripStyle.Hidden, Padding = new Padding(4, 2, 4, 2) };
 
-            btnRun = new ToolStripButton("▶  Run")
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Text,
-                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
-            };
-            btnRun.Click += BtnRun_Click;
-
             btnSavePdf = new ToolStripButton("Save PDF")
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Text,
@@ -106,18 +103,7 @@ namespace PlayParser
             };
             btnSavePdf.Click += BtnSavePdf_Click;
 
-            btnSplit = new ToolStripButton("↓ Split")
-            {
-                DisplayStyle = ToolStripItemDisplayStyle.Text,
-                ToolTipText = "Split Gutenberg source files into ScenesIn"
-            };
-            btnSplit.Click += BtnSplit_Click;
-
-            toolStrip.Items.Add(btnRun);
-            toolStrip.Items.Add(new ToolStripSeparator());
             toolStrip.Items.Add(btnSavePdf);
-            toolStrip.Items.Add(new ToolStripSeparator());
-            toolStrip.Items.Add(btnSplit);
             Controls.Add(toolStrip);
         }
 
@@ -237,80 +223,46 @@ namespace PlayParser
                 Visible = false
             };
 
-            const int Row1Top = 6;   // combo top in row 1
-            const int Row1LblTop = 10; // label top in row 1
-            const int Row2 = 36;       // row 2 base offset
-            const int Row2Top = Row2 + 6;
-            const int Row2LblTop = Row2 + 10;
+            const int RowTop = 7;
+            const int RowLblTop = 11;
 
-            // ── Row 1: Era ────────────────────────────────────────────────────
-            var lblEra = new Label
+            // ── Play name label ───────────────────────────────────────────────
+            _playNameLabel = new Label
             {
-                Text = "Era:", AutoSize = true,
-                ForeColor = Color.FromArgb(139, 148, 158),
-                Font = new Font("Segoe UI", 8.5f),
-                Top = Row1LblTop, Left = 8
-            };
-            eraCombo = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 110, Top = Row1Top, Left = 40,
-                Font = new Font("Segoe UI", 8.5f)
-            };
-            eraCombo.Items.Add("Classical");
-            eraCombo.Items.Add("Renaissance");
-            eraCombo.SelectedIndex = 1;
-
-            // ── Row 2: Play + author ──────────────────────────────────────────
-            var lblPlay = new Label
-            {
-                Text = "Play:", AutoSize = true,
-                ForeColor = Color.FromArgb(139, 148, 158),
-                Font = new Font("Segoe UI", 8.5f),
-                Top = Row2LblTop, Left = 8
-            };
-            playCombo = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 175, Top = Row2Top, Left = 50,
-                Font = new Font("Segoe UI", 8.5f)
-            };
-            authorLabel = new Label
-            {
-                Text = "", AutoSize = false, Width = 195, Height = 20,
-                Top = Row2LblTop - 1, Left = 234,
-                ForeColor = Color.FromArgb(100, 110, 120),
-                Font = new Font("Segoe UI", 8.5f, FontStyle.Italic),
+                Text = "", AutoSize = false, Width = 200, Height = 20,
+                Top = RowLblTop, Left = 8,
+                ForeColor = Color.FromArgb(201, 209, 217),
+                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
                 BackColor = Color.Transparent
             };
 
-            // ── Row 2: Scene ──────────────────────────────────────────────────
+            // ── Scene ─────────────────────────────────────────────────────────
             var lblScene = new Label
             {
                 Text = "Scene:", AutoSize = true,
                 ForeColor = Color.FromArgb(139, 148, 158),
                 Font = new Font("Segoe UI", 8.5f),
-                Top = Row2LblTop, Left = 438
+                Top = RowLblTop, Left = 216
             };
             sceneCombo = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 160, Top = Row2Top, Left = 484,
+                Width = 160, Top = RowTop, Left = 262,
                 Font = new Font("Segoe UI", 8.5f)
             };
 
-            // ── Row 2: Actor ──────────────────────────────────────────────────
+            // ── Actor ─────────────────────────────────────────────────────────
             var lblActor = new Label
             {
                 Text = "Actor:", AutoSize = true,
                 ForeColor = Color.FromArgb(139, 148, 158),
                 Font = new Font("Segoe UI", 8.5f),
-                Top = Row2LblTop, Left = 656
+                Top = RowLblTop, Left = 434
             };
             actorCombo = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Width = 150, Top = Row2Top, Left = 700,
+                Width = 150, Top = RowTop, Left = 478,
                 Font = new Font("Segoe UI", 8.5f)
             };
             actorCombo.Items.Add("None");
@@ -319,7 +271,7 @@ namespace PlayParser
             colorSwatch = new Panel
             {
                 Width = 16, Height = 16,
-                Left = 856, Top = Row2 + (36 - 16) / 2,
+                Left = 634, Top = (SceneBarHeight - 16) / 2,
                 BackColor = Color.FromArgb(48, 54, 61),
                 Visible = false
             };
@@ -327,7 +279,7 @@ namespace PlayParser
             {
                 Text = "Actor Info",
                 Size = new Size(82, 22),
-                Left = 880, Top = Row2 + (36 - 22) / 2,
+                Left = 658, Top = (SceneBarHeight - 22) / 2,
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.FromArgb(33, 38, 45),
                 ForeColor = Color.FromArgb(201, 209, 217),
@@ -338,13 +290,10 @@ namespace PlayParser
             actorInfoBtn.FlatAppearance.BorderColor = Color.FromArgb(64, 72, 80);
             actorInfoBtn.Click += ActorInfoBtn_Click;
 
-            eraCombo.SelectedIndexChanged  += EraCombo_Changed;
-            playCombo.SelectedIndexChanged += PlayCombo_Changed;
             sceneCombo.SelectedIndexChanged += SceneCombo_Changed;
             actorCombo.SelectedIndexChanged += ActorCombo_Changed;
             sceneBar.Controls.AddRange(new Control[] {
-                lblEra, eraCombo, lblPlay, playCombo, authorLabel,
-                lblScene, sceneCombo, lblActor, actorCombo, colorSwatch, actorInfoBtn
+                _playNameLabel, lblScene, sceneCombo, lblActor, actorCombo, colorSwatch, actorInfoBtn
             });
 
             sceneWebView = new WebView2 { Dock = DockStyle.Fill, Visible = false };
@@ -388,8 +337,16 @@ namespace PlayParser
             btnRpgNext.FlatAppearance.BorderColor = Color.FromArgb(64, 72, 80);
             btnRpgNext.Click += RpgNext_Click;
 
+            btnRpgRestart = new Button {
+                Text = "↺ Restart", Size = new Size(90, 24), Left = 502, Top = RpgTop,
+                FlatStyle = FlatStyle.Flat, Visible = false,
+                BackColor = Color.FromArgb(33, 38, 45), ForeColor = Color.FromArgb(201, 209, 217),
+                Font = new Font("Segoe UI", 8.5f), Cursor = Cursors.Hand };
+            btnRpgRestart.FlatAppearance.BorderColor = Color.FromArgb(64, 72, 80);
+            btnRpgRestart.Click += RpgRestart_Click;
+
             rpgBar.Controls.AddRange(new Control[] { lblRpgPlay, rpgPlayCombo, btnRpgStart,
-                                                     btnRpgPrev, btnRpgNext });
+                                                     btnRpgPrev, btnRpgNext, btnRpgRestart });
 
             rpgWebView = new WebView2 { Dock = DockStyle.Fill, Visible = false };
 
@@ -434,7 +391,15 @@ namespace PlayParser
             {
                 await webView.EnsureCoreWebView2Async();
                 webViewReady = true;
-                webView.NavigateToString(SplashHtml());
+                if (_pendingPlays != null)
+                {
+                    webView.NavigateToString(HtmlReport.Generate(_pendingPlays));
+                    _pendingPlays = null;
+                }
+                else
+                {
+                    webView.NavigateToString(SplashHtml());
+                }
             }
             catch (Exception ex)
             {
@@ -448,7 +413,7 @@ namespace PlayParser
             {
                 await sceneWebView.EnsureCoreWebView2Async();
                 sceneWebViewReady = true;
-                if (playCombo.SelectedIndex >= 0 && sceneCombo.SelectedItem is SceneItem)
+                if (!string.IsNullOrEmpty(_currentPlayName) && sceneCombo.SelectedItem is SceneItem)
                     SceneCombo_Changed(null, EventArgs.Empty);
                 else
                     sceneWebView.NavigateToString(SceneViewerSplashHtml());
@@ -462,7 +427,7 @@ namespace PlayParser
         private static string SplashHtml() =>
             "<html><body style='font-family:\"Segoe UI\",sans-serif;color:#8b949e;background:#0d1117;" +
             "display:flex;align-items:center;justify-content:center;height:100vh;margin:0;'>" +
-            "<p style='font-size:1.1rem;'>Press <strong style='color:#e6edf3;'>Run</strong> to analyse the plays.</p>" +
+            "<p style='font-size:1.1rem;'>Press <strong style='color:#e6edf3;'>Create</strong> in Play Sandbox to load a play.</p>" +
             "</body></html>";
 
         private static string SceneViewerSplashHtml() =>
@@ -473,113 +438,52 @@ namespace PlayParser
 
         // ── Console logging ───────────────────────────────────────────────────
 
-        private void AppendLog(string text)
+        internal void AppendLog(string text)
         {
             if (consoleBox.InvokeRequired) { consoleBox.BeginInvoke(() => AppendLog(text)); return; }
             consoleBox.AppendText(text);
             consoleBox.ScrollToCaret();
         }
 
-        // ── Run button ────────────────────────────────────────────────────────
-
-        private async void BtnRun_Click(object? sender, EventArgs e)
+        internal void ClearLog()
         {
-            btnRun.Enabled = false;
-            btnSavePdf.Enabled = false;
-            statusLabel.Text = "Processing...";
+            if (consoleBox.InvokeRequired) { consoleBox.BeginInvoke(ClearLog); return; }
             consoleBox.Clear();
+        }
 
-            var prevOut = Console.Out;
-            Console.SetOut(new GuiTextWriter(AppendLog));
+        // ── Load plays (called by PlaySandboxForm after Create) ───────────────
 
-            List<Play> plays;
-            try
-            {
-                plays = await Task.Run(() => Program.RunPlays());
-            }
-            catch (Exception ex)
-            {
-                Console.SetOut(prevOut);
-                statusLabel.Text = $"Error: {ex.Message}";
-                btnRun.Enabled = true;
-                return;
-            }
-            finally
-            {
-                Console.SetOut(prevOut);
-            }
-
+        public void LoadPlays(List<Play> plays)
+        {
             lastPlays = plays;
 
             if (webViewReady)
                 webView.NavigateToString(HtmlReport.Generate(plays));
+            else
+                _pendingPlays = plays;
 
-            PopulatePlayCombo();
+            string? playName = plays.Count > 0 ? plays[0].playName : null;
+            if (playName != null)
+            {
+                _currentPlayName = playName;
+                _playNameLabel.Text = playName;
+                LoadCurrentPlayScenes();
+            }
+
             PopulateRpgCombos();
-
-            btnRun.Enabled = true;
-            btnSavePdf.Enabled = true;
-            statusLabel.Text = "Done.";
-        }
-
-        // ── Split button ──────────────────────────────────────────────────────
-
-        private async void BtnSplit_Click(object? sender, EventArgs e)
-        {
-            btnSplit.Enabled = false;
-            statusLabel.Text = "Splitting...";
-            consoleBox.Clear();
-
-            var prevOut = Console.Out;
-            Console.SetOut(new GuiTextWriter(AppendLog));
-
-            try
-            {
-                await Task.Run(() => GutenbergSplitter.SplitAll());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                statusLabel.Text = $"Split error: {ex.Message}";
-            }
-            finally
-            {
-                Console.SetOut(prevOut);
-                btnSplit.Enabled = true;
-                if (statusLabel.Text == "Splitting...")
-                    statusLabel.Text = "Split complete.";
-            }
+            btnSavePdf.Enabled = plays.Count > 0;
+            statusLabel.Text = playName != null ? $"Loaded: {playName}" : "Done.";
         }
 
         // ── Scene viewer combo logic ──────────────────────────────────────────
 
-        private void PopulatePlayCombo()
-        {
-            string era = eraCombo.SelectedItem as string ?? "Renaissance";
-            playCombo.Items.Clear();
-            foreach (var play in lastPlays.Where(p => Play.GetPlayEra(p.playName) == era))
-                playCombo.Items.Add(play.playName);
-            if (playCombo.Items.Count > 0)
-                playCombo.SelectedIndex = 0;
-            else
-            {
-                authorLabel.Text = "";
-                sceneCombo.Items.Clear();
-            }
-        }
-
-        private void EraCombo_Changed(object? sender, EventArgs e) => PopulatePlayCombo();
-
-        private void PlayCombo_Changed(object? sender, EventArgs e)
+        private void LoadCurrentPlayScenes()
         {
             sceneCombo.Items.Clear();
-            string? playName = playCombo.SelectedItem as string;
-            if (playName == null) { authorLabel.Text = ""; return; }
+            if (string.IsNullOrEmpty(_currentPlayName)) return;
 
-            var play = lastPlays.FirstOrDefault(p => p.playName == playName);
-            if (play == null) { authorLabel.Text = ""; return; }
-
-            authorLabel.Text = play.author.Length > 0 ? $"by {play.author}" : "";
+            var play = lastPlays.FirstOrDefault(p => p.playName == _currentPlayName);
+            if (play == null) return;
 
             var scenesOut = Path.Combine(Program.GetPlaysFolder(), play.playName, "ScenesOut");
             if (!Directory.Exists(scenesOut)) return;
@@ -597,9 +501,9 @@ namespace PlayParser
         private void SceneCombo_Changed(object? sender, EventArgs e)
         {
             if (!sceneWebViewReady) return;
-            if (playCombo.SelectedItem is not string playName || sceneCombo.SelectedItem is not SceneItem item) return;
+            if (string.IsNullOrEmpty(_currentPlayName) || sceneCombo.SelectedItem is not SceneItem item) return;
 
-            recentScenePlay = lastPlays.FirstOrDefault(p => p.playName == playName);
+            recentScenePlay = lastPlays.FirstOrDefault(p => p.playName == _currentPlayName);
             if (recentScenePlay == null) return;
             recentScenePath = Path.Combine(Program.GetPlaysFolder(), recentScenePlay.playName, "ScenesOut", item.Filename);
             if (!File.Exists(recentScenePath)) return;
@@ -634,10 +538,10 @@ namespace PlayParser
 
         private void ActorInfoBtn_Click(object? sender, EventArgs e)
         {
-            if (playCombo.SelectedItem is not string playName) return;
+            if (string.IsNullOrEmpty(_currentPlayName)) return;
             string? actorKey = actorCombo.SelectedItem as string;
             if (actorKey == null || actorKey == "None") return;
-            var play = lastPlays.FirstOrDefault(p => p.playName == playName);
+            var play = lastPlays.FirstOrDefault(p => p.playName == _currentPlayName);
             if (play == null) return;
             using var dlg = new ActorInfoForm(play, actorKey, recentScenePath);
             dlg.ShowDialog(this);
@@ -776,11 +680,19 @@ namespace PlayParser
             UpdateRpgNavButtons();
         }
 
+        private async void RpgRestart_Click(object? sender, EventArgs e)
+        {
+            if (!rpgWebViewReady || _rpgScenes.Count == 0) return;
+            var json = RpgTileEngine.ToJson(_rpgScenes[_rpgSceneIdx]);
+            await rpgWebView.ExecuteScriptAsync($"loadScene({json})");
+        }
+
         private void UpdateRpgNavButtons()
         {
             bool active = _rpgScenes.Count > 0;
-            btnRpgPrev.Visible = active && _rpgSceneIdx > 0;
-            btnRpgNext.Visible = active && _rpgSceneIdx < _rpgScenes.Count - 1;
+            btnRpgPrev.Visible    = active && _rpgSceneIdx > 0;
+            btnRpgNext.Visible    = active && _rpgSceneIdx < _rpgScenes.Count - 1;
+            btnRpgRestart.Visible = active;
         }
 
         private static string RpgSplashHtml() =>
@@ -791,7 +703,14 @@ namespace PlayParser
 
         private static string GameHtml(string firstSceneJson)
         {
-            _cloudPng ??= LoadCloudPngBase64();
+            EnsureCastle();
+            _cloudPng   ??= LoadAsset("cloud.png");
+            _maleBase   ??= LoadAsset("male.png");
+            _maleOutfit ??= LoadAsset("male_outfit.png");
+            _femaleBase ??= LoadAsset("female.png");
+            _femaleOutfit ??= LoadAsset("female_outfit.png");
+            _wallTile   ??= LoadAsset("wall.png");
+            _floorTile  ??= LoadAsset("floor.png");
             return
 @"<!DOCTYPE html>
 <html>
@@ -815,9 +734,9 @@ canvas{display:block}
 #dlg{width:220px;flex-shrink:0;padding:16px 14px 12px;
      background:#161b22;border-left:1px solid #21262d;overflow:hidden;
      display:flex;flex-direction:column}
-#speaker{font-weight:700;font-size:1.0rem;letter-spacing:.07em;color:#79c0ff;margin-bottom:4px}
-#speech{font-style:italic;font-size:1.2rem;color:#e6edf3;line-height:1.55}
-#hint{margin-top:10px;font-size:1.0rem;color:#8b949e}
+#speaker{font-weight:700;font-size:1.2rem;letter-spacing:.07em;color:#c9d1d9;margin-bottom:4px}
+#speech{font-size:1.2rem;color:#e6edf3;line-height:1.55}
+#hint{margin-top:10px;font-size:1.0rem;font-style:italic;color:#8b949e}
 #victory{display:none;position:absolute;inset:0;flex-direction:column;
          align-items:center;justify-content:center;background:#0d1117;
          font-size:1.4rem;color:#2ea043;text-align:center;padding:2rem}
@@ -842,16 +761,22 @@ var canvas=document.getElementById('game');
 var ctx=canvas.getContext('2d');
 canvas.width=TILE*GW; canvas.height=TILE*GH;
 
-var mainChar='',chars={},timeline=[],tlIdx=0,lineCounts={};
+var mainChar='',heroChar='',chars={},timeline=[],tlIdx=0,lineCounts={};
 var curLine=null,phase='idle',monoTimer=null;
 
 var cloudImg=new Image(); cloudImg.src='data:image/png;base64,CLOUD_DATA';
+var maleBaseImg=new Image(); maleBaseImg.src='data:image/png;base64,MALE_BASE_DATA';
+var maleOutfitImg=new Image(); maleOutfitImg.src='data:image/png;base64,MALE_OUTFIT_DATA';
+var femaleBaseImg=new Image(); femaleBaseImg.src='data:image/png;base64,FEMALE_BASE_DATA';
+var femaleOutfitImg=new Image(); femaleOutfitImg.src='data:image/png;base64,FEMALE_OUTFIT_DATA';
+var wallImg=new Image(); wallImg.src='data:image/png;base64,WALL_DATA';
+var floorImg=new Image(); floorImg.src='data:image/png;base64,FLOOR_DATA';
+var offCanvas=document.createElement('canvas'); offCanvas.width=48; offCanvas.height=64;
+var offCtx=offCanvas.getContext('2d');
 var cloudA=0,cloudAng=0,cloudEpi=0,cloudPhaseC='wait',cloudTick=0;
 var charSex={},charDir={},charFrame={},walkTick=0;
 var arrowVisible=true,arrowTimer=null;
 var walls={};
-var SKIN='#f5c39a',HAIR_M='#2d1a08',HAIR_F='#8b4513',
-    SHOE='#2a1a0a',PANT='#2d3a5c',BELT='#5a4020';
 
 function showVictory(){
   var v=document.getElementById('victory');
@@ -862,7 +787,7 @@ function showVictory(){
 function loadScene(data){
   if(monoTimer){clearTimeout(monoTimer);monoTimer=null;}
   if(arrowTimer){clearInterval(arrowTimer);arrowTimer=null;} arrowVisible=true;
-  mainChar=data.mainChar; lineCounts=data.lineCounts||{};
+  mainChar=data.mainChar; heroChar=data.heroChar||''; lineCounts=data.lineCounts||{};
   timeline=data.timeline; tlIdx=0; curLine=null; phase='idle';
   chars={}; charSex=data.genders||{}; walkTick=0;
   walls={};
@@ -881,8 +806,10 @@ function loadScene(data){
   step(); render();
 }
 
-function setSpeech(spkr,txt){
-  document.getElementById('speaker').textContent=spkr;
+function setSpeech(spkr,txt,color){
+  var el=document.getElementById('speaker');
+  el.textContent=spkr;
+  el.style.color=color||'#c9d1d9';
   document.getElementById('speech').textContent=txt;
 }
 
@@ -892,6 +819,11 @@ function step(){
 
     if(ev.type==='enter'){
       for(var i=0;i<ev.chars.length;i++) if(chars[ev.chars[i]]) chars[ev.chars[i]].onStage=true;
+      // When the scene hero enters, they become the player character.
+      if(heroChar && heroChar!==mainChar && ev.chars.indexOf(heroChar)>=0){
+        mainChar=heroChar;
+        document.getElementById('main-lbl').textContent='You: '+mainChar;
+      }
       tlIdx++; continue;
     }
 
@@ -909,7 +841,7 @@ function step(){
 
     if(ev.type==='dialogue'){
       curLine=ev;
-      setSpeech(ev.speaker, '“'+ev.text+'”');
+      setSpeech(ev.speaker.toUpperCase()+'.', ev.text, chars[ev.speaker]?chars[ev.speaker].color:null);
       var spkrChar=chars[ev.speaker];
       var spkrOnStage=spkrChar&&spkrChar.onStage;
 
@@ -996,23 +928,26 @@ function move(dx,dy){
 }
 
 function render(){
-  ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.strokeStyle='#161b22'; ctx.lineWidth=1;
-  for(var gx=0;gx<=GW;gx++){
-    ctx.beginPath();ctx.moveTo(gx*TILE,0);ctx.lineTo(gx*TILE,canvas.height);ctx.stroke();
-  }
-  for(var gy=0;gy<=GH;gy++){
-    ctx.beginPath();ctx.moveTo(0,gy*TILE);ctx.lineTo(canvas.width,gy*TILE);ctx.stroke();
+  // Floor tiles
+  var floorOk=floorImg.complete&&floorImg.naturalWidth>0;
+  for(var gy=0;gy<GH;gy++) for(var gx=0;gx<GW;gx++){
+    if(floorOk) ctx.drawImage(floorImg,gx*TILE,gy*TILE,TILE,TILE);
+    else{ ctx.fillStyle='#0d1117'; ctx.fillRect(gx*TILE,gy*TILE,TILE,TILE); }
   }
 
+  // Walls
+  var wallOk=wallImg.complete&&wallImg.naturalWidth>0;
   var wkeys=Object.keys(walls);
   for(var wi=0;wi<wkeys.length;wi++){
     var wp=wkeys[wi].split(',');
     var wrx=parseInt(wp[0])*TILE,wry=parseInt(wp[1])*TILE;
-    ctx.fillStyle='#1c2128'; ctx.fillRect(wrx,wry,TILE,TILE);
-    ctx.fillStyle='#2d333b'; ctx.fillRect(wrx+2,wry+2,TILE-4,TILE-4);
-    ctx.fillStyle='#373e47'; ctx.fillRect(wrx+2,wry+2,TILE-4,2);
-                             ctx.fillRect(wrx+2,wry+2,2,TILE-4);
+    if(wallOk) ctx.drawImage(wallImg,wrx,wry,TILE,TILE);
+    else{
+      ctx.fillStyle='#1c2128'; ctx.fillRect(wrx,wry,TILE,TILE);
+      ctx.fillStyle='#2d333b'; ctx.fillRect(wrx+2,wry+2,TILE-4,TILE-4);
+      ctx.fillStyle='#373e47'; ctx.fillRect(wrx+2,wry+2,TILE-4,2);
+                               ctx.fillRect(wrx+2,wry+2,2,TILE-4);
+    }
   }
 
   var nextSpkr=(phase==='wait'&&curLine)?curLine.speaker:null;
@@ -1111,85 +1046,20 @@ function drawArrow(tx,ty,dx,dy){
 }
 
 function drawDoll(cx,cy,sex,dir,frame,outfit){
-  var x=cx-12, y=cy-16;  // 24x32 sprite top-left (rendered at 2x scale)
-  var m=(sex==='m');
-  var la=(frame===1?2:frame===2?-2:0), ra=-la;  // leg swing
-  var aa=(frame===1?2:frame===2?-2:0), ab=-aa;  // arm swing
-
-  ctx.save();
-  ctx.translate(cx,cy); ctx.scale(2,2); ctx.translate(-cx,-cy);
-  if(dir==='right'){ctx.translate(cx,0);ctx.scale(-1,1);ctx.translate(-cx,0);}
-  var side=(dir==='left'||dir==='right');
-  var back=(dir==='up');
-
-  // ── Legs / skirt ──────────────────────────────────────────────
-  if(m){
-    ctx.fillStyle=PANT;
-    if(side){
-      ctx.fillRect(x+7,y+21+la,5,10); ctx.fillRect(x+13,y+21+ra,5,10);
-    } else {
-      ctx.fillRect(x+4,y+21+la,6,10); ctx.fillRect(x+14,y+21+ra,6,10);
-    }
-    ctx.fillStyle=SHOE;
-    if(side){
-      ctx.fillRect(x+6,y+30+la,7,2); ctx.fillRect(x+12,y+30+ra,7,2);
-    } else {
-      ctx.fillRect(x+3,y+30+la,8,2); ctx.fillRect(x+13,y+30+ra,8,2);
-    }
-  } else {
-    ctx.fillStyle=outfit;
-    ctx.beginPath();
-    ctx.moveTo(x+5,y+21); ctx.lineTo(x+19,y+21);
-    ctx.lineTo(x+22,y+32); ctx.lineTo(x+2,y+32);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle=SHOE;
-    ctx.fillRect(x+4,y+31,6,1); ctx.fillRect(x+14,y+31,6,1);
-  }
-
-  // ── Torso ──────────────────────────────────────────────────────
-  ctx.fillStyle=outfit;
-  if(side){
-    ctx.fillRect(x+5,y+11,13,10);
-  } else {
-    ctx.fillRect(x+4,y+11,16,10);
-  }
-  ctx.fillStyle=BELT;
-  if(side){ ctx.fillRect(x+5,y+20,13,2); } else { ctx.fillRect(x+4,y+20,16,2); }
-
-  // ── Arms ──────────────────────────────────────────────────────
-  ctx.fillStyle=outfit;
-  if(side){
-    ctx.fillRect(x+14,y+11+aa,3,9); ctx.fillRect(x+7,y+11+ab,3,9);
-    ctx.fillStyle=SKIN;
-    ctx.fillRect(x+14,y+19+aa,3,3); ctx.fillRect(x+7,y+19+ab,3,3);
-  } else {
-    ctx.fillRect(x+1,y+11+aa,3,9); ctx.fillRect(x+20,y+11+ab,3,9);
-    ctx.fillStyle=SKIN;
-    ctx.fillRect(x+1,y+19+aa,3,3); ctx.fillRect(x+20,y+19+ab,3,3);
-  }
-
-  // ── Head ──────────────────────────────────────────────────────
-  ctx.fillStyle=SKIN;
-  ctx.beginPath(); ctx.arc(x+12,y+5,5,0,Math.PI*2); ctx.fill();
-
-  // ── Hair ──────────────────────────────────────────────────────
-  ctx.fillStyle=m?HAIR_M:HAIR_F;
-  ctx.fillRect(x+7,y+0,10,3);
-  ctx.fillRect(x+7,y+0,2,7); ctx.fillRect(x+15,y+0,2,7);
-  if(!m){ ctx.fillRect(x+5,y+0,2,13); ctx.fillRect(x+17,y+0,2,13); }
-  if(side&&!m){ ctx.fillRect(x+17,y+0,2,13); }
-
-  // ── Face ──────────────────────────────────────────────────────
-  if(!back){
-    ctx.fillStyle='#1a0a00';
-    if(side){
-      ctx.fillRect(x+15,y+5,2,2);
-    } else {
-      ctx.fillRect(x+9,y+5,2,2); ctx.fillRect(x+13,y+5,2,2);
-    }
-  }
-
-  ctx.restore();
+  var base=sex==='m'?maleBaseImg:femaleBaseImg;
+  var mask=sex==='m'?maleOutfitImg:femaleOutfitImg;
+  var di={down:0,left:1,right:2,up:3};
+  var sx=((di[dir]||0)*3+frame)*48;
+  // Step 1: outfit-colored region via mask
+  offCtx.clearRect(0,0,48,64);
+  offCtx.fillStyle=outfit; offCtx.fillRect(0,0,48,64);
+  offCtx.globalCompositeOperation='destination-in';
+  if(mask.complete&&mask.naturalWidth>0) offCtx.drawImage(mask,sx,0,48,64,0,0,48,64);
+  offCtx.globalCompositeOperation='source-over';
+  // Step 2: base layer (skin, hair, shoes, etc.) on top
+  if(base.complete&&base.naturalWidth>0) offCtx.drawImage(base,sx,0,48,64,0,0,48,64);
+  // Step 3: blit to main canvas
+  ctx.drawImage(offCanvas,cx-24,cy-32);
 }
 
 document.addEventListener('keydown',function(e){
@@ -1217,11 +1087,24 @@ function tickClouds(){
 }
 setInterval(tickClouds,50);
 
-loadScene(SCENE_DATA);
+// Defer first scene load until all sprite/tile images have decoded
+var _scene0=SCENE_DATA;
+var _imgPending=6;
+function _imgDone(){ if(--_imgPending<=0) loadScene(_scene0); }
+[maleBaseImg,maleOutfitImg,femaleBaseImg,femaleOutfitImg,wallImg,floorImg].forEach(function(img){
+  if(img.complete&&img.naturalWidth>0) _imgDone();
+  else{ img.onload=_imgDone; img.onerror=_imgDone; }
+});
 </script>
 </body></html>"
-            .Replace("CLOUD_DATA", _cloudPng!)
-            .Replace("SCENE_DATA", firstSceneJson);
+            .Replace("CLOUD_DATA",         _cloudPng!)
+            .Replace("MALE_BASE_DATA",     _maleBase!)
+            .Replace("MALE_OUTFIT_DATA",   _maleOutfit!)
+            .Replace("FEMALE_BASE_DATA",   _femaleBase!)
+            .Replace("FEMALE_OUTFIT_DATA", _femaleOutfit!)
+            .Replace("WALL_DATA",          _wallTile!)
+            .Replace("FLOOR_DATA",         _floorTile!)
+            .Replace("SCENE_DATA",         firstSceneJson);
         }
 
         // ── Nested types ──────────────────────────────────────────────────────
