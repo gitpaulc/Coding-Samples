@@ -3,7 +3,7 @@ namespace PlayParser
 {
   public static class Program
   {
-    private static PlayParserForm? ppf = null;
+    internal static PlayParserForm? ppf = null;
 
     public static bool IsUppercase(string str)
     {
@@ -140,12 +140,8 @@ namespace PlayParser
     public static List<Play> RunPlays()
     {
       var result = new List<Play>();
-      var playNames = new SortedSet<string>();
-      for (int ii = 0; ii < (int)Play.PlayEnum.NumPlays; ++ii)
-        playNames.Add(Play.GetPlayName((Play.PlayEnum)ii));
-
       var rootFolder = GetPlaysFolder();
-      foreach (var playName in playNames)
+      foreach (var playName in Play.GetAllPlayNames())
       {
         Play play = new Play();
         play.ResetPlay(playName);
@@ -160,6 +156,23 @@ namespace PlayParser
       return result;
     }
 
+    public static List<Play> RunSinglePlay(string playName)
+    {
+      var result = new List<Play>();
+      var rootFolder = GetPlaysFolder();
+      var playFolder = Path.Combine(rootFolder, playName);
+      if (!Directory.Exists(playFolder)) return result;
+      Play play = new Play();
+      play.ResetPlay(playName);
+      play.LoadAuthor(playFolder);
+      play.CopyTrimmedScenes(playFolder);
+      play.WriteCounts(playFolder);
+      play.DetectGenders(playFolder);
+      play.PrintStatistics(playFolder);
+      result.Add(play);
+      return result;
+    }
+
     public static PlayParserForm? GetPlayParserForm() { return ppf; }
 
     [STAThread]
@@ -169,8 +182,7 @@ namespace PlayParser
       Application.SetCompatibleTextRenderingDefault(false);
       using (var splash = new SplashForm())
         splash.ShowDialog();
-      ppf = new PlayParserForm();
-      Application.Run(ppf);
+      Application.Run(new PlaySandboxForm());
     }
   }
 }

@@ -30,6 +30,7 @@ namespace PlayParser
             [JsonPropertyName("label")]      public string                   Label      { get; set; } = "";
             [JsonPropertyName("location")]   public string                   Location   { get; set; } = "";
             [JsonPropertyName("mainChar")]   public string                   MainChar   { get; set; } = "";
+            [JsonPropertyName("heroChar")]   public string                   HeroChar   { get; set; } = "";
             [JsonPropertyName("gridW")]      public int                      GridW      { get; set; } = 20;
             [JsonPropertyName("gridH")]      public int                      GridH      { get; set; } = 13;
             [JsonPropertyName("chars")]      public List<TileChar>           Chars      { get; set; } = new();
@@ -364,16 +365,26 @@ namespace PlayParser
                 if (ev.Type == "exit")  foreach (var c in ev.Chars) initOnStage.Remove(c);
             }
 
-            // Main = highest line count among characters already on stage at scene start.
-            // Falls back to first speaker if no one entered before the first line.
-            string mainChar = lineCounts
-                .Where(kv => initOnStage.Contains(kv.Key))
-                .OrderByDescending(kv => kv.Value)
-                .Select(kv => kv.Key)
-                .FirstOrDefault()
-                ?? initOnStage.FirstOrDefault()
-                ?? timeline.FirstOrDefault(e => e.Type == "dialogue")?.Speaker
-                ?? play.Actors.FirstOrDefault() ?? "";
+            // Hero = true main character of the scene (title actor if present, else most lines).
+            string heroChar = play.GetSceneMainCharacter(lineCounts);
+
+            // Initial RPG player = hero if already on stage, else best available on-stage actor.
+            string mainChar;
+            if (!string.IsNullOrEmpty(heroChar) && initOnStage.Contains(heroChar))
+            {
+                mainChar = heroChar;
+            }
+            else
+            {
+                mainChar = lineCounts
+                    .Where(kv => initOnStage.Contains(kv.Key))
+                    .OrderByDescending(kv => kv.Value)
+                    .Select(kv => kv.Key)
+                    .FirstOrDefault()
+                    ?? initOnStage.FirstOrDefault()
+                    ?? timeline.FirstOrDefault(e => e.Type == "dialogue")?.Speaker
+                    ?? play.Actors.FirstOrDefault() ?? "";
+            }
 
             // All participants (speakers + enter/exit actors).
             var allP = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -416,6 +427,7 @@ namespace PlayParser
                 Label      = label,
                 Location   = location,
                 MainChar   = mainChar,
+                HeroChar   = heroChar,
                 GridW      = GW,
                 GridH      = GH,
                 Chars      = charList,

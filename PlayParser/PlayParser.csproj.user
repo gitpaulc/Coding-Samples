@@ -8,6 +8,9 @@
     <Compile Update="PlayParserForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="PlaySandboxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="SplashForm.cs">
       <SubType>Form</SubType>
     </Compile>

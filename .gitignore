@@ -111,4 +111,16 @@ mesh_renderer/MeshRenderer/x64
 PlayParser/.vs
 PlayParser/bin
 PlayParser/obj
-PlayParser/Plays/*/ScenesOut*
+PlayParser/publish
+PlayParser/runtimes
+PlayParser/Microsoft.Web.WebView2.*
+PlayParser/Plays/
+PlayParser/SourcesEdited/
+
+IconGen/*
+D3DCompiler_47_cor3.dll
+PenImc_cor3.dll
+PresentationNative_cor3.dll
+WebView2Loader.dll
+vcruntime140_cor3.dll
+wpfgfx_cor3.dll

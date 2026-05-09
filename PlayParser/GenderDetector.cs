@@ -32,10 +32,17 @@ namespace PlayParser
         // Title-based detection first; pronoun-proximity fallback for untitled characters.
         public static ActorGender Detect(string actorName, IEnumerable<string> sceneFiles)
         {
-            foreach (var part in actorName.Split(' '))
+            var actorNameArr = actorName.Split(' ');
+            int actorNameInd = -1;
+            foreach (var part in actorNameArr)
             {
+                ++actorNameInd;
                 if (MaleTitles.Contains(part)) return ActorGender.Male;
                 if (FemaleTitles.Contains(part)) return ActorGender.Female;
+                if (actorNameInd == (actorNameArr.Length - 1))
+                {
+                    if (part.EndsWith('a')) return ActorGender.Female;
+                }
             }
 
             int male = 0, female = 0;

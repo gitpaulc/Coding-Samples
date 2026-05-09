@@ -14,14 +14,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="cloud.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="shakespeare.ico">
+    <Content Include="resource\castle\cloud.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="paul.jpg">
+    <Content Include="resource\castle\male.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="resource\castle\male_outfit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="resource\castle\female.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="resource\castle\female_outfit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shakespeare.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shakespeare.png">
